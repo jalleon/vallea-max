@@ -63,7 +63,7 @@ import { MaterialDashboardLayout } from '../../components/layout/MaterialDashboa
 import { PropertyView } from '../../features/library/components/PropertyView'
 import { PropertyEdit } from '../../features/library/components/PropertyEdit'
 import { Property, PropertyCreateInput } from '../../features/library/types/property.types'
-import { propertiesService } from '../../features/library/_api/mock-properties.service'
+import { propertiesSupabaseService as propertiesService } from '../../features/library/_api/properties-supabase.service'
 
 // Mock organization ID - in a real app this would come from auth context
 const MOCK_ORG_ID = 'mock-org-id'
@@ -100,20 +100,30 @@ const stats = [
 ]
 
 // Convert Property format to table format for display
-const convertToTableFormat = (property: Property): any => ({
-  id: property.id,
-  idNo: `24-${property.id.slice(-4).padStart(4, '0')}`,
-  address: property.adresse,
-  city: property.ville || property.municipalite,
-  soldDate: property.date_vente instanceof Date ?
-    property.date_vente.toISOString().split('T')[0] :
-    property.date_vente,
-  soldPrice: property.prix_vente || 0,
-  propertyType: property.genre_propriete || property.type_propriete || 'Résidentiel',
-  constructionYear: property.annee_construction || 2000,
-  source: property.source || 'Manual',
-  matrixMls: property.numero_mls || ''
-})
+const convertToTableFormat = (property: Property, index: number): any => {
+  // Get year from created_at or current year
+  const year = property.created_at ?
+    new Date(property.created_at).getFullYear().toString().slice(-2) :
+    new Date().getFullYear().toString().slice(-2)
+
+  // Sequential number based on index (1-based)
+  const seqNumber = (index + 1).toString().padStart(4, '0')
+
+  return {
+    id: property.id,
+    idNo: `${year}-${seqNumber}`,
+    address: property.adresse,
+    city: property.ville || property.municipalite,
+    soldDate: property.date_vente instanceof Date ?
+      property.date_vente.toISOString().split('T')[0] :
+      property.date_vente,
+    soldPrice: property.prix_vente || 0,
+    propertyType: property.genre_propriete || property.type_propriete || 'Résidentiel',
+    constructionYear: property.annee_construction || 2000,
+    source: property.source || 'Manual',
+    matrixMls: property.numero_mls || ''
+  }
+}
 
 export default function LibraryPage() {
   const [properties, setProperties] = useState<Property[]>([])
@@ -150,7 +160,7 @@ export default function LibraryPage() {
       })
 
       setProperties(result.items)
-      setTableProperties(result.items.map(convertToTableFormat))
+      setTableProperties(result.items.map((property, index) => convertToTableFormat(property, index)))
     } catch (err) {
       console.error('Error loading properties:', err)
       setError('Failed to load properties. Please try again.')
