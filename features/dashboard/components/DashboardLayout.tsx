@@ -28,7 +28,7 @@ import {
   Tune,
   CloudUpload
 } from '@mui/icons-material'
-import { useAuth } from '@/features/auth/hooks/useAuth'
+import { useAuth } from '@/contexts/AuthContext'
 import { DashboardSidebar } from './DashboardSidebar'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 
