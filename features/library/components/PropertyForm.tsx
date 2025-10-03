@@ -519,8 +519,8 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
                 {...field}
                 label="Salles de bain"
                 type="number"
-                step="0.5"
                 fullWidth
+                inputProps={{ step: 0.5 }}
                 onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
               />
             )}
@@ -536,8 +536,8 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
                 {...field}
                 label="Salles d'eau"
                 type="number"
-                step="0.5"
                 fullWidth
+                inputProps={{ step: 0.5 }}
                 onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
               />
             )}
