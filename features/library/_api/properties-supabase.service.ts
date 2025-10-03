@@ -46,6 +46,20 @@ class PropertiesSupabaseService {
     // Separate floor_areas from main property data
     const { floor_areas, ...propertyData } = input
 
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      throw new Error('User must be authenticated')
+    }
+
+    // Get organization_id from user metadata
+    const organizationId = user.user_metadata?.organization_id
+
+    if (!organizationId) {
+      throw new Error('User must belong to an organization')
+    }
+
     // Clean up empty string values - convert to null for database
     const cleanedData = Object.entries(propertyData).reduce((acc, [key, value]) => {
       // Convert empty strings to null
@@ -57,14 +71,13 @@ class PropertiesSupabaseService {
       return acc
     }, {} as any)
 
-    // Create the property
-    // Set organization_id and created_by to null until auth is implemented
+    // Create the property - RLS handles access control
     const { data: property, error: propertyError } = await supabase
       .from('properties')
       .insert([{
         ...cleanedData,
-        organization_id: null, // TODO: Get from auth context
-        created_by: null // TODO: Get from auth context
+        organization_id: organizationId,
+        created_by: user.id
       }])
       .select()
       .single()

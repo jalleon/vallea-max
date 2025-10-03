@@ -64,6 +64,7 @@ import { PropertyView } from '../../features/library/components/PropertyView'
 import { PropertyEdit } from '../../features/library/components/PropertyEdit'
 import { Property, PropertyCreateInput } from '../../features/library/types/property.types'
 import { propertiesSupabaseService as propertiesService } from '../../features/library/_api/properties-supabase.service'
+import { ProtectedRoute } from '../../components/auth/ProtectedRoute'
 
 // Mock organization ID - in a real app this would come from auth context
 const MOCK_ORG_ID = 'mock-org-id'
@@ -283,8 +284,9 @@ export default function LibraryPage() {
   const isAllSelected = selectedRows.length === Math.min(rowsPerPage, tableProperties.length - page * rowsPerPage)
 
   return (
-    <MaterialDashboardLayout>
-      <Box>
+    <ProtectedRoute>
+      <MaterialDashboardLayout>
+        <Box>
         {/* Header */}
         <Box sx={{ mb: 4 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -660,5 +662,6 @@ export default function LibraryPage() {
         </Snackbar>
       </Box>
     </MaterialDashboardLayout>
+    </ProtectedRoute>
   )
 }
