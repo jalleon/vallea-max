@@ -569,11 +569,11 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         fullWidth
                         label="Salle de bain"
                         type="number"
-                        step="0.5"
                         value={formData.salle_bain || ''}
                         onChange={(e) => handleInputChange('salle_bain', e.target.value ? parseFloat(e.target.value) : undefined)}
                         variant="outlined"
                         size="small"
+                        inputProps={{ step: 0.5 }}
                       />
                     </Grid>
                     <Grid item xs={12} md={3}>
@@ -581,7 +581,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         fullWidth
                         label="Salle d'eau"
                         type="number"
-                        step="0.5"
+                        inputProps={{ step: 0.5 }}
                         value={formData.salle_eau || ''}
                         onChange={(e) => handleInputChange('salle_eau', e.target.value ? parseFloat(e.target.value) : undefined)}
                         variant="outlined"
