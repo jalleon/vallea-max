@@ -1,4 +1,4 @@
-import { AdjustmentData } from '@/features/adjustments/types/adjustment.types'
+type AdjustmentData = Record<string, { amount: number } | undefined>
 
 export const calculateAdjustedValue = (
   salePrice: number,
