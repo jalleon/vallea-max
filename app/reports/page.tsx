@@ -290,7 +290,7 @@ export default function ReportsPage() {
                               label={template.pages}
                               size="small"
                               variant="outlined"
-                              color={template.color}
+                              color={template.color as 'primary' | 'secondary' | 'default' | 'error' | 'info' | 'success' | 'warning'}
                             />
                           </Box>
                         </Box>
