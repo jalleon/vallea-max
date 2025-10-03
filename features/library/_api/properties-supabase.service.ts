@@ -78,7 +78,7 @@ class PropertiesSupabaseService {
         ...cleanedData,
         organization_id: organizationId,
         created_by: user.id
-      }])
+      } as any])
       .select()
       .single()
 
