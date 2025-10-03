@@ -106,7 +106,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               color="inherit"
             >
               <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
-                {user?.full_name?.[0] || user?.email?.[0] || 'U'}
+                {user?.user_metadata?.full_name?.[0] || user?.email?.[0] || 'U'}
               </Avatar>
             </IconButton>
           </Box>
