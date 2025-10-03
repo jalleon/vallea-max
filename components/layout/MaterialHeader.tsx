@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import Image from 'next/image'
 import {
   AppBar,
   Toolbar,
@@ -86,25 +87,16 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
           </IconButton>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Box
-              sx={{
-                width: 40,
-                height: 40,
-                borderRadius: 2,
-                background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontWeight: 'bold',
-                fontSize: '1.2rem'
-              }}
-            >
-              V
-            </Box>
+            <Image
+              src="/logo.png"
+              alt="Valea Max Logo"
+              width={40}
+              height={40}
+              style={{ borderRadius: '8px' }}
+            />
             <Box>
               <Typography variant="h6" component="div" sx={{ fontWeight: 700 }}>
-                Vallea Max
+                Valea Max
               </Typography>
               <Typography variant="caption" color="text.secondary">
                 Évaluation Immobilière Pro

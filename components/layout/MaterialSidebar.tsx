@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import Image from 'next/image'
 import {
   Drawer,
   List,
@@ -85,24 +86,16 @@ export function MaterialSidebar({ mobileOpen, onMobileClose, drawerWidth }: Mate
       {/* Header Section */}
       <Box sx={{ p: 3, pt: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-          <Box
-            sx={{
-              width: 32,
-              height: 32,
-              borderRadius: 1.5,
-              background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
-              fontWeight: 'bold'
-            }}
-          >
-            V
-          </Box>
+          <Image
+            src="/logo.png"
+            alt="Valea Max Logo"
+            width={32}
+            height={32}
+            style={{ borderRadius: '6px' }}
+          />
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1 }}>
-              Vallea Max
+              Valea Max
             </Typography>
             <Typography variant="caption" color="text.secondary">
               Version 2.0 Pro

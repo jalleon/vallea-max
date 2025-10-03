@@ -5,7 +5,7 @@ import { AuthProvider } from '../contexts/AuthContext'
 import { ProtectedRoute } from '../components/auth/ProtectedRoute'
 
 export const metadata: Metadata = {
-  title: 'Vallea Max - Plateforme d\'évaluation immobilière',
+  title: 'Valea Max - Plateforme d\'évaluation immobilière',
   description: 'Plateforme professionnelle d\'évaluation immobilière avec gestion de propriétés, évaluations RPS/NAS, et génération de rapports.',
 }
 
