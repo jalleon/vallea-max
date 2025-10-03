@@ -28,7 +28,7 @@ const mockProperties: Property[] = [
     nombre_chambres: 3,
     salle_bain: 2,
     salle_eau: 1,
-    stationnement: 'Garage double',
+    stationnement: 'Garage',
     type_sous_sol: 'Complet',
     numero_mls: 'MLS12345',
     media_references: [],
