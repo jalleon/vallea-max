@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('name', 'Default Organization')
         .single()
 
-      finalOrgId = orgData?.id
+      finalOrgId = (orgData as { id: string } | null)?.id
     }
 
     const { error } = await supabase.auth.signUp({
