@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { useAuth } from '@/contexts/AuthContext'
 import {
   Box,
@@ -77,8 +78,17 @@ export default function SignupPage() {
       <Card sx={{ maxWidth: 450, width: '100%', boxShadow: 24 }}>
         <CardContent sx={{ p: 4 }}>
           <Box sx={{ textAlign: 'center', mb: 4 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+              <Image
+                src="/logo.png"
+                alt="Valea Max Logo"
+                width={100}
+                height={100}
+                style={{ borderRadius: '12px' }}
+              />
+            </Box>
             <Typography variant="h4" fontWeight={700} gutterBottom>
-              Vallea Max
+              Valea Max
             </Typography>
             <Typography variant="body1" color="text.secondary">
               Créez votre compte
