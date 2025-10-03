@@ -59,9 +59,9 @@ export interface Property {
   updated_at: Date
 }
 
-export type PropertyType = 'Condo' | 'Unifamiliale' | 'Plex' | 'Appartement' | 'Semi-commercial' | 'Autre'
-export type PropertyStatus = 'Vendu' | 'Actif' | 'Retiré' | 'Conditionnel' | 'Expiré'
-export type BasementType = 'Aucun' | 'Complet aménagé' | 'Complet non-aménagé' | 'Partiel aménagé' | 'Partiel non-aménagé' | 'Vide sanitaire' | 'Dalle de béton'
+export type PropertyType = 'Condo' | 'Unifamiliale' | 'Plex' | 'Appartement' | 'Semi-commercial' | 'Terrain' | 'Commercial' | 'Autre'
+export type PropertyStatus = 'Vendu' | 'À vendre' | 'Actif' | 'Retiré' | 'Conditionnel' | 'Expiré'
+export type BasementType = 'Aucun' | 'Complet' | 'Partiel' | 'Complet aménagé' | 'Complet non-aménagé' | 'Partiel aménagé' | 'Partiel non-aménagé' | 'Vide sanitaire' | 'Dalle de béton'
 export type ParkingType = 'Allée' | 'Garage' | 'Abri d\'auto' | 'Rue' | 'Aucun'
 export type FloorType = 'Sous-sol' | 'Rez-de-chaussée' | '2e étage' | '3e étage' | 'Comble' | 'Mezzanine'
 
