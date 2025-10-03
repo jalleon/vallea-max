@@ -89,6 +89,7 @@ export function useCreateProperty() {
       organization_id: '1',
       created_by: '1',
       ...property,
+      date_vente: property.date_vente ? new Date(property.date_vente) : undefined,
       media_references: [],
       is_template: property.is_template || false,
       is_shared: property.is_shared !== false,
