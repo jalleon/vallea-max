@@ -1,8 +1,64 @@
 import { supabase } from '@/lib/supabase/client'
 import { Property, PropertyCreateInput, PropertyUpdateInput } from '../types/property.types'
 import { PropertyFilters, PaginatedResponse } from '@/types/common.types'
+import { Database } from '@/types/database.types'
+
+type PropertyRow = Database['public']['Tables']['properties']['Row']
 
 export class PropertiesService {
+  // Transform Supabase data to Property type
+  private transformToProperty(data: PropertyRow): Property {
+    return {
+      id: data.id,
+      organization_id: data.organization_id!,
+      created_by: data.created_by!,
+      adresse: data.adresse,
+      ville: data.ville || undefined,
+      municipalite: data.municipalite || undefined,
+      code_postal: data.code_postal || undefined,
+      province: data.province || undefined,
+      prix_vente: data.prix_vente || undefined,
+      prix_demande: data.prix_demande || undefined,
+      date_vente: data.date_vente ? new Date(data.date_vente) : undefined,
+      jours_sur_marche: data.jours_sur_marche || undefined,
+      status: data.status as any,
+      type_propriete: data.type_propriete as any,
+      genre_propriete: data.genre_propriete || undefined,
+      annee_construction: data.annee_construction || undefined,
+      zonage: data.zonage || undefined,
+      superficie_terrain_m2: data.superficie_terrain_m2 || undefined,
+      superficie_terrain_pi2: data.superficie_terrain_pi2 || undefined,
+      frontage_m2: data.frontage_m2 || undefined,
+      profondeur_m2: data.profondeur_m2 || undefined,
+      frontage_pi2: data.frontage_pi2 || undefined,
+      profondeur_pi2: data.profondeur_pi2 || undefined,
+      superficie_habitable_m2: data.superficie_habitable_m2 || undefined,
+      superficie_habitable_pi2: data.superficie_habitable_pi2 || undefined,
+      perimetre_batiment_m2: data.perimetre_batiment_m2 || undefined,
+      perimetre_batiment_pi2: data.perimetre_batiment_pi2 || undefined,
+      nombre_pieces: data.nombre_pieces || undefined,
+      nombre_chambres: data.nombre_chambres || undefined,
+      salle_bain: data.salle_bain || undefined,
+      salle_eau: data.salle_eau || undefined,
+      stationnement: data.stationnement as any,
+      dimension_garage: data.dimension_garage || undefined,
+      type_sous_sol: data.type_sous_sol as any,
+      toiture: data.toiture || undefined,
+      ameliorations_hors_sol: data.ameliorations_hors_sol || undefined,
+      numero_mls: data.numero_mls || undefined,
+      date_vente_precedente: data.date_vente_precedente ? new Date(data.date_vente_precedente) : undefined,
+      prix_vente_precedente: data.prix_vente_precedente || undefined,
+      source: data.source || undefined,
+      notes: data.notes || undefined,
+      is_template: data.is_template || false,
+      is_shared: data.is_shared || false,
+      created_at: new Date(data.created_at!),
+      updated_at: new Date(data.updated_at!),
+      media_references: Array.isArray(data.media_references) ? data.media_references as any : [],
+      floor_areas: []
+    }
+  }
+
   async getProperties(params: {
     offset?: number
     limit?: number
@@ -54,7 +110,7 @@ export class PropertiesService {
     if (error) throw error
 
     return {
-      items: (data || []) as Property[],
+      items: (data || []).map(item => this.transformToProperty(item)),
       total: count || 0,
       hasMore: (count || 0) > end + 1
     }
@@ -68,7 +124,7 @@ export class PropertiesService {
       .single()
 
     if (error) throw error
-    return data as Property
+    return this.transformToProperty(data)
   }
 
   async create(property: PropertyCreateInput): Promise<Property> {
@@ -101,7 +157,7 @@ export class PropertiesService {
     // Log activity
     await this.logActivity('property_created', data.id)
 
-    return data as Property
+    return this.transformToProperty(data)
   }
 
   async update(id: string, updates: Partial<PropertyUpdateInput>): Promise<Property> {
@@ -117,7 +173,7 @@ export class PropertiesService {
     // Log activity
     await this.logActivity('property_updated', id)
 
-    return data as Property
+    return this.transformToProperty(data)
   }
 
   async delete(ids: string[]): Promise<void> {
@@ -190,7 +246,7 @@ export class PropertiesService {
       count: data.length
     })
 
-    return data as Property[]
+    return data.map(item => this.transformToProperty(item))
   }
 
   async searchComparables(criteria: {
@@ -244,7 +300,7 @@ export class PropertiesService {
     const { data, error } = await query
 
     if (error) throw error
-    return (data || []) as Property[]
+    return (data || []).map(item => this.transformToProperty(item))
   }
 
   async findByMLSNumber(mlsNumber: string): Promise<Property | null> {
@@ -255,7 +311,7 @@ export class PropertiesService {
       .maybeSingle()
 
     if (error) throw error
-    return data as Property | null
+    return data ? this.transformToProperty(data) : null
   }
 
   async getCities(): Promise<string[]> {
