@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Typography,
   Grid,
@@ -13,7 +13,8 @@ import {
   LinearProgress,
   IconButton,
   Button,
-  alpha
+  alpha,
+  CircularProgress
 } from '@mui/material'
 import {
   TrendingUp,
@@ -25,80 +26,79 @@ import {
   Timeline,
   CalendarToday,
   MoreVert,
-  Add
+  Add,
+  Business
 } from '@mui/icons-material'
 import { MaterialDashboardLayout } from '../../components/layout/MaterialDashboardLayout'
 import { FinancialCharts } from '../../components/dashboard/FinancialCharts'
-
-// Données pour les cartes KPI
-const kpiData = [
-  {
-    title: 'Revenus ce mois',
-    value: '66,000 $',
-    change: '+22.5%',
-    trend: 'up',
-    icon: AttachMoney,
-    color: 'success'
-  },
-  {
-    title: 'Évaluations complétées',
-    value: '22',
-    change: '+15.3%',
-    trend: 'up',
-    icon: Assessment,
-    color: 'primary'
-  },
-  {
-    title: 'Propriétés en bibliothèque',
-    value: '156',
-    change: '+8.1%',
-    trend: 'up',
-    icon: Home,
-    color: 'info'
-  },
-  {
-    title: 'Rapports générés',
-    value: '18',
-    change: '-2.4%',
-    trend: 'down',
-    icon: Description,
-    color: 'warning'
-  }
-]
-
-// Données pour les activités récentes
-const recentActivities = [
-  {
-    title: 'Évaluation RPS complétée',
-    subtitle: '123 Rue Principale, Montréal - 485,000 $',
-    time: 'Il y a 2 heures',
-    status: 'completed',
-    avatar: 'A'
-  },
-  {
-    title: 'Nouveau rapport généré',
-    subtitle: '456 Avenue des Érables, Laval',
-    time: 'Il y a 4 heures',
-    status: 'generated',
-    avatar: 'R'
-  },
-  {
-    title: 'Propriété ajoutée',
-    subtitle: '789 Boulevard St-Laurent, Québec',
-    time: 'Hier',
-    status: 'added',
-    avatar: 'P'
-  },
-  {
-    title: 'Ajustements calculés',
-    subtitle: 'Comparables pour secteur Plateau',
-    time: 'Il y a 2 jours',
-    status: 'calculated',
-    avatar: 'C'
-  }
-]
+import { useAuth } from '@/contexts/AuthContext'
+import { dashboardService, UserDashboardStats } from '@/features/dashboard/services/dashboard.service'
 
 export default function DashboardPage() {
+  const { user } = useAuth()
+  const [stats, setStats] = useState<UserDashboardStats | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (user?.user_metadata?.organization_id) {
+      loadDashboardData()
+    }
+  }, [user])
+
+  const loadDashboardData = async () => {
+    if (!user) return
+
+    try {
+      setLoading(true)
+      const data = await dashboardService.getUserDashboardStats(
+        user.id,
+        user.user_metadata.organization_id
+      )
+      setStats(data)
+    } catch (error) {
+      console.error('Error loading dashboard:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <MaterialDashboardLayout>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+          <CircularProgress />
+        </Box>
+      </MaterialDashboardLayout>
+    )
+  }
+
+  const kpiData = [
+    {
+      title: 'Mes Propriétés',
+      value: stats?.myPropertiesCount.toString() || '0',
+      icon: Home,
+      color: 'primary'
+    },
+    {
+      title: 'Mes Évaluations',
+      value: stats?.myAppraisalsCount.toString() || '0',
+      icon: Assessment,
+      color: 'success'
+    },
+    {
+      title: 'Mes Rapports',
+      value: stats?.myReportsCount.toString() || '0',
+      icon: Description,
+      color: 'info'
+    },
+    {
+      title: 'Propriétés de l\'Organisation',
+      value: stats?.orgPropertiesCount.toString() || '0',
+      icon: Business,
+      color: 'warning'
+    }
+  ]
+
   return (
     <MaterialDashboardLayout>
       <Box>
@@ -107,10 +107,10 @@ export default function DashboardPage() {
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Box>
               <Typography variant="h4" fontWeight={700} gutterBottom>
-                Tableau de bord
+                Mon Tableau de bord
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Vue d'ensemble de votre activité d'évaluation immobilière
+                Bonjour {user?.user_metadata?.full_name || user?.email} - Vue de votre activité personnelle
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', gap: 2 }}>
@@ -264,9 +264,14 @@ export default function DashboardPage() {
                 </Box>
 
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {recentActivities.map((activity, index) => (
+                  {stats?.recentActivities.length === 0 && (
+                    <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
+                      Aucune activité récente
+                    </Typography>
+                  )}
+                  {stats?.recentActivities.map((activity) => (
                     <Paper
-                      key={index}
+                      key={activity.id}
                       sx={{
                         p: 2,
                         bgcolor: alpha('#1e3a8a', 0.02),
@@ -288,7 +293,7 @@ export default function DashboardPage() {
                             fontSize: '0.875rem'
                           }}
                         >
-                          {activity.avatar}
+                          {activity.type[0].toUpperCase()}
                         </Avatar>
                         <Box sx={{ flex: 1 }}>
                           <Typography variant="body1" fontWeight={600}>

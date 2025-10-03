@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { ValleaThemeProvider } from '../components/providers/ThemeProvider'
 import { AuthProvider } from '../contexts/AuthContext'
+import { ProtectedRoute } from '../components/auth/ProtectedRoute'
 
 export const metadata: Metadata = {
   title: 'Vallea Max - Plateforme d\'évaluation immobilière',
@@ -18,7 +19,9 @@ export default function RootLayout({
       <body style={{ margin: 0 }}>
         <ValleaThemeProvider>
           <AuthProvider>
-            {children}
+            <ProtectedRoute>
+              {children}
+            </ProtectedRoute>
           </AuthProvider>
         </ValleaThemeProvider>
       </body>
