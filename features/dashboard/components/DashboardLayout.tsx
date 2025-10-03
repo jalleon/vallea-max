@@ -94,7 +94,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography variant="body2" color="text.secondary">
-              {user?.full_name || user?.email}
+              {user?.user_metadata?.full_name || user?.email}
             </Typography>
             <IconButton
               size="large"
