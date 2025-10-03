@@ -364,7 +364,7 @@ export function PropertyView({
                     <Typography variant="body2" color="text.secondary">Frontage / Profondeur</Typography>
                     <Typography variant="body1">
                       {property.frontage_m2 && property.profondeur_m2 ?
-                        `${formatMeasurement(property.frontage_m2, 'distance', 'm')} x ${formatMeasurement(property.profondeur_m2, 'distance', 'm')}`
+                        `${formatMeasurement(property.frontage_m2, 'length', 'm')} x ${formatMeasurement(property.profondeur_m2, 'length', 'm')}`
                         : 'N/A'
                       }
                     </Typography>
