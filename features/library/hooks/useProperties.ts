@@ -118,6 +118,7 @@ export function useUpdateProperty() {
     const updatedProperty: Property = {
       ...existingProperty,
       ...updates,
+      date_vente: updates.date_vente ? new Date(updates.date_vente) : existingProperty.date_vente,
       updated_at: new Date()
     }
 
