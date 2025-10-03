@@ -429,7 +429,7 @@ export default function ReportsPage() {
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Imprimer">
-                          <IconButton size="small" color="action">
+                          <IconButton size="small" color="default">
                             <Print />
                           </IconButton>
                         </Tooltip>
