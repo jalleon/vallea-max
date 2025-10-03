@@ -1,4 +1,5 @@
 import { MediaReference } from '@/types/common.types'
+import { PROPERTY_TYPES, PROPERTY_STATUSES, BASEMENT_TYPES, PARKING_TYPES, FLOOR_TYPES } from '../constants/property.constants'
 
 export interface Property {
   id: string
@@ -59,11 +60,11 @@ export interface Property {
   updated_at: Date
 }
 
-export type PropertyType = 'Condo' | 'Unifamiliale' | 'Plex' | 'Appartement' | 'Semi-commercial' | 'Terrain' | 'Commercial' | 'Autre'
-export type PropertyStatus = 'Vendu' | 'À vendre' | 'Actif' | 'Retiré' | 'Conditionnel' | 'Expiré'
-export type BasementType = 'Aucun' | 'Complet' | 'Partiel' | 'Complet aménagé' | 'Complet non-aménagé' | 'Partiel aménagé' | 'Partiel non-aménagé' | 'Vide sanitaire' | 'Dalle de béton'
-export type ParkingType = 'Allée' | 'Garage' | 'Abri d\'auto' | 'Rue' | 'Aucun'
-export type FloorType = 'Sous-sol' | 'Rez-de-chaussée' | '2e étage' | '3e étage' | 'Comble' | 'Mezzanine'
+export type PropertyType = typeof PROPERTY_TYPES[number]
+export type PropertyStatus = typeof PROPERTY_STATUSES[number]
+export type BasementType = typeof BASEMENT_TYPES[number]
+export type ParkingType = typeof PARKING_TYPES[number]
+export type FloorType = typeof FLOOR_TYPES[number]
 
 export interface FloorArea {
   id: string

@@ -19,6 +19,7 @@ import {
 } from '@mui/material'
 // import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { Property, PropertyCreateInput, PropertyUpdateInput, PropertyType, PropertyStatus, BasementType } from '../types/property.types'
+import { PROPERTY_TYPES, PROPERTY_STATUSES, BASEMENT_TYPES } from '../constants/property.constants'
 import { formatCurrency, convertM2ToPi2, convertPi2ToM2 } from '@/lib/utils/formatting'
 import { useEffect } from 'react'
 
@@ -31,8 +32,8 @@ const propertySchema = z.object({
   prix_vente: z.number().optional(),
   prix_demande: z.number().optional(),
   date_vente: z.date().optional(),
-  status: z.enum(['Vendu', 'À vendre', 'Actif', 'Retiré', 'Conditionnel', 'Expiré']).optional(),
-  type_propriete: z.enum(['Condo', 'Unifamiliale', 'Plex', 'Appartement', 'Semi-commercial', 'Terrain', 'Commercial', 'Autre']).optional(),
+  status: z.enum(PROPERTY_STATUSES).optional(),
+  type_propriete: z.enum(PROPERTY_TYPES).optional(),
   genre_propriete: z.string().optional(),
   annee_construction: z.number().min(1800).max(new Date().getFullYear() + 5).optional(),
   zonage: z.string().optional(),
@@ -49,7 +50,7 @@ const propertySchema = z.object({
   salle_eau: z.number().min(0).optional(),
   stationnement: z.string().optional(),
   dimension_garage: z.string().optional(),
-  type_sous_sol: z.enum(['Aucun', 'Complet', 'Partiel', 'Complet aménagé', 'Complet non-aménagé', 'Partiel aménagé', 'Partiel non-aménagé', 'Vide sanitaire', 'Dalle de béton']).optional(),
+  type_sous_sol: z.enum(BASEMENT_TYPES).optional(),
   toiture: z.string().optional(),
   ameliorations_hors_sol: z.string().optional(),
   numero_mls: z.string().optional(),
@@ -67,9 +68,9 @@ interface PropertyFormProps {
   loading?: boolean
 }
 
-const propertyTypes: PropertyType[] = ['Unifamiliale', 'Condo', 'Plex', 'Terrain', 'Commercial']
-const propertyStatuses: PropertyStatus[] = ['Vendu', 'À vendre', 'Retiré', 'Expiré']
-const basementTypes: BasementType[] = ['Complet', 'Partiel', 'Vide sanitaire', 'Aucun']
+const propertyTypes: PropertyType[] = [...PROPERTY_TYPES]
+const propertyStatuses: PropertyStatus[] = [...PROPERTY_STATUSES]
+const basementTypes: BasementType[] = [...BASEMENT_TYPES]
 
 export function PropertyForm({ property, onSubmit, loading = false }: PropertyFormProps) {
   const {
