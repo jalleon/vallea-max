@@ -74,11 +74,11 @@ class PropertiesSupabaseService {
     // Create the property - RLS handles access control
     const { data: property, error: propertyError } = await supabase
       .from('properties')
-      .insert([{
+      .insert({
         ...cleanedData,
         organization_id: organizationId,
         created_by: user.id
-      } as any])
+      })
       .select()
       .single()
 
