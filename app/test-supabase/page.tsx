@@ -1,5 +1,7 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabase/client'
 import SimpleTest from './simple-test'
 
 export default function TestSupabasePage() {
