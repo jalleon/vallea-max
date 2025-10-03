@@ -215,24 +215,6 @@ export default function DashboardPage() {
                     <Typography variant="body2" color="text.secondary" gutterBottom>
                       {kpi.title}
                     </Typography>
-
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      {kpi.trend === 'up' ? (
-                        <TrendingUp color="success" fontSize="small" />
-                      ) : (
-                        <TrendingDown color="error" fontSize="small" />
-                      )}
-                      <Typography
-                        variant="body2"
-                        fontWeight={600}
-                        color={kpi.trend === 'up' ? 'success.main' : 'error.main'}
-                      >
-                        {kpi.change}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        vs mois dernier
-                      </Typography>
-                    </Box>
                   </CardContent>
                 </Card>
               </Grid>
