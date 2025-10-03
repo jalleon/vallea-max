@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase/client'
 export interface UserDashboardStats {
   myPropertiesCount: number
   myAppraisalsCount: number
-  myReportsCount: number
+  myComparablesCount: number
   orgPropertiesCount: number
   recentActivities: Array<{
     id: string
@@ -35,9 +35,9 @@ export class DashboardService {
       .select('*', { count: 'exact', head: true })
       .eq('created_by', userId)
 
-    // Get reports created by this user
-    const { count: myReportsCount } = await supabase
-      .from('reports')
+    // Get comparables created by this user
+    const { count: myComparablesCount } = await supabase
+      .from('comparables')
       .select('*', { count: 'exact', head: true })
       .eq('created_by', userId)
 
@@ -61,7 +61,7 @@ export class DashboardService {
     return {
       myPropertiesCount: myPropertiesCount || 0,
       myAppraisalsCount: myAppraisalsCount || 0,
-      myReportsCount: myReportsCount || 0,
+      myComparablesCount: myComparablesCount || 0,
       orgPropertiesCount: orgPropertiesCount || 0,
       recentActivities
     }

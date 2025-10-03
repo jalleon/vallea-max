@@ -86,8 +86,8 @@ export default function DashboardPage() {
       color: 'success'
     },
     {
-      title: 'Mes Rapports',
-      value: stats?.myReportsCount.toString() || '0',
+      title: 'Mes Comparables',
+      value: stats?.myComparablesCount.toString() || '0',
       icon: Description,
       color: 'info'
     },
