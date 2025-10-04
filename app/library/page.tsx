@@ -412,18 +412,19 @@ export default function LibraryPage() {
 
         {/* Filters and Search */}
         <Card sx={{ mb: 3 }}>
-          <CardContent sx={{ p: 3 }}>
-            <Grid container spacing={3} alignItems="center">
+          <CardContent sx={{ p: 2 }}>
+            <Grid container spacing={2} alignItems="center">
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
+                  size="small"
                   placeholder="Rechercher par adresse, ville, MLS, ID..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <Search />
+                        <Search fontSize="small" />
                       </InputAdornment>
                     ),
                     endAdornment: searchTerm && (
@@ -433,7 +434,7 @@ export default function LibraryPage() {
                           onClick={() => setSearchTerm('')}
                           edge="end"
                         >
-                          <Clear />
+                          <Clear fontSize="small" />
                         </IconButton>
                       </InputAdornment>
                     ),
@@ -442,7 +443,7 @@ export default function LibraryPage() {
                 />
               </Grid>
               <Grid item xs={12} md={3}>
-                <FormControl fullWidth>
+                <FormControl fullWidth size="small">
                   <InputLabel>Type</InputLabel>
                   <Select
                     value={typeFilter}
@@ -459,7 +460,7 @@ export default function LibraryPage() {
                 </FormControl>
               </Grid>
               <Grid item xs={12} md={3}>
-                <FormControl fullWidth>
+                <FormControl fullWidth size="small">
                   <InputLabel>Ville</InputLabel>
                   <Select
                     value={cityFilter}
@@ -480,7 +481,8 @@ export default function LibraryPage() {
               <Grid item xs={12}>
                 <Button
                   variant="outlined"
-                  startIcon={<FilterList />}
+                  size="small"
+                  startIcon={<FilterList fontSize="small" />}
                   onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
                   sx={{ borderRadius: 2 }}
                 >
@@ -635,23 +637,24 @@ export default function LibraryPage() {
               <Table stickyHeader>
               <TableHead>
                 <TableRow sx={{ bgcolor: alpha('#1e3a8a', 0.05) }}>
-                  <TableCell padding="checkbox">
+                  <TableCell padding="checkbox" sx={{ py: 1 }}>
                     <Checkbox
+                      size="small"
                       indeterminate={isIndeterminate}
                       checked={isAllSelected}
                       onChange={handleSelectAll}
                     />
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 100 }}>ID No</TableCell>
-                  <TableCell sx={{ fontWeight: 600, width: 'auto' }}>Adresse</TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 120 }}>Ville</TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 140 }}>Date Vente</TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 130 }}>Prix Vente</TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 150 }}>Type</TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 110 }}>Année Const.</TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 100 }}>Source</TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 130 }}>Matrix/MLS No</TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 120 }}>Actions</TableCell>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 100, py: 1 }}>ID No</TableCell>
+                  <TableCell sx={{ fontWeight: 600, width: 'auto', py: 1 }}>Adresse</TableCell>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 120, py: 1 }}>Ville</TableCell>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 140, py: 1 }}>Date Vente</TableCell>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 130, py: 1 }}>Prix Vente</TableCell>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 150, py: 1 }}>Type</TableCell>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 110, py: 1 }}>Année Const.</TableCell>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 100, py: 1 }}>Source</TableCell>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 130, py: 1 }}>Matrix/MLS No</TableCell>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 120, py: 1 }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -665,46 +668,48 @@ export default function LibraryPage() {
                         bgcolor: isSelected(property.id) ? alpha('#1e3a8a', 0.12) : alpha('#1e3a8a', 0.04)
                       },
                       '& td': {
-                        whiteSpace: 'nowrap'
+                        whiteSpace: 'nowrap',
+                        py: 0.75
                       }
                     }}
                     onClick={() => handleRowSelect(property.id)}
                   >
                     <TableCell padding="checkbox">
                       <Checkbox
+                        size="small"
                         checked={isSelected(property.id)}
                         onChange={() => handleRowSelect(property.id)}
                         onClick={(e) => e.stopPropagation()}
                       />
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" fontWeight={600} color="primary.main">
+                      <Typography variant="body2" fontSize="0.875rem" fontWeight={600} color="primary.main">
                         {property.idNo}
                       </Typography>
                     </TableCell>
                     <TableCell sx={{ maxWidth: 400, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      <Typography variant="body2" fontWeight={600} noWrap>
+                      <Typography variant="body2" fontSize="0.875rem" fontWeight={600} noWrap>
                         {property.address}
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <LocationOn fontSize="small" color="action" />
-                        <Typography variant="body2">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <LocationOn fontSize="small" sx={{ fontSize: 16 }} color="action" />
+                        <Typography variant="body2" fontSize="0.875rem">
                           {property.city}
                         </Typography>
                       </Box>
                     </TableCell>
                     <TableCell sx={{ minWidth: 140 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <CalendarToday fontSize="small" color="action" />
-                        <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <CalendarToday fontSize="small" sx={{ fontSize: 16 }} color="action" />
+                        <Typography variant="body2" fontSize="0.875rem" sx={{ whiteSpace: 'nowrap' }}>
                           {new Date(property.soldDate).toLocaleDateString('fr-CA')}
                         </Typography>
                       </Box>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" fontWeight={600} color="success.main">
+                      <Typography variant="body2" fontSize="0.875rem" fontWeight={600} color="success.main">
                         {property.soldPrice.toLocaleString('fr-CA', {
                           style: 'currency',
                           currency: 'CAD',
@@ -718,10 +723,11 @@ export default function LibraryPage() {
                         variant="outlined"
                         size="small"
                         icon={getPropertyTypeIcon(property.propertyType)}
+                        sx={{ height: 24, '& .MuiChip-label': { fontSize: '0.75rem', px: 1 } }}
                       />
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2">
+                      <Typography variant="body2" fontSize="0.875rem">
                         {property.constructionYear}
                       </Typography>
                     </TableCell>
@@ -731,23 +737,24 @@ export default function LibraryPage() {
                         variant="filled"
                         size="small"
                         color="info"
+                        sx={{ height: 24, '& .MuiChip-label': { fontSize: '0.75rem', px: 1 } }}
                       />
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" fontFamily="monospace">
+                      <Typography variant="body2" fontSize="0.875rem" fontFamily="monospace">
                         {property.matrixMls}
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Box sx={{ display: 'flex', gap: 1 }} onClick={(e) => e.stopPropagation()}>
+                      <Box sx={{ display: 'flex', gap: 0.5 }} onClick={(e) => e.stopPropagation()}>
                         <Tooltip title="Voir détails">
                           <IconButton size="small" color="primary" onClick={() => handleView(property)}>
-                            <Visibility />
+                            <Visibility fontSize="small" />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Modifier">
                           <IconButton size="small" color="info" onClick={() => handleEdit(property)}>
-                            <Edit />
+                            <Edit fontSize="small" />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Supprimer">
@@ -759,7 +766,7 @@ export default function LibraryPage() {
                               setDeleteDialogOpen(true)
                             }}
                           >
-                            <Delete />
+                            <Delete fontSize="small" />
                           </IconButton>
                         </Tooltip>
                       </Box>
