@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { useAuth } from '@/contexts/AuthContext'
+import { useRandomBackground } from '@/hooks/useRandomBackground'
 import {
   Box,
   Card,
@@ -22,6 +23,7 @@ import { Visibility, VisibilityOff, Email, Lock } from '@mui/icons-material'
 export default function LoginPage() {
   const router = useRouter()
   const { signIn } = useAuth()
+  const backgroundImage = useRandomBackground()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -50,11 +52,25 @@ export default function LoginPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        position: 'relative',
         p: 2,
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage: `url(${backgroundImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          filter: 'brightness(0.7)',
+          zIndex: 0,
+        },
       }}
     >
-      <Card sx={{ maxWidth: 450, width: '100%', boxShadow: 24 }}>
+      <Card sx={{ maxWidth: 450, width: '100%', boxShadow: 24, position: 'relative', zIndex: 1 }}>
         <CardContent sx={{ p: 4 }}>
           <Box sx={{ textAlign: 'center', mb: 4 }}>
             <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
