@@ -1,10 +1,10 @@
-# Vallea Real Estate Appraisal Application
+# Valea Max - Real Estate Appraisal Application
 
 A comprehensive real estate appraisal application built with Next.js 14.2.33, TypeScript, and Material-UI, designed for property management and evaluation.
 
 ## Project Overview
 
-This application provides a complete property management system with features for creating, viewing, editing, and managing real estate properties. The system includes sophisticated UI/UX design, unit conversions, keyboard navigation, and comprehensive data persistence.
+This application provides a complete property management system with features for creating, viewing, editing, and managing real estate properties. The system includes sophisticated UI/UX design, unit conversions, keyboard navigation, comprehensive data persistence, and advanced search/filtering capabilities.
 
 ## Technology Stack
 
@@ -12,18 +12,40 @@ This application provides a complete property management system with features fo
 - **Language**: TypeScript
 - **UI Library**: Material-UI (MUI) v6+
 - **State Management**: React Hooks (useState, useEffect)
-- **Data Storage**: localStorage-based mock service (ready for database integration)
+- **Database**: Supabase PostgreSQL
+- **Authentication**: Supabase Auth with custom auth context
 - **Styling**: MUI theming with custom gradients and styling
 
 ## Features Implemented
 
-### 1. Library Module (Property Management)
+### 1. Authentication System
+
+#### Login & Signup (`app/login/page.tsx`, `app/signup/page.tsx`)
+- **Alternating Background Images**: Random property images from `public/backgrounds/` on each page load
+- **Dimmed Backgrounds**: 70% brightness overlay for better form readability
+- **Valea Max Branding**: Custom logo with rounded corners
+- **Secure Authentication**: Supabase Auth integration
+- **Auto-redirect**: Redirects to `/dashboard` after successful login/signup
+- **French Interface**: Fully localized UI
+
+### 2. Library Module (Property Management)
 
 #### Main Property Table (`app/library/page.tsx`)
-- **Enhanced Date Column**: Widened date column for proper display
-- **Functional Actions**: Complete CRUD operations with action buttons
-- **Data Persistence**: Real-time updates with localStorage persistence
-- **Responsive Design**: Material-UI based responsive layout
+- **Compact Display**: Single-line rows with reduced heights (py: 0.75)
+- **Advanced Search Bar**: Multi-field search across address, city, MLS, ID, and source
+- **Dynamic Type Filter**: Shows only property types present in database (Condo, Unifamiliale, Plex, Appartement, Semi-commercial, Terrain, Commercial, Autre)
+- **Dynamic City Filter**: Populated with cities from actual property data
+- **Advanced Filters Panel**: Collapsible section with:
+  - Date range filtering (sale date from/to)
+  - Price range filtering (min/max with $ symbol)
+  - Construction year range filtering
+- **Real-time Filtering**: All filters work together with instant results
+- **Result Count Display**: Shows number of filtered results
+- **Clear Filters**: One-click reset of all filters
+- **Functional Actions**: Complete CRUD operations with icon buttons
+- **Data Persistence**: Real-time updates with Supabase database
+- **Responsive Design**: Material-UI based responsive layout with compact spacing
+- **Pagination**: Customizable rows per page with French labels
 
 #### Property View Component (`features/library/components/PropertyView.tsx`)
 - **Advanced Dialog Interface**: Full-screen property viewer with gradient header
@@ -63,12 +85,15 @@ This application provides a complete property management system with features fo
 - **Dual Unit Totals**: Display totals in both m² and pi²
 - **Type Classification**: Automatic classification of floors as 'hors-sol' or 'sous-sol'
 
-#### Data Layer (`features/library/_api/mock-properties.service.ts`)
+#### Data Layer (`features/library/_api/properties-supabase.service.ts`)
 - **Complete CRUD Operations**: Create, Read, Update, Delete with proper error handling
-- **LocalStorage Persistence**: Data persists across browser sessions
-- **Mock Data**: Two sample properties with comprehensive field coverage
+- **Supabase Integration**: Real-time database with PostgreSQL
+- **Pagination Support**: Efficient data loading with limit/offset
+- **Property Duplication**: Clone existing properties with one click
+- **Bulk Delete**: Delete multiple properties at once
 - **Date Handling**: Proper serialization/deserialization of Date objects
 - **Type Safety**: Full TypeScript integration with Property interfaces
+- **Error Handling**: Comprehensive error handling and user feedback
 
 ### 2. Type System (`features/library/types/property.types.ts`)
 
@@ -139,9 +164,9 @@ interface Property {
 ```
 
 #### Enum Types
-- **PropertyType**: 'Condo' | 'Unifamiliale' | 'Plex' | 'Appartement' | 'Semi-commercial' | 'Autre'
-- **PropertyStatus**: 'Vendu' | 'Actif' | 'Retiré' | 'Conditionnel' | 'Expiré'
-- **BasementType**: 'Aucun' | 'Complet aménagé' | 'Complet non-aménagé' | 'Partiel aménagé' | 'Partiel non-aménagé' | 'Vide sanitaire' | 'Dalle de béton'
+- **PropertyType**: 'Condo' | 'Unifamiliale' | 'Plex' | 'Appartement' | 'Semi-commercial' | 'Terrain' | 'Commercial' | 'Autre'
+- **PropertyStatus**: 'Vendu' | 'À vendre' | 'Actif' | 'Retiré' | 'Conditionnel' | 'Expiré'
+- **BasementType**: 'Aucun' | 'Complet' | 'Partiel' | 'Complet aménagé' | 'Complet non-aménagé' | 'Partiel aménagé' | 'Partiel non-aménagé' | 'Vide sanitaire' | 'Dalle de béton'
 - **ParkingType**: 'Allée' | 'Garage' | 'Abri d\'auto' | 'Rue' | 'Aucun'
 - **FloorType**: 'Sous-sol' | 'Rez-de-chaussée' | '2e étage' | '3e étage' | 'Comble' | 'Mezzanine'
 
@@ -160,43 +185,59 @@ interface Property {
 ### 4. Visual Design System
 
 #### Color Scheme & Gradients
-- **Primary Gradients**: Blue-based gradients for headers and primary actions
+- **Primary Gradients**: Blue-based gradients (#667eea to #764ba2) for headers and primary actions
 - **Success Gradients**: Green-based for financial information
 - **Info Gradients**: Light blue for measurement sections
 - **Warning/Secondary**: Orange/purple for building characteristics
+- **Background Images**: Alternating real estate property images with 70% brightness
 
 #### Typography Hierarchy
 - **Headers**: h4-h6 variants with proper font weights
-- **Body Text**: Consistent body1/body2 with proper contrast
+- **Body Text**: Consistent body2 with 0.875rem (14px) font size for compact display
 - **Labels**: Text.secondary for field labels
+- **Table Text**: Compact 0.875rem sizing throughout for efficient space usage
 
 #### Component Styling
-- **Cards**: Elevated with border radius and gradient backgrounds
-- **Buttons**: Gradient backgrounds with hover effects
-- **Form Fields**: Consistent sizing with Material-UI small variant
-- **Tables**: Professional styling with alternating rows and proper spacing
+- **Cards**: Elevated with border radius and reduced padding (p: 2) for compact layout
+- **Buttons**: Gradient backgrounds with hover effects, size="small" throughout
+- **Form Fields**: Consistent size="small" variant across all inputs
+- **Tables**: Professional styling with single-line rows (py: 0.75), nowrap, and ellipsis overflow
+- **Icons**: Reduced to fontSize="small" (16px) for compact display
+- **Chips**: Height 24px with 0.75rem labels
 
 ## User Experience Features
 
-### 1. Keyboard Navigation
+### 1. Search & Filtering
+- **Multi-field Search**: Search across address, city, MLS number, ID, and source
+- **Quick Filters**: Dropdown filters for property type and city
+- **Advanced Filters**: Collapsible panel with date range, price range, and year range filters
+- **Real-time Results**: Instant filtering with result count display
+- **Filter Persistence**: Filters remain active during pagination
+- **Clear All**: One-click reset of all active filters
+
+### 2. Keyboard Navigation
 - **Arrow Keys**: Navigate between properties in view mode (← →)
 - **Escape Key**: Close dialogs and return to main view
 - **Tab Navigation**: Proper tab order through form fields
 
-### 2. Responsive Behavior
+### 3. Responsive Behavior
 - **Grid System**: Material-UI responsive grid throughout
 - **Mobile Adaptation**: Forms adapt to smaller screens
 - **Touch-Friendly**: Proper button sizes and spacing
+- **Compact Display**: Optimized for viewing maximum records per page
 
-### 3. Data Validation
+### 4. Data Validation
 - **Type Safety**: TypeScript ensures proper data types
 - **Input Validation**: Proper number parsing and validation
 - **Error Handling**: Graceful handling of invalid data
+- **Required Fields**: Clear validation for required property information
 
-### 4. User Feedback
-- **Loading States**: Proper loading indicators
-- **Success/Error Messages**: Clear user feedback
+### 5. User Feedback
+- **Loading States**: Proper loading indicators with CircularProgress
+- **Success/Error Messages**: Snackbar notifications for all actions
 - **Visual Cues**: Color coding for status and types
+- **Selection States**: Visual feedback for selected rows
+- **Bulk Actions**: Delete multiple properties with confirmation dialog
 
 ## Known Issues Resolved
 
@@ -224,13 +265,31 @@ interface Property {
 - **Issue**: Superficie terrain showing "450.00 m² / 4844 pi² / 450.00 m² / 4844 pi²"
 - **Solution**: Call `formatMeasurement()` once instead of twice with concatenation
 
+### 7. Login Redirect Issue
+- **Issue**: Login/signup redirecting to /library instead of /dashboard
+- **Solution**: Updated router.push() calls to redirect to '/dashboard'
+
+### 8. Property Type Filtering
+- **Issue**: Type filter showing dynamic types instead of complete list
+- **Solution**: Use PROPERTY_TYPES constant for complete dropdown options
+
+### 9. Multi-line Table Rows
+- **Issue**: Table rows wrapping to multiple lines with long addresses
+- **Solution**: Applied whiteSpace: 'nowrap' to all cells, ellipsis overflow for addresses
+
 ## File Structure
 
 ```
 vallea-max/
 ├── app/
 │   ├── library/
-│   │   └── page.tsx                 # Main library page
+│   │   └── page.tsx                 # Main library page with advanced filtering
+│   ├── login/
+│   │   └── page.tsx                 # Login page with background images
+│   ├── signup/
+│   │   └── page.tsx                 # Signup page with background images
+│   ├── dashboard/
+│   │   └── page.tsx                 # Dashboard landing page
 │   ├── globals.css                  # Global styles
 │   └── layout.tsx                   # App layout
 ├── features/
@@ -241,27 +300,38 @@ vallea-max/
 │       │   ├── PropertyTable.tsx    # Data table
 │       │   └── PropertyView.tsx     # Property view dialog
 │       ├── _api/
-│       │   ├── mock-properties.service.ts  # Mock data service
-│       │   └── properties.service.ts       # API service
-│       ├── hooks/
-│       │   └── useProperties.ts     # Property management hook
+│       │   └── properties-supabase.service.ts  # Supabase service
+│       ├── constants/
+│       │   └── property.constants.ts  # Property type constants
 │       └── types/
 │           └── property.types.ts    # TypeScript interfaces
+├── contexts/
+│   └── AuthContext.tsx              # Authentication context
+├── hooks/
+│   └── useRandomBackground.ts       # Random background image hook
 ├── lib/
 │   └── utils/
 │       ├── calculations.ts          # Calculation utilities
-│       └── formatting.ts           # Formatting utilities
+│       └── formatting.ts            # Formatting utilities
 ├── components/
-│   ├── ui/                         # Reusable UI components
-│   └── layout/                     # Layout components
-└── README.md                       # This file
+│   ├── auth/
+│   │   └── ProtectedRoute.tsx      # Route protection component
+│   ├── ui/                          # Reusable UI components
+│   └── layout/
+│       └── MaterialDashboardLayout.tsx  # Dashboard layout
+├── public/
+│   ├── backgrounds/                 # Login/signup background images
+│   │   ├── bg1.jpg
+│   │   └── bg2.jpg
+│   └── logo.png                     # Valea Max logo
+└── README.md                        # This file
 ```
 
 ## Development Commands
 
 ```bash
-# Start development server
-npm run dev -- --port 4006
+# Start development server (auto-selects available port)
+npm run dev
 
 # Build for production
 npm run build
@@ -273,25 +343,38 @@ npm run lint
 npm run typecheck
 ```
 
+## Environment Variables
+
+Create a `.env.local` file with the following:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
 ## Future Enhancements
 
-### 1. Database Integration
-- Replace mock service with Supabase PostgreSQL
-- Implement real-time data synchronization
-- Add user authentication and multi-tenancy
-
-### 2. Additional Features
+### 1. Additional Features
 - Image upload and management for properties
-- Advanced search and filtering
 - Property comparison tools
 - Export functionality (PDF, Excel)
 - Print-friendly views
+- Map view integration
+- Saved search filters
+- Email notifications
 
-### 3. Performance Optimizations
+### 2. Performance Optimizations
 - Implement virtual scrolling for large datasets
 - Add caching strategies
 - Optimize bundle size
-- Add lazy loading
+- Add lazy loading for images
+- Server-side filtering for large datasets
+
+### 3. Analytics & Reporting
+- Property value trends
+- Market analysis tools
+- Comparative market analysis (CMA)
+- Custom report generation
 
 ## Testing Strategy
 
@@ -327,10 +410,15 @@ When making changes to this project:
 - **v1.2**: Complete PropertyEdit redesign with auto-conversions
 - **v1.3**: Data persistence and CRUD operations
 - **v1.4**: Field enhancements and dropdown implementations
-- **v1.5**: Bug fixes and display optimizations (current)
+- **v1.5**: Bug fixes and display optimizations
+- **v2.0**: Supabase integration and authentication system
+- **v2.1**: Advanced filtering and search capabilities
+- **v2.2**: Compact UI redesign with single-line table rows
+- **v2.3**: Alternating background images for auth pages (current)
 
 ---
 
-*Last updated: 2025-01-01*
+*Last updated: 2025-10-04*
 *Next.js Version: 14.2.33*
 *Material-UI Version: 6+*
+*Database: Supabase PostgreSQL*
