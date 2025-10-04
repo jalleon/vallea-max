@@ -58,7 +58,8 @@ import {
   Download,
   Share,
   DeleteForever,
-  Clear
+  Clear,
+  ExpandMore
 } from '@mui/icons-material'
 import { MaterialDashboardLayout } from '../../components/layout/MaterialDashboardLayout'
 import { PropertyView } from '../../features/library/components/PropertyView'
@@ -127,6 +128,9 @@ const convertToTableFormat = (property: Property, index: number): any => {
   }
 }
 
+// Property types for filter
+const PROPERTY_TYPES = ['Condo', 'Unifamiliale', 'Plex', 'Appartement', 'Semi-commercial', 'Terrain', 'Commercial', 'Autre'] as const
+
 export default function LibraryPage() {
   const [properties, setProperties] = useState<Property[]>([])
   const [tableProperties, setTableProperties] = useState<any[]>([])
@@ -144,6 +148,13 @@ export default function LibraryPage() {
   const [editProperty, setEditProperty] = useState<Property | null>(null)
   const [isNewProperty, setIsNewProperty] = useState(false)
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' })
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
+  const [priceFrom, setPriceFrom] = useState('')
+  const [priceTo, setPriceTo] = useState('')
+  const [yearFrom, setYearFrom] = useState('')
+  const [yearTo, setYearTo] = useState('')
 
   // Load properties from database
   useEffect(() => {
@@ -171,22 +182,13 @@ export default function LibraryPage() {
     }
   }
 
-  // Get unique cities and types from the actual property data
+  // Get unique cities from the actual property data
   const availableCities = Array.from(
     new Set(
       properties
         .map(p => p.ville || p.municipalite)
         .filter(Boolean)
         .filter((city): city is string => typeof city === 'string')
-    )
-  ).sort()
-
-  const availableTypes = Array.from(
-    new Set(
-      properties
-        .map(p => p.type_propriete)
-        .filter(Boolean)
-        .filter((type): type is string => typeof type === 'string')
     )
   ).sort()
 
@@ -207,19 +209,43 @@ export default function LibraryPage() {
     // City filter
     const matchesCity = !cityFilter || property.city === cityFilter
 
-    return matchesSearch && matchesType && matchesCity
+    // Date range filter
+    const propertyDate = property.soldDate ? new Date(property.soldDate) : null
+    const matchesDateFrom = !dateFrom || !propertyDate || propertyDate >= new Date(dateFrom)
+    const matchesDateTo = !dateTo || !propertyDate || propertyDate <= new Date(dateTo)
+
+    // Price range filter
+    const matchesPriceFrom = !priceFrom || property.soldPrice >= parseFloat(priceFrom)
+    const matchesPriceTo = !priceTo || property.soldPrice <= parseFloat(priceTo)
+
+    // Construction year range filter
+    const matchesYearFrom = !yearFrom || property.constructionYear >= parseInt(yearFrom)
+    const matchesYearTo = !yearTo || property.constructionYear <= parseInt(yearTo)
+
+    return matchesSearch && matchesType && matchesCity &&
+           matchesDateFrom && matchesDateTo &&
+           matchesPriceFrom && matchesPriceTo &&
+           matchesYearFrom && matchesYearTo
   })
 
   // Reset page when filters change
   useEffect(() => {
     setPage(0)
-  }, [searchTerm, typeFilter, cityFilter])
+  }, [searchTerm, typeFilter, cityFilter, dateFrom, dateTo, priceFrom, priceTo, yearFrom, yearTo])
 
   const handleClearFilters = () => {
     setSearchTerm('')
     setTypeFilter('')
     setCityFilter('')
+    setDateFrom('')
+    setDateTo('')
+    setPriceFrom('')
+    setPriceTo('')
+    setYearFrom('')
+    setYearTo('')
   }
+
+  const hasActiveFilters = searchTerm || typeFilter || cityFilter || dateFrom || dateTo || priceFrom || priceTo || yearFrom || yearTo
 
   const showSnackbar = (message: string, severity: 'success' | 'error' = 'success') => {
     setSnackbar({ open: true, message, severity })
@@ -424,7 +450,7 @@ export default function LibraryPage() {
                     onChange={(e) => setTypeFilter(e.target.value)}
                   >
                     <MenuItem value="">Tous les types</MenuItem>
-                    {availableTypes.map((type) => (
+                    {PROPERTY_TYPES.map((type) => (
                       <MenuItem key={type} value={type}>
                         {type}
                       </MenuItem>
@@ -449,7 +475,117 @@ export default function LibraryPage() {
                   </Select>
                 </FormControl>
               </Grid>
-              {(searchTerm || typeFilter || cityFilter) && (
+
+              {/* Advanced Filters Toggle */}
+              <Grid item xs={12}>
+                <Button
+                  variant="outlined"
+                  startIcon={<FilterList />}
+                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                  sx={{ borderRadius: 2 }}
+                >
+                  Filtres Avancés {showAdvancedFilters ? '▲' : '▼'}
+                </Button>
+              </Grid>
+
+              {/* Advanced Filters */}
+              {showAdvancedFilters && (
+                <>
+                  <Grid item xs={12}>
+                    <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                      Date de vente
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <TextField
+                          fullWidth
+                          label="De"
+                          type="date"
+                          value={dateFrom}
+                          onChange={(e) => setDateFrom(e.target.value)}
+                          InputLabelProps={{ shrink: true }}
+                          size="small"
+                        />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <TextField
+                          fullWidth
+                          label="À"
+                          type="date"
+                          value={dateTo}
+                          onChange={(e) => setDateTo(e.target.value)}
+                          InputLabelProps={{ shrink: true }}
+                          size="small"
+                        />
+                      </Grid>
+                    </Grid>
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                      Prix de vente
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <TextField
+                          fullWidth
+                          label="Minimum"
+                          type="number"
+                          value={priceFrom}
+                          onChange={(e) => setPriceFrom(e.target.value)}
+                          InputProps={{
+                            startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                          }}
+                          size="small"
+                        />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <TextField
+                          fullWidth
+                          label="Maximum"
+                          type="number"
+                          value={priceTo}
+                          onChange={(e) => setPriceTo(e.target.value)}
+                          InputProps={{
+                            startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                          }}
+                          size="small"
+                        />
+                      </Grid>
+                    </Grid>
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                      Année de construction
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <TextField
+                          fullWidth
+                          label="De"
+                          type="number"
+                          value={yearFrom}
+                          onChange={(e) => setYearFrom(e.target.value)}
+                          size="small"
+                        />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <TextField
+                          fullWidth
+                          label="À"
+                          type="number"
+                          value={yearTo}
+                          onChange={(e) => setYearTo(e.target.value)}
+                          size="small"
+                        />
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                </>
+              )}
+
+              {hasActiveFilters && (
                 <Grid item xs={12}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Typography variant="body2" color="text.secondary">
@@ -527,6 +663,9 @@ export default function LibraryPage() {
                       bgcolor: isSelected(property.id) ? alpha('#1e3a8a', 0.08) : 'transparent',
                       '&:hover': {
                         bgcolor: isSelected(property.id) ? alpha('#1e3a8a', 0.12) : alpha('#1e3a8a', 0.04)
+                      },
+                      '& td': {
+                        whiteSpace: 'nowrap'
                       }
                     }}
                     onClick={() => handleRowSelect(property.id)}
@@ -543,8 +682,8 @@ export default function LibraryPage() {
                         {property.idNo}
                       </Typography>
                     </TableCell>
-                    <TableCell sx={{ maxWidth: 400 }}>
-                      <Typography variant="body2" fontWeight={600} sx={{ wordBreak: 'break-word' }}>
+                    <TableCell sx={{ maxWidth: 400, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <Typography variant="body2" fontWeight={600} noWrap>
                         {property.address}
                       </Typography>
                     </TableCell>
