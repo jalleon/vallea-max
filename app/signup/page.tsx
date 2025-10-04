@@ -61,7 +61,7 @@ export default function SignupPage() {
       setLoading(false)
       // Auto-login after signup
       setTimeout(() => {
-        router.push('/library')
+        router.push('/dashboard')
       }, 2000)
     }
   }

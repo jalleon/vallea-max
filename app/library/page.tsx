@@ -57,7 +57,8 @@ import {
   TrendingUp,
   Download,
   Share,
-  DeleteForever
+  DeleteForever,
+  Clear
 } from '@mui/icons-material'
 import { MaterialDashboardLayout } from '../../components/layout/MaterialDashboardLayout'
 import { PropertyView } from '../../features/library/components/PropertyView'
@@ -170,6 +171,37 @@ export default function LibraryPage() {
     }
   }
 
+  // Filter properties based on search term and filters
+  const filteredProperties = tableProperties.filter(property => {
+    // Search term filter - search across multiple fields
+    const searchLower = searchTerm.toLowerCase().trim()
+    const matchesSearch = !searchTerm ||
+      property.address?.toLowerCase().includes(searchLower) ||
+      property.city?.toLowerCase().includes(searchLower) ||
+      property.idNo?.toLowerCase().includes(searchLower) ||
+      property.matrixMls?.toLowerCase().includes(searchLower) ||
+      property.source?.toLowerCase().includes(searchLower)
+
+    // Type filter
+    const matchesType = !typeFilter || property.propertyType === typeFilter
+
+    // City filter
+    const matchesCity = !cityFilter || property.city === cityFilter
+
+    return matchesSearch && matchesType && matchesCity
+  })
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(0)
+  }, [searchTerm, typeFilter, cityFilter])
+
+  const handleClearFilters = () => {
+    setSearchTerm('')
+    setTypeFilter('')
+    setCityFilter('')
+  }
+
   const showSnackbar = (message: string, severity: 'success' | 'error' = 'success') => {
     setSnackbar({ open: true, message, severity })
   }
@@ -186,7 +218,7 @@ export default function LibraryPage() {
 
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const allIds = tableProperties.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(p => p.id)
+      const allIds = filteredProperties.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(p => p.id)
       setSelectedRows(allIds)
     } else {
       setSelectedRows([])
@@ -281,7 +313,7 @@ export default function LibraryPage() {
 
   const isSelected = (id: string) => selectedRows.includes(id)
   const isIndeterminate = selectedRows.length > 0 && selectedRows.length < rowsPerPage
-  const isAllSelected = selectedRows.length === Math.min(rowsPerPage, tableProperties.length - page * rowsPerPage)
+  const isAllSelected = selectedRows.length === Math.min(rowsPerPage, filteredProperties.length - page * rowsPerPage)
 
   return (
     <ProtectedRoute>
@@ -333,10 +365,10 @@ export default function LibraryPage() {
         <Card sx={{ mb: 3 }}>
           <CardContent sx={{ p: 3 }}>
             <Grid container spacing={3} alignItems="center">
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  placeholder="Rechercher une propriété..."
+                  placeholder="Rechercher par adresse, ville, MLS, ID..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   InputProps={{
@@ -345,11 +377,22 @@ export default function LibraryPage() {
                         <Search />
                       </InputAdornment>
                     ),
+                    endAdornment: searchTerm && (
+                      <InputAdornment position="end">
+                        <IconButton
+                          size="small"
+                          onClick={() => setSearchTerm('')}
+                          edge="end"
+                        >
+                          <Clear />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
                   }}
                   sx={{ borderRadius: 2 }}
                 />
               </Grid>
-              <Grid item xs={12} md={2}>
+              <Grid item xs={12} md={3}>
                 <FormControl fullWidth>
                   <InputLabel>Type</InputLabel>
                   <Select
@@ -364,7 +407,7 @@ export default function LibraryPage() {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} md={2}>
+              <Grid item xs={12} md={3}>
                 <FormControl fullWidth>
                   <InputLabel>Ville</InputLabel>
                   <Select
@@ -380,24 +423,22 @@ export default function LibraryPage() {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} md={4}>
-                <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-                  <Button
-                    variant="outlined"
-                    startIcon={<FilterList />}
-                    sx={{ borderRadius: 2 }}
-                  >
-                    Filtres Avancés
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    startIcon={<Share />}
-                    sx={{ borderRadius: 2 }}
-                  >
-                    Partager
-                  </Button>
-                </Box>
-              </Grid>
+              {(searchTerm || typeFilter || cityFilter) && (
+                <Grid item xs={12}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="body2" color="text.secondary">
+                      {filteredProperties.length} résultat{filteredProperties.length !== 1 ? 's' : ''} trouvé{filteredProperties.length !== 1 ? 's' : ''}
+                    </Typography>
+                    <Button
+                      size="small"
+                      onClick={handleClearFilters}
+                      startIcon={<Clear />}
+                    >
+                      Effacer les filtres
+                    </Button>
+                  </Box>
+                </Grid>
+              )}
             </Grid>
           </CardContent>
         </Card>
@@ -452,7 +493,7 @@ export default function LibraryPage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {tableProperties.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((property) => (
+                {filteredProperties.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((property) => (
                   <TableRow
                     key={property.id}
                     sx={{
@@ -566,7 +607,7 @@ export default function LibraryPage() {
             <TablePagination
               rowsPerPageOptions={[5, 10, 25, 50]}
               component="div"
-              count={tableProperties.length}
+              count={filteredProperties.length}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={(_, newPage) => setPage(newPage)}
@@ -574,6 +615,8 @@ export default function LibraryPage() {
                 setRowsPerPage(parseInt(e.target.value, 10))
                 setPage(0)
               }}
+              labelRowsPerPage="Lignes par page:"
+              labelDisplayedRows={({ from, to, count }) => `${from}-${to} sur ${count}`}
             />
           </Card>
         )}
