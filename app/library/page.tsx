@@ -120,7 +120,7 @@ const convertToTableFormat = (property: Property, index: number): any => {
       property.date_vente.toISOString().split('T')[0] :
       property.date_vente,
     soldPrice: property.prix_vente || 0,
-    propertyType: property.genre_propriete || property.type_propriete || 'Résidentiel',
+    propertyType: property.type_propriete || property.genre_propriete || 'Autre',
     constructionYear: property.annee_construction || 2000,
     source: property.source || 'Manual',
     matrixMls: property.numero_mls || ''
@@ -170,6 +170,25 @@ export default function LibraryPage() {
       setLoading(false)
     }
   }
+
+  // Get unique cities and types from the actual property data
+  const availableCities = Array.from(
+    new Set(
+      properties
+        .map(p => p.ville || p.municipalite)
+        .filter(Boolean)
+        .filter((city): city is string => typeof city === 'string')
+    )
+  ).sort()
+
+  const availableTypes = Array.from(
+    new Set(
+      properties
+        .map(p => p.type_propriete)
+        .filter(Boolean)
+        .filter((type): type is string => typeof type === 'string')
+    )
+  ).sort()
 
   // Filter properties based on search term and filters
   const filteredProperties = tableProperties.filter(property => {
@@ -304,10 +323,14 @@ export default function LibraryPage() {
 
   const getPropertyTypeIcon = (type: string) => {
     switch (type) {
-      case 'Résidentiel': return <Home />
+      case 'Unifamiliale': return <Home />
+      case 'Condo': return <Home />
+      case 'Plex': return <Home />
+      case 'Appartement': return <Home />
       case 'Commercial': return <Business />
-      case 'Industriel': return <Factory />
-      default: return <Terrain />
+      case 'Semi-commercial': return <Business />
+      case 'Terrain': return <Terrain />
+      default: return <Home />
     }
   }
 
@@ -401,9 +424,11 @@ export default function LibraryPage() {
                     onChange={(e) => setTypeFilter(e.target.value)}
                   >
                     <MenuItem value="">Tous les types</MenuItem>
-                    <MenuItem value="Résidentiel">Résidentiel</MenuItem>
-                    <MenuItem value="Commercial">Commercial</MenuItem>
-                    <MenuItem value="Industriel">Industriel</MenuItem>
+                    {availableTypes.map((type) => (
+                      <MenuItem key={type} value={type}>
+                        {type}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
               </Grid>
@@ -416,10 +441,11 @@ export default function LibraryPage() {
                     onChange={(e) => setCityFilter(e.target.value)}
                   >
                     <MenuItem value="">Toutes les villes</MenuItem>
-                    <MenuItem value="Montréal">Montréal</MenuItem>
-                    <MenuItem value="Laval">Laval</MenuItem>
-                    <MenuItem value="Québec">Québec</MenuItem>
-                    <MenuItem value="Gatineau">Gatineau</MenuItem>
+                    {availableCities.map((city) => (
+                      <MenuItem key={city} value={city}>
+                        {city}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
               </Grid>
@@ -481,11 +507,11 @@ export default function LibraryPage() {
                     />
                   </TableCell>
                   <TableCell sx={{ fontWeight: 600, minWidth: 100 }}>ID No</TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 300 }}>Adresse</TableCell>
+                  <TableCell sx={{ fontWeight: 600, width: 'auto' }}>Adresse</TableCell>
                   <TableCell sx={{ fontWeight: 600, minWidth: 120 }}>Ville</TableCell>
                   <TableCell sx={{ fontWeight: 600, minWidth: 140 }}>Date Vente</TableCell>
                   <TableCell sx={{ fontWeight: 600, minWidth: 130 }}>Prix Vente</TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 120 }}>Type</TableCell>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 150 }}>Type</TableCell>
                   <TableCell sx={{ fontWeight: 600, minWidth: 110 }}>Année Const.</TableCell>
                   <TableCell sx={{ fontWeight: 600, minWidth: 100 }}>Source</TableCell>
                   <TableCell sx={{ fontWeight: 600, minWidth: 130 }}>Matrix/MLS No</TableCell>
@@ -517,8 +543,8 @@ export default function LibraryPage() {
                         {property.idNo}
                       </Typography>
                     </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" fontWeight={600}>
+                    <TableCell sx={{ maxWidth: 400 }}>
+                      <Typography variant="body2" fontWeight={600} sx={{ wordBreak: 'break-word' }}>
                         {property.address}
                       </Typography>
                     </TableCell>
