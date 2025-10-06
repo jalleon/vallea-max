@@ -2,13 +2,17 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslation } from '@/hooks/useTranslation'
 
 export default function HomePage() {
   const router = useRouter()
+  const { t, locale } = useTranslation('common')
 
   useEffect(() => {
-    router.push('/dashboard')
-  }, [router])
+    // Always include locale prefix with 'always' mode
+    const path = `/${locale}/dashboard`
+    router.push(path)
+  }, [router, locale])
 
   return (
     <div style={{
@@ -19,7 +23,7 @@ export default function HomePage() {
       fontSize: '18px',
       color: '#666'
     }}>
-      Redirection vers le tableau de bord...
+      {t('redirecting')}
     </div>
   )
 }

@@ -61,12 +61,12 @@ import {
   Clear,
   ExpandMore
 } from '@mui/icons-material'
-import { MaterialDashboardLayout } from '../../components/layout/MaterialDashboardLayout'
-import { PropertyView } from '../../features/library/components/PropertyView'
-import { PropertyEdit } from '../../features/library/components/PropertyEdit'
-import { Property, PropertyCreateInput } from '../../features/library/types/property.types'
-import { propertiesSupabaseService as propertiesService } from '../../features/library/_api/properties-supabase.service'
-import { ProtectedRoute } from '../../components/auth/ProtectedRoute'
+import { MaterialDashboardLayout } from '../../../components/layout/MaterialDashboardLayout'
+import { PropertyView } from '../../../features/library/components/PropertyView'
+import { PropertyEdit } from '../../../features/library/components/PropertyEdit'
+import { Property, PropertyCreateInput } from '../../../features/library/types/property.types'
+import { propertiesSupabaseService as propertiesService } from '../../../features/library/_api/properties-supabase.service'
+import { ProtectedRoute } from '../../../components/auth/ProtectedRoute'
 
 // Mock organization ID - in a real app this would come from auth context
 const MOCK_ORG_ID = 'mock-org-id'

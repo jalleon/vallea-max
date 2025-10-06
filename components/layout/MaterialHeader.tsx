@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState } from 'react'
-import Image from 'next/image'
 import {
   AppBar,
   Toolbar,
@@ -9,9 +8,7 @@ import {
   IconButton,
   Avatar,
   Box,
-  Badge,
   Tooltip,
-  Chip,
   Menu,
   MenuItem,
   ListItemIcon,
@@ -20,15 +17,15 @@ import {
 } from '@mui/material'
 import {
   Menu as MenuIcon,
-  Notifications,
   Settings,
-  AccountCircle,
-  Business,
   Logout,
-  Person
+  Person,
+  Language,
+  ChevronRight
 } from '@mui/icons-material'
 import { useAuth } from '@/contexts/AuthContext'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
+import { useTranslation } from '@/hooks/useTranslation'
 
 interface MaterialHeaderProps {
   onMenuClick: () => void
@@ -39,7 +36,10 @@ interface MaterialHeaderProps {
 export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: MaterialHeaderProps) {
   const { user, signOut } = useAuth()
   const router = useRouter()
+  const pathname = usePathname()
+  const { t, locale } = useTranslation('common')
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null)
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
@@ -47,11 +47,39 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
 
   const handleMenuClose = () => {
     setAnchorEl(null)
+    setSettingsAnchorEl(null)
+  }
+
+  const handleSettingsOpen = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation()
+    setSettingsAnchorEl(event.currentTarget)
+  }
+
+  const handleSettingsClose = () => {
+    setSettingsAnchorEl(null)
   }
 
   const handleLogout = async () => {
     await signOut()
     router.push('/login')
+  }
+
+  const handleLanguageChange = (newLocale: string) => {
+    const currentPath = pathname
+    const segments = currentPath.split('/')
+
+    // Replace the locale segment
+    if (segments[1] === 'en' || segments[1] === 'fr') {
+      segments[1] = newLocale
+    } else {
+      // If no locale in path, add it
+      segments.unshift('', newLocale)
+    }
+
+    const newPath = segments.join('/').replace('//', '/')
+    router.push(newPath)
+    handleSettingsClose()
+    handleMenuClose()
   }
 
   // Get user initials for avatar
@@ -75,7 +103,7 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
     >
       <Toolbar sx={{ justifyContent: 'space-between', px: 3 }}>
         {/* Left side */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -85,62 +113,21 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
           >
             <MenuIcon />
           </IconButton>
-
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Image
-              src="/logo.png"
-              alt="Valea Max Logo"
-              width={40}
-              height={40}
-              style={{ borderRadius: '8px' }}
-            />
-            <Box>
-              <Typography variant="h6" component="div" sx={{ fontWeight: 700 }}>
-                Valea Max
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Évaluation Immobilière Pro
-              </Typography>
-            </Box>
-          </Box>
         </Box>
 
         {/* Right side */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Chip
-            icon={<Business />}
-            label="Évaluateur Agréé"
-            variant="outlined"
-            size="small"
-            color="primary"
-            sx={{ mr: 2 }}
-          />
-
-          <Tooltip title="Notifications">
-            <IconButton color="inherit">
-              <Badge badgeContent={3} color="error">
-                <Notifications />
-              </Badge>
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title="Paramètres">
-            <IconButton color="inherit">
-              <Settings />
-            </IconButton>
-          </Tooltip>
-
           <Tooltip title="Compte">
-            <IconButton onClick={handleMenuOpen} sx={{ ml: 2, p: 0 }}>
+            <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
                   {userInitials}
                 </Avatar>
                 <Box sx={{ display: { xs: 'none', md: 'block' } }}>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.1, mb: '-3px' }}>
                     {user?.user_metadata?.full_name || user?.email?.split('@')[0]}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.1, display: 'block' }}>
                     {user?.email}
                   </Typography>
                 </Box>
@@ -161,11 +148,12 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
               </ListItemIcon>
               <ListItemText>Mon profil</ListItemText>
             </MenuItem>
-            <MenuItem onClick={handleMenuClose}>
+            <MenuItem onClick={handleSettingsOpen}>
               <ListItemIcon>
                 <Settings fontSize="small" />
               </ListItemIcon>
               <ListItemText>Paramètres</ListItemText>
+              <ChevronRight fontSize="small" />
             </MenuItem>
             <Divider />
             <MenuItem onClick={handleLogout}>
@@ -173,6 +161,35 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
                 <Logout fontSize="small" />
               </ListItemIcon>
               <ListItemText>Déconnexion</ListItemText>
+            </MenuItem>
+          </Menu>
+
+          {/* Settings submenu */}
+          <Menu
+            anchorEl={settingsAnchorEl}
+            open={Boolean(settingsAnchorEl)}
+            onClose={handleSettingsClose}
+            transformOrigin={{ horizontal: 'left', vertical: 'top' }}
+            anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
+          >
+            <MenuItem disabled>
+              <ListItemIcon>
+                <Language fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary="Langue / Language" />
+            </MenuItem>
+            <Divider />
+            <MenuItem
+              onClick={() => handleLanguageChange('fr')}
+              selected={locale === 'fr'}
+            >
+              <ListItemText inset>Français</ListItemText>
+            </MenuItem>
+            <MenuItem
+              onClick={() => handleLanguageChange('en')}
+              selected={locale === 'en'}
+            >
+              <ListItemText inset>English</ListItemText>
             </MenuItem>
           </Menu>
         </Box>

@@ -49,7 +49,7 @@ import {
   Star,
   LocationOn
 } from '@mui/icons-material'
-import { MaterialDashboardLayout } from '../../components/layout/MaterialDashboardLayout'
+import { MaterialDashboardLayout } from '../../../components/layout/MaterialDashboardLayout'
 
 // Données factices pour les ajustements
 const adjustmentCriteria = [

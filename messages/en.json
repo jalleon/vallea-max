@@ -1,0 +1,198 @@
+{
+  "common": {
+    "appName": "Valea Max",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "add": "Add",
+    "search": "Search",
+    "filter": "Filter",
+    "clear": "Clear",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "yes": "Yes",
+    "no": "No",
+    "all": "All",
+    "none": "None",
+    "select": "Select",
+    "redirecting": "Redirecting to dashboard...",
+    "results": "{count, plural, =0 {No results} =1 {1 result} other {# results}}",
+    "selected": "{count, plural, =0 {None selected} =1 {1 selected} other {# selected}}",
+    "currency": "{amount, number, currency}",
+    "date": "{date, date, short}",
+    "dateRange": "From {from, date, short} to {to, date, short}"
+  },
+
+  "auth": {
+    "login": {
+      "title": "Login",
+      "subtitle": "Sign in to your account",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign In",
+      "loading": "Signing in...",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create Account",
+      "error": "Invalid email or password"
+    },
+    "signup": {
+      "title": "Create Account",
+      "subtitle": "Create your Valea Max account",
+      "fullName": "Full Name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Create Account",
+      "loading": "Creating account...",
+      "hasAccount": "Already have an account?",
+      "login": "Sign In",
+      "success": "Account created successfully! Redirecting...",
+      "errors": {
+        "passwordMismatch": "Passwords do not match",
+        "passwordTooShort": "Password must be at least 6 characters",
+        "emailExists": "This email is already in use"
+      }
+    },
+    "logout": "Logout"
+  },
+
+  "navigation": {
+    "dashboard": "Dashboard",
+    "library": "Library",
+    "comparables": "Comparables",
+    "reports": "Reports",
+    "settings": "Settings"
+  },
+
+  "library": {
+    "title": "Property Library",
+    "subtitle": "Manage your real estate portfolio and create new property records",
+    "newProperty": "New Property",
+    "export": "Export",
+    "deleteSelected": "Delete ({count})",
+    "confirmDelete": "Are you sure you want to delete {count, plural, =1 {this property} other {these # properties}}?",
+    "deleteMessage": "This action cannot be undone.",
+
+    "search": {
+      "placeholder": "Search by address, city, MLS, ID...",
+      "advancedFilters": "Advanced Filters",
+      "type": "Type",
+      "allTypes": "All types",
+      "city": "City",
+      "allCities": "All cities",
+      "dateRange": "Sale date",
+      "priceRange": "Sale price",
+      "yearRange": "Construction year",
+      "from": "From",
+      "to": "To",
+      "minimum": "Minimum",
+      "maximum": "Maximum",
+      "clearFilters": "Clear filters",
+      "resultsFound": "{count} result{count, plural, =0 {s} =1 {} other {s}} found"
+    },
+
+    "table": {
+      "idNo": "ID No",
+      "address": "Address",
+      "city": "City",
+      "saleDate": "Sale Date",
+      "salePrice": "Sale Price",
+      "type": "Type",
+      "yearBuilt": "Year Built",
+      "source": "Source",
+      "mlsNo": "Matrix/MLS No",
+      "actions": "Actions",
+      "viewDetails": "View details",
+      "edit": "Edit",
+      "delete": "Delete",
+      "rowsPerPage": "Rows per page:",
+      "displayedRows": "{from}-{to} of {count}"
+    },
+
+    "propertyTypes": {
+      "Condo": "Condo",
+      "Unifamiliale": "Single Family",
+      "Plex": "Plex",
+      "Appartement": "Apartment",
+      "Semi-commercial": "Semi-commercial",
+      "Terrain": "Land",
+      "Commercial": "Commercial",
+      "Autre": "Other"
+    },
+
+    "propertyStatus": {
+      "Vendu": "Sold",
+      "À vendre": "For Sale",
+      "Actif": "Active",
+      "Retiré": "Withdrawn",
+      "Conditionnel": "Conditional",
+      "Expiré": "Expired"
+    },
+
+    "notifications": {
+      "created": "Property created successfully",
+      "updated": "Property updated successfully",
+      "deleted": "Property deleted successfully",
+      "duplicated": "Property duplicated successfully",
+      "error": "An error occurred. Please try again."
+    }
+  },
+
+  "dashboard": {
+    "title": "My Dashboard",
+    "welcome": "Hello {name} - Your personal activity view",
+    "thisWeek": "This Week",
+    "newAppraisal": "New Appraisal",
+    "stats": {
+      "myProperties": "My Properties",
+      "myAppraisals": "My Appraisals",
+      "myComparables": "My Comparables",
+      "orgProperties": "Organization Properties",
+      "evaluationsThisYear": "Appraisals this year",
+      "totalValueAppraised": "Total value appraised",
+      "satisfactionRate": "Satisfaction rate",
+      "avgClientRating": "Avg client rating"
+    },
+    "financialAnalytics": "Financial Analytics",
+    "recentActivities": {
+      "title": "Recent Activities",
+      "viewAll": "View All",
+      "noActivities": "No recent activities"
+    },
+    "monthlyGoals": {
+      "title": "Monthly Goals",
+      "appraisals": "Appraisals",
+      "revenue": "Revenue",
+      "clientSatisfaction": "Client Satisfaction",
+      "congratulations": "Excellent performance this month!",
+      "aheadOfGoals": "You are ahead of your goals"
+    }
+  },
+
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "notifications": "Notifications",
+    "account": "Account",
+    "security": "Security",
+    "preferences": "Preferences"
+  },
+
+  "errors": {
+    "404": "Page not found",
+    "500": "Server error",
+    "general": "An error occurred",
+    "network": "Network connection error",
+    "unauthorized": "Unauthorized",
+    "forbidden": "Access forbidden"
+  }
+}

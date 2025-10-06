@@ -89,16 +89,16 @@ export function MaterialSidebar({ mobileOpen, onMobileClose, drawerWidth }: Mate
           <Image
             src="/logo.png"
             alt="Valea Max Logo"
-            width={32}
-            height={32}
-            style={{ borderRadius: '6px' }}
+            width={40}
+            height={40}
+            style={{ borderRadius: '8px' }}
           />
           <Box>
-            <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
               Valea Max
             </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Version 2.0 Pro
+            <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1, display: 'block', mt: '-2px' }}>
+              Évaluation Immobilière
             </Typography>
           </Box>
         </Box>

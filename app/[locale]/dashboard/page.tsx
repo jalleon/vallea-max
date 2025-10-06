@@ -7,7 +7,6 @@ import {
   Card,
   CardContent,
   Box,
-  Chip,
   Avatar,
   Paper,
   LinearProgress,
@@ -17,8 +16,6 @@ import {
   CircularProgress
 } from '@mui/material'
 import {
-  TrendingUp,
-  TrendingDown,
   Home,
   Assessment,
   Description,
@@ -29,13 +26,16 @@ import {
   Add,
   Business
 } from '@mui/icons-material'
-import { MaterialDashboardLayout } from '../../components/layout/MaterialDashboardLayout'
-import { FinancialCharts } from '../../components/dashboard/FinancialCharts'
+import { MaterialDashboardLayout } from '../../../components/layout/MaterialDashboardLayout'
+import { FinancialCharts } from '../../../components/dashboard/FinancialCharts'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTranslation } from '@/hooks/useTranslation'
 import { dashboardService, UserDashboardStats } from '@/features/dashboard/services/dashboard.service'
 
 export default function DashboardPage() {
   const { user } = useAuth()
+  const { t } = useTranslation('dashboard')
+  const { t: tCommon } = useTranslation('common')
   const [stats, setStats] = useState<UserDashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -74,25 +74,25 @@ export default function DashboardPage() {
 
   const kpiData = [
     {
-      title: 'Mes Propriétés',
+      title: t('stats.myProperties'),
       value: stats?.myPropertiesCount.toString() || '0',
       icon: Home,
       color: 'primary'
     },
     {
-      title: 'Mes Évaluations',
+      title: t('stats.myAppraisals'),
       value: stats?.myAppraisalsCount.toString() || '0',
       icon: Assessment,
       color: 'success'
     },
     {
-      title: 'Mes Comparables',
+      title: t('stats.myComparables'),
       value: stats?.myComparablesCount.toString() || '0',
       icon: Description,
       color: 'info'
     },
     {
-      title: 'Propriétés de l\'Organisation',
+      title: t('stats.orgProperties'),
       value: stats?.orgPropertiesCount.toString() || '0',
       icon: Business,
       color: 'warning'
@@ -107,26 +107,38 @@ export default function DashboardPage() {
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Box>
               <Typography variant="h4" fontWeight={700} gutterBottom>
-                Mon Tableau de bord
+                {t('title')}
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Bonjour {user?.user_metadata?.full_name || user?.email} - Vue de votre activité personnelle
+                {t('welcome', { name: user?.user_metadata?.full_name || user?.email || '' })}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', gap: 2 }}>
               <Button
                 variant="outlined"
                 startIcon={<CalendarToday />}
-                sx={{ borderRadius: 3 }}
+                sx={{
+                  borderRadius: 3,
+                  '& .MuiButton-startIcon': {
+                    marginRight: '4px'
+                  },
+                  lineHeight: 1.1
+                }}
               >
-                Cette semaine
+                {t('thisWeek')}
               </Button>
               <Button
                 variant="contained"
                 startIcon={<Add />}
-                sx={{ borderRadius: 3 }}
+                sx={{
+                  borderRadius: 3,
+                  '& .MuiButton-startIcon': {
+                    marginRight: '4px'
+                  },
+                  lineHeight: 1.1
+                }}
               >
-                Nouvelle évaluation
+                {t('newAppraisal')}
               </Button>
             </Box>
           </Box>
@@ -136,48 +148,47 @@ export default function DashboardPage() {
             sx={{
               p: 3,
               background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
-              color: 'white',
               borderRadius: 3
             }}
           >
             <Grid container spacing={3}>
               <Grid item xs={12} sm={3}>
                 <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="h4" fontWeight={700}>
+                  <Typography variant="h4" fontWeight={700} sx={{ color: 'white' }}>
                     85
                   </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                    Évaluations cette année
+                  <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.6)', lineHeight: 1.1 }}>
+                    {t('stats.evaluationsThisYear')}
                   </Typography>
                 </Box>
               </Grid>
               <Grid item xs={12} sm={3}>
                 <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="h4" fontWeight={700}>
+                  <Typography variant="h4" fontWeight={700} sx={{ color: 'white' }}>
                     3.2M $
                   </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                    Valeur totale évaluée
+                  <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.6)', lineHeight: 1.1 }}>
+                    {t('stats.totalValueAppraised')}
                   </Typography>
                 </Box>
               </Grid>
               <Grid item xs={12} sm={3}>
                 <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="h4" fontWeight={700}>
+                  <Typography variant="h4" fontWeight={700} sx={{ color: 'white' }}>
                     98.5%
                   </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                    Taux de satisfaction
+                  <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.6)', lineHeight: 1.1 }}>
+                    {t('stats.satisfactionRate')}
                   </Typography>
                 </Box>
               </Grid>
               <Grid item xs={12} sm={3}>
                 <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="h4" fontWeight={700}>
+                  <Typography variant="h4" fontWeight={700} sx={{ color: 'white' }}>
                     4.8
                   </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                    Note moyenne client
+                  <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.6)', lineHeight: 1.1 }}>
+                    {t('stats.avgClientRating')}
                   </Typography>
                 </Box>
               </Grid>
@@ -225,7 +236,7 @@ export default function DashboardPage() {
         {/* Charts Section */}
         <Box sx={{ mb: 4 }}>
           <Typography variant="h5" fontWeight={600} gutterBottom>
-            Analytiques Financières
+            {t('financialAnalytics')}
           </Typography>
           <FinancialCharts />
         </Box>
@@ -238,17 +249,17 @@ export default function DashboardPage() {
               <CardContent sx={{ p: 3 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                   <Typography variant="h6" fontWeight={600}>
-                    Activités Récentes
+                    {t('recentActivities.title')}
                   </Typography>
                   <Button size="small" endIcon={<Timeline />}>
-                    Voir tout
+                    {t('recentActivities.viewAll')}
                   </Button>
                 </Box>
 
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {stats?.recentActivities.length === 0 && (
                     <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
-                      Aucune activité récente
+                      {t('recentActivities.noActivities')}
                     </Typography>
                   )}
                   {stats?.recentActivities.map((activity) => (
@@ -301,12 +312,12 @@ export default function DashboardPage() {
             <Card sx={{ height: 'fit-content' }}>
               <CardContent sx={{ p: 3 }}>
                 <Typography variant="h6" fontWeight={600} gutterBottom>
-                  Objectifs du Mois
+                  {t('monthlyGoals.title')}
                 </Typography>
 
                 <Box sx={{ mb: 3 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body2">Évaluations</Typography>
+                    <Typography variant="body2">{t('monthlyGoals.appraisals')}</Typography>
                     <Typography variant="body2" fontWeight={600}>22/25</Typography>
                   </Box>
                   <LinearProgress
@@ -318,7 +329,7 @@ export default function DashboardPage() {
 
                 <Box sx={{ mb: 3 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body2">Revenus</Typography>
+                    <Typography variant="body2">{t('monthlyGoals.revenue')}</Typography>
                     <Typography variant="body2" fontWeight={600}>66K$/75K$</Typography>
                   </Box>
                   <LinearProgress
@@ -331,7 +342,7 @@ export default function DashboardPage() {
 
                 <Box sx={{ mb: 3 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body2">Satisfaction Client</Typography>
+                    <Typography variant="body2">{t('monthlyGoals.clientSatisfaction')}</Typography>
                     <Typography variant="body2" fontWeight={600}>98.5%</Typography>
                   </Box>
                   <LinearProgress
@@ -352,10 +363,10 @@ export default function DashboardPage() {
                   }}
                 >
                   <Typography variant="body2" fontWeight={600} color="success.main">
-                    🎯 Excellente performance ce mois!
+                    {t('monthlyGoals.congratulations')}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    Vous êtes en avance sur vos objectifs
+                    {t('monthlyGoals.aheadOfGoals')}
                   </Typography>
                 </Paper>
               </CardContent>
