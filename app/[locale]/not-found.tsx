@@ -24,17 +24,17 @@ export default function NotFound() {
         404
       </Typography>
       <Typography variant="h5" component="h2" gutterBottom>
-        {t('notFound.title', 'Page non trouvée')}
+        {t('notFound.title')}
       </Typography>
       <Typography variant="body1" color="text.secondary" paragraph>
-        {t('notFound.description', 'La page que vous recherchez n\'existe pas.')}
+        {t('notFound.description')}
       </Typography>
       <Button
         variant="contained"
         onClick={() => router.push(`/${locale}/dashboard`)}
         sx={{ mt: 2 }}
       >
-        {t('notFound.goHome', 'Retour au tableau de bord')}
+        {t('notFound.goHome')}
       </Button>
     </Box>
   )

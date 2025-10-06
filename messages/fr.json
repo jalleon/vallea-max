@@ -28,7 +28,12 @@
     "selected": "{count, plural, =0 {Aucun sélectionné} =1 {1 sélectionné} other {# sélectionnés}}",
     "currency": "{amount, number, currency}",
     "date": "{date, date, short}",
-    "dateRange": "Du {from, date, short} au {to, date, short}"
+    "dateRange": "Du {from, date, short} au {to, date, short}",
+    "notFound": {
+      "title": "Page non trouvée",
+      "description": "La page que vous recherchez n'existe pas.",
+      "goHome": "Retour au tableau de bord"
+    }
   },
 
   "auth": {
