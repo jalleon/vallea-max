@@ -72,7 +72,9 @@
   "navigation": {
     "dashboard": "Dashboard",
     "library": "Library",
-    "comparables": "Comparables",
+    "inspection": "Inspections",
+    "evaluations": "Appraisals",
+    "adjustments": "Adjustments",
     "reports": "Reports",
     "settings": "Settings"
   },
@@ -190,6 +192,56 @@
     "account": "Account",
     "security": "Security",
     "preferences": "Preferences"
+  },
+
+  "inspection": {
+    "title": "Inspections",
+    "createNew": "Create New Inspection",
+    "continue": "Continue",
+    "confirmDelete": "Are you sure you want to delete this inspection?",
+    "deleteMessage": "This action cannot be undone.",
+    "table": {
+      "address": "Address",
+      "city": "City",
+      "type": "Type",
+      "progress": "Progress",
+      "lastUpdated": "Last Updated",
+      "actions": "Actions"
+    },
+    "empty": "No active inspections",
+    "emptyDescription": "Create a new inspection to get started",
+    "form": {
+      "title": "New Inspection",
+      "subtitle": "Enter basic property information",
+      "address": "Address",
+      "addressPlaceholder": "123 Main Street",
+      "city": "City",
+      "cityPlaceholder": "Montreal",
+      "province": "Province",
+      "propertyType": "Property Type",
+      "create": "Create",
+      "cancel": "Cancel",
+      "creating": "Creating...",
+      "required": "This field is required"
+    },
+    "breadcrumb": {
+      "root": "Inspection",
+      "categories": "Categories"
+    },
+    "categories": {
+      "title": "Inspection Categories",
+      "pieces": "Rooms",
+      "batiment": "Building",
+      "garage": "Garage",
+      "mecanique": "Mechanical",
+      "divers": "Miscellaneous",
+      "exterieur": "Exterior",
+      "comingSoon": "Coming Soon"
+    },
+    "progress": {
+      "overall": "Overall Progress",
+      "completion": "{percent}% completed"
+    }
   },
 
   "errors": {

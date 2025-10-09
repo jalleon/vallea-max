@@ -1,6 +1,39 @@
 import { MediaReference } from '@/types/common.types'
 import { PROPERTY_TYPES, PROPERTY_STATUSES, BASEMENT_TYPES, PARKING_TYPES, FLOOR_TYPES } from '../constants/property.constants'
 
+// Inspection types
+export type InspectionStatus = 'not_started' | 'in_progress' | 'completed'
+export type InspectionCategory = 'pieces' | 'batiment' | 'garage' | 'mecanique' | 'divers' | 'exterieur'
+
+// Room inspection structure for inspection_pieces
+export interface RoomInspection {
+  type: string
+  armoires?: string[]
+  comptoirs?: string[]
+  dosseret?: string[]
+  plancher?: string[]
+  plafond?: string
+  murs?: string[]
+  grandeur?: string
+  completedAt?: string
+  [key: string]: any // Allow additional custom fields
+}
+
+export interface FloorInspection {
+  name: string
+  rooms: {
+    [roomId: string]: RoomInspection
+  }
+}
+
+export interface InspectionPieces {
+  floors: {
+    [floorId: string]: FloorInspection
+  }
+  totalRooms: number
+  completedRooms: number
+}
+
 export interface Property {
   id: string
   organization_id: string
@@ -56,6 +89,18 @@ export interface Property {
   notes?: string
   is_template: boolean
   is_shared: boolean
+
+  // Inspection fields
+  inspection_status?: InspectionStatus
+  inspection_date?: Date
+  inspection_completion?: number
+  inspection_pieces?: InspectionPieces
+  inspection_batiment?: Record<string, any>
+  inspection_garage?: Record<string, any>
+  inspection_mecanique?: Record<string, any>
+  inspection_exterieur?: Record<string, any>
+  inspection_divers?: Record<string, any>
+  inspection_categories_completed?: InspectionCategory[]
 
   created_at: Date
   updated_at: Date
@@ -116,6 +161,16 @@ export interface PropertyCreateInput {
   notes?: string
   is_template?: boolean
   is_shared?: boolean
+  inspection_status?: InspectionStatus
+  inspection_date?: string
+  inspection_completion?: number
+  inspection_pieces?: InspectionPieces
+  inspection_batiment?: Record<string, any>
+  inspection_garage?: Record<string, any>
+  inspection_mecanique?: Record<string, any>
+  inspection_exterieur?: Record<string, any>
+  inspection_divers?: Record<string, any>
+  inspection_categories_completed?: InspectionCategory[]
 }
 
 export interface PropertyUpdateInput extends Partial<PropertyCreateInput> {

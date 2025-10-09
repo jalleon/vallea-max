@@ -1,47 +1,49 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 
 interface SidebarProps {
   isOpen: boolean
 }
 
-const menuItems = [
-  {
-    id: 'dashboard',
-    label: 'Tableau de bord',
-    icon: '📊',
-    path: '/dashboard'
-  },
-  {
-    id: 'library',
-    label: 'Bibliothèque',
-    icon: '📋',
-    path: '/library'
-  },
-  {
-    id: 'evaluations',
-    label: 'Évaluations',
-    icon: '🏠',
-    path: '/evaluations'
-  },
-  {
-    id: 'adjustments',
-    label: 'Ajustements',
-    icon: '⚖️',
-    path: '/adjustments'
-  },
-  {
-    id: 'reports',
-    label: 'Rapports',
-    icon: '📄',
-    path: '/reports'
-  }
-]
-
 export function Sidebar({ isOpen }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
+  const t = useTranslations('navigation')
+
+  const menuItems = [
+    {
+      id: 'dashboard',
+      label: t('dashboard'),
+      icon: '📊',
+      path: '/dashboard'
+    },
+    {
+      id: 'library',
+      label: t('library'),
+      icon: '📋',
+      path: '/library'
+    },
+    {
+      id: 'evaluations',
+      label: t('evaluations'),
+      icon: '🏠',
+      path: '/evaluations'
+    },
+    {
+      id: 'adjustments',
+      label: t('adjustments'),
+      icon: '⚖️',
+      path: '/adjustments'
+    },
+    {
+      id: 'reports',
+      label: t('reports'),
+      icon: '📄',
+      path: '/reports'
+    }
+  ]
 
   const handleItemClick = (path: string) => {
     router.push(path)
@@ -62,7 +64,7 @@ export function Sidebar({ isOpen }: SidebarProps) {
     }}>
       <nav style={{ padding: '24px 0' }}>
         {menuItems.map((item) => {
-          const isActive = pathname === item.path
+          const isActive = pathname?.endsWith(item.path) || pathname === item.path
 
           return (
             <button
@@ -98,6 +100,7 @@ export function Sidebar({ isOpen }: SidebarProps) {
             </button>
           )
         })}
+
       </nav>
 
       {/* Footer section */}

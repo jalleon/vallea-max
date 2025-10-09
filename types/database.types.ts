@@ -310,6 +310,16 @@ export type Database = {
           updated_at: string | null
           ville: string | null
           zonage: string | null
+          inspection_status: string | null
+          inspection_date: string | null
+          inspection_completion: number | null
+          inspection_pieces: Json | null
+          inspection_batiment: Json | null
+          inspection_garage: Json | null
+          inspection_mecanique: Json | null
+          inspection_exterieur: Json | null
+          inspection_divers: Json | null
+          inspection_categories_completed: string[] | null
         }
         Insert: {
           adresse: string
@@ -359,6 +369,16 @@ export type Database = {
           updated_at?: string | null
           ville?: string | null
           zonage?: string | null
+          inspection_status?: string | null
+          inspection_date?: string | null
+          inspection_completion?: number | null
+          inspection_pieces?: Json | null
+          inspection_batiment?: Json | null
+          inspection_garage?: Json | null
+          inspection_mecanique?: Json | null
+          inspection_exterieur?: Json | null
+          inspection_divers?: Json | null
+          inspection_categories_completed?: string[] | null
         }
         Update: {
           adresse?: string
@@ -408,6 +428,16 @@ export type Database = {
           updated_at?: string | null
           ville?: string | null
           zonage?: string | null
+          inspection_status?: string | null
+          inspection_date?: string | null
+          inspection_completion?: number | null
+          inspection_pieces?: Json | null
+          inspection_batiment?: Json | null
+          inspection_garage?: Json | null
+          inspection_mecanique?: Json | null
+          inspection_exterieur?: Json | null
+          inspection_divers?: Json | null
+          inspection_categories_completed?: string[] | null
         }
         Relationships: [
           {

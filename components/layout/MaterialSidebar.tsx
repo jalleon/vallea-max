@@ -24,11 +24,12 @@ import {
   Description,
   TrendingUp,
   Home,
-  Analytics
+  Analytics,
+  Search
 } from '@mui/icons-material'
 import { usePathname, useRouter } from 'next/navigation'
 
-const menuItems = [
+const regularMenuItems = [
   {
     id: 'dashboard',
     label: 'Tableau de bord',
@@ -65,6 +66,13 @@ const menuItems = [
     description: 'Documents professionnels'
   }
 ]
+
+const inspectionMenuItem = {
+  id: 'inspection',
+  label: 'Inspections',
+  icon: Search,
+  path: '/inspection'
+}
 
 interface MaterialSidebarProps {
   mobileOpen: boolean
@@ -129,7 +137,7 @@ export function MaterialSidebar({ mobileOpen, onMobileClose, drawerWidth }: Mate
       <Divider />
 
       {/* Navigation Menu */}
-      <Box sx={{ flex: 1, px: 2, py: 1 }}>
+      <Box sx={{ flex: 1, px: 2, py: 1, display: 'flex', flexDirection: 'column' }}>
         <Typography
           variant="overline"
           sx={{
@@ -145,7 +153,7 @@ export function MaterialSidebar({ mobileOpen, onMobileClose, drawerWidth }: Mate
         </Typography>
 
         <List>
-          {menuItems.map((item) => {
+          {regularMenuItems.map((item) => {
             const isActive = pathname === item.path
             const Icon = item.icon
 
@@ -201,6 +209,67 @@ export function MaterialSidebar({ mobileOpen, onMobileClose, drawerWidth }: Mate
               </ListItem>
             )
           })}
+        </List>
+
+        {/* Spacer to push inspection to bottom */}
+        <Box sx={{ flex: 1 }} />
+
+        {/* Inspection Menu Item - Green highlight for mobile/tablet use */}
+        <List>
+          {(() => {
+            const isActive = pathname === inspectionMenuItem.path
+            const Icon = inspectionMenuItem.icon
+
+            return (
+              <ListItem disablePadding sx={{ mb: 0.5 }}>
+                <ListItemButton
+                  onClick={() => handleItemClick(inspectionMenuItem.path)}
+                  sx={{
+                    borderRadius: 2,
+                    mx: 1,
+                    bgcolor: isActive ? alpha('#16a34a', 0.2) : alpha('#16a34a', 0.08),
+                    color: isActive ? '#15803d' : '#16a34a',
+                    border: '1px solid',
+                    borderColor: isActive ? '#16a34a' : alpha('#16a34a', 0.3),
+                    '&:hover': {
+                      bgcolor: alpha('#16a34a', 0.15),
+                      borderColor: '#16a34a'
+                    },
+                    transition: 'all 0.2s ease-in-out'
+                  }}
+                >
+                  <ListItemIcon
+                    sx={{
+                      color: isActive ? '#15803d' : '#16a34a',
+                      minWidth: 40
+                    }}
+                  >
+                    <Icon />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={
+                      <Typography
+                        variant="body2"
+                        fontWeight={600}
+                      >
+                        {inspectionMenuItem.label}
+                      </Typography>
+                    }
+                  />
+                  {isActive && (
+                    <Box
+                      sx={{
+                        width: 3,
+                        height: 20,
+                        bgcolor: '#16a34a',
+                        borderRadius: 1.5
+                      }}
+                    />
+                  )}
+                </ListItemButton>
+              </ListItem>
+            )
+          })()}
         </List>
       </Box>
 

@@ -72,7 +72,9 @@
   "navigation": {
     "dashboard": "Tableau de bord",
     "library": "Bibliothèque",
-    "comparables": "Comparables",
+    "inspection": "Inspections",
+    "evaluations": "Évaluations",
+    "adjustments": "Ajustements",
     "reports": "Rapports",
     "settings": "Paramètres"
   },
@@ -190,6 +192,56 @@
     "account": "Compte",
     "security": "Sécurité",
     "preferences": "Préférences"
+  },
+
+  "inspection": {
+    "title": "Inspections",
+    "createNew": "Créer nouvelle inspection",
+    "continue": "Continuer",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette inspection?",
+    "deleteMessage": "Cette action est irréversible.",
+    "table": {
+      "address": "Adresse",
+      "city": "Ville",
+      "type": "Type",
+      "progress": "Progrès",
+      "lastUpdated": "Dernière mise à jour",
+      "actions": "Actions"
+    },
+    "empty": "Aucune inspection active",
+    "emptyDescription": "Créez une nouvelle inspection pour commencer",
+    "form": {
+      "title": "Nouvelle Inspection",
+      "subtitle": "Entrez les informations de base de la propriété",
+      "address": "Adresse",
+      "addressPlaceholder": "123 Rue Principale",
+      "city": "Ville",
+      "cityPlaceholder": "Montréal",
+      "province": "Province",
+      "propertyType": "Type de propriété",
+      "create": "Créer",
+      "cancel": "Annuler",
+      "creating": "Création en cours...",
+      "required": "Ce champ est requis"
+    },
+    "breadcrumb": {
+      "root": "Inspection",
+      "categories": "Catégories"
+    },
+    "categories": {
+      "title": "Catégories d'inspection",
+      "pieces": "Pièces",
+      "batiment": "Bâtiment",
+      "garage": "Garage",
+      "mecanique": "Mécanique",
+      "divers": "Divers",
+      "exterieur": "Extérieur",
+      "comingSoon": "Bientôt disponible"
+    },
+    "progress": {
+      "overall": "Progrès global",
+      "completion": "{percent}% complété"
+    }
   },
 
   "errors": {
