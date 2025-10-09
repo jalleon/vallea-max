@@ -77,6 +77,7 @@ export interface FloorArea {
 
 export interface PropertyCreateInput {
   adresse: string
+  property_id_no?: string  // Unique property identification number
   ville?: string
   municipalite?: string
   code_postal?: string
