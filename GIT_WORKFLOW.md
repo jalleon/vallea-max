@@ -21,7 +21,13 @@ chore/update-dependencies
 
 ## Daily Workflow
 
-### 1. Starting a New Task
+Choose your workflow based on whether you're working solo or with collaborators:
+
+### Option A: Solo Workflow (Local Branches Only) - Recommended for Now
+
+Branches stay local, only main goes to GitHub. Simpler and cleaner.
+
+#### 1. Starting a New Task
 
 ```bash
 # Make sure you're on main and it's up to date
@@ -32,7 +38,7 @@ git pull origin main
 git checkout -b feature/your-feature-name
 ```
 
-### 2. Working on Your Feature
+#### 2. Working on Your Feature
 
 ```bash
 # Make changes to your code...
@@ -50,7 +56,7 @@ git add path/to/file.ts
 git commit -m "feat: add property search functionality"
 ```
 
-### 3. Finishing Your Feature
+#### 3. Finishing Your Feature
 
 ```bash
 # Make sure all changes are committed
@@ -62,12 +68,85 @@ git checkout main
 # Merge your feature
 git merge feature/your-feature-name
 
-# Push to remote
+# Push to remote (only main goes to GitHub)
 git push origin main
 
 # Delete the feature branch (cleanup)
 git branch -d feature/your-feature-name
 ```
+
+**Result:** Your feature is on GitHub in main, but the branch itself never appeared there.
+
+---
+
+### Option B: Collaborative Workflow (Push Branches to GitHub)
+
+Use this when working with others or creating Pull Requests. Branches are visible on GitHub.
+
+#### 1. Starting a New Task
+
+```bash
+# Make sure you're on main and it's up to date
+git checkout main
+git pull origin main
+
+# Create and switch to a new branch
+git checkout -b feature/your-feature-name
+```
+
+#### 2. Working on Your Feature
+
+```bash
+# Make changes to your code...
+
+# Check what changed
+git status
+git diff
+
+# Stage your changes
+git add .
+# Or stage specific files
+git add path/to/file.ts
+
+# Commit with a descriptive message
+git commit -m "feat: add property search functionality"
+
+# Push branch to GitHub (makes it visible to collaborators)
+git push -u origin feature/your-feature-name
+```
+
+#### 3. Finishing Your Feature
+
+**Option 3a: Merge locally**
+```bash
+# Switch back to main
+git checkout main
+
+# Merge your feature
+git merge feature/your-feature-name
+
+# Push main to remote
+git push origin main
+
+# Delete the feature branch (both local and remote)
+git branch -d feature/your-feature-name
+git push origin --delete feature/your-feature-name
+```
+
+**Option 3b: Create Pull Request on GitHub**
+```bash
+# After pushing your branch, go to GitHub
+# Click "Compare & pull request"
+# Review changes, add description
+# Click "Create pull request"
+# Click "Merge pull request"
+# Then locally:
+git checkout main
+git pull origin main
+git branch -d feature/your-feature-name
+```
+
+**Result:** Branch was visible on GitHub during development, then merged and deleted.
 
 ## Commit Message Convention
 
