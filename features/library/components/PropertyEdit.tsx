@@ -315,7 +315,27 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                   </Box>
                   <Grid container spacing={2}>
                     {/* Row 1 */}
-                    <Grid item xs={12} md={4}>
+                    <Grid item xs={12} md={2}>
+                      <TextField
+                        fullWidth
+                        label="ID No"
+                        value={formData.property_id_no || 'Auto-généré'}
+                        variant="outlined"
+                        size="small"
+                        disabled
+                        InputProps={{
+                          readOnly: true,
+                        }}
+                        sx={{
+                          '& .MuiInputBase-input.Mui-disabled': {
+                            color: theme.palette.primary.main,
+                            fontWeight: 600,
+                            WebkitTextFillColor: theme.palette.primary.main,
+                          }
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={3}>
                       <TextField
                         fullWidth
                         label="Adresse"
@@ -345,7 +365,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         size="small"
                       />
                     </Grid>
-                    <Grid item xs={12} md={2}>
+                    <Grid item xs={12} md={1}>
                       <TextField
                         fullWidth
                         label="Code postal"
@@ -799,7 +819,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                     <Grid item xs={6}>
                       <TextField
                         fullWidth
-                        label="Périmètre du bâtiment (m²)"
+                        label="Périmètre du bâtiment (m)"
                         type="number"
                         inputProps={{ step: 0.01 }}
                         value={formData.perimetre_batiment_m2 || ''}
@@ -807,7 +827,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                           const val = e.target.value ? parseFloat(e.target.value) : undefined
                           handleInputChange('perimetre_batiment_m2', val)
                           if (val) {
-                            handleInputChange('perimetre_batiment_pi2', parseFloat((val * 10.764).toFixed(2)))
+                            handleInputChange('perimetre_batiment_pi2', parseFloat((val * 3.28084).toFixed(2)))
                           } else {
                             handleInputChange('perimetre_batiment_pi2', undefined)
                           }
@@ -818,7 +838,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                     <Grid item xs={6}>
                       <TextField
                         fullWidth
-                        label="Périmètre du bâtiment (pi²)"
+                        label="Périmètre du bâtiment (pi)"
                         type="number"
                         inputProps={{ step: 0.01 }}
                         value={formData.perimetre_batiment_pi2 || ''}
@@ -826,7 +846,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                           const val = e.target.value ? parseFloat(e.target.value) : undefined
                           handleInputChange('perimetre_batiment_pi2', val)
                           if (val) {
-                            handleInputChange('perimetre_batiment_m2', parseFloat((val / 10.764).toFixed(2)))
+                            handleInputChange('perimetre_batiment_m2', parseFloat((val / 3.28084).toFixed(2)))
                           } else {
                             handleInputChange('perimetre_batiment_m2', undefined)
                           }

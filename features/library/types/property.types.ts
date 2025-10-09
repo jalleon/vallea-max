@@ -5,6 +5,7 @@ export interface Property {
   id: string
   organization_id: string
   created_by: string
+  property_id_no?: string  // Unique property identification number
 
   // Core fields (1-15)
   adresse: string

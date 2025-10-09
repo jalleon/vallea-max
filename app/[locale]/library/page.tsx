@@ -24,6 +24,7 @@ import {
   TableRow,
   Paper,
   TablePagination,
+  TableSortLabel,
   Fab,
   Tooltip,
   alpha,
@@ -104,17 +105,24 @@ const stats = [
 
 // Convert Property format to table format for display
 const convertToTableFormat = (property: Property, index: number): any => {
-  // Get year from created_at or current year
-  const year = property.created_at ?
-    new Date(property.created_at).getFullYear().toString().slice(-2) :
-    new Date().getFullYear().toString().slice(-2)
+  // Use stored property_id_no if available, otherwise generate a temporary one
+  let idNo = property.property_id_no
 
-  // Sequential number based on index (1-based)
-  const seqNumber = (index + 1).toString().padStart(4, '0')
+  if (!idNo) {
+    // Fallback for properties created before this feature
+    // Get year from created_at or current year
+    const year = property.created_at ?
+      new Date(property.created_at).getFullYear().toString().slice(-2) :
+      new Date().getFullYear().toString().slice(-2)
+
+    // Sequential number based on index (1-based)
+    const seqNumber = (index + 1).toString().padStart(4, '0')
+    idNo = `${year}-${seqNumber}`
+  }
 
   return {
     id: property.id,
-    idNo: `${year}-${seqNumber}`,
+    idNo,
     address: property.adresse,
     city: property.ville || property.municipalite,
     soldDate: property.date_vente instanceof Date ?
@@ -155,6 +163,8 @@ export default function LibraryPage() {
   const [priceTo, setPriceTo] = useState('')
   const [yearFrom, setYearFrom] = useState('')
   const [yearTo, setYearTo] = useState('')
+  const [orderBy, setOrderBy] = useState<string>('idNo')
+  const [order, setOrder] = useState<'asc' | 'desc'>('asc')
 
   // Load properties from database
   useEffect(() => {
@@ -263,7 +273,7 @@ export default function LibraryPage() {
 
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const allIds = filteredProperties.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(p => p.id)
+      const allIds = sortedProperties.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(p => p.id)
       setSelectedRows(allIds)
     } else {
       setSelectedRows([])
@@ -315,6 +325,20 @@ export default function LibraryPage() {
     setIsNewProperty(!tableProperty)
   }
 
+  const handleFixDuplicateIds = async () => {
+    try {
+      setLoading(true)
+      await propertiesService.fixDuplicateIds()
+      await loadProperties() // Reload data
+      showSnackbar('Duplicate IDs fixed successfully')
+    } catch (err) {
+      console.error('Error fixing duplicate IDs:', err)
+      showSnackbar('Failed to fix duplicate IDs', 'error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleDuplicate = async (tableProperty: any) => {
     try {
       await propertiesService.duplicate(tableProperty.id)
@@ -360,9 +384,42 @@ export default function LibraryPage() {
     }
   }
 
+  const handleRequestSort = (property: string) => {
+    const isAsc = orderBy === property && order === 'asc'
+    setOrder(isAsc ? 'desc' : 'asc')
+    setOrderBy(property)
+  }
+
+  const sortComparator = (a: any, b: any, orderBy: string, order: 'asc' | 'desc') => {
+    let aValue = a[orderBy]
+    let bValue = b[orderBy]
+
+    // Handle null/undefined values
+    if (aValue == null) aValue = ''
+    if (bValue == null) bValue = ''
+
+    // Convert dates to timestamps for comparison
+    if (orderBy === 'soldDate') {
+      aValue = aValue ? new Date(aValue).getTime() : 0
+      bValue = bValue ? new Date(bValue).getTime() : 0
+    }
+
+    // Numeric comparison for numbers
+    if (typeof aValue === 'number' && typeof bValue === 'number') {
+      return order === 'asc' ? aValue - bValue : bValue - aValue
+    }
+
+    // String comparison
+    const comparison = aValue.toString().localeCompare(bValue.toString(), 'fr-CA', { numeric: true })
+    return order === 'asc' ? comparison : -comparison
+  }
+
+  // Apply sorting to filtered properties
+  const sortedProperties = [...filteredProperties].sort((a, b) => sortComparator(a, b, orderBy, order))
+
   const isSelected = (id: string) => selectedRows.includes(id)
   const isIndeterminate = selectedRows.length > 0 && selectedRows.length < rowsPerPage
-  const isAllSelected = selectedRows.length === Math.min(rowsPerPage, filteredProperties.length - page * rowsPerPage)
+  const isAllSelected = selectedRows.length === Math.min(rowsPerPage, sortedProperties.length - page * rowsPerPage)
 
   return (
     <ProtectedRoute>
@@ -645,20 +702,92 @@ export default function LibraryPage() {
                       onChange={handleSelectAll}
                     />
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 100, py: 1 }}>ID No</TableCell>
-                  <TableCell sx={{ fontWeight: 600, width: 'auto', py: 1 }}>Adresse</TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 120, py: 1 }}>Ville</TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 140, py: 1 }}>Date Vente</TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 130, py: 1 }}>Prix Vente</TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 150, py: 1 }}>Type</TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 110, py: 1 }}>Année Const.</TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 100, py: 1 }}>Source</TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 130, py: 1 }}>Matrix/MLS No</TableCell>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 100, py: 1 }}>
+                    <TableSortLabel
+                      active={orderBy === 'idNo'}
+                      direction={orderBy === 'idNo' ? order : 'asc'}
+                      onClick={() => handleRequestSort('idNo')}
+                    >
+                      ID No
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, width: 'auto', py: 1 }}>
+                    <TableSortLabel
+                      active={orderBy === 'address'}
+                      direction={orderBy === 'address' ? order : 'asc'}
+                      onClick={() => handleRequestSort('address')}
+                    >
+                      Adresse
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 120, py: 1 }}>
+                    <TableSortLabel
+                      active={orderBy === 'city'}
+                      direction={orderBy === 'city' ? order : 'asc'}
+                      onClick={() => handleRequestSort('city')}
+                    >
+                      Ville
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 140, py: 1 }}>
+                    <TableSortLabel
+                      active={orderBy === 'soldDate'}
+                      direction={orderBy === 'soldDate' ? order : 'asc'}
+                      onClick={() => handleRequestSort('soldDate')}
+                    >
+                      Date Vente
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 130, py: 1 }}>
+                    <TableSortLabel
+                      active={orderBy === 'soldPrice'}
+                      direction={orderBy === 'soldPrice' ? order : 'asc'}
+                      onClick={() => handleRequestSort('soldPrice')}
+                    >
+                      Prix Vente
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 150, py: 1 }}>
+                    <TableSortLabel
+                      active={orderBy === 'propertyType'}
+                      direction={orderBy === 'propertyType' ? order : 'asc'}
+                      onClick={() => handleRequestSort('propertyType')}
+                    >
+                      Type
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 110, py: 1 }}>
+                    <TableSortLabel
+                      active={orderBy === 'constructionYear'}
+                      direction={orderBy === 'constructionYear' ? order : 'asc'}
+                      onClick={() => handleRequestSort('constructionYear')}
+                    >
+                      Année Const.
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 100, py: 1 }}>
+                    <TableSortLabel
+                      active={orderBy === 'source'}
+                      direction={orderBy === 'source' ? order : 'asc'}
+                      onClick={() => handleRequestSort('source')}
+                    >
+                      Source
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 130, py: 1 }}>
+                    <TableSortLabel
+                      active={orderBy === 'matrixMls'}
+                      direction={orderBy === 'matrixMls' ? order : 'asc'}
+                      onClick={() => handleRequestSort('matrixMls')}
+                    >
+                      Matrix/MLS No
+                    </TableSortLabel>
+                  </TableCell>
                   <TableCell sx={{ fontWeight: 600, minWidth: 120, py: 1 }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredProperties.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((property) => (
+                {sortedProperties.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((property) => (
                   <TableRow
                     key={property.id}
                     sx={{
@@ -779,7 +908,7 @@ export default function LibraryPage() {
             <TablePagination
               rowsPerPageOptions={[5, 10, 25, 50]}
               component="div"
-              count={filteredProperties.length}
+              count={sortedProperties.length}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={(_, newPage) => setPage(newPage)}

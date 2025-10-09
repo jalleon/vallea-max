@@ -267,11 +267,17 @@ export function PropertyView({
                 </Box>
                 <CardContent sx={{ p: 3 }}>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} md={6}>
+                  <Grid item xs={12} md={3}>
+                    <Typography variant="body2" color="text.secondary">ID No</Typography>
+                    <Typography variant="body1" fontWeight={600} color="primary">
+                      {property.property_id_no || 'N/A'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={5}>
                     <Typography variant="body2" color="text.secondary">Adresse</Typography>
                     <Typography variant="body1">{property.adresse}</Typography>
                   </Grid>
-                  <Grid item xs={12} md={6}>
+                  <Grid item xs={12} md={4}>
                     <Typography variant="body2" color="text.secondary">Ville, arrondissement</Typography>
                     <Typography variant="body1">
                       {[property.ville, property.municipalite].filter(Boolean).join(', ') || 'N/A'}
@@ -373,7 +379,7 @@ export function PropertyView({
                     <Typography variant="body2" color="text.secondary">Périmètre du bâtiment</Typography>
                     <Typography variant="body1">
                       {property.perimetre_batiment_m2 ?
-                        formatMeasurement(property.perimetre_batiment_m2, 'area', 'm2')
+                        formatMeasurement(property.perimetre_batiment_m2, 'length', 'm')
                         : 'N/A'
                       }
                     </Typography>

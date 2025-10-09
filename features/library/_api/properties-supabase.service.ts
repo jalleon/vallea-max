@@ -8,10 +8,25 @@ type FloorAreaRow = Database['public']['Tables']['floor_areas']['Row']
 class PropertiesSupabaseService {
   // Transform Supabase data to Property type
   private transformToProperty(data: PropertyRow & { floor_areas: FloorAreaRow[] }): Property {
+    // Extract property ID from media_references if available
+    let propertyIdNo: string | undefined
+    let mediaFiles: any[] = []
+
+    if (data.media_references) {
+      const mediaRefs = data.media_references as any
+      if (typeof mediaRefs === 'object' && !Array.isArray(mediaRefs)) {
+        propertyIdNo = mediaRefs.metadata?.property_id_no
+        mediaFiles = mediaRefs.files || []
+      } else if (Array.isArray(mediaRefs)) {
+        mediaFiles = mediaRefs
+      }
+    }
+
     return {
       id: data.id,
       organization_id: data.organization_id!,
       created_by: data.created_by!,
+      property_id_no: propertyIdNo,
       adresse: data.adresse,
       ville: data.ville || undefined,
       municipalite: data.municipalite || undefined,
@@ -54,7 +69,7 @@ class PropertiesSupabaseService {
       is_shared: data.is_shared || false,
       created_at: new Date(data.created_at!),
       updated_at: new Date(data.updated_at!),
-      media_references: Array.isArray(data.media_references) ? data.media_references as any : [],
+      media_references: mediaFiles,
       floor_areas: (data.floor_areas || []).map(fa => ({
         id: fa.id,
         floor: fa.floor as any,
@@ -123,6 +138,41 @@ class PropertiesSupabaseService {
       throw new Error('User must belong to an organization')
     }
 
+    // Generate unique property ID
+    const year = new Date().getFullYear().toString().slice(-2)
+
+    // Get all existing property IDs for this year to find the highest sequence number
+    const { data: existingProperties } = await supabase
+      .from('properties')
+      .select('media_references')
+      .eq('organization_id', organizationId)
+      .gte('created_at', `${new Date().getFullYear()}-01-01`)
+
+    // Extract existing ID numbers to find the highest sequence
+    let maxSequence = 0
+    if (existingProperties && existingProperties.length > 0) {
+      existingProperties.forEach(prop => {
+        const mediaRefs = prop.media_references as any
+        if (mediaRefs && typeof mediaRefs === 'object' && !Array.isArray(mediaRefs)) {
+          const idNo = mediaRefs.metadata?.property_id_no
+          if (idNo && typeof idNo === 'string') {
+            // Extract sequence number from format "YY-XXXX"
+            const match = idNo.match(/^\d{2}-(\d{4})$/)
+            if (match) {
+              const seq = parseInt(match[1], 10)
+              if (seq > maxSequence) {
+                maxSequence = seq
+              }
+            }
+          }
+        }
+      })
+    }
+
+    // Generate the next sequence number
+    const seqNumber = (maxSequence + 1).toString().padStart(4, '0')
+    const propertyIdNo = `${year}-${seqNumber}`
+
     // Clean up empty string values - convert to null for database
     const cleanedData = Object.entries(propertyData).reduce((acc, [key, value]) => {
       // Convert empty strings to null
@@ -134,11 +184,25 @@ class PropertiesSupabaseService {
       return acc
     }, {} as any)
 
+    // Prepare media_references with property ID
+    const mediaReferences = Array.isArray(cleanedData.media_references)
+      ? cleanedData.media_references
+      : []
+
+    // Add property ID to media_references metadata
+    const updatedMediaReferences = {
+      files: mediaReferences,
+      metadata: {
+        property_id_no: propertyIdNo
+      }
+    }
+
     // Create the property - RLS handles access control
     const { data: property, error: propertyError } = await supabase
       .from('properties')
       .insert({
         ...cleanedData,
+        media_references: updatedMediaReferences,
         organization_id: organizationId,
         created_by: user.id
       })
@@ -279,6 +343,90 @@ class PropertiesSupabaseService {
         type: floor.type
       }))
     } as PropertyCreateInput)
+  }
+
+  // Utility method to fix duplicate IDs
+  async fixDuplicateIds(organizationId?: string): Promise<void> {
+    // Get current user if no org ID provided
+    if (!organizationId) {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('User must be authenticated')
+      organizationId = user.user_metadata?.organization_id
+      if (!organizationId) throw new Error('User must belong to an organization')
+    }
+
+    const year = new Date().getFullYear().toString().slice(-2)
+
+    // Get all properties for this organization this year
+    const { data: properties } = await supabase
+      .from('properties')
+      .select('id, media_references, created_at')
+      .eq('organization_id', organizationId)
+      .gte('created_at', `${new Date().getFullYear()}-01-01`)
+      .order('created_at', { ascending: true })
+
+    if (!properties || properties.length === 0) return
+
+    // Track used IDs and find duplicates
+    const usedIds = new Set<string>()
+    const toUpdate: { id: string, newIdNo: string }[] = []
+    let nextSequence = 1
+
+    for (const prop of properties) {
+      const mediaRefs = prop.media_references as any
+      let currentIdNo: string | undefined
+
+      if (mediaRefs && typeof mediaRefs === 'object' && !Array.isArray(mediaRefs)) {
+        currentIdNo = mediaRefs.metadata?.property_id_no
+      }
+
+      // If no ID or duplicate ID, assign a new one
+      if (!currentIdNo || usedIds.has(currentIdNo)) {
+        // Find next available sequence number
+        while (usedIds.has(`${year}-${nextSequence.toString().padStart(4, '0')}`)) {
+          nextSequence++
+        }
+        const newIdNo = `${year}-${nextSequence.toString().padStart(4, '0')}`
+        toUpdate.push({ id: prop.id, newIdNo })
+        usedIds.add(newIdNo)
+        nextSequence++
+      } else {
+        usedIds.add(currentIdNo)
+        // Update nextSequence if this ID uses a higher number
+        const match = currentIdNo.match(/^\d{2}-(\d{4})$/)
+        if (match) {
+          const seq = parseInt(match[1], 10)
+          if (seq >= nextSequence) {
+            nextSequence = seq + 1
+          }
+        }
+      }
+    }
+
+    // Update properties with new IDs
+    for (const { id, newIdNo } of toUpdate) {
+      const { data: prop } = await supabase
+        .from('properties')
+        .select('media_references')
+        .eq('id', id)
+        .single()
+
+      const mediaRefs = prop?.media_references as any || {}
+      const updatedMediaRefs = {
+        files: Array.isArray(mediaRefs) ? mediaRefs : (mediaRefs.files || []),
+        metadata: {
+          ...(typeof mediaRefs === 'object' && !Array.isArray(mediaRefs) ? mediaRefs.metadata : {}),
+          property_id_no: newIdNo
+        }
+      }
+
+      await supabase
+        .from('properties')
+        .update({ media_references: updatedMediaRefs })
+        .eq('id', id)
+    }
+
+    console.log(`Fixed ${toUpdate.length} duplicate IDs`)
   }
 }
 
