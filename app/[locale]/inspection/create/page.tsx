@@ -88,7 +88,7 @@ export default function CreateInspectionPage() {
         adresse: formData.address,
         ville: formData.city,
         province: formData.province,
-        type_propriete: formData.propertyType,
+        type_propriete: formData.propertyType as any,
         source: 'Inspection',
         inspection_status: 'in_progress',
         inspection_completion: 0,
