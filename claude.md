@@ -94,6 +94,49 @@ export const moduleService = {
 - Let Supabase handle `organization_id` and `created_by` via RLS
 - Use JSONB for complex inspection data
 
+### Type Assertions with Supabase (IMPORTANT)
+
+**Why needed**: Supabase uses generic `Json` types and `null`, while our TypeScript uses specific interfaces and `undefined`.
+
+**Best Practice - Type assertions at database boundaries:**
+
+```typescript
+// ✅ READING from Supabase
+const { data: property } = await supabase
+  .from('properties')
+  .select('inspection_pieces')
+  .single()
+
+// Cast to our domain type
+const inspectionData = property.inspection_pieces as unknown as InspectionPieces
+
+// ✅ WRITING to Supabase
+const updatedData: InspectionPieces = { floors: {}, totalRooms: 0, completedRooms: 0 }
+
+await supabase
+  .from('properties')
+  .update({
+    inspection_pieces: updatedData as any,  // Cast when writing JSONB
+    updated_at: new Date().toISOString()
+  })
+
+// ✅ SANITIZING form data (convert empty strings to null)
+const sanitizedData: any = { ...formData }
+Object.keys(sanitizedData).forEach(key => {
+  if (sanitizedData[key] === '') {
+    sanitizedData[key] = null  // Database expects null, not empty string
+  }
+})
+```
+
+**When to use type assertions:**
+- ✅ Reading JSONB data from Supabase
+- ✅ Writing custom types to JSONB columns
+- ✅ Converting between Supabase's types and our domain types
+- ✅ Form data that might have empty strings (convert to `null`)
+
+**This is standard industry practice** (used by Stripe, GitHub, Vercel, etc.)
+
 ---
 
 ## 🎨 UI/UX Guidelines
@@ -158,6 +201,10 @@ features/[module-name]/
 - **Always use TypeScript** - no `any` types unless absolutely necessary
 - **Define interfaces** in `types/` folder
 - **Use type safety** throughout
+- **Type assertions at boundaries**: Use `as any` or `as unknown as Type` when interfacing with Supabase
+  - Supabase uses generic `Json` types and `null` for optional values
+  - Our app uses specific types (e.g., `InspectionPieces`) and `undefined` for optional values
+  - Type assertions at the database boundary are standard practice
 
 ### Component Rules
 1. **Use functional components** with hooks
