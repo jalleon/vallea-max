@@ -80,7 +80,7 @@ class InspectionService {
       const overallProgress = this.calculateOverallProgress({
         ...fullProperty,
         inspection_pieces: currentData
-      })
+      } as Partial<Property>)
 
       // Update the property with new data
       const { error: updateError } = await supabase
