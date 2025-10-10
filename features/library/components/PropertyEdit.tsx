@@ -279,7 +279,17 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
 
   const handleSave = async () => {
     try {
-      await onSave(formData)
+      // Sanitize data: convert empty strings to null for all fields
+      const sanitizedData: any = { ...formData }
+
+      // Convert empty strings to null for all fields to avoid database type errors
+      Object.keys(sanitizedData).forEach(key => {
+        if (sanitizedData[key] === '') {
+          sanitizedData[key] = null
+        }
+      })
+
+      await onSave(sanitizedData)
       onClose()
     } catch (error) {
       console.error('Error saving property:', error)

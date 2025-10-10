@@ -146,11 +146,28 @@ export default function RoomInspectionPage() {
       const currentData = property.inspection_pieces || { floors: {}, totalRooms: 0, completedRooms: 0 }
       const wasCompleted = currentData.floors?.[floorId]?.rooms?.[roomId]?.completedAt !== undefined
 
-      // Update room data with completion timestamp
+      // Check if any field has data (excluding 'type', 'completedAt', and 'customValues')
+      const hasData = Object.keys(roomData).some(key => {
+        if (key === 'type' || key === 'completedAt' || key === 'customValues') return false
+        const value = roomData[key]
+        // Check if value exists and is not empty
+        if (Array.isArray(value)) return value.length > 0
+        if (typeof value === 'string') return value.trim().length > 0
+        return value !== null && value !== undefined
+      })
+
+      // Update room data with or without completion timestamp based on whether there's data
       const updatedRoomData = {
         ...roomData,
-        completedAt: new Date().toISOString(),
         customValues
+      }
+
+      // Only add completedAt if there's actual data
+      if (hasData) {
+        updatedRoomData.completedAt = new Date().toISOString()
+      } else {
+        // Remove completedAt if no data
+        delete updatedRoomData.completedAt
       }
 
       // Update the room in the floor
@@ -164,8 +181,12 @@ export default function RoomInspectionPage() {
 
       // Calculate new completed rooms count
       let newCompletedRooms = currentData.completedRooms
-      if (!wasCompleted) {
+      if (hasData && !wasCompleted) {
+        // Room now has data and wasn't completed before
         newCompletedRooms += 1
+      } else if (!hasData && wasCompleted) {
+        // Room no longer has data but was completed before
+        newCompletedRooms -= 1
       }
 
       const updatedPieces: InspectionPieces = {

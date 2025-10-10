@@ -43,7 +43,9 @@ import {
   LocalLaundryService,
   Inventory,
   Settings,
-  OpenInNew
+  OpenInNew,
+  MeetingRoom,
+  WbSunny
 } from '@mui/icons-material'
 import { useTranslations } from 'next-intl'
 import { useRouter, useParams, useSearchParams } from 'next/navigation'
@@ -66,9 +68,11 @@ const ROOM_ICONS: Record<string, any> = {
   salle_familiale: SalleFamiliale,
   buanderie: LocalLaundryService,
   rangement: Inventory,
-  salle_mecanique: Settings
+  salle_mecanique: Settings,
+  vestibule: MeetingRoom,
+  solarium: WbSunny
 }
-const ADDITIONAL_ROOM_TYPES = ['chambre', 'salle_bain', 'salle_eau', 'autre']
+const ADDITIONAL_ROOM_TYPES = ['chambre', 'salle_bain', 'salle_eau', 'vestibule', 'solarium', 'cuisine', 'salle_a_manger', 'salon', 'bureau', 'salle_sejour', 'salle_familiale', 'buanderie', 'rangement', 'salle_mecanique']
 
 export default function PiecesPage() {
   const t = useTranslations()
@@ -87,6 +91,9 @@ export default function PiecesPage() {
   // Dialog states
   const [addRoomDialogOpen, setAddRoomDialogOpen] = useState(false)
   const [newRoomType, setNewRoomType] = useState('chambre')
+  const [roomInstanceDialogOpen, setRoomInstanceDialogOpen] = useState(false)
+  const [selectedRoomType, setSelectedRoomType] = useState<string | null>(null)
+  const [selectedRoomInstances, setSelectedRoomInstances] = useState<Array<{ id: string; type: string; data: any }>>([])
 
   useEffect(() => {
     loadProperty()
@@ -168,6 +175,20 @@ export default function PiecesPage() {
       type: floor.rooms[roomId].type,
       data: floor.rooms[roomId]
     }))
+  }
+
+  const getGroupedRooms = (floorId: string) => {
+    const rooms = getRoomsForFloor(floorId)
+    const grouped: Record<string, Array<{ id: string; type: string; data: any }>> = {}
+
+    rooms.forEach(room => {
+      if (!grouped[room.type]) {
+        grouped[room.type] = []
+      }
+      grouped[room.type].push(room)
+    })
+
+    return grouped
   }
 
   const isRoomCompleted = (floorId: string, roomId: string) => {
@@ -323,8 +344,21 @@ export default function PiecesPage() {
     setNewRoomType('chambre')
   }
 
-  const handleRoomClick = (floorId: string, roomId: string) => {
-    router.push(`/${locale}/inspection/${propertyId}/pieces/${floorId}/${roomId}`)
+  const handleRoomGroupClick = (roomType: string, instances: Array<{ id: string; type: string; data: any }>) => {
+    if (instances.length === 1) {
+      // If only one instance, go directly to that room
+      router.push(`/${locale}/inspection/${propertyId}/pieces/${selectedFloor}/${instances[0].id}`)
+    } else {
+      // If multiple instances, show selection dialog
+      setSelectedRoomType(roomType)
+      setSelectedRoomInstances(instances)
+      setRoomInstanceDialogOpen(true)
+    }
+  }
+
+  const handleRoomInstanceClick = (roomId: string) => {
+    setRoomInstanceDialogOpen(false)
+    router.push(`/${locale}/inspection/${propertyId}/pieces/${selectedFloor}/${roomId}`)
   }
 
   const handleBack = () => {
@@ -532,51 +566,60 @@ export default function PiecesPage() {
             </Box>
 
             <Grid container spacing={2}>
-              {rooms.sort((a, b) => {
-                // Use basement room types for sous_sol, otherwise use base room types
+              {(() => {
+                const groupedRooms = getGroupedRooms(selectedFloor)
                 const roomTypesOrder = selectedFloor === 'sous_sol' ? BASEMENT_ROOM_TYPES : BASE_ROOM_TYPES
-                const orderA = roomTypesOrder.indexOf(a.type)
-                const orderB = roomTypesOrder.indexOf(b.type)
-                if (orderA === -1 && orderB === -1) return 0
-                if (orderA === -1) return 1
-                if (orderB === -1) return -1
-                return orderA - orderB
-              }).map((room) => {
-                const isCompleted = isRoomCompleted(selectedFloor, room.id)
-                const roomConfig = ROOM_CONFIG[room.type]
-                const RoomIcon = ROOM_ICONS[room.type]
 
-                return (
-                  <Grid item xs={12} sm={6} md={4} key={room.id}>
-                    <Card
-                      elevation={0}
-                      sx={{
-                        border: '2px solid',
-                        borderColor: isCompleted ? '#4CAF50' : 'grey.300',
-                        transition: 'all 0.2s ease',
-                        '&:hover': {
-                          transform: 'translateY(-4px)',
-                          boxShadow: 2
-                        }
-                      }}
-                    >
-                      <CardActionArea onClick={() => handleRoomClick(selectedFloor, room.id)} sx={{ p: 2 }}>
-                        <CardContent sx={{ p: 0 }}>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                            {RoomIcon && <RoomIcon sx={{ fontSize: 32, color: isCompleted ? '#4CAF50' : 'text.secondary' }} />}
-                            {isCompleted && (
-                              <CheckCircle sx={{ color: '#4CAF50', fontSize: 24 }} />
-                            )}
-                          </Box>
-                          <Typography variant="h6" fontWeight={600} color={isCompleted ? '#4CAF50' : 'text.primary'}>
-                            {roomConfig ? t(roomConfig.translationKey) : room.type}
-                          </Typography>
-                        </CardContent>
-                      </CardActionArea>
-                    </Card>
-                  </Grid>
-                )
-              })}
+                // Sort room types by their order
+                const sortedRoomTypes = Object.keys(groupedRooms).sort((a, b) => {
+                  const orderA = roomTypesOrder.indexOf(a)
+                  const orderB = roomTypesOrder.indexOf(b)
+                  if (orderA === -1 && orderB === -1) return 0
+                  if (orderA === -1) return 1
+                  if (orderB === -1) return -1
+                  return orderA - orderB
+                })
+
+                return sortedRoomTypes.map((roomType) => {
+                  const instances = groupedRooms[roomType]
+                  const roomConfig = ROOM_CONFIG[roomType]
+                  const RoomIcon = ROOM_ICONS[roomType]
+                  const allCompleted = instances.every(instance => isRoomCompleted(selectedFloor, instance.id))
+                  const someCompleted = instances.some(instance => isRoomCompleted(selectedFloor, instance.id))
+
+                  return (
+                    <Grid item xs={12} sm={6} md={4} key={roomType}>
+                      <Card
+                        elevation={0}
+                        sx={{
+                          border: '2px solid',
+                          borderColor: allCompleted ? '#4CAF50' : someCompleted ? '#FFA726' : 'grey.300',
+                          transition: 'all 0.2s ease',
+                          '&:hover': {
+                            transform: 'translateY(-4px)',
+                            boxShadow: 2
+                          }
+                        }}
+                      >
+                        <CardActionArea onClick={() => handleRoomGroupClick(roomType, instances)} sx={{ p: 2 }}>
+                          <CardContent sx={{ p: 0 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                              {RoomIcon && <RoomIcon sx={{ fontSize: 32, color: allCompleted ? '#4CAF50' : 'text.secondary' }} />}
+                              {allCompleted && (
+                                <CheckCircle sx={{ color: '#4CAF50', fontSize: 24 }} />
+                              )}
+                            </Box>
+                            <Typography variant="h6" fontWeight={600} color={allCompleted ? '#4CAF50' : 'text.primary'}>
+                              {roomConfig ? t(roomConfig.translationKey) : roomType}
+                              {instances.length > 1 && ` (x${instances.length})`}
+                            </Typography>
+                          </CardContent>
+                        </CardActionArea>
+                      </Card>
+                    </Grid>
+                  )
+                })
+              })()}
             </Grid>
           </Box>
         )}
@@ -608,6 +651,55 @@ export default function PiecesPage() {
             <Button onClick={handleAddRoom} variant="contained" disabled={saving}>
               {saving ? <CircularProgress size={20} /> : t('common.add')}
             </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Room Instance Selection Dialog */}
+        <Dialog open={roomInstanceDialogOpen} onClose={() => setRoomInstanceDialogOpen(false)} maxWidth="sm" fullWidth>
+          <DialogTitle>
+            {selectedRoomType && ROOM_CONFIG[selectedRoomType] ? t(ROOM_CONFIG[selectedRoomType].translationKey) : selectedRoomType}
+          </DialogTitle>
+          <DialogContent>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Sélectionnez la pièce que vous souhaitez inspecter:
+            </Typography>
+            <Grid container spacing={2}>
+              {selectedRoomInstances.map((instance, index) => {
+                const isCompleted = isRoomCompleted(selectedFloor!, instance.id)
+                return (
+                  <Grid item xs={12} key={instance.id}>
+                    <Card
+                      elevation={0}
+                      sx={{
+                        border: '2px solid',
+                        borderColor: isCompleted ? '#4CAF50' : 'grey.300',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          transform: 'translateY(-2px)',
+                          boxShadow: 2
+                        }
+                      }}
+                      onClick={() => handleRoomInstanceClick(instance.id)}
+                    >
+                      <CardContent>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Typography variant="h6" fontWeight={600}>
+                            {selectedRoomType && ROOM_CONFIG[selectedRoomType] ? t(ROOM_CONFIG[selectedRoomType].translationKey) : selectedRoomType} #{index + 1}
+                          </Typography>
+                          {isCompleted && (
+                            <CheckCircle sx={{ color: '#4CAF50', fontSize: 24 }} />
+                          )}
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                )
+              })}
+            </Grid>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setRoomInstanceDialogOpen(false)}>{t('common.cancel')}</Button>
           </DialogActions>
         </Dialog>
       </Box>

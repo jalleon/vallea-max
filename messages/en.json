@@ -259,6 +259,8 @@
       "buanderie": "Laundry Room",
       "rangement": "Storage",
       "salleMecanique": "Mechanical Room",
+      "vestibule": "Vestibule",
+      "solarium": "Solarium",
       "autre": "Other"
     },
     "floors": {

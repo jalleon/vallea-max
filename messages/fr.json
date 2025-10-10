@@ -259,6 +259,8 @@
       "buanderie": "Buanderie",
       "rangement": "Rangement",
       "salleMecanique": "Salle mécanique",
+      "vestibule": "Vestibule",
+      "solarium": "Solarium",
       "autre": "Autre"
     },
     "floors": {

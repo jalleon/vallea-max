@@ -500,6 +500,64 @@ export const ROOM_CONFIG: Record<string, RoomTypeConfig> = {
         options: SIZE_OPTIONS
       }
     ]
+  },
+  vestibule: {
+    id: 'vestibule',
+    translationKey: 'inspection.rooms.vestibule',
+    fields: [
+      {
+        name: 'plancher',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.flooring.label',
+        options: MATERIAL_OPTIONS.flooring
+      },
+      {
+        name: 'plafond',
+        type: 'text',
+        translationKey: 'inspection.materials.ceiling.label'
+      },
+      {
+        name: 'murs',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.walls.label',
+        options: MATERIAL_OPTIONS.walls
+      },
+      {
+        name: 'grandeur',
+        type: 'select',
+        translationKey: 'inspection.fields.size',
+        options: SIZE_OPTIONS
+      }
+    ]
+  },
+  solarium: {
+    id: 'solarium',
+    translationKey: 'inspection.rooms.solarium',
+    fields: [
+      {
+        name: 'plancher',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.flooring.label',
+        options: MATERIAL_OPTIONS.flooring
+      },
+      {
+        name: 'plafond',
+        type: 'text',
+        translationKey: 'inspection.materials.ceiling.label'
+      },
+      {
+        name: 'murs',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.walls.label',
+        options: MATERIAL_OPTIONS.walls
+      },
+      {
+        name: 'grandeur',
+        type: 'select',
+        translationKey: 'inspection.fields.size',
+        options: SIZE_OPTIONS
+      }
+    ]
   }
 }
 
