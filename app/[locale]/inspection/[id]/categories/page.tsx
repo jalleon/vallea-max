@@ -266,7 +266,7 @@ export default function InspectionCategoriesPage() {
           {categories.map((category) => {
             const Icon = category.icon
             const isCompleted = isCategoryCompleted(category.id)
-            const hasStarted = isCompleted || (category.id === 'pieces' && property?.inspection_pieces?.totalRooms > 0)
+            const hasStarted = isCompleted || (category.id === 'pieces' && (property?.inspection_pieces?.totalRooms ?? 0) > 0)
 
             return (
               <Grid item xs={12} sm={6} key={category.id}>
