@@ -253,7 +253,7 @@ class PropertiesSupabaseService {
     // Update the property
     const { data: property, error: propertyError } = await supabase
       .from('properties')
-      .update(propertyData)
+      .update(propertyData as any)
       .eq('id', id)
       .select()
       .single()
