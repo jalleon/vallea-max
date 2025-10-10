@@ -157,7 +157,7 @@ export default function RoomInspectionPage() {
       })
 
       // Update room data with or without completion timestamp based on whether there's data
-      const updatedRoomData = {
+      const updatedRoomData: any = {
         ...roomData,
         customValues
       }
