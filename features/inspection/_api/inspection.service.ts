@@ -38,7 +38,7 @@ class InspectionService {
 
       if (fetchError) throw fetchError
 
-      const currentData: InspectionPieces = property.inspection_pieces || {
+      const currentData: InspectionPieces = (property.inspection_pieces as InspectionPieces) || {
         floors: {},
         totalRooms: 0,
         completedRooms: 0
