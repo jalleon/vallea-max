@@ -80,7 +80,6 @@ const CATEGORIES = [
 
 export function InspectionProgressWindow({ property }: InspectionProgressWindowProps) {
   const t = useTranslations('inspection.progress')
-  const [isCollapsed, setIsCollapsed] = useState(true)
   const [expandedCategories, setExpandedCategories] = useState<string[]>([])
 
   const toggleCategory = (categoryId: string) => {
@@ -216,33 +215,26 @@ export function InspectionProgressWindow({ property }: InspectionProgressWindowP
         overflow: 'hidden'
       }}
     >
-      {/* Header with collapse button */}
+      {/* Header */}
       <Box
         sx={{
           p: 2,
           display: 'flex',
-          justifyContent: 'space-between',
           alignItems: 'center',
-          bgcolor: '#f5f5f5',
-          cursor: 'pointer'
+          gap: 1,
+          bgcolor: '#f5f5f5'
         }}
-        onClick={() => setIsCollapsed(!isCollapsed)}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Assessment sx={{ fontSize: 32, color: 'primary.main' }} />
-          <Typography variant="h4" fontWeight={700}>
-            {t('title')}
-          </Typography>
-          <Typography variant="h4" fontWeight={700} color="primary">
-            {overallProgress}%
-          </Typography>
-        </Box>
-        <IconButton size="small">
-          {isCollapsed ? <KeyboardArrowDown /> : <KeyboardArrowUp />}
-        </IconButton>
+        <Assessment sx={{ fontSize: 32, color: 'primary.main' }} />
+        <Typography variant="h4" fontWeight={700}>
+          {t('title')}
+        </Typography>
+        <Typography variant="h4" fontWeight={700} color="primary">
+          {overallProgress}%
+        </Typography>
       </Box>
 
-      {/* Progress bar - always visible */}
+      {/* Progress bar and category pills - always visible */}
       <Box sx={{ px: 2, pt: 1, pb: 2 }}>
         <LinearProgress
           variant="determinate"
@@ -257,66 +249,67 @@ export function InspectionProgressWindow({ property }: InspectionProgressWindowP
             }
           }}
         />
-      </Box>
 
-      {/* Collapsible category details */}
-      <Collapse in={!isCollapsed}>
-        <Box sx={{ p: 2, pt: 0 }}>
+        {/* Category Pills */}
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
           {CATEGORIES.map((category) => {
             const Icon = category.icon
             const isCompleted = isCategoryCompleted(category.id)
             const isExpanded = expandedCategories.includes(category.id)
 
             return (
-              <Box
+              <Chip
                 key={category.id}
+                icon={<Icon sx={{ fontSize: 18 }} />}
+                label={category.name}
+                onClick={() => toggleCategory(category.id)}
                 sx={{
-                  mb: 2,
-                  borderLeft: '4px solid',
-                  borderColor: category.color,
-                  pl: 2,
-                  py: 1
+                  bgcolor: isExpanded ? `${category.color}3a` : 'white',
+                  color: isExpanded || isCompleted ? category.color : 'text.secondary',
+                  border: `1px solid ${category.color}`,
+                  fontWeight: isExpanded || isCompleted ? 600 : 400,
+                  boxShadow: isExpanded ? `0 0 0 2px ${category.color}40` : 'none',
+                  '& .MuiChip-icon': {
+                    color: category.color
+                  },
+                  '&:hover': {
+                    bgcolor: `${category.color}2a`,
+                    borderColor: category.color
+                  }
                 }}
-              >
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    cursor: 'pointer'
-                  }}
-                  onClick={() => toggleCategory(category.id)}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Icon sx={{ fontSize: 20, color: category.color }} />
-                    <Typography variant="body1" fontWeight={600}>
-                      {category.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      ({category.weight > 0 ? `${category.weight * 100}%` : 'optionnel'})
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Chip
-                      label={isCompleted ? 'Complété' : 'Non commencé'}
-                      size="small"
-                      color={isCompleted ? 'success' : 'default'}
-                      icon={isCompleted ? <CheckCircle sx={{ fontSize: 16 }} /> : undefined}
-                    />
-                    <IconButton size="small">
-                      {isExpanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-                    </IconButton>
-                  </Box>
-                </Box>
-
-                <Collapse in={isExpanded}>
-                  {renderCategoryDetails(category.id)}
-                </Collapse>
-              </Box>
+                deleteIcon={isCompleted ? <CheckCircle sx={{ fontSize: 18 }} /> : undefined}
+                onDelete={isCompleted ? () => {} : undefined}
+              />
             )
           })}
         </Box>
-      </Collapse>
+      </Box>
+
+      {/* Category details */}
+      <Box sx={{ p: 2, pt: 0 }}>
+        {CATEGORIES.map((category) => {
+          const isExpanded = expandedCategories.includes(category.id)
+
+          if (!isExpanded) return null
+
+          return (
+            <Box
+              key={category.id}
+              sx={{
+                mb: 2,
+                borderLeft: '4px solid',
+                borderColor: category.color,
+                pl: 2,
+                py: 1
+              }}
+            >
+              <Collapse in={isExpanded}>
+                {renderCategoryDetails(category.id)}
+              </Collapse>
+            </Box>
+          )
+        })}
+      </Box>
     </Paper>
   )
 }

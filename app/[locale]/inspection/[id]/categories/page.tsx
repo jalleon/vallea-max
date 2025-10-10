@@ -52,7 +52,7 @@ const categories = [
     icon: Home,
     color: '#FF9800',
     weight: 0.25,
-    enabled: false
+    enabled: true
   },
   {
     id: 'garage',
@@ -61,7 +61,7 @@ const categories = [
     icon: DirectionsCar,
     color: '#4CAF50',
     weight: 0.15,
-    enabled: false
+    enabled: true
   },
   {
     id: 'mecanique',
@@ -70,7 +70,7 @@ const categories = [
     icon: Settings,
     color: '#9C27B0',
     weight: 0.15,
-    enabled: false
+    enabled: true
   },
   {
     id: 'divers',
@@ -79,7 +79,7 @@ const categories = [
     icon: Build,
     color: '#607D8B',
     weight: 0.00,
-    enabled: false
+    enabled: true
   },
   {
     id: 'exterieur',
@@ -88,7 +88,7 @@ const categories = [
     icon: Landscape,
     color: '#795548',
     weight: 0.20,
-    enabled: false
+    enabled: true
   }
 ]
 
@@ -273,7 +273,7 @@ export default function InspectionCategoriesPage() {
                 <Card
                   elevation={0}
                   sx={{
-                    height: '200px',
+                    height: '150px',
                     borderRadius: '16px',
                     border: hasStarted ? '2px solid' : '1px solid',
                     borderColor: hasStarted ? category.color : '#e0e0e0',
@@ -318,32 +318,24 @@ export default function InspectionCategoriesPage() {
                     }}>
                       <Icon sx={{
                         fontSize: 48,
-                        color: hasStarted ? category.color : '#9e9e9e',
+                        color: category.color,
                         mb: 2
                       }} />
                       <Typography
-                        variant="h6"
+                        variant="h5"
                         fontWeight="bold"
                         gutterBottom
-                        sx={{ color: hasStarted ? category.color : 'text.primary' }}
+                        sx={{ color: 'text.primary' }}
                       >
                         {category.name}
                       </Typography>
                       <Typography
                         variant="body2"
                         color="text.secondary"
-                        sx={{ fontSize: '12px', mb: 1 }}
+                        sx={{ fontSize: '12px' }}
                       >
                         {category.description}
                       </Typography>
-                      {!category.enabled && (
-                        <Chip
-                          label={t('inspection.categories.comingSoon')}
-                          size="small"
-                          sx={{ mt: 1 }}
-                          color="default"
-                        />
-                      )}
                     </CardContent>
                   </CardActionArea>
                 </Card>

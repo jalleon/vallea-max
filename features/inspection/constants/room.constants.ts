@@ -384,15 +384,131 @@ export const ROOM_CONFIG: Record<string, RoomTypeConfig> = {
         options: SIZE_OPTIONS
       }
     ]
+  },
+  salle_familiale: {
+    id: 'salle_familiale',
+    translationKey: 'inspection.rooms.salleFamiliale',
+    fields: [
+      {
+        name: 'plancher',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.flooring.label',
+        options: MATERIAL_OPTIONS.flooring
+      },
+      {
+        name: 'plafond',
+        type: 'text',
+        translationKey: 'inspection.materials.ceiling.label'
+      },
+      {
+        name: 'murs',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.walls.label',
+        options: MATERIAL_OPTIONS.walls
+      },
+      {
+        name: 'grandeur',
+        type: 'select',
+        translationKey: 'inspection.fields.size',
+        options: SIZE_OPTIONS
+      }
+    ]
+  },
+  buanderie: {
+    id: 'buanderie',
+    translationKey: 'inspection.rooms.buanderie',
+    fields: [
+      {
+        name: 'plancher',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.flooring.label',
+        options: MATERIAL_OPTIONS.flooring
+      },
+      {
+        name: 'plafond',
+        type: 'text',
+        translationKey: 'inspection.materials.ceiling.label'
+      },
+      {
+        name: 'murs',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.walls.label',
+        options: MATERIAL_OPTIONS.walls
+      },
+      {
+        name: 'grandeur',
+        type: 'select',
+        translationKey: 'inspection.fields.size',
+        options: SIZE_OPTIONS
+      }
+    ]
+  },
+  rangement: {
+    id: 'rangement',
+    translationKey: 'inspection.rooms.rangement',
+    fields: [
+      {
+        name: 'plancher',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.flooring.label',
+        options: MATERIAL_OPTIONS.flooring
+      },
+      {
+        name: 'plafond',
+        type: 'text',
+        translationKey: 'inspection.materials.ceiling.label'
+      },
+      {
+        name: 'murs',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.walls.label',
+        options: MATERIAL_OPTIONS.walls
+      },
+      {
+        name: 'grandeur',
+        type: 'select',
+        translationKey: 'inspection.fields.size',
+        options: SIZE_OPTIONS
+      }
+    ]
+  },
+  salle_mecanique: {
+    id: 'salle_mecanique',
+    translationKey: 'inspection.rooms.salleMecanique',
+    fields: [
+      {
+        name: 'plancher',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.flooring.label',
+        options: MATERIAL_OPTIONS.flooring
+      },
+      {
+        name: 'plafond',
+        type: 'text',
+        translationKey: 'inspection.materials.ceiling.label'
+      },
+      {
+        name: 'murs',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.walls.label',
+        options: MATERIAL_OPTIONS.walls
+      },
+      {
+        name: 'grandeur',
+        type: 'select',
+        translationKey: 'inspection.fields.size',
+        options: SIZE_OPTIONS
+      }
+    ]
   }
 }
 
 // Floor options
 export const FLOOR_OPTIONS = [
-  { value: 'sous_sol', translationKey: 'inspection.floors.sousSol' },
-  { value: 'rdc', translationKey: 'inspection.floors.rdc' },
-  { value: 'deuxieme', translationKey: 'inspection.floors.deuxieme' },
-  { value: 'troisieme', translationKey: 'inspection.floors.troisieme' }
+  { value: 'sous_sol', translationKey: 'inspection.floors.sousSol', displayName: 'Sous-sol' },
+  { value: 'rdc', translationKey: 'inspection.floors.rdc', displayName: 'R.D.C.' },
+  { value: 'deuxieme', translationKey: 'inspection.floors.deuxieme', displayName: '2e' },
+  { value: 'troisieme', translationKey: 'inspection.floors.troisieme', displayName: '3e' }
 ]
 
 // Helper function to get room types as array

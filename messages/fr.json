@@ -255,6 +255,10 @@
       "salleSejour": "Salle de séjour",
       "salleBain": "Salle de bain",
       "salleEau": "Salle d'eau",
+      "salleFamiliale": "Salle familiale",
+      "buanderie": "Buanderie",
+      "rangement": "Rangement",
+      "salleMecanique": "Salle mécanique",
       "autre": "Autre"
     },
     "floors": {
@@ -262,7 +266,7 @@
       "rdc": "R.-D.-C",
       "deuxieme": "2e",
       "troisieme": "3e",
-      "addFloor": "Ajouter un étage"
+      "addFloor": "Sélectionner un étage"
     },
     "materials": {
       "cabinets": {

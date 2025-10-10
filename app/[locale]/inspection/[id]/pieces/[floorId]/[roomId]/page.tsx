@@ -186,8 +186,8 @@ export default function RoomInspectionPage() {
         inspection_completion: overallCompletion
       })
 
-      // Navigate back to pieces page
-      router.push(`/${locale}/inspection/${propertyId}/pieces`)
+      // Navigate back to pieces page with selected floor
+      router.push(`/${locale}/inspection/${propertyId}/pieces?floor=${floorId}`)
     } catch (err) {
       console.error('Error saving room inspection:', err)
       setError(t('common.error'))
@@ -197,7 +197,7 @@ export default function RoomInspectionPage() {
   }
 
   const handleBack = () => {
-    router.push(`/${locale}/inspection/${propertyId}/pieces`)
+    router.push(`/${locale}/inspection/${propertyId}/pieces?floor=${floorId}`)
   }
 
   const handleBreadcrumbClick = (path: string) => {

@@ -30,22 +30,51 @@ import {
   Add,
   CheckCircle,
   ArrowBack,
-  NavigateNext
+  NavigateNext,
+  Kitchen,
+  RestaurantMenu,
+  Chair,
+  Bed,
+  WorkOutline,
+  Weekend,
+  Bathtub,
+  Shower,
+  Weekend as SalleFamiliale,
+  LocalLaundryService,
+  Inventory,
+  Settings,
+  OpenInNew
 } from '@mui/icons-material'
 import { useTranslations } from 'next-intl'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import { propertiesSupabaseService } from '@/features/library/_api/properties-supabase.service'
 import { Property, InspectionPieces, FloorInspection } from '@/features/library/types/property.types'
 import { MaterialDashboardLayout } from '@/components/layout/MaterialDashboardLayout'
 import { FLOOR_OPTIONS, ROOM_CONFIG } from '@/features/inspection/constants/room.constants'
 
-const BASE_ROOM_TYPES = ['cuisine', 'salon', 'salle_a_manger', 'chambre', 'bureau', 'salle_sejour', 'salle_bain', 'salle_eau']
+const BASE_ROOM_TYPES = ['cuisine', 'salle_a_manger', 'salon', 'chambre', 'bureau', 'salle_sejour', 'salle_bain', 'salle_eau']
+const BASEMENT_ROOM_TYPES = ['salle_familiale', 'salle_sejour', 'chambre', 'bureau', 'buanderie', 'rangement', 'salle_mecanique', 'salle_bain', 'salle_eau']
+const ROOM_ICONS: Record<string, any> = {
+  cuisine: Kitchen,
+  salle_a_manger: RestaurantMenu,
+  salon: Chair,
+  chambre: Bed,
+  bureau: WorkOutline,
+  salle_sejour: Weekend,
+  salle_bain: Bathtub,
+  salle_eau: Shower,
+  salle_familiale: SalleFamiliale,
+  buanderie: LocalLaundryService,
+  rangement: Inventory,
+  salle_mecanique: Settings
+}
 const ADDITIONAL_ROOM_TYPES = ['chambre', 'salle_bain', 'salle_eau', 'autre']
 
 export default function PiecesPage() {
   const t = useTranslations()
   const router = useRouter()
   const params = useParams()
+  const searchParams = useSearchParams()
   const locale = params.locale as string
   const propertyId = params.id as string
 
@@ -56,9 +85,7 @@ export default function PiecesPage() {
   const [error, setError] = useState<string | null>(null)
 
   // Dialog states
-  const [addFloorDialogOpen, setAddFloorDialogOpen] = useState(false)
   const [addRoomDialogOpen, setAddRoomDialogOpen] = useState(false)
-  const [newFloorName, setNewFloorName] = useState('')
   const [newRoomType, setNewRoomType] = useState('chambre')
 
   useEffect(() => {
@@ -73,14 +100,31 @@ export default function PiecesPage() {
       const prop = await propertiesSupabaseService.getProperty(propertyId)
       setProperty(prop)
 
-      // Initialize inspection_pieces if not exists
-      if (!prop.inspection_pieces) {
+      // Check if there's a floor query parameter
+      const floorParam = searchParams.get('floor')
+
+      // Initialize inspection_pieces if not exists or default to RDC floor
+      if (!prop.inspection_pieces || !prop.inspection_pieces.floors) {
         const initialData: InspectionPieces = {
           floors: {},
           totalRooms: 0,
           completedRooms: 0
         }
         await updateInspectionPieces(initialData)
+        // Create RDC floor and set as selected
+        await handleAddPredefinedFloor('rdc', 'R.D.C.')
+      } else if (!selectedFloor) {
+        // If there's a floor parameter and it exists, select it
+        if (floorParam && prop.inspection_pieces.floors[floorParam]) {
+          setSelectedFloor(floorParam)
+        } else if (prop.inspection_pieces.floors['rdc']) {
+          // Otherwise default to RDC if it exists
+          setSelectedFloor('rdc')
+        } else {
+          // Otherwise select first available floor
+          const firstFloor = Object.keys(prop.inspection_pieces.floors)[0]
+          if (firstFloor) setSelectedFloor(firstFloor)
+        }
       }
     } catch (err) {
       console.error('Error loading property:', err)
@@ -131,14 +175,22 @@ export default function PiecesPage() {
     return room?.completedAt !== undefined
   }
 
-  const handleAddFloor = async () => {
-    if (!property || !newFloorName.trim()) return
+  const handleAddNextFloor = async () => {
+    if (!property) return
 
-    const floorId = `floor_${Date.now()}`
     const currentData = property.inspection_pieces || { floors: {}, totalRooms: 0, completedRooms: 0 }
 
+    // Determine next floor number
+    let nextFloorNumber = 4
+    while (currentData.floors[`floor_${nextFloorNumber}`]) {
+      nextFloorNumber++
+    }
+
+    const floorId = `floor_${nextFloorNumber}`
+    const floorName = `${nextFloorNumber}e`
+
     const newFloor: FloorInspection = {
-      name: newFloorName,
+      name: floorName,
       rooms: {}
     }
 
@@ -160,8 +212,6 @@ export default function PiecesPage() {
     }
 
     await updateInspectionPieces(updatedData)
-    setAddFloorDialogOpen(false)
-    setNewFloorName('')
     setSelectedFloor(floorId)
   }
 
@@ -172,6 +222,44 @@ export default function PiecesPage() {
 
     // Check if floor already exists
     if (currentData.floors[floorValue]) {
+      // If it's basement and has wrong room types, recreate it
+      if (floorValue === 'sous_sol') {
+        const existingRooms = Object.values(currentData.floors[floorValue].rooms || {})
+        const hasOldRoomTypes = existingRooms.some(room =>
+          room.type === 'cuisine' || room.type === 'salle_a_manger' || room.type === 'salon'
+        )
+
+        if (hasOldRoomTypes) {
+          // Delete and recreate basement with correct room types
+          const oldRoomCount = Object.keys(currentData.floors[floorValue].rooms || {}).length
+
+          const newFloor: FloorInspection = {
+            name: floorName,
+            rooms: {}
+          }
+
+          BASEMENT_ROOM_TYPES.forEach(roomType => {
+            const roomId = `${roomType}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+            newFloor.rooms[roomId] = {
+              type: roomType
+            }
+          })
+
+          const updatedData: InspectionPieces = {
+            ...currentData,
+            floors: {
+              ...currentData.floors,
+              [floorValue]: newFloor
+            },
+            totalRooms: currentData.totalRooms - oldRoomCount + BASEMENT_ROOM_TYPES.length
+          }
+
+          await updateInspectionPieces(updatedData)
+          setSelectedFloor(floorValue)
+          return
+        }
+      }
+
       setSelectedFloor(floorValue)
       return
     }
@@ -181,8 +269,11 @@ export default function PiecesPage() {
       rooms: {}
     }
 
-    // Initialize base room types
-    BASE_ROOM_TYPES.forEach(roomType => {
+    // Use basement room types for sous_sol, otherwise use base room types
+    const roomTypes = floorValue === 'sous_sol' ? BASEMENT_ROOM_TYPES : BASE_ROOM_TYPES
+
+    // Initialize room types
+    roomTypes.forEach(roomType => {
       const roomId = `${roomType}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       newFloor.rooms[roomId] = {
         type: roomType
@@ -195,7 +286,7 @@ export default function PiecesPage() {
         ...currentData.floors,
         [floorValue]: newFloor
       },
-      totalRooms: currentData.totalRooms + BASE_ROOM_TYPES.length
+      totalRooms: currentData.totalRooms + roomTypes.length
     }
 
     await updateInspectionPieces(updatedData)
@@ -244,6 +335,13 @@ export default function PiecesPage() {
     router.push(`/${locale}${path}`)
   }
 
+  const handleAddressClick = () => {
+    if (property?.adresse && property?.ville) {
+      const query = encodeURIComponent(`${property.adresse}, ${property.ville}, ${property.province || 'QC'}`)
+      window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank')
+    }
+  }
+
   if (loading) {
     return (
       <MaterialDashboardLayout>
@@ -289,6 +387,37 @@ export default function PiecesPage() {
           <Typography color="text.primary">{t('inspection.categories.pieces')}</Typography>
         </Breadcrumbs>
 
+        {/* Property Address - Clickable to Google Maps */}
+        <Box sx={{ mb: 3 }}>
+          <Typography
+            variant="h5"
+            component="button"
+            onClick={handleAddressClick}
+            sx={{
+              cursor: 'pointer',
+              background: 'none',
+              border: 'none',
+              p: 0,
+              color: 'primary.main',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              '&:hover': {
+                textDecoration: 'underline'
+              }
+            }}
+          >
+            {property.adresse}, {property.ville}
+            <OpenInNew fontSize="small" />
+          </Typography>
+          {property.province && (
+            <Typography variant="body2" color="text.secondary">
+              {property.province} • {property.type_propriete}
+            </Typography>
+          )}
+        </Box>
+
         {/* Header */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -315,7 +444,7 @@ export default function PiecesPage() {
                 <Button
                   key={floor.value}
                   variant={isSelected ? 'contained' : 'outlined'}
-                  onClick={() => handleAddPredefinedFloor(floor.value, t(floor.translationKey))}
+                  onClick={() => handleAddPredefinedFloor(floor.value, floor.displayName)}
                   sx={{
                     minWidth: 120,
                     bgcolor: isSelected ? '#4CAF50' : 'transparent',
@@ -328,17 +457,52 @@ export default function PiecesPage() {
                   }}
                   startIcon={floorExists ? <CheckCircle /> : undefined}
                 >
-                  {t(floor.translationKey)}
+                  {floor.displayName}
                 </Button>
               )
             })}
+            {/* Additional floors (4e, 5e, etc.) */}
+            {floors
+              .filter(f => {
+                // Only show floors that are not in FLOOR_OPTIONS
+                const isPredefinedFloor = FLOOR_OPTIONS.some(opt => opt.value === f.id)
+                return !isPredefinedFloor && f.id.startsWith('floor_')
+              })
+              .sort((a, b) => {
+                const numA = parseInt(a.id.replace('floor_', ''))
+                const numB = parseInt(b.id.replace('floor_', ''))
+                return numA - numB
+              })
+              .map((floor) => {
+                const isSelected = selectedFloor === floor.id
+
+                return (
+                  <Button
+                    key={floor.id}
+                    variant={isSelected ? 'contained' : 'outlined'}
+                    onClick={() => setSelectedFloor(floor.id)}
+                    sx={{
+                      minWidth: 120,
+                      bgcolor: isSelected ? '#4CAF50' : 'transparent',
+                      borderColor: '#4CAF50',
+                      color: isSelected ? 'white' : '#4CAF50',
+                      '&:hover': {
+                        bgcolor: isSelected ? '#45a049' : '#f0fdf4',
+                        borderColor: '#4CAF50'
+                      }
+                    }}
+                    startIcon={<CheckCircle />}
+                  >
+                    {floor.name}
+                  </Button>
+                )
+              })}
             <Button
               variant="outlined"
-              startIcon={<Add />}
-              onClick={() => setAddFloorDialogOpen(true)}
-              sx={{ minWidth: 120 }}
+              onClick={handleAddNextFloor}
+              sx={{ minWidth: 60 }}
             >
-              +
+              <Add />
             </Button>
           </Box>
         </Paper>
@@ -348,7 +512,7 @@ export default function PiecesPage() {
           <Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6" fontWeight={600}>
-                {floors.find(f => f.id === selectedFloor)?.name}
+                Pièces - {floors.find(f => f.id === selectedFloor)?.name}
               </Typography>
               <Button
                 variant="outlined"
@@ -368,9 +532,19 @@ export default function PiecesPage() {
             </Box>
 
             <Grid container spacing={2}>
-              {rooms.map((room) => {
+              {rooms.sort((a, b) => {
+                // Use basement room types for sous_sol, otherwise use base room types
+                const roomTypesOrder = selectedFloor === 'sous_sol' ? BASEMENT_ROOM_TYPES : BASE_ROOM_TYPES
+                const orderA = roomTypesOrder.indexOf(a.type)
+                const orderB = roomTypesOrder.indexOf(b.type)
+                if (orderA === -1 && orderB === -1) return 0
+                if (orderA === -1) return 1
+                if (orderB === -1) return -1
+                return orderA - orderB
+              }).map((room) => {
                 const isCompleted = isRoomCompleted(selectedFloor, room.id)
                 const roomConfig = ROOM_CONFIG[room.type]
+                const RoomIcon = ROOM_ICONS[room.type]
 
                 return (
                   <Grid item xs={12} sm={6} md={4} key={room.id}>
@@ -388,14 +562,15 @@ export default function PiecesPage() {
                     >
                       <CardActionArea onClick={() => handleRoomClick(selectedFloor, room.id)} sx={{ p: 2 }}>
                         <CardContent sx={{ p: 0 }}>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Typography variant="h6" fontWeight={600} color={isCompleted ? '#4CAF50' : 'text.primary'}>
-                              {roomConfig ? t(roomConfig.translationKey) : room.type}
-                            </Typography>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                            {RoomIcon && <RoomIcon sx={{ fontSize: 32, color: isCompleted ? '#4CAF50' : 'text.secondary' }} />}
                             {isCompleted && (
-                              <CheckCircle sx={{ color: '#4CAF50', fontSize: 32 }} />
+                              <CheckCircle sx={{ color: '#4CAF50', fontSize: 24 }} />
                             )}
                           </Box>
+                          <Typography variant="h6" fontWeight={600} color={isCompleted ? '#4CAF50' : 'text.primary'}>
+                            {roomConfig ? t(roomConfig.translationKey) : room.type}
+                          </Typography>
                         </CardContent>
                       </CardActionArea>
                     </Card>
@@ -405,29 +580,6 @@ export default function PiecesPage() {
             </Grid>
           </Box>
         )}
-
-        {/* Add Floor Dialog */}
-        <Dialog open={addFloorDialogOpen} onClose={() => setAddFloorDialogOpen(false)} maxWidth="sm" fullWidth>
-          <DialogTitle>{t('inspection.floors.addFloor')}</DialogTitle>
-          <DialogContent>
-            <TextField
-              autoFocus
-              margin="dense"
-              label={t('common.name')}
-              type="text"
-              fullWidth
-              value={newFloorName}
-              onChange={(e) => setNewFloorName(e.target.value)}
-              placeholder="4e étage, Grenier, etc."
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setAddFloorDialogOpen(false)}>{t('common.cancel')}</Button>
-            <Button onClick={handleAddFloor} variant="contained" disabled={!newFloorName.trim() || saving}>
-              {saving ? <CircularProgress size={20} /> : t('common.add')}
-            </Button>
-          </DialogActions>
-        </Dialog>
 
         {/* Add Room Dialog */}
         <Dialog open={addRoomDialogOpen} onClose={() => setAddRoomDialogOpen(false)} maxWidth="sm" fullWidth>

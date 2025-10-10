@@ -255,6 +255,10 @@
       "salleSejour": "Family Room",
       "salleBain": "Bathroom",
       "salleEau": "Powder Room",
+      "salleFamiliale": "Family Room",
+      "buanderie": "Laundry Room",
+      "rangement": "Storage",
+      "salleMecanique": "Mechanical Room",
       "autre": "Other"
     },
     "floors": {
@@ -262,7 +266,7 @@
       "rdc": "Ground Floor",
       "deuxieme": "2nd Floor",
       "troisieme": "3rd Floor",
-      "addFloor": "Add Floor"
+      "addFloor": "Select a Floor"
     },
     "materials": {
       "cabinets": {
