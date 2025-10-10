@@ -35,10 +35,13 @@ import {
   AttachMoney,
   Home,
   Straighten,
-  Layers
+  Layers,
+  Search as InspectionIcon,
+  CheckCircle
 } from '@mui/icons-material'
 import { Property } from '../types/property.types'
 import { formatCurrency, formatDate, formatMeasurement } from '@/lib/utils/formatting'
+import { useRouter } from 'next/navigation'
 
 interface PropertyViewProps {
   property: Property | null
@@ -60,6 +63,7 @@ export function PropertyView({
   canNavigateNext = false
 }: PropertyViewProps) {
   const theme = useTheme()
+  const router = useRouter()
 
   // Keyboard navigation
   useEffect(() => {
@@ -515,6 +519,196 @@ export function PropertyView({
               </CardContent>
             </Card>
           </Grid>
+
+          {/* Inspection Section - Show for ALL properties */}
+          <Grid item xs={12}>
+            <Card
+              elevation={0}
+              sx={{
+                border: `1px solid ${theme.palette.divider}`,
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                overflow: 'visible'
+              }}
+            >
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <InspectionIcon sx={{ color: 'white', mr: 1 }} />
+                    <Typography variant="h6" sx={{ color: 'white', fontWeight: 600 }}>
+                      Inspection
+                    </Typography>
+                  </Box>
+                  <Chip
+                    label={
+                      property.inspection_status === 'completed' ? 'Complété' :
+                      property.inspection_status === 'in_progress' ? 'En cours' :
+                      'Non commencé'
+                    }
+                    sx={{
+                      backgroundColor:
+                        property.inspection_status === 'completed' ? '#4CAF50' :
+                        property.inspection_status === 'in_progress' ? '#FF9800' :
+                        '#9E9E9E',
+                      color: 'white',
+                      fontWeight: 600
+                    }}
+                  />
+                  </Box>
+
+                  {/* Progress Bar */}
+                  <Box sx={{ mb: 3 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.9)' }}>
+                        Progrès global
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: 'white', fontWeight: 600 }}>
+                        {property.inspection_completion || 0}%
+                      </Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        width: '100%',
+                        height: 8,
+                        backgroundColor: 'rgba(255,255,255,0.2)',
+                        borderRadius: 4,
+                        overflow: 'hidden'
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          width: `${property.inspection_completion || 0}%`,
+                          height: '100%',
+                          backgroundColor: 'white',
+                          borderRadius: 4,
+                          transition: 'width 0.3s ease'
+                        }}
+                      />
+                    </Box>
+                  </Box>
+
+                  <Grid container spacing={2} sx={{ mb: 2 }}>
+                    {/* Inspection Date */}
+                    <Grid item xs={12} md={4}>
+                      <Box sx={{ p: 2, borderRadius: 1, backgroundColor: 'rgba(255,255,255,0.15)' }}>
+                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                          Date d'inspection
+                        </Typography>
+                        <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
+                          {property.inspection_date ? new Date(property.inspection_date).toLocaleDateString('fr-CA') : 'N/A'}
+                        </Typography>
+                      </Box>
+                    </Grid>
+
+                    {/* Room Count */}
+                    {property.inspection_pieces && (
+                      <>
+                        <Grid item xs={12} md={4}>
+                          <Box sx={{ p: 2, borderRadius: 1, backgroundColor: 'rgba(255,255,255,0.15)' }}>
+                            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                              Pièces inspectées
+                            </Typography>
+                            <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
+                              {property.inspection_pieces.completedRooms || 0} / {property.inspection_pieces.totalRooms || 0}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                          <Box sx={{ p: 2, borderRadius: 1, backgroundColor: 'rgba(255,255,255,0.15)' }}>
+                            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                              Étages
+                            </Typography>
+                            <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
+                              {Object.keys(property.inspection_pieces.floors || {}).length}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      </>
+                    )}
+                  </Grid>
+
+                  {/* Completed Categories */}
+                  {property.inspection_categories_completed && property.inspection_categories_completed.length > 0 && (
+                    <Box sx={{ mb: 2, p: 2, borderRadius: 1, backgroundColor: 'rgba(255,255,255,0.15)' }}>
+                      <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)', mb: 1, display: 'block' }}>
+                        Catégories complétées
+                      </Typography>
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                        {property.inspection_categories_completed.map((category) => (
+                          <Chip
+                            key={category}
+                            icon={<CheckCircle sx={{ fontSize: 16 }} />}
+                            label={category}
+                            size="small"
+                            sx={{
+                              backgroundColor: 'rgba(255,255,255,0.9)',
+                              color: '#667eea',
+                              fontWeight: 600
+                            }}
+                          />
+                        ))}
+                      </Box>
+                    </Box>
+                  )}
+
+                  {/* Floor Summary */}
+                  {property.inspection_pieces && Object.keys(property.inspection_pieces.floors || {}).length > 0 && (
+                    <Box sx={{ p: 2, borderRadius: 1, backgroundColor: 'rgba(255,255,255,0.15)' }}>
+                      <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)', mb: 1, display: 'block' }}>
+                        Détails par étage
+                      </Typography>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                        {Object.entries(property.inspection_pieces.floors).map(([floorId, floor]) => {
+                          const totalRooms = Object.keys(floor.rooms || {}).length
+                          const completedRooms = Object.values(floor.rooms || {}).filter(
+                            (room: any) => room.completedAt
+                          ).length
+                          return (
+                            <Box
+                              key={floorId}
+                              sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                p: 1,
+                                borderRadius: 1,
+                                backgroundColor: 'rgba(255,255,255,0.1)'
+                              }}
+                            >
+                              <Typography variant="body2" sx={{ color: 'white' }}>
+                                {floor.name}
+                              </Typography>
+                              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.9)' }}>
+                                {completedRooms}/{totalRooms} pièces
+                              </Typography>
+                            </Box>
+                          )
+                        })}
+                      </Box>
+                    </Box>
+                  )}
+
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      onClose()
+                      router.push(`/fr/inspection/${property.id}/categories`)
+                    }}
+                    fullWidth
+                    sx={{
+                      mt: 2,
+                      backgroundColor: 'white',
+                      color: '#667eea',
+                      fontWeight: 600,
+                      '&:hover': {
+                        backgroundColor: 'rgba(255,255,255,0.9)'
+                      }
+                    }}
+                  >
+                    Voir détails
+                  </Button>
+                </CardContent>
+              </Card>
+            </Grid>
         </Grid>
         </Box>
       </DialogContent>

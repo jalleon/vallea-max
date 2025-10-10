@@ -165,6 +165,9 @@ export default function LibraryPage() {
   const [yearTo, setYearTo] = useState('')
   const [orderBy, setOrderBy] = useState<string>('idNo')
   const [order, setOrder] = useState<'asc' | 'desc'>('asc')
+  const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false)
+  const [duplicateProperty, setDuplicateProperty] = useState<Property | null>(null)
+  const [pendingPropertyData, setPendingPropertyData] = useState<PropertyCreateInput | null>(null)
 
   // Load properties from database
   useEffect(() => {
@@ -357,7 +360,21 @@ export default function LibraryPage() {
         await propertiesService.update(editProperty.id, propertyData)
         showSnackbar('Property updated successfully')
       } else if (isNewProperty) {
-        // Create new property
+        // Check for duplicate address when creating new property
+        const existingProperty = properties.find(
+          p => p.adresse?.toLowerCase() === propertyData.adresse?.toLowerCase() &&
+               p.ville?.toLowerCase() === propertyData.ville?.toLowerCase()
+        )
+
+        if (existingProperty) {
+          // Show duplicate dialog
+          setDuplicateProperty(existingProperty)
+          setPendingPropertyData(propertyData)
+          setDuplicateDialogOpen(true)
+          return // Don't create yet, wait for user decision
+        }
+
+        // Create new property if no duplicate found
         await propertiesService.create(propertyData)
         showSnackbar('Property created successfully')
       }
@@ -368,6 +385,61 @@ export default function LibraryPage() {
     } catch (err) {
       console.error('Error saving property:', err)
       showSnackbar('Failed to save property', 'error')
+    }
+  }
+
+  const handleMergeProperty = async () => {
+    if (!duplicateProperty || !pendingPropertyData) return
+
+    try {
+      // Merge logic: keep existing values, overwrite with new non-empty values
+      const mergedData: any = {}
+
+      // For each field in pendingPropertyData
+      Object.keys(pendingPropertyData).forEach(key => {
+        const newValue = (pendingPropertyData as any)[key]
+        const existingValue = (duplicateProperty as any)[key]
+
+        // Use new value if it's not empty/null/undefined, otherwise keep existing
+        if (newValue !== null && newValue !== undefined && newValue !== '') {
+          mergedData[key] = newValue
+        } else if (existingValue !== null && existingValue !== undefined && existingValue !== '') {
+          mergedData[key] = existingValue
+        }
+      })
+
+      // Update the existing property with merged data
+      await propertiesService.update(duplicateProperty.id, mergedData)
+      showSnackbar('Property merged successfully')
+
+      await loadProperties()
+      setDuplicateDialogOpen(false)
+      setDuplicateProperty(null)
+      setPendingPropertyData(null)
+      setEditProperty(null)
+      setIsNewProperty(false)
+    } catch (err) {
+      console.error('Error merging property:', err)
+      showSnackbar('Failed to merge property', 'error')
+    }
+  }
+
+  const handleCreateDuplicate = async () => {
+    if (!pendingPropertyData) return
+
+    try {
+      await propertiesService.create(pendingPropertyData)
+      showSnackbar('Property created successfully')
+
+      await loadProperties()
+      setDuplicateDialogOpen(false)
+      setDuplicateProperty(null)
+      setPendingPropertyData(null)
+      setEditProperty(null)
+      setIsNewProperty(false)
+    } catch (err) {
+      console.error('Error creating property:', err)
+      showSnackbar('Failed to create property', 'error')
     }
   }
 
@@ -978,6 +1050,71 @@ export default function LibraryPage() {
           }}
           onSave={handleSave}
         />
+
+        {/* Duplicate Address Detection Dialog */}
+        <Dialog
+          open={duplicateDialogOpen}
+          onClose={() => {
+            setDuplicateDialogOpen(false)
+            setDuplicateProperty(null)
+            setPendingPropertyData(null)
+          }}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>Adresse existante détectée</DialogTitle>
+          <DialogContent>
+            <DialogContentText sx={{ mb: 2 }}>
+              Une propriété avec la même adresse existe déjà dans votre bibliothèque:
+            </DialogContentText>
+            {duplicateProperty && (
+              <Box sx={{ p: 2, bgcolor: 'grey.100', borderRadius: 1, mb: 2 }}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Propriété existante:
+                </Typography>
+                <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                  {duplicateProperty.adresse}, {duplicateProperty.ville}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Type: {duplicateProperty.type_propriete}
+                  {duplicateProperty.prix_vente && ` • Prix: ${duplicateProperty.prix_vente.toLocaleString()}$`}
+                </Typography>
+              </Box>
+            )}
+            <DialogContentText>
+              Voulez-vous <strong>fusionner</strong> les informations avec la propriété existante ou créer un <strong>doublon</strong>?
+            </DialogContentText>
+            <DialogContentText sx={{ mt: 2, fontSize: '0.875rem', color: 'text.secondary' }}>
+              <strong>Fusionner:</strong> Les nouvelles valeurs remplaceront les champs vides de la propriété existante.
+              <br />
+              <strong>Créer un doublon:</strong> Une nouvelle propriété distincte sera créée.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => {
+                setDuplicateDialogOpen(false)
+                setDuplicateProperty(null)
+                setPendingPropertyData(null)
+              }}
+            >
+              Annuler
+            </Button>
+            <Button
+              onClick={handleCreateDuplicate}
+              variant="outlined"
+            >
+              Créer un doublon
+            </Button>
+            <Button
+              onClick={handleMergeProperty}
+              variant="contained"
+              color="primary"
+            >
+              Fusionner
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         {/* Floating Action Button */}
         <Fab

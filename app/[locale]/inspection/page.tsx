@@ -161,126 +161,126 @@ export default function InspectionPage() {
           </Button>
         </Box>
 
-      {/* Error Alert */}
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
+        {/* Error Alert */}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        )}
 
-      {/* Loading State */}
-      {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-          <CircularProgress />
-        </Box>
-      ) : properties.length === 0 ? (
-        /* Empty State */
-        <Paper sx={{ p: 8, textAlign: 'center' }}>
-          <Typography variant="h6" color="text.secondary" gutterBottom>
-            {t('inspection.empty')}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            {t('inspection.emptyDescription')}
-          </Typography>
-          <Button
-            variant="outlined"
-            startIcon={<Add />}
-            onClick={handleCreateNew}
-          >
-            {t('inspection.createNew')}
-          </Button>
-        </Paper>
-      ) : (
-        /* Table */
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ fontWeight: 600 }}>
-                  {t('inspection.table.address')}
-                </TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>
-                  {t('inspection.table.city')}
-                </TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>
-                  {t('inspection.table.type')}
-                </TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>
-                  {t('inspection.table.progress')}
-                </TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>
-                  {t('inspection.table.lastUpdated')}
-                </TableCell>
-                <TableCell sx={{ fontWeight: 600 }} align="right">
-                  {t('inspection.table.actions')}
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {properties.map((property) => (
-                <TableRow key={property.id} hover>
-                  <TableCell>{property.adresse}</TableCell>
-                  <TableCell>{property.ville || 'N/A'}</TableCell>
-                  <TableCell>{property.type_propriete || 'N/A'}</TableCell>
-                  <TableCell>
-                    <Chip
-                      label={`${property.inspection_completion || 0}%`}
-                      color={getProgressColor(property.inspection_completion)}
-                      size="small"
-                      sx={{ minWidth: 60 }}
-                    />
+        {/* Loading State */}
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+            <CircularProgress />
+          </Box>
+        ) : properties.length === 0 ? (
+          /* Empty State */
+          <Paper sx={{ p: 8, textAlign: 'center' }}>
+            <Typography variant="h6" color="text.secondary" gutterBottom>
+              {t('inspection.empty')}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              {t('inspection.emptyDescription')}
+            </Typography>
+            <Button
+              variant="outlined"
+              startIcon={<Add />}
+              onClick={handleCreateNew}
+            >
+              {t('inspection.createNew')}
+            </Button>
+          </Paper>
+        ) : (
+          /* Table */
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 600 }}>
+                    {t('inspection.table.address')}
                   </TableCell>
-                  <TableCell>{formatDate(property.updated_at)}</TableCell>
-                  <TableCell align="right">
-                    <Button
-                      variant="contained"
-                      size="small"
-                      endIcon={<ArrowForward />}
-                      onClick={() => handleContinue(property.id)}
-                      sx={{ mr: 1 }}
-                    >
-                      {t('inspection.continue')}
-                    </Button>
-                    <IconButton
-                      color="error"
-                      size="small"
-                      onClick={() => handleDeleteClick(property)}
-                    >
-                      <Delete fontSize="small" />
-                    </IconButton>
+                  <TableCell sx={{ fontWeight: 600 }}>
+                    {t('inspection.table.city')}
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>
+                    {t('inspection.table.type')}
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>
+                    {t('inspection.table.progress')}
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>
+                    {t('inspection.table.lastUpdated')}
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600 }} align="right">
+                    {t('inspection.table.actions')}
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
+              </TableHead>
+              <TableBody>
+                {properties.map((property) => (
+                  <TableRow key={property.id} hover>
+                    <TableCell>{property.adresse}</TableCell>
+                    <TableCell>{property.ville || 'N/A'}</TableCell>
+                    <TableCell>{property.type_propriete || 'N/A'}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={`${property.inspection_completion || 0}%`}
+                        color={getProgressColor(property.inspection_completion)}
+                        size="small"
+                        sx={{ minWidth: 60 }}
+                      />
+                    </TableCell>
+                    <TableCell>{formatDate(property.updated_at)}</TableCell>
+                    <TableCell align="right">
+                      <Button
+                        variant="contained"
+                        size="small"
+                        endIcon={<ArrowForward />}
+                        onClick={() => handleContinue(property.id)}
+                        sx={{ mr: 1 }}
+                      >
+                        {t('inspection.continue')}
+                      </Button>
+                      <IconButton
+                        color="error"
+                        size="small"
+                        onClick={() => handleDeleteClick(property)}
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen(false)}
-      >
-        <DialogTitle>{t('inspection.confirmDelete')}</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            {t('inspection.deleteMessage')}
-            {propertyToDelete && (
-              <Box sx={{ mt: 2 }}>
-                <strong>{propertyToDelete.adresse}</strong>
-              </Box>
-            )}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>
-            {t('common.cancel')}
-          </Button>
-          <Button onClick={handleDeleteConfirm} color="error" variant="contained">
-            {t('common.delete')}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        {/* Delete Confirmation Dialog */}
+        <Dialog
+          open={deleteDialogOpen}
+          onClose={() => setDeleteDialogOpen(false)}
+        >
+          <DialogTitle>{t('inspection.confirmDelete')}</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              {t('inspection.deleteMessage')}
+              {propertyToDelete && (
+                <Box sx={{ mt: 2 }}>
+                  <strong>{propertyToDelete.adresse}</strong>
+                </Box>
+              )}
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setDeleteDialogOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+              {t('common.delete')}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </MaterialDashboardLayout>
   )

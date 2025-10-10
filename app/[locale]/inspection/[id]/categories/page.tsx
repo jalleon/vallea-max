@@ -18,62 +18,76 @@ import {
   Snackbar
 } from '@mui/material'
 import {
+  Layers,
   Home,
-  Business,
   DirectionsCar,
+  Settings,
   Build,
-  Inventory,
-  Yard,
+  Landscape,
   NavigateNext,
-  OpenInNew
+  OpenInNew,
+  CheckCircle
 } from '@mui/icons-material'
 import { useTranslations } from 'next-intl'
 import { useRouter, useParams } from 'next/navigation'
 import { propertiesSupabaseService } from '@/features/library/_api/properties-supabase.service'
 import { Property } from '@/features/library/types/property.types'
 import { MaterialDashboardLayout } from '@/components/layout/MaterialDashboardLayout'
+import { InspectionProgressWindow } from '@/features/inspection/components/InspectionProgressWindow'
 
 const categories = [
   {
     id: 'pieces',
-    icon: Home,
-    color: '#4CAF50',
-    weight: 40,
+    name: 'Pièces',
+    description: 'Inspection pièce par pièce',
+    icon: Layers,
+    color: '#2196F3',
+    weight: 0.25,
     enabled: true
   },
   {
     id: 'batiment',
-    icon: Business,
-    color: '#2196F3',
-    weight: 15,
+    name: 'Bâtiment',
+    description: 'Structure et éléments fixes',
+    icon: Home,
+    color: '#FF9800',
+    weight: 0.25,
     enabled: false
   },
   {
     id: 'garage',
+    name: 'Garage',
+    description: 'Garage et stationnement',
     icon: DirectionsCar,
-    color: '#FF9800',
-    weight: 10,
+    color: '#4CAF50',
+    weight: 0.15,
     enabled: false
   },
   {
     id: 'mecanique',
-    icon: Build,
+    name: 'Mécanique',
+    description: 'Systèmes mécaniques',
+    icon: Settings,
     color: '#9C27B0',
-    weight: 15,
+    weight: 0.15,
     enabled: false
   },
   {
     id: 'divers',
-    icon: Inventory,
-    color: '#FFC107',
-    weight: 0,
+    name: 'Divers',
+    description: 'Autres systèmes',
+    icon: Build,
+    color: '#607D8B',
+    weight: 0.00,
     enabled: false
   },
   {
     id: 'exterieur',
-    icon: Yard,
-    color: '#00BCD4',
-    weight: 20,
+    name: 'Extérieur',
+    description: 'Aménagements extérieurs',
+    icon: Landscape,
+    color: '#795548',
+    weight: 0.20,
     enabled: false
   }
 ]
@@ -99,7 +113,7 @@ export default function InspectionCategoriesPage() {
       setLoading(true)
       setError(null)
 
-      const prop = await propertiesSupabaseService.getPropertyById(propertyId)
+      const prop = await propertiesSupabaseService.getProperty(propertyId)
       setProperty(prop)
     } catch (err) {
       console.error('Error loading property:', err)
@@ -109,47 +123,47 @@ export default function InspectionCategoriesPage() {
     }
   }
 
-  const calculateOverallProgress = () => {
-    if (!property) return 0
-
-    // Calculate weighted progress based on category completion
-    let totalProgress = 0
-    let totalWeight = 0
-
-    categories.forEach(cat => {
-      if (cat.weight > 0) {
-        const categoryProgress = getCategoryProgress(cat.id)
-        totalProgress += categoryProgress * cat.weight
-        totalWeight += cat.weight
-      }
-    })
-
-    return totalWeight > 0 ? Math.round(totalProgress / totalWeight) : 0
-  }
-
-  const getCategoryProgress = (categoryId: string) => {
-    if (!property) return 0
+  const isCategoryCompleted = (categoryId: string): boolean => {
+    if (!property) return false
 
     switch (categoryId) {
       case 'pieces':
+        // Completed if at least 2 rooms are saved
         const piecesData = property.inspection_pieces
-        if (piecesData && piecesData.totalRooms > 0) {
-          return Math.round((piecesData.completedRooms / piecesData.totalRooms) * 100)
-        }
-        return 0
+        return (piecesData?.completedRooms || 0) >= 2
       case 'batiment':
-        return property.inspection_batiment ? 100 : 0
+        // Completed if any subcategory has data
+        return !!property.inspection_batiment
       case 'garage':
-        return property.inspection_garage ? 100 : 0
+        return !!property.inspection_garage
       case 'mecanique':
-        return property.inspection_mecanique ? 100 : 0
+        return !!property.inspection_mecanique
       case 'divers':
-        return property.inspection_divers ? 100 : 0
+        return !!property.inspection_divers
       case 'exterieur':
-        return property.inspection_exterieur ? 100 : 0
+        return !!property.inspection_exterieur
       default:
-        return 0
+        return false
     }
+  }
+
+  const calculateOverallProgress = () => {
+    if (!property) return 0
+
+    // Calculate progress based on completed categories with their weights
+    let totalProgress = 0
+
+    categories.forEach(cat => {
+      if (isCategoryCompleted(cat.id)) {
+        totalProgress += cat.weight * 100
+      }
+    })
+
+    return Math.round(totalProgress)
+  }
+
+  const getCategoryProgress = (categoryId: string) => {
+    return isCategoryCompleted(categoryId) ? 100 : 0
   }
 
   const handleCategoryClick = (category: typeof categories[0]) => {
@@ -162,8 +176,8 @@ export default function InspectionCategoriesPage() {
   }
 
   const handleAddressClick = () => {
-    if (property?.address && property?.city) {
-      const query = encodeURIComponent(`${property.address}, ${property.city}, ${property.province || 'QC'}`)
+    if (property?.adresse && property?.ville) {
+      const query = encodeURIComponent(`${property.adresse}, ${property.ville}, ${property.province || 'QC'}`)
       window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank')
     }
   }
@@ -229,93 +243,99 @@ export default function InspectionCategoriesPage() {
               }
             }}
           >
-            {property.address}, {property.city}
+            {property.adresse}, {property.ville}
             <OpenInNew fontSize="small" />
           </Typography>
           {property.province && (
             <Typography variant="body2" color="text.secondary">
-              {property.province} • {property.property_type}
+              {property.province} • {property.type_propriete}
             </Typography>
           )}
         </Box>
 
-        {/* Overall Progress */}
-        <Paper elevation={0} sx={{ p: 3, mb: 4, border: '1px solid', borderColor: 'divider' }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-            <Typography variant="h6" fontWeight={600}>
-              {t('inspection.progress.overall')}
-            </Typography>
-            <Typography variant="h6" fontWeight={700} color="primary">
-              {t('inspection.progress.completion', { percent: overallProgress })}
-            </Typography>
-          </Box>
-          <LinearProgress
-            variant="determinate"
-            value={overallProgress}
-            sx={{
-              height: 10,
-              borderRadius: 5,
-              bgcolor: 'grey.200',
-              '& .MuiLinearProgress-bar': {
-                borderRadius: 5,
-                bgcolor: overallProgress < 33 ? 'error.main' : overallProgress < 66 ? 'warning.main' : 'success.main'
-              }
-            }}
-          />
-        </Paper>
+        {/* Progress Window */}
+        <InspectionProgressWindow property={property} />
 
         {/* Categories Title */}
         <Typography variant="h4" fontWeight={700} gutterBottom sx={{ mb: 3 }}>
           {t('inspection.categories.title')}
         </Typography>
 
-        {/* Category Grid */}
+        {/* Category Grid - 2 columns */}
         <Grid container spacing={3}>
           {categories.map((category) => {
             const Icon = category.icon
-            const progress = getCategoryProgress(category.id)
+            const isCompleted = isCategoryCompleted(category.id)
+            const hasStarted = isCompleted || (category.id === 'pieces' && property?.inspection_pieces?.totalRooms > 0)
 
             return (
-              <Grid item xs={12} sm={6} md={4} key={category.id}>
+              <Grid item xs={12} sm={6} key={category.id}>
                 <Card
                   elevation={0}
                   sx={{
-                    border: '2px solid',
-                    borderColor: category.color,
+                    height: '200px',
+                    borderRadius: '16px',
+                    border: hasStarted ? '2px solid' : '1px solid',
+                    borderColor: hasStarted ? category.color : '#e0e0e0',
+                    bgcolor: hasStarted ? `${category.color}1a` : 'white',
                     opacity: category.enabled ? 1 : 0.6,
-                    transition: 'all 0.2s ease',
+                    position: 'relative',
+                    transition: 'all 0.3s ease',
                     '&:hover': {
                       transform: category.enabled ? 'translateY(-4px)' : 'none',
-                      boxShadow: category.enabled ? 4 : 0
+                      boxShadow: category.enabled ? 6 : 1
                     }
                   }}
                 >
+                  {isCompleted && (
+                    <CheckCircle
+                      sx={{
+                        position: 'absolute',
+                        top: 12,
+                        right: 12,
+                        fontSize: 32,
+                        color: category.color
+                      }}
+                    />
+                  )}
                   <CardActionArea
                     onClick={() => handleCategoryClick(category)}
                     disabled={!category.enabled}
-                    sx={{ p: 3 }}
+                    sx={{
+                      height: '100%',
+                      p: 3,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
                   >
-                    <CardContent sx={{ p: 0 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                        <Icon sx={{ fontSize: 48, color: category.color }} />
-                        <Chip
-                          label={`${progress}%`}
-                          sx={{
-                            bgcolor: category.color,
-                            color: 'white',
-                            fontWeight: 700,
-                            fontSize: '1rem'
-                          }}
-                        />
-                      </Box>
-                      <Typography variant="h5" fontWeight={700} gutterBottom sx={{ color: category.color }}>
-                        {t(`inspection.categories.${category.id}`)}
+                    <CardContent sx={{
+                      p: 0,
+                      width: '100%',
+                      textAlign: 'center',
+                      '&:last-child': { pb: 0 }
+                    }}>
+                      <Icon sx={{
+                        fontSize: 48,
+                        color: hasStarted ? category.color : '#9e9e9e',
+                        mb: 2
+                      }} />
+                      <Typography
+                        variant="h6"
+                        fontWeight="bold"
+                        gutterBottom
+                        sx={{ color: hasStarted ? category.color : 'text.primary' }}
+                      >
+                        {category.name}
                       </Typography>
-                      {category.weight > 0 && (
-                        <Typography variant="body2" color="text.secondary">
-                          {category.weight}% {t('inspection.progress.overall').toLowerCase()}
-                        </Typography>
-                      )}
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ fontSize: '12px', mb: 1 }}
+                      >
+                        {category.description}
+                      </Typography>
                       {!category.enabled && (
                         <Chip
                           label={t('inspection.categories.comingSoon')}

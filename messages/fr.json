@@ -11,6 +11,9 @@
     "edit": "Modifier",
     "view": "Voir",
     "add": "Ajouter",
+    "name": "Nom",
+    "value": "Valeur",
+    "enterCustomValue": "Entrez une valeur personnalisée",
     "search": "Rechercher",
     "filter": "Filtrer",
     "clear": "Effacer",
@@ -240,7 +243,85 @@
     },
     "progress": {
       "overall": "Progrès global",
-      "completion": "{percent}% complété"
+      "completion": "{percent}% complété",
+      "title": "Progression de l'inspection"
+    },
+    "rooms": {
+      "cuisine": "Cuisine",
+      "salon": "Salon",
+      "salleAManger": "Salle à manger",
+      "chambre": "Chambre à coucher",
+      "bureau": "Bureau",
+      "salleSejour": "Salle de séjour",
+      "salleBain": "Salle de bain",
+      "salleEau": "Salle d'eau",
+      "autre": "Autre"
+    },
+    "floors": {
+      "sousSol": "Sous-sol",
+      "rdc": "R.-D.-C",
+      "deuxieme": "2e",
+      "troisieme": "3e",
+      "addFloor": "Ajouter un étage"
+    },
+    "materials": {
+      "cabinets": {
+        "label": "Armoires",
+        "melamine": "Mélamine",
+        "wood": "Bois",
+        "lacquered": "Laqué",
+        "other": "Autre"
+      },
+      "counters": {
+        "label": "Comptoirs",
+        "laminate": "Stratifié",
+        "quartz": "Quartz",
+        "granite": "Granite",
+        "ceramic": "Céramique",
+        "wood": "Bois",
+        "marble": "Marbre",
+        "other": "Autre"
+      },
+      "backsplash": {
+        "label": "Dosseret",
+        "ceramic": "Céramique",
+        "stainless": "Inox",
+        "quartz": "Quartz",
+        "granite": "Granite",
+        "other": "Autre"
+      },
+      "flooring": {
+        "label": "Plancher",
+        "ceramic": "Céramique",
+        "hardwood": "Lattes de bois",
+        "engineered": "Bois d'ingénierie",
+        "floating": "Flottant",
+        "vinyl": "Vinyle",
+        "carpet": "Tapis",
+        "other": "Autre"
+      },
+      "walls": {
+        "label": "Murs",
+        "stucco": "Stucco",
+        "wood": "Bois",
+        "concrete": "Béton",
+        "brick": "Brique",
+        "stone": "Pierre",
+        "veneer": "Placage",
+        "other": "Autre"
+      },
+      "ceiling": {
+        "label": "Plafond"
+      }
+    },
+    "fields": {
+      "size": "Grandeur",
+      "fixtureCount": "Nombre d'appareils de plomberie"
+    },
+    "sizes": {
+      "large": "Grande",
+      "medium": "Moyenne",
+      "small": "Petite"
     }
   },
 

@@ -5,6 +5,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogContentText,
   DialogActions,
   Button,
   Grid,
@@ -38,10 +39,12 @@ import {
   Home,
   Stairs,
   SquareFoot,
-  AttachMoney
+  AttachMoney,
+  Search as InspectionIcon
 } from '@mui/icons-material'
 import { Property, PropertyCreateInput, PropertyType, PropertyStatus, BasementType, ParkingType, FloorType, FloorArea } from '../types/property.types'
 import { v4 as uuidv4 } from 'uuid'
+import { useRouter } from 'next/navigation'
 
 interface PropertyEditProps {
   property: Property | null
@@ -52,6 +55,7 @@ interface PropertyEditProps {
 
 export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditProps) {
   const theme = useTheme()
+  const router = useRouter()
   const [formData, setFormData] = useState<PropertyCreateInput>({
     adresse: '',
     ville: '',
@@ -100,6 +104,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
     area_m2: 0,
     area_ft2: 0
   })
+  const [inspectionConfirmOpen, setInspectionConfirmOpen] = useState(false)
 
   useEffect(() => {
     if (property) {
@@ -290,6 +295,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
   const totals = calculateTotalHabitable()
 
   return (
+    <>
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
       <DialogTitle>
         {property ? 'Modifier le comparable' : 'Nouveau comparable'}
@@ -1079,6 +1085,110 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
               </Card>
             </Grid>
 
+            {/* Inspection Section - Show for ALL properties */}
+            {property && (
+              <Grid item xs={12}>
+                <Card
+                  elevation={0}
+                  sx={{
+                    border: `1px solid ${theme.palette.divider}`,
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  }}
+                >
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                      <InspectionIcon sx={{ color: 'white', mr: 1 }} />
+                      <Typography variant="h6" sx={{ color: 'white', fontWeight: 600 }}>
+                        Inspection
+                      </Typography>
+                    </Box>
+
+                    <Grid container spacing={2} sx={{ mb: 2 }}>
+                      <Grid item xs={12} md={4}>
+                        <Box sx={{ p: 2, borderRadius: 1, backgroundColor: 'rgba(255,255,255,0.15)' }}>
+                          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                            Statut
+                          </Typography>
+                          <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
+                            {property.inspection_status === 'in_progress' ? 'En cours' :
+                             property.inspection_status === 'completed' ? 'Complété' :
+                             'Non commencé'}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12} md={4}>
+                        <Box sx={{ p: 2, borderRadius: 1, backgroundColor: 'rgba(255,255,255,0.15)' }}>
+                          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                            Progrès
+                          </Typography>
+                          <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
+                            {property.inspection_completion || 0}% complété
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12} md={4}>
+                        <Box sx={{ p: 2, borderRadius: 1, backgroundColor: 'rgba(255,255,255,0.15)' }}>
+                          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                            Date d'inspection
+                          </Typography>
+                          <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
+                            {property.inspection_date ? new Date(property.inspection_date).toLocaleDateString('fr-CA') : 'N/A'}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    </Grid>
+
+                    {/* Completed Categories Summary */}
+                    {property.inspection_categories_completed && property.inspection_categories_completed.length > 0 && (
+                      <Box sx={{ mb: 2, p: 2, borderRadius: 1, backgroundColor: 'rgba(255,255,255,0.15)' }}>
+                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)', mb: 1, display: 'block' }}>
+                          Catégories complétées
+                        </Typography>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                          {property.inspection_categories_completed.map((category) => (
+                            <Chip
+                              key={category}
+                              label={category}
+                              size="small"
+                              sx={{
+                                backgroundColor: 'rgba(255,255,255,0.9)',
+                                color: '#667eea',
+                                fontWeight: 600
+                              }}
+                            />
+                          ))}
+                        </Box>
+                      </Box>
+                    )}
+
+                    <Button
+                      variant="contained"
+                      onClick={() => {
+                        // If no inspection started, show confirmation dialog
+                        if (!property.inspection_status || property.inspection_status === 'not_started') {
+                          setInspectionConfirmOpen(true)
+                        } else {
+                          // Navigate directly if inspection already exists
+                          onClose()
+                          router.push(`/fr/inspection/${property.id}/categories`)
+                        }
+                      }}
+                      sx={{
+                        backgroundColor: 'white',
+                        color: '#667eea',
+                        fontWeight: 600,
+                        '&:hover': {
+                          backgroundColor: 'rgba(255,255,255,0.9)'
+                        }
+                      }}
+                    >
+                      {property.inspection_status && property.inspection_status !== 'not_started' ? 'Modifier l\'inspection' : 'Commencer l\'inspection'}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Grid>
+            )}
+
             {/* Notes */}
             <Grid item xs={12}>
               <TextField
@@ -1101,5 +1211,48 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
         </Button>
       </DialogActions>
     </Dialog>
+
+    {/* Inspection Confirmation Dialog */}
+    <Dialog
+      open={inspectionConfirmOpen}
+      onClose={() => setInspectionConfirmOpen(false)}
+    >
+      <DialogTitle>Commencer une inspection</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          Voulez-vous commencer une inspection pour cette propriété? Cela initialisera le module d'inspection et vous permettra de documenter l'état de la propriété.
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setInspectionConfirmOpen(false)}>
+          Annuler
+        </Button>
+        <Button
+          onClick={async () => {
+            if (property) {
+              // Initialize inspection
+              await onSave({
+                inspection_status: 'in_progress',
+                inspection_date: new Date(),
+                inspection_completion: 0
+              } as any)
+              setInspectionConfirmOpen(false)
+              onClose()
+              router.push(`/fr/inspection/${property.id}/categories`)
+            }
+          }}
+          variant="contained"
+          sx={{
+            bgcolor: '#667eea',
+            '&:hover': {
+              bgcolor: '#5568d3'
+            }
+          }}
+        >
+          Commencer
+        </Button>
+      </DialogActions>
+    </Dialog>
+  </>
   )
 }

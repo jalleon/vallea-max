@@ -11,6 +11,9 @@
     "edit": "Edit",
     "view": "View",
     "add": "Add",
+    "name": "Name",
+    "value": "Value",
+    "enterCustomValue": "Enter a custom value",
     "search": "Search",
     "filter": "Filter",
     "clear": "Clear",
@@ -240,7 +243,85 @@
     },
     "progress": {
       "overall": "Overall Progress",
-      "completion": "{percent}% completed"
+      "completion": "{percent}% completed",
+      "title": "Inspection Progress"
+    },
+    "rooms": {
+      "cuisine": "Kitchen",
+      "salon": "Living Room",
+      "salleAManger": "Dining Room",
+      "chambre": "Bedroom",
+      "bureau": "Office",
+      "salleSejour": "Family Room",
+      "salleBain": "Bathroom",
+      "salleEau": "Powder Room",
+      "autre": "Other"
+    },
+    "floors": {
+      "sousSol": "Basement",
+      "rdc": "Ground Floor",
+      "deuxieme": "2nd Floor",
+      "troisieme": "3rd Floor",
+      "addFloor": "Add Floor"
+    },
+    "materials": {
+      "cabinets": {
+        "label": "Cabinets",
+        "melamine": "Melamine",
+        "wood": "Wood",
+        "lacquered": "Lacquered",
+        "other": "Other"
+      },
+      "counters": {
+        "label": "Counters",
+        "laminate": "Laminate",
+        "quartz": "Quartz",
+        "granite": "Granite",
+        "ceramic": "Ceramic",
+        "wood": "Wood",
+        "marble": "Marble",
+        "other": "Other"
+      },
+      "backsplash": {
+        "label": "Backsplash",
+        "ceramic": "Ceramic",
+        "stainless": "Stainless Steel",
+        "quartz": "Quartz",
+        "granite": "Granite",
+        "other": "Other"
+      },
+      "flooring": {
+        "label": "Flooring",
+        "ceramic": "Ceramic",
+        "hardwood": "Hardwood",
+        "engineered": "Engineered Wood",
+        "floating": "Floating",
+        "vinyl": "Vinyl",
+        "carpet": "Carpet",
+        "other": "Other"
+      },
+      "walls": {
+        "label": "Walls",
+        "stucco": "Stucco",
+        "wood": "Wood",
+        "concrete": "Concrete",
+        "brick": "Brick",
+        "stone": "Stone",
+        "veneer": "Veneer",
+        "other": "Other"
+      },
+      "ceiling": {
+        "label": "Ceiling"
+      }
+    },
+    "fields": {
+      "size": "Size",
+      "fixtureCount": "Number of Fixtures"
+    },
+    "sizes": {
+      "large": "Large",
+      "medium": "Medium",
+      "small": "Small"
     }
   },
 

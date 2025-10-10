@@ -207,6 +207,19 @@ git checkout feature/feature-x
 
 ## When Things Go Wrong
 
+### Accidentally merged too early
+If you merged to main but want to continue working on the branch:
+```bash
+# Undo the merge (must be on main)
+git reset --hard HEAD~1
+
+# Switch back to your feature branch
+git checkout feature/your-feature-name
+
+# Continue working...
+```
+**Important:** Only do this if you haven't pushed to GitHub yet!
+
 ### Undo last commit (keep changes)
 ```bash
 git reset --soft HEAD~1
