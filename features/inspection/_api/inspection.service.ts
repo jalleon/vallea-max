@@ -86,7 +86,7 @@ class InspectionService {
       const { error: updateError } = await supabase
         .from('properties')
         .update({
-          inspection_pieces: currentData,
+          inspection_pieces: currentData as any,
           inspection_completion: overallProgress,
           updated_at: new Date().toISOString()
         })
@@ -319,7 +319,7 @@ class InspectionService {
       const { error } = await supabase
         .from('properties')
         .update({
-          inspection_pieces: initialData,
+          inspection_pieces: initialData as any,
           inspection_status: 'in_progress',
           inspection_date: new Date().toISOString(),
           inspection_completion: 0,
