@@ -99,7 +99,7 @@ export default function InspectionCategoriesPage() {
       setLoading(true)
       setError(null)
 
-      const prop = await propertiesSupabaseService.getPropertyById(propertyId)
+      const prop = await propertiesSupabaseService.getProperty(propertyId)
       setProperty(prop)
     } catch (err) {
       console.error('Error loading property:', err)
