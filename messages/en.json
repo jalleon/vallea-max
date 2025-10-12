@@ -254,5 +254,14 @@
     "network": "Network connection error",
     "unauthorized": "Unauthorized",
     "forbidden": "Access forbidden"
+  },
+
+  "pricing": {
+    "title": "Choose Your Plan",
+    "subtitle": "Select the perfect plan for your real estate appraisal needs",
+    "month": "month",
+    "popular": "Most Popular",
+    "subscribe": "Subscribe Now",
+    "footer": "All plans include a 14-day free trial. Cancel anytime."
   }
 }
