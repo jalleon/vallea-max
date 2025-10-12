@@ -231,16 +231,16 @@ export default function LoginPage() {
                     alt="Valea Max Logo"
                     width={100}
                     height={100}
-                    style={{ borderRadius: '16px', marginTop: '-8px' }}
+                    style={{ borderRadius: '16px' }}
                   />
-                  <Box sx={{ textAlign: 'left' }}>
+                  <Box sx={{ textAlign: 'left', mt: 3 }}>
                     <Typography
                       variant="h3"
                       sx={{
                         fontFamily: 'var(--font-montserrat)',
                         fontWeight: 700,
                         color: theme.palette.primary.main,
-                        lineHeight: 1.2,
+                        lineHeight: 1.1,
                         letterSpacing: '-0.5px',
                         fontSize: { xs: '1.75rem', md: '2.25rem' },
                       }}
@@ -254,9 +254,10 @@ export default function LoginPage() {
                         fontWeight: 400,
                         color: '#4A5568',
                         fontSize: '0.8rem',
-                        letterSpacing: '0.03em',
+                        letterSpacing: '0.15em',
                         display: 'block',
                         mt: 0.5,
+                        textAlign: 'center',
                       }}
                     >
                       {locale === 'fr' ? 'Évaluation immobilière' : 'Real Estate Valuation'}
