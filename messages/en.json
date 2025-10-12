@@ -46,7 +46,10 @@
       "loading": "Signing in...",
       "noAccount": "Don't have an account?",
       "createAccount": "Create Account",
-      "error": "Invalid email or password"
+      "error": "Invalid email or password",
+      "continueWithGoogle": "Continue with Google",
+      "continueWithApple": "Continue with Apple",
+      "orContinueWith": "or continue with"
     },
     "signup": {
       "title": "Create Account",

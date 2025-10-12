@@ -20,7 +20,9 @@ import {
   IconButton,
   CircularProgress,
 } from '@mui/material'
-import { Visibility, VisibilityOff, Email, Lock } from '@mui/icons-material'
+import { Visibility, VisibilityOff, Email, Lock, Google, Apple } from '@mui/icons-material'
+import { createClient } from '@/lib/supabase/client'
+import { Divider } from '@mui/material'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -28,6 +30,7 @@ export default function LoginPage() {
   const backgroundImage = useRandomBackground()
   const { t, locale } = useTranslation('auth.login')
   const { t: tCommon } = useTranslation('common')
+  const supabase = createClient()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -47,6 +50,44 @@ export default function LoginPage() {
       setLoading(false)
     } else {
       router.push(`/${locale === 'fr' ? '' : locale + '/'}dashboard`)
+    }
+  }
+
+  const handleGoogleLogin = async () => {
+    setLoading(true)
+    setError('')
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
+      })
+
+      if (error) throw error
+    } catch (err: any) {
+      setError(err.message)
+      setLoading(false)
+    }
+  }
+
+  const handleAppleLogin = async () => {
+    setLoading(true)
+    setError('')
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'apple',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
+      })
+
+      if (error) throw error
+    } catch (err: any) {
+      setError(err.message)
+      setLoading(false)
     }
   }
 
@@ -112,6 +153,60 @@ export default function LoginPage() {
               {error}
             </Alert>
           )}
+
+          {/* OAuth Buttons */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
+            <Button
+              variant="outlined"
+              size="large"
+              fullWidth
+              startIcon={<Google />}
+              onClick={handleGoogleLogin}
+              disabled={loading}
+              sx={{
+                borderColor: '#4285F4',
+                color: '#4285F4',
+                textTransform: 'none',
+                fontSize: '15px',
+                py: 1.5,
+                '&:hover': {
+                  borderColor: '#357ae8',
+                  bgcolor: 'rgba(66, 133, 244, 0.04)'
+                }
+              }}
+            >
+              {t('continueWithGoogle') || 'Continue with Google'}
+            </Button>
+
+            <Button
+              variant="outlined"
+              size="large"
+              fullWidth
+              startIcon={<Apple />}
+              onClick={handleAppleLogin}
+              disabled={loading}
+              sx={{
+                borderColor: '#000',
+                color: '#000',
+                textTransform: 'none',
+                fontSize: '15px',
+                py: 1.5,
+                '&:hover': {
+                  borderColor: '#000',
+                  bgcolor: 'rgba(0, 0, 0, 0.04)'
+                }
+              }}
+            >
+              {t('continueWithApple') || 'Continue with Apple'}
+            </Button>
+          </Box>
+
+          {/* Divider */}
+          <Divider sx={{ my: 3 }}>
+            <Typography variant="body2" color="text.secondary">
+              {t('orContinueWith') || 'or'}
+            </Typography>
+          </Divider>
 
           <form onSubmit={handleSubmit}>
             <TextField

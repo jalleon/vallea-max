@@ -46,7 +46,10 @@
       "loading": "Connexion en cours...",
       "noAccount": "Pas encore de compte?",
       "createAccount": "Créer un compte",
-      "error": "Email ou mot de passe incorrect"
+      "error": "Email ou mot de passe incorrect",
+      "continueWithGoogle": "Continuer avec Google",
+      "continueWithApple": "Continuer avec Apple",
+      "orContinueWith": "ou continuer avec"
     },
     "signup": {
       "title": "Créer un compte",
