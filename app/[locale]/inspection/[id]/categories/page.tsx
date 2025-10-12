@@ -162,8 +162,8 @@ export default function InspectionCategoriesPage() {
   }
 
   const handleAddressClick = () => {
-    if (property?.address && property?.city) {
-      const query = encodeURIComponent(`${property.address}, ${property.city}, ${property.province || 'QC'}`)
+    if (property?.adresse && property?.ville) {
+      const query = encodeURIComponent(`${property.adresse}, ${property.ville}, ${property.province || 'QC'}`)
       window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank')
     }
   }
