@@ -260,8 +260,105 @@
     "title": "Choose Your Plan",
     "subtitle": "Select the perfect plan for your real estate appraisal needs",
     "month": "month",
+    "year": "year",
+    "monthly": "Monthly",
+    "annual": "Annual",
     "popular": "Most Popular",
     "subscribe": "Subscribe Now",
-    "footer": "All plans include a 14-day free trial. Cancel anytime."
+    "getStarted": "Get Started",
+    "save240": "Save $240/year (20% discount)",
+    "footer": "All plans include a 14-day free trial. Cancel anytime.",
+    "billedAnnually": "billed annually"
+  },
+
+  "landing": {
+    "nav": {
+      "features": "Features",
+      "screenshots": "Screenshots",
+      "pricing": "Pricing",
+      "login": "Login",
+      "signup": "Sign Up"
+    },
+    "hero": {
+      "title": "Professional Real Estate Appraisals Made Simple",
+      "subtitle": "Valea Max helps you manage your property appraisals with precision and efficiency. Detailed inspections, comprehensive reports, and AI-powered market analysis.",
+      "cta": {
+        "primary": "Start Free Trial",
+        "secondary": "View Pricing"
+      }
+    },
+    "features": {
+      "title": "Everything You Need",
+      "subtitle": "Professional tools for quality real estate appraisals",
+      "newBadge": "New",
+      "aiPdf": {
+        "title": "Smart AI PDF Reader",
+        "description": "Import comparable PDFs and let our AI automatically extract all data. Add multiple properties to your library in seconds."
+      },
+      "propertyLibrary": {
+        "title": "Property Library",
+        "description": "Manage your real estate portfolio with advanced search, dynamic filters, and PDF/Excel exports. All your data in one place."
+      },
+      "inspections": {
+        "title": "Detailed Inspections",
+        "description": "Create comprehensive inspection reports with photos, measurements, and notes. Real-time progress tracking by category."
+      },
+      "comparables": {
+        "title": "Comparable Analysis",
+        "description": "Find and compare similar properties with automatic adjustments. Accurate market analysis for reliable appraisals."
+      },
+      "analytics": {
+        "title": "Market Analytics",
+        "description": "Access up-to-date market data and comparative analysis for accurate appraisals based on real data."
+      },
+      "cloud": {
+        "title": "Secure Cloud Access",
+        "description": "Access your data from anywhere with our cloud platform. Real-time sync and automatic backups."
+      }
+    },
+    "screenshots": {
+      "title": "Discover the Interface",
+      "subtitle": "A modern and intuitive interface designed to maximize your productivity",
+      "library": {
+        "title": "Property Library",
+        "description": "Comprehensive dashboard with advanced filters, multi-criteria search, and batch management"
+      },
+      "inspection": {
+        "title": "Inspection Module",
+        "description": "Category-based inspection interface with progress tracking and geotagged photos"
+      },
+      "pdfReader": {
+        "title": "Smart PDF Reader",
+        "description": "AI that reads your PDFs and automatically extracts all comparable data"
+      },
+      "reports": {
+        "title": "Professional Reports",
+        "description": "Generate comprehensive and customizable appraisal reports in PDF"
+      }
+    },
+    "benefits": {
+      "title": "Why Choose Valea Max?",
+      "subtitle": "Join hundreds of appraisers who trust us to manage their properties",
+      "unlimited": "Unlimited property inspections",
+      "reporting": "Advanced reporting and analytics",
+      "support": "Priority email and phone support",
+      "mobile": "Mobile app access",
+      "export": "PDF and Excel export",
+      "updates": "Free updates and new features"
+    },
+    "trial": {
+      "title": "14-Day Free Trial",
+      "description": "Try Valea Max risk-free. No credit card required. Cancel anytime.",
+      "cta": "Start Free Trial"
+    },
+    "cta": {
+      "title": "Ready to transform your appraisal process?",
+      "subtitle": "Join Valea Max today and discover how we can improve your appraisal workflow",
+      "primary": "Get Started Now",
+      "secondary": "View Pricing"
+    },
+    "footer": {
+      "rights": "All rights reserved."
+    }
   }
 }

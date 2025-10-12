@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Montserrat, Fraunces } from 'next/font/google'
 import { notFound } from 'next/navigation'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
@@ -8,7 +8,9 @@ import { ValleaThemeProvider } from '@/components/providers/ThemeProvider'
 import { AuthProvider } from '@/contexts/AuthContext'
 import '../globals.css'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
+const montserrat = Montserrat({ subsets: ['latin'], variable: '--font-montserrat' })
+const fraunces = Fraunces({ subsets: ['latin'], variable: '--font-fraunces' })
 
 export const metadata: Metadata = {
   title: 'Valea Max',
@@ -40,7 +42,7 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale}>
-      <body className={inter.className}>
+      <body className={`${inter.variable} ${montserrat.variable} ${fraunces.variable} ${inter.className}`}>
         <NextIntlClientProvider messages={messages}>
           <ValleaThemeProvider>
             <AuthProvider>

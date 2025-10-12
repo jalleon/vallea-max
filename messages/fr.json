@@ -260,8 +260,105 @@
     "title": "Choisissez votre forfait",
     "subtitle": "Sélectionnez le forfait parfait pour vos besoins d'évaluation immobilière",
     "month": "mois",
+    "year": "an",
+    "monthly": "Mensuel",
+    "annual": "Annuel",
     "popular": "Plus populaire",
     "subscribe": "S'abonner maintenant",
-    "footer": "Tous les forfaits incluent un essai gratuit de 14 jours. Annulez à tout moment."
+    "getStarted": "Commencer",
+    "save240": "Économisez 240$/an (20% de rabais)",
+    "footer": "Tous les forfaits incluent un essai gratuit de 14 jours. Annulez à tout moment.",
+    "billedAnnually": "facturé annuellement"
+  },
+
+  "landing": {
+    "nav": {
+      "features": "Fonctionnalités",
+      "screenshots": "Captures d'écran",
+      "pricing": "Tarifs",
+      "login": "Connexion",
+      "signup": "S'inscrire"
+    },
+    "hero": {
+      "title": "Évaluations immobilières professionnelles simplifiées",
+      "subtitle": "Valea Max vous aide à gérer vos évaluations immobilières avec précision et efficacité. Inspections détaillées, rapports complets et analyses de marché pilotées par l'IA.",
+      "cta": {
+        "primary": "Commencer gratuitement",
+        "secondary": "Voir les forfaits"
+      }
+    },
+    "features": {
+      "title": "Tout ce dont vous avez besoin",
+      "subtitle": "Des outils professionnels pour des évaluations immobilières de qualité",
+      "newBadge": "Nouveau",
+      "aiPdf": {
+        "title": "Lecteur PDF intelligent avec IA",
+        "description": "Importez des PDF de comparables et laissez notre IA extraire automatiquement toutes les données. Ajoutez plusieurs propriétés à votre bibliothèque en quelques secondes."
+      },
+      "propertyLibrary": {
+        "title": "Bibliothèque de propriétés",
+        "description": "Gérez votre portefeuille immobilier avec des recherches avancées, des filtres dynamiques et des exports PDF/Excel. Toutes vos données au même endroit."
+      },
+      "inspections": {
+        "title": "Inspections détaillées",
+        "description": "Créez des rapports d'inspection complets avec des photos, des mesures et des notes. Suivi des progrès en temps réel par catégorie."
+      },
+      "comparables": {
+        "title": "Analyse de comparables",
+        "description": "Trouvez et comparez des propriétés similaires avec des ajustements automatiques. Analyses de marché précises pour des évaluations fiables."
+      },
+      "analytics": {
+        "title": "Analyses de marché",
+        "description": "Accédez à des données de marché actualisées et des analyses comparatives pour des évaluations précises basées sur des données réelles."
+      },
+      "cloud": {
+        "title": "Accès cloud sécurisé",
+        "description": "Accédez à vos données depuis n'importe où avec notre plateforme cloud. Synchronisation en temps réel et sauvegardes automatiques."
+      }
+    },
+    "screenshots": {
+      "title": "Découvrez l'interface",
+      "subtitle": "Une interface moderne et intuitive conçue pour maximiser votre productivité",
+      "library": {
+        "title": "Bibliothèque de propriétés",
+        "description": "Tableau de bord complet avec filtres avancés, recherche multi-critères et gestion par lots"
+      },
+      "inspection": {
+        "title": "Module d'inspection",
+        "description": "Interface d'inspection par catégories avec suivi des progrès et photos géolocalisées"
+      },
+      "pdfReader": {
+        "title": "Lecteur PDF intelligent",
+        "description": "IA qui lit vos PDFs et extrait automatiquement toutes les données des comparables"
+      },
+      "reports": {
+        "title": "Rapports professionnels",
+        "description": "Générez des rapports d'évaluation complets et personnalisables en PDF"
+      }
+    },
+    "benefits": {
+      "title": "Pourquoi choisir Valea Max?",
+      "subtitle": "Rejoignez des centaines d'évaluateurs qui nous font confiance pour gérer leurs propriétés",
+      "unlimited": "Inspections illimitées de propriétés",
+      "reporting": "Rapports et analyses avancés",
+      "support": "Support prioritaire par email et téléphone",
+      "mobile": "Accès application mobile",
+      "export": "Export PDF et Excel",
+      "updates": "Mises à jour et nouvelles fonctionnalités gratuites"
+    },
+    "trial": {
+      "title": "Essai gratuit de 14 jours",
+      "description": "Testez Valea Max sans risque. Aucune carte de crédit requise. Annulez à tout moment.",
+      "cta": "Démarrer l'essai gratuit"
+    },
+    "cta": {
+      "title": "Prêt à transformer votre façon d'évaluer?",
+      "subtitle": "Rejoignez Valea Max aujourd'hui et découvrez comment nous pouvons améliorer votre processus d'évaluation",
+      "primary": "Commencer maintenant",
+      "secondary": "Voir les tarifs"
+    },
+    "footer": {
+      "rights": "Tous droits réservés."
+    }
   }
 }
