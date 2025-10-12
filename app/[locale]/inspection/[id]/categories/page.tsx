@@ -229,7 +229,7 @@ export default function InspectionCategoriesPage() {
               }
             }}
           >
-            {property.address}, {property.city}
+            {property.adresse}, {property.ville}
             <OpenInNew fontSize="small" />
           </Typography>
           {property.province && (
