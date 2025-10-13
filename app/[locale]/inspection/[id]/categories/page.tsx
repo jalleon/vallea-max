@@ -234,7 +234,7 @@ export default function InspectionCategoriesPage() {
           </Typography>
           {property.province && (
             <Typography variant="body2" color="text.secondary">
-              {property.province} • {property.property_type}
+              {property.province} • {property.type_propriete}
             </Typography>
           )}
         </Box>
