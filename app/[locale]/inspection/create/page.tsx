@@ -85,10 +85,10 @@ export default function CreateInspectionPage() {
       setError(null)
 
       const property = await propertiesSupabaseService.createProperty({
-        address: formData.address,
-        city: formData.city,
+        adresse: formData.address,
+        ville: formData.city,
         province: formData.province,
-        property_type: formData.propertyType,
+        type_propriete: formData.propertyType,
         source: 'Inspection',
         inspection_status: 'in_progress',
         inspection_completion: 0,
