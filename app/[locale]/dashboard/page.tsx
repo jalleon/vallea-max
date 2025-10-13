@@ -40,8 +40,13 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (user?.user_metadata?.organization_id) {
-      loadDashboardData()
+    if (user) {
+      if (user.user_metadata?.organization_id) {
+        loadDashboardData()
+      } else {
+        // No organization ID, stop loading
+        setLoading(false)
+      }
     }
   }, [user])
 

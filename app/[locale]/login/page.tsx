@@ -64,7 +64,7 @@ export default function LoginPage() {
       setError(t('error'))
       setLoading(false)
     } else {
-      router.push(`/${locale === 'fr' ? '' : locale + '/'}dashboard`)
+      router.push(`/${locale}/dashboard`)
     }
   }
 
@@ -415,7 +415,7 @@ export default function LoginPage() {
                   <Typography variant="body2" sx={{ color: '#6B7280' }}>
                     {t('noAccount')}{' '}
                     <Link
-                      href={`/${locale === 'fr' ? '' : locale + '/'}signup`}
+                      href={`/${locale}/signup`}
                       sx={{
                         fontWeight: 600,
                         color: '#10B981',
