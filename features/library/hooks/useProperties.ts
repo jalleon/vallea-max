@@ -120,6 +120,7 @@ export function useUpdateProperty() {
       ...existingProperty,
       ...updates,
       date_vente: updates.date_vente ? new Date(updates.date_vente) : existingProperty.date_vente,
+      inspection_date: updates.inspection_date ? new Date(updates.inspection_date) : existingProperty.inspection_date,
       updated_at: new Date()
     }
 
