@@ -247,13 +247,33 @@ class PropertiesSupabaseService {
   }
 
   async updateProperty(id: string, input: Partial<PropertyCreateInput>): Promise<Property> {
-    // Separate floor_areas from main property data
-    const { floor_areas, ...propertyData } = input
+    // Separate floor_areas and inspection fields from main property data
+    const {
+      floor_areas,
+      inspection_pieces,
+      inspection_batiment,
+      inspection_garage,
+      inspection_mecanique,
+      inspection_exterieur,
+      inspection_divers,
+      ...propertyData
+    } = input
+
+    // Prepare update data with properly typed JSONB fields
+    const updateData: any = {
+      ...propertyData,
+      ...(inspection_pieces !== undefined && { inspection_pieces: inspection_pieces as any }),
+      ...(inspection_batiment !== undefined && { inspection_batiment: inspection_batiment as any }),
+      ...(inspection_garage !== undefined && { inspection_garage: inspection_garage as any }),
+      ...(inspection_mecanique !== undefined && { inspection_mecanique: inspection_mecanique as any }),
+      ...(inspection_exterieur !== undefined && { inspection_exterieur: inspection_exterieur as any }),
+      ...(inspection_divers !== undefined && { inspection_divers: inspection_divers as any }),
+    }
 
     // Update the property
     const { data: property, error: propertyError } = await supabase
       .from('properties')
-      .update(propertyData)
+      .update(updateData)
       .eq('id', id)
       .select()
       .single()
