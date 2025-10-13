@@ -5,22 +5,22 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { Box, CircularProgress, Typography } from '@mui/material'
 
+const PUBLIC_ROUTES = ['/login', '/signup']
+
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
 
   useEffect(() => {
-    // Only redirect if loading is complete and there's no user
-    if (!loading && !user) {
-      // Extract locale from pathname (e.g., /fr/library -> fr)
-      const locale = pathname.split('/')[1]
-      router.replace(`/${locale}/login`)
+    // Only redirect if not on a public route
+    if (!loading && !user && !PUBLIC_ROUTES.includes(pathname)) {
+      router.push('/login')
     }
   }, [user, loading, pathname, router])
 
-  // Show loading spinner while checking auth
-  if (loading) {
+  // Show loading spinner while checking auth (but not on public routes)
+  if (loading && !PUBLIC_ROUTES.includes(pathname)) {
     return (
       <Box
         sx={{
@@ -34,14 +34,14 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
       >
         <CircularProgress size={48} />
         <Typography variant="body1" color="text.secondary">
-          Loading...
+          Chargement...
         </Typography>
       </Box>
     )
   }
 
-  // If no user, don't render (will redirect)
-  if (!user) {
+  // If no user and not on public route, don't render (will redirect)
+  if (!user && !PUBLIC_ROUTES.includes(pathname)) {
     return null
   }
 
