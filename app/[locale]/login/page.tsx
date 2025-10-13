@@ -43,13 +43,16 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
 
+    // Clear any existing session first to avoid conflicts
+    await supabase.auth.signOut()
+
     const { error } = await signIn(email, password)
 
     if (error) {
       setError(t('error'))
       setLoading(false)
     } else {
-      router.push(`/${locale === 'fr' ? '' : locale + '/'}dashboard`)
+      router.push(`/${locale}/dashboard`)
     }
   }
 
