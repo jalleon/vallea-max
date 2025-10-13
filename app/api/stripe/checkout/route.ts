@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { stripe, STRIPE_PLANS, PlanType } from '@/lib/stripe/config'
+import { getStripe, STRIPE_PLANS, PlanType } from '@/lib/stripe/config'
 import { createClient } from '@/lib/supabase/client'
 
 export async function POST(request: Request) {
@@ -21,6 +21,9 @@ export async function POST(request: Request) {
         { status: 500 }
       )
     }
+
+    // Get Stripe instance
+    const stripe = getStripe()
 
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({

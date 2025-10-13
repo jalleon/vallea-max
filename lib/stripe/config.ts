@@ -3,6 +3,10 @@ import Stripe from 'stripe'
 
 let stripeInstance: Stripe | null = null
 
+/**
+ * Get or create Stripe instance
+ * Throws error if STRIPE_SECRET_KEY is not set
+ */
 export function getStripe(): Stripe {
   if (!stripeInstance) {
     const secretKey = process.env.STRIPE_SECRET_KEY
@@ -16,13 +20,6 @@ export function getStripe(): Stripe {
   }
   return stripeInstance
 }
-
-// Lazy initialization - only throw error when actually used
-export const stripe = new Proxy({} as Stripe, {
-  get(target, prop) {
-    return getStripe()[prop as keyof Stripe]
-  }
-})
 
 // Re-export client-safe types and constants
 export { STRIPE_PLANS, type PlanType } from './client-config'
