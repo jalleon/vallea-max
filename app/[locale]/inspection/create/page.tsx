@@ -18,6 +18,7 @@ import { useTranslations } from 'next-intl'
 import { useRouter, useParams } from 'next/navigation'
 import { propertiesSupabaseService } from '@/features/library/_api/properties-supabase.service'
 import { MaterialDashboardLayout } from '@/components/layout/MaterialDashboardLayout'
+import type { PropertyType } from '@/features/library/types/property.types'
 
 const provinces = [
   'QC', 'ON', 'BC', 'AB', 'MB', 'SK', 'NS', 'NB', 'NL', 'PE', 'NT', 'YT', 'NU'
@@ -88,7 +89,7 @@ export default function CreateInspectionPage() {
         adresse: formData.address,
         ville: formData.city,
         province: formData.province,
-        type_propriete: formData.propertyType,
+        type_propriete: formData.propertyType as PropertyType,
         source: 'Inspection',
         inspection_status: 'in_progress',
         inspection_completion: 0,
