@@ -129,7 +129,20 @@ export default function LoginPage() {
         <Container maxWidth="lg">
           <Toolbar sx={{ py: 1 }}>
             {/* Logo and Brand */}
-            <Box sx={{ display: 'flex', alignItems: 'flex-start', flexGrow: 1, gap: 1.5 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                flexGrow: 1,
+                gap: 1.5,
+                cursor: 'pointer',
+                '&:hover': {
+                  opacity: 0.8,
+                },
+                transition: 'opacity 0.2s',
+              }}
+              onClick={() => router.push(`/${locale}`)}
+            >
               <Image
                 src="/logo.png"
                 alt="Valea Max"

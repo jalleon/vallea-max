@@ -131,13 +131,27 @@ export default function LandingPage() {
         sx={{
           bgcolor: 'rgba(255, 255, 255, 0.95)',
           backdropFilter: 'blur(10px)',
-          borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          borderBottom: `1px solid rgba(26, 31, 54, 0.1)`,
+          borderRadius: 0,
         }}
       >
         <Container maxWidth="lg">
           <Toolbar sx={{ py: 1 }}>
             {/* Logo and Brand */}
-            <Box sx={{ display: 'flex', alignItems: 'flex-start', flexGrow: 1, gap: 1.5 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                flexGrow: 1,
+                gap: 1.5,
+                cursor: 'pointer',
+                '&:hover': {
+                  opacity: 0.8,
+                },
+                transition: 'opacity 0.2s',
+              }}
+              onClick={() => router.push(`/${locale}`)}
+            >
               <Image
                 src="/logo.png"
                 alt="Valea Max"
@@ -275,8 +289,7 @@ export default function LandingPage() {
       {/* Hero Section */}
       <Box
         sx={{
-          background: `linear-gradient(135deg, #1A1F36 0%, #232A44 50%, #2D3561 100%)`,
-          color: 'white',
+          color: '#E8E2D5',
           pt: { xs: 16, md: 20 },
           pb: { xs: 12, md: 16 },
           position: 'relative',
@@ -288,37 +301,15 @@ export default function LandingPage() {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundImage: `
-              repeating-linear-gradient(90deg, rgba(232, 226, 213, 0.03) 0px, transparent 1px, transparent 40px, rgba(232, 226, 213, 0.03) 41px),
-              repeating-linear-gradient(0deg, rgba(232, 226, 213, 0.03) 0px, transparent 1px, transparent 40px, rgba(232, 226, 213, 0.03) 41px),
-              radial-gradient(ellipse at 30% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
-              radial-gradient(ellipse at 70% 80%, rgba(245, 158, 11, 0.06) 0%, transparent 60%)
-            `,
-            filter: 'url(#noise)',
-            pointerEvents: 'none',
-          },
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: '200px',
-            background: 'linear-gradient(to top, rgba(232, 226, 213, 0.05) 0%, transparent 100%)',
-            pointerEvents: 'none',
+            backgroundImage: 'url(/backgrounds/bg8.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            filter: 'brightness(0.5)',
+            zIndex: 0,
           },
         }}
       >
-        {/* SVG Noise Filter */}
-        <svg style={{ position: 'absolute', width: 0, height: 0 }}>
-          <defs>
-            <filter id="noise">
-              <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch" />
-              <feColorMatrix type="saturate" values="0" />
-              <feBlend mode="multiply" in2="SourceGraphic" />
-            </filter>
-          </defs>
-        </svg>
 
         <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
           <Grid container spacing={4} alignItems="center">
@@ -332,6 +323,7 @@ export default function LandingPage() {
                   lineHeight: 1.15,
                   fontFamily: 'var(--font-fraunces)',
                   letterSpacing: '-0.02em',
+                  color: '#E8E2D5',
                 }}
               >
                 {t('hero.title')}
@@ -345,6 +337,7 @@ export default function LandingPage() {
                   fontSize: { xs: '1.1rem', md: '1.3rem' },
                   lineHeight: 1.6,
                   fontFamily: 'var(--font-inter)',
+                  color: '#E8E2D5',
                 }}
               >
                 {t('hero.subtitle')}
@@ -581,10 +574,10 @@ export default function LandingPage() {
             right: 0,
             bottom: 0,
             backgroundImage: `
-              repeating-linear-gradient(90deg, rgba(232, 226, 213, 0.02) 0px, transparent 1px, transparent 50px, rgba(232, 226, 213, 0.02) 51px),
-              repeating-linear-gradient(0deg, rgba(232, 226, 213, 0.02) 0px, transparent 1px, transparent 50px, rgba(232, 226, 213, 0.02) 51px),
-              radial-gradient(circle at 20% 30%, rgba(245, 158, 11, 0.06) 0%, transparent 50%),
-              radial-gradient(circle at 80% 70%, rgba(124, 58, 237, 0.06) 0%, transparent 50%)
+              repeating-linear-gradient(90deg, rgba(232, 226, 213, 0.08) 0px, transparent 1px, transparent 40px, rgba(232, 226, 213, 0.08) 41px),
+              repeating-linear-gradient(0deg, rgba(232, 226, 213, 0.08) 0px, transparent 1px, transparent 40px, rgba(232, 226, 213, 0.08) 41px),
+              radial-gradient(ellipse at 30% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 80%, rgba(245, 158, 11, 0.06) 0%, transparent 60%)
             `,
             pointerEvents: 'none',
           },
