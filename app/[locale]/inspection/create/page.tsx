@@ -92,7 +92,7 @@ export default function CreateInspectionPage() {
         source: 'Inspection',
         inspection_status: 'in_progress',
         inspection_completion: 0,
-        inspection_date: new Date()
+        inspection_date: new Date().toISOString()
       })
 
       router.push(`/${locale}/inspection/${property.id}/categories`)
