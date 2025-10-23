@@ -491,7 +491,7 @@
         "guillotine": "Guillotine",
         "fixes": "Fixes"
       },
-      "murOptions": {
+      "cornicheOptions": {
         "aluminium": "Aluminium"
       },
       "chemineesOptions": {
@@ -535,6 +535,10 @@
       "finitionOptions": {
         "fini": "Fini",
         "nonFini": "Non fini"
+      },
+      "materiauxOptions": {
+        "briques": "Briques",
+        "beton": "Béton"
       }
     },
     "mecanique": {
