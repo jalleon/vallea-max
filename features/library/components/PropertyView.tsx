@@ -102,6 +102,54 @@ export function PropertyView({
   const completedCategories = getCompletedCategories(property)
   const isInspectionComplete = inspectionProgress === 100
 
+  // Calculate room counts from inspection data
+  const calculateRoomCounts = () => {
+    if (!property.inspection_pieces?.floors) {
+      return { bedrooms: 0, bathrooms: 0, powderRooms: 0, totalRooms: 0 }
+    }
+
+    let bedrooms = 0
+    let bathrooms = 0
+    let powderRooms = 0
+    let totalRooms = 0
+
+    // Room types to EXCLUDE from total count
+    const excludedRoomTypes = ['salle_bain', 'salle_eau', 'vestibule', 'solarium']
+
+    Object.entries(property.inspection_pieces.floors).forEach(([floorId, floorData]: [string, any]) => {
+      const isBasement = floorData.type === 'basement'
+
+      Object.entries(floorData.rooms || {}).forEach(([roomId, roomData]: [string, any]) => {
+        const roomType = roomData.type
+
+        // Count bedrooms (excluding basement)
+        if (roomType === 'chambre' && !isBasement) {
+          bedrooms++
+        }
+
+        // Count bathrooms (including basement)
+        if (roomType === 'salle_bain') {
+          bathrooms++
+        }
+
+        // Count powder rooms (including basement)
+        if (roomType === 'salle_eau') {
+          powderRooms++
+        }
+
+        // Count total rooms (excluding basement and excluded room types)
+        if (!isBasement && !excludedRoomTypes.includes(roomType)) {
+          totalRooms++
+        }
+      })
+    })
+
+    return { bedrooms, bathrooms, powderRooms, totalRooms }
+  }
+
+  const roomCounts = calculateRoomCounts()
+  const hasInspectionData = property.inspection_pieces?.floors && Object.keys(property.inspection_pieces.floors).length > 0
+
   const getInspectionButtonText = () => {
     if (isInspectionComplete) {
       return 'Voir inspection'
@@ -494,19 +542,27 @@ export function PropertyView({
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={3}>
                     <Typography variant="body2" color="text.secondary">Nombre de pièces</Typography>
-                    <Typography variant="body1">{property.nombre_pieces || 'N/A'}</Typography>
+                    <Typography variant="body1">
+                      {hasInspectionData ? roomCounts.totalRooms : (property.nombre_pieces || 'N/A')}
+                    </Typography>
                   </Grid>
                   <Grid item xs={12} md={3}>
                     <Typography variant="body2" color="text.secondary">Nombre de chambres</Typography>
-                    <Typography variant="body1">{property.nombre_chambres || 'N/A'}</Typography>
+                    <Typography variant="body1">
+                      {hasInspectionData ? roomCounts.bedrooms : (property.nombre_chambres || 'N/A')}
+                    </Typography>
                   </Grid>
                   <Grid item xs={12} md={3}>
                     <Typography variant="body2" color="text.secondary">Salle de bain</Typography>
-                    <Typography variant="body1">{property.salle_bain || 'N/A'}</Typography>
+                    <Typography variant="body1">
+                      {hasInspectionData ? roomCounts.bathrooms : (property.salle_bain || 'N/A')}
+                    </Typography>
                   </Grid>
                   <Grid item xs={12} md={3}>
                     <Typography variant="body2" color="text.secondary">Salle d'eau</Typography>
-                    <Typography variant="body1">{property.salle_eau || 'N/A'}</Typography>
+                    <Typography variant="body1">
+                      {hasInspectionData ? roomCounts.powderRooms : (property.salle_eau || 'N/A')}
+                    </Typography>
                   </Grid>
                   <Grid item xs={12} md={6}>
                     <Typography variant="body2" color="text.secondary">Stationnement</Typography>
