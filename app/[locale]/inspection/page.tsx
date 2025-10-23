@@ -33,6 +33,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { propertiesSupabaseService } from '@/features/library/_api/properties-supabase.service'
 import { Property } from '@/features/library/types/property.types'
 import { MaterialDashboardLayout } from '@/components/layout/MaterialDashboardLayout'
+import { calculateInspectionProgress } from '@/features/inspection/utils/progress.utils'
 
 export default function InspectionPage() {
   const t = useTranslations()
@@ -223,12 +224,17 @@ export default function InspectionPage() {
                     <TableCell>{property.ville || 'N/A'}</TableCell>
                     <TableCell>{property.type_propriete || 'N/A'}</TableCell>
                     <TableCell>
-                      <Chip
-                        label={`${property.inspection_completion || 0}%`}
-                        color={getProgressColor(property.inspection_completion)}
-                        size="small"
-                        sx={{ minWidth: 60 }}
-                      />
+                      {(() => {
+                        const progress = calculateInspectionProgress(property)
+                        return (
+                          <Chip
+                            label={`${progress}%`}
+                            color={getProgressColor(progress)}
+                            size="small"
+                            sx={{ minWidth: 60 }}
+                          />
+                        )
+                      })()}
                     </TableCell>
                     <TableCell>{formatDate(property.updated_at)}</TableCell>
                     <TableCell align="right">
