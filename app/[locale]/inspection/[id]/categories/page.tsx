@@ -35,11 +35,11 @@ import { Property } from '@/features/library/types/property.types'
 import { MaterialDashboardLayout } from '@/components/layout/MaterialDashboardLayout'
 import { InspectionProgressWindow } from '@/features/inspection/components/InspectionProgressWindow'
 
-const categories = [
+const getCategories = (t: any) => [
   {
     id: 'pieces',
-    name: 'Pièces',
-    description: 'Inspection pièce par pièce',
+    name: t('inspection.categories.pieces'),
+    description: t('inspection.categories.piecesDesc'),
     icon: Layers,
     color: '#2196F3',
     weight: 0.25,
@@ -47,8 +47,8 @@ const categories = [
   },
   {
     id: 'batiment',
-    name: 'Bâtiment',
-    description: 'Structure et éléments fixes',
+    name: t('inspection.categories.batiment'),
+    description: t('inspection.categories.batimentDesc'),
     icon: Home,
     color: '#FF9800',
     weight: 0.25,
@@ -56,8 +56,8 @@ const categories = [
   },
   {
     id: 'garage',
-    name: 'Garage',
-    description: 'Garage et stationnement',
+    name: t('inspection.categories.garage'),
+    description: t('inspection.categories.garageDesc'),
     icon: DirectionsCar,
     color: '#4CAF50',
     weight: 0.15,
@@ -65,8 +65,8 @@ const categories = [
   },
   {
     id: 'mecanique',
-    name: 'Mécanique',
-    description: 'Systèmes mécaniques',
+    name: t('inspection.categories.mecanique'),
+    description: t('inspection.categories.mecaniqueDesc'),
     icon: Settings,
     color: '#9C27B0',
     weight: 0.15,
@@ -74,8 +74,8 @@ const categories = [
   },
   {
     id: 'divers',
-    name: 'Divers',
-    description: 'Autres systèmes',
+    name: t('inspection.categories.divers'),
+    description: t('inspection.categories.diversDesc'),
     icon: Build,
     color: '#607D8B',
     weight: 0.00,
@@ -83,8 +83,8 @@ const categories = [
   },
   {
     id: 'exterieur',
-    name: 'Extérieur',
-    description: 'Aménagements extérieurs',
+    name: t('inspection.categories.exterieur'),
+    description: t('inspection.categories.exterieurDesc'),
     icon: Landscape,
     color: '#795548',
     weight: 0.20,
@@ -150,6 +150,7 @@ export default function InspectionCategoriesPage() {
   const calculateOverallProgress = () => {
     if (!property) return 0
 
+    const categories = getCategories(t)
     // Calculate progress based on completed categories with their weights
     let totalProgress = 0
 
@@ -205,6 +206,7 @@ export default function InspectionCategoriesPage() {
   }
 
   const overallProgress = calculateOverallProgress()
+  const categories = getCategories(t)
 
   return (
     <MaterialDashboardLayout>

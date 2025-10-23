@@ -25,6 +25,7 @@ export const MATERIAL_OPTIONS = {
     { value: 'melamine', translationKey: 'inspection.materials.cabinets.melamine' },
     { value: 'wood', translationKey: 'inspection.materials.cabinets.wood' },
     { value: 'lacquered', translationKey: 'inspection.materials.cabinets.lacquered' },
+    { value: 'mdf', translationKey: 'inspection.materials.cabinets.mdf' },
     { value: 'other', translationKey: 'inspection.materials.cabinets.other' }
   ],
   counters: [
@@ -33,6 +34,7 @@ export const MATERIAL_OPTIONS = {
     { value: 'granite', translationKey: 'inspection.materials.counters.granite' },
     { value: 'ceramic', translationKey: 'inspection.materials.counters.ceramic' },
     { value: 'wood', translationKey: 'inspection.materials.counters.wood' },
+    { value: 'stainless', translationKey: 'inspection.materials.counters.stainless' },
     { value: 'marble', translationKey: 'inspection.materials.counters.marble' },
     { value: 'other', translationKey: 'inspection.materials.counters.other' }
   ],
@@ -60,6 +62,12 @@ export const MATERIAL_OPTIONS = {
     { value: 'stone', translationKey: 'inspection.materials.walls.stone' },
     { value: 'veneer', translationKey: 'inspection.materials.walls.veneer' },
     { value: 'other', translationKey: 'inspection.materials.walls.other' }
+  ],
+  ceiling: [
+    { value: 'drywall', translationKey: 'inspection.materials.ceiling.drywall' },
+    { value: 'suspended', translationKey: 'inspection.materials.ceiling.suspended' },
+    { value: 'stucco', translationKey: 'inspection.materials.ceiling.stucco' },
+    { value: 'other', translationKey: 'inspection.materials.ceiling.other' }
   ]
 }
 
@@ -68,6 +76,22 @@ export const SIZE_OPTIONS = [
   { value: 'large', translationKey: 'inspection.sizes.large' },
   { value: 'medium', translationKey: 'inspection.sizes.medium' },
   { value: 'small', translationKey: 'inspection.sizes.small' }
+]
+
+// Fixture count options for bathrooms
+export const BATHROOM_FIXTURE_OPTIONS = [
+  { value: '3', translationKey: 'inspection.fixtures.3' },
+  { value: '4', translationKey: 'inspection.fixtures.4' },
+  { value: '5', translationKey: 'inspection.fixtures.5' },
+  { value: '6', translationKey: 'inspection.fixtures.6' },
+  { value: '7', translationKey: 'inspection.fixtures.7' },
+  { value: '8', translationKey: 'inspection.fixtures.8' }
+]
+
+// Fixture count options for powder rooms
+export const POWDER_ROOM_FIXTURE_OPTIONS = [
+  { value: '1', translationKey: 'inspection.fixtures.1' },
+  { value: '2', translationKey: 'inspection.fixtures.2' }
 ]
 
 // Room type configurations
@@ -101,21 +125,21 @@ export const ROOM_CONFIG: Record<string, RoomTypeConfig> = {
         options: MATERIAL_OPTIONS.flooring
       },
       {
-        name: 'plafond',
-        type: 'text',
-        translationKey: 'inspection.materials.ceiling.label'
-      },
-      {
         name: 'murs',
         type: 'multiselect',
         translationKey: 'inspection.materials.walls.label',
         options: MATERIAL_OPTIONS.walls
       },
       {
-        name: 'grandeur',
-        type: 'select',
-        translationKey: 'inspection.fields.size',
-        options: SIZE_OPTIONS
+        name: 'plafond',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.ceiling.label',
+        options: MATERIAL_OPTIONS.ceiling
+      },
+      {
+        name: 'notes',
+        type: 'text',
+        translationKey: 'inspection.fields.notes'
       }
     ]
   },
@@ -130,21 +154,21 @@ export const ROOM_CONFIG: Record<string, RoomTypeConfig> = {
         options: MATERIAL_OPTIONS.flooring
       },
       {
-        name: 'plafond',
-        type: 'text',
-        translationKey: 'inspection.materials.ceiling.label'
-      },
-      {
         name: 'murs',
         type: 'multiselect',
         translationKey: 'inspection.materials.walls.label',
         options: MATERIAL_OPTIONS.walls
       },
       {
-        name: 'grandeur',
-        type: 'select',
-        translationKey: 'inspection.fields.size',
-        options: SIZE_OPTIONS
+        name: 'plafond',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.ceiling.label',
+        options: MATERIAL_OPTIONS.ceiling
+      },
+      {
+        name: 'notes',
+        type: 'text',
+        translationKey: 'inspection.fields.notes'
       }
     ]
   },
@@ -159,21 +183,21 @@ export const ROOM_CONFIG: Record<string, RoomTypeConfig> = {
         options: MATERIAL_OPTIONS.flooring
       },
       {
-        name: 'plafond',
-        type: 'text',
-        translationKey: 'inspection.materials.ceiling.label'
-      },
-      {
         name: 'murs',
         type: 'multiselect',
         translationKey: 'inspection.materials.walls.label',
         options: MATERIAL_OPTIONS.walls
       },
       {
-        name: 'grandeur',
-        type: 'select',
-        translationKey: 'inspection.fields.size',
-        options: SIZE_OPTIONS
+        name: 'plafond',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.ceiling.label',
+        options: MATERIAL_OPTIONS.ceiling
+      },
+      {
+        name: 'notes',
+        type: 'text',
+        translationKey: 'inspection.fields.notes'
       }
     ]
   },
@@ -182,15 +206,16 @@ export const ROOM_CONFIG: Record<string, RoomTypeConfig> = {
     translationKey: 'inspection.rooms.chambre',
     fields: [
       {
+        name: 'grandeur',
+        type: 'select',
+        translationKey: 'inspection.fields.size',
+        options: SIZE_OPTIONS
+      },
+      {
         name: 'plancher',
         type: 'multiselect',
         translationKey: 'inspection.materials.flooring.label',
         options: MATERIAL_OPTIONS.flooring
-      },
-      {
-        name: 'plafond',
-        type: 'text',
-        translationKey: 'inspection.materials.ceiling.label'
       },
       {
         name: 'murs',
@@ -199,10 +224,15 @@ export const ROOM_CONFIG: Record<string, RoomTypeConfig> = {
         options: MATERIAL_OPTIONS.walls
       },
       {
-        name: 'grandeur',
-        type: 'select',
-        translationKey: 'inspection.fields.size',
-        options: SIZE_OPTIONS
+        name: 'plafond',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.ceiling.label',
+        options: MATERIAL_OPTIONS.ceiling
+      },
+      {
+        name: 'notes',
+        type: 'text',
+        translationKey: 'inspection.fields.notes'
       }
     ]
   },
@@ -217,21 +247,21 @@ export const ROOM_CONFIG: Record<string, RoomTypeConfig> = {
         options: MATERIAL_OPTIONS.flooring
       },
       {
-        name: 'plafond',
-        type: 'text',
-        translationKey: 'inspection.materials.ceiling.label'
-      },
-      {
         name: 'murs',
         type: 'multiselect',
         translationKey: 'inspection.materials.walls.label',
         options: MATERIAL_OPTIONS.walls
       },
       {
-        name: 'grandeur',
-        type: 'select',
-        translationKey: 'inspection.fields.size',
-        options: SIZE_OPTIONS
+        name: 'plafond',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.ceiling.label',
+        options: MATERIAL_OPTIONS.ceiling
+      },
+      {
+        name: 'notes',
+        type: 'text',
+        translationKey: 'inspection.fields.notes'
       }
     ]
   },
@@ -246,21 +276,21 @@ export const ROOM_CONFIG: Record<string, RoomTypeConfig> = {
         options: MATERIAL_OPTIONS.flooring
       },
       {
-        name: 'plafond',
-        type: 'text',
-        translationKey: 'inspection.materials.ceiling.label'
-      },
-      {
         name: 'murs',
         type: 'multiselect',
         translationKey: 'inspection.materials.walls.label',
         options: MATERIAL_OPTIONS.walls
       },
       {
-        name: 'grandeur',
-        type: 'select',
-        translationKey: 'inspection.fields.size',
-        options: SIZE_OPTIONS
+        name: 'plafond',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.ceiling.label',
+        options: MATERIAL_OPTIONS.ceiling
+      },
+      {
+        name: 'notes',
+        type: 'text',
+        translationKey: 'inspection.fields.notes'
       }
     ]
   },
@@ -269,16 +299,10 @@ export const ROOM_CONFIG: Record<string, RoomTypeConfig> = {
     translationKey: 'inspection.rooms.salleBain',
     fields: [
       {
-        name: 'armoires',
-        type: 'multiselect',
-        translationKey: 'inspection.materials.cabinets.label',
-        options: MATERIAL_OPTIONS.cabinets
-      },
-      {
-        name: 'comptoirs',
-        type: 'multiselect',
-        translationKey: 'inspection.materials.counters.label',
-        options: MATERIAL_OPTIONS.counters
+        name: 'nombreAppareils',
+        type: 'select',
+        translationKey: 'inspection.fields.fixtureCount',
+        options: BATHROOM_FIXTURE_OPTIONS
       },
       {
         name: 'plancher',
@@ -287,9 +311,10 @@ export const ROOM_CONFIG: Record<string, RoomTypeConfig> = {
         options: MATERIAL_OPTIONS.flooring
       },
       {
-        name: 'plafond',
-        type: 'text',
-        translationKey: 'inspection.materials.ceiling.label'
+        name: 'dosseret',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.backsplash.label',
+        options: MATERIAL_OPTIONS.backsplash
       },
       {
         name: 'murs',
@@ -298,15 +323,15 @@ export const ROOM_CONFIG: Record<string, RoomTypeConfig> = {
         options: MATERIAL_OPTIONS.walls
       },
       {
-        name: 'grandeur',
-        type: 'select',
-        translationKey: 'inspection.fields.size',
-        options: SIZE_OPTIONS
+        name: 'plafond',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.ceiling.label',
+        options: MATERIAL_OPTIONS.ceiling
       },
       {
-        name: 'nombreAppareils',
+        name: 'notes',
         type: 'text',
-        translationKey: 'inspection.fields.fixtureCount'
+        translationKey: 'inspection.fields.notes'
       }
     ]
   },
@@ -315,16 +340,10 @@ export const ROOM_CONFIG: Record<string, RoomTypeConfig> = {
     translationKey: 'inspection.rooms.salleEau',
     fields: [
       {
-        name: 'armoires',
-        type: 'multiselect',
-        translationKey: 'inspection.materials.cabinets.label',
-        options: MATERIAL_OPTIONS.cabinets
-      },
-      {
-        name: 'comptoirs',
-        type: 'multiselect',
-        translationKey: 'inspection.materials.counters.label',
-        options: MATERIAL_OPTIONS.counters
+        name: 'nombreAppareils',
+        type: 'select',
+        translationKey: 'inspection.fields.fixtureCount',
+        options: POWDER_ROOM_FIXTURE_OPTIONS
       },
       {
         name: 'plancher',
@@ -333,9 +352,10 @@ export const ROOM_CONFIG: Record<string, RoomTypeConfig> = {
         options: MATERIAL_OPTIONS.flooring
       },
       {
-        name: 'plafond',
-        type: 'text',
-        translationKey: 'inspection.materials.ceiling.label'
+        name: 'dosseret',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.backsplash.label',
+        options: MATERIAL_OPTIONS.backsplash
       },
       {
         name: 'murs',
@@ -344,15 +364,15 @@ export const ROOM_CONFIG: Record<string, RoomTypeConfig> = {
         options: MATERIAL_OPTIONS.walls
       },
       {
-        name: 'grandeur',
-        type: 'select',
-        translationKey: 'inspection.fields.size',
-        options: SIZE_OPTIONS
+        name: 'plafond',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.ceiling.label',
+        options: MATERIAL_OPTIONS.ceiling
       },
       {
-        name: 'nombreAppareils',
+        name: 'notes',
         type: 'text',
-        translationKey: 'inspection.fields.fixtureCount'
+        translationKey: 'inspection.fields.notes'
       }
     ]
   },
@@ -367,21 +387,21 @@ export const ROOM_CONFIG: Record<string, RoomTypeConfig> = {
         options: MATERIAL_OPTIONS.flooring
       },
       {
-        name: 'plafond',
-        type: 'text',
-        translationKey: 'inspection.materials.ceiling.label'
-      },
-      {
         name: 'murs',
         type: 'multiselect',
         translationKey: 'inspection.materials.walls.label',
         options: MATERIAL_OPTIONS.walls
       },
       {
-        name: 'grandeur',
-        type: 'select',
-        translationKey: 'inspection.fields.size',
-        options: SIZE_OPTIONS
+        name: 'plafond',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.ceiling.label',
+        options: MATERIAL_OPTIONS.ceiling
+      },
+      {
+        name: 'notes',
+        type: 'text',
+        translationKey: 'inspection.fields.notes'
       }
     ]
   },
@@ -396,21 +416,21 @@ export const ROOM_CONFIG: Record<string, RoomTypeConfig> = {
         options: MATERIAL_OPTIONS.flooring
       },
       {
-        name: 'plafond',
-        type: 'text',
-        translationKey: 'inspection.materials.ceiling.label'
-      },
-      {
         name: 'murs',
         type: 'multiselect',
         translationKey: 'inspection.materials.walls.label',
         options: MATERIAL_OPTIONS.walls
       },
       {
-        name: 'grandeur',
-        type: 'select',
-        translationKey: 'inspection.fields.size',
-        options: SIZE_OPTIONS
+        name: 'plafond',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.ceiling.label',
+        options: MATERIAL_OPTIONS.ceiling
+      },
+      {
+        name: 'notes',
+        type: 'text',
+        translationKey: 'inspection.fields.notes'
       }
     ]
   },
@@ -425,21 +445,21 @@ export const ROOM_CONFIG: Record<string, RoomTypeConfig> = {
         options: MATERIAL_OPTIONS.flooring
       },
       {
-        name: 'plafond',
-        type: 'text',
-        translationKey: 'inspection.materials.ceiling.label'
-      },
-      {
         name: 'murs',
         type: 'multiselect',
         translationKey: 'inspection.materials.walls.label',
         options: MATERIAL_OPTIONS.walls
       },
       {
-        name: 'grandeur',
-        type: 'select',
-        translationKey: 'inspection.fields.size',
-        options: SIZE_OPTIONS
+        name: 'plafond',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.ceiling.label',
+        options: MATERIAL_OPTIONS.ceiling
+      },
+      {
+        name: 'notes',
+        type: 'text',
+        translationKey: 'inspection.fields.notes'
       }
     ]
   },
@@ -454,21 +474,21 @@ export const ROOM_CONFIG: Record<string, RoomTypeConfig> = {
         options: MATERIAL_OPTIONS.flooring
       },
       {
-        name: 'plafond',
-        type: 'text',
-        translationKey: 'inspection.materials.ceiling.label'
-      },
-      {
         name: 'murs',
         type: 'multiselect',
         translationKey: 'inspection.materials.walls.label',
         options: MATERIAL_OPTIONS.walls
       },
       {
-        name: 'grandeur',
-        type: 'select',
-        translationKey: 'inspection.fields.size',
-        options: SIZE_OPTIONS
+        name: 'plafond',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.ceiling.label',
+        options: MATERIAL_OPTIONS.ceiling
+      },
+      {
+        name: 'notes',
+        type: 'text',
+        translationKey: 'inspection.fields.notes'
       }
     ]
   },
@@ -483,21 +503,21 @@ export const ROOM_CONFIG: Record<string, RoomTypeConfig> = {
         options: MATERIAL_OPTIONS.flooring
       },
       {
-        name: 'plafond',
-        type: 'text',
-        translationKey: 'inspection.materials.ceiling.label'
-      },
-      {
         name: 'murs',
         type: 'multiselect',
         translationKey: 'inspection.materials.walls.label',
         options: MATERIAL_OPTIONS.walls
       },
       {
-        name: 'grandeur',
-        type: 'select',
-        translationKey: 'inspection.fields.size',
-        options: SIZE_OPTIONS
+        name: 'plafond',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.ceiling.label',
+        options: MATERIAL_OPTIONS.ceiling
+      },
+      {
+        name: 'notes',
+        type: 'text',
+        translationKey: 'inspection.fields.notes'
       }
     ]
   },
@@ -512,21 +532,21 @@ export const ROOM_CONFIG: Record<string, RoomTypeConfig> = {
         options: MATERIAL_OPTIONS.flooring
       },
       {
-        name: 'plafond',
-        type: 'text',
-        translationKey: 'inspection.materials.ceiling.label'
-      },
-      {
         name: 'murs',
         type: 'multiselect',
         translationKey: 'inspection.materials.walls.label',
         options: MATERIAL_OPTIONS.walls
       },
       {
-        name: 'grandeur',
-        type: 'select',
-        translationKey: 'inspection.fields.size',
-        options: SIZE_OPTIONS
+        name: 'plafond',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.ceiling.label',
+        options: MATERIAL_OPTIONS.ceiling
+      },
+      {
+        name: 'notes',
+        type: 'text',
+        translationKey: 'inspection.fields.notes'
       }
     ]
   },
@@ -541,21 +561,21 @@ export const ROOM_CONFIG: Record<string, RoomTypeConfig> = {
         options: MATERIAL_OPTIONS.flooring
       },
       {
-        name: 'plafond',
-        type: 'text',
-        translationKey: 'inspection.materials.ceiling.label'
-      },
-      {
         name: 'murs',
         type: 'multiselect',
         translationKey: 'inspection.materials.walls.label',
         options: MATERIAL_OPTIONS.walls
       },
       {
-        name: 'grandeur',
-        type: 'select',
-        translationKey: 'inspection.fields.size',
-        options: SIZE_OPTIONS
+        name: 'plafond',
+        type: 'multiselect',
+        translationKey: 'inspection.materials.ceiling.label',
+        options: MATERIAL_OPTIONS.ceiling
+      },
+      {
+        name: 'notes',
+        type: 'text',
+        translationKey: 'inspection.fields.notes'
       }
     ]
   }

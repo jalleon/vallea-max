@@ -7,16 +7,17 @@ import {
   Typography,
   Breadcrumbs,
   Link,
-  Grid,
   TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Button,
   CircularProgress,
   Alert,
-  IconButton
+  IconButton,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  InputAdornment
 } from '@mui/material'
 import {
   DirectionsCar,
@@ -30,6 +31,8 @@ import { propertiesSupabaseService } from '@/features/library/_api/properties-su
 import { Property } from '@/features/library/types/property.types'
 import { MaterialDashboardLayout } from '@/components/layout/MaterialDashboardLayout'
 
+const FEET_TO_METERS = 0.3048
+
 export default function GaragePage() {
   const t = useTranslations()
   const router = useRouter()
@@ -41,20 +44,29 @@ export default function GaragePage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [formData, setFormData] = useState<Record<string, any>>({
-    type: '',
-    nombre_places: '',
-    largeur: '',
-    profondeur: '',
-    type_porte: '',
-    ouvre_porte: '',
-    etat: '',
-    notes: ''
-  })
+  const [formData, setFormData] = useState<Record<string, any>>({})
+  const [customValues, setCustomValues] = useState<Record<string, string>>({})
+  const [customDialogOpen, setCustomDialogOpen] = useState(false)
+  const [currentField, setCurrentField] = useState<string | null>(null)
+  const [tempCustomValue, setTempCustomValue] = useState('')
+
+  // Dimension states
+  const [largeurFeet, setLargeurFeet] = useState('')
+  const [longueurFeet, setLongueurFeet] = useState('')
+  const [largeurMeters, setLargeurMeters] = useState('')
+  const [longueurMeters, setLongueurMeters] = useState('')
 
   useEffect(() => {
     loadProperty()
   }, [propertyId])
+
+  useEffect(() => {
+    // Load dimensions from formData
+    if (formData.largeur_feet) setLargeurFeet(formData.largeur_feet)
+    if (formData.longueur_feet) setLongueurFeet(formData.longueur_feet)
+    if (formData.largeur_meters) setLargeurMeters(formData.largeur_meters)
+    if (formData.longueur_meters) setLongueurMeters(formData.longueur_meters)
+  }, [formData])
 
   const loadProperty = async () => {
     try {
@@ -66,6 +78,11 @@ export default function GaragePage() {
 
       if (prop.inspection_garage) {
         setFormData(prop.inspection_garage)
+
+        // Load custom values
+        if (prop.inspection_garage.customValues) {
+          setCustomValues(prop.inspection_garage.customValues)
+        }
       }
     } catch (err) {
       console.error('Error loading property:', err)
@@ -78,11 +95,20 @@ export default function GaragePage() {
   const handleSave = async () => {
     try {
       setSaving(true)
+
+      // Include dimension data
+      const garageData = {
+        ...formData,
+        largeur_feet: largeurFeet,
+        longueur_feet: longueurFeet,
+        largeur_meters: largeurMeters,
+        longueur_meters: longueurMeters,
+        customValues,
+        completedAt: new Date().toISOString()
+      }
+
       await propertiesSupabaseService.updateProperty(propertyId, {
-        inspection_garage: {
-          ...formData,
-          completedAt: new Date().toISOString()
-        }
+        inspection_garage: garageData
       })
 
       router.push(`/${locale}/inspection/${propertyId}/categories`)
@@ -106,6 +132,139 @@ export default function GaragePage() {
       ...prev,
       [field]: value
     }))
+  }
+
+  const handleCustomValueSave = () => {
+    if (currentField && tempCustomValue.trim()) {
+      setCustomValues(prev => ({
+        ...prev,
+        [currentField]: tempCustomValue
+      }))
+    }
+    setCustomDialogOpen(false)
+    setCurrentField(null)
+    setTempCustomValue('')
+  }
+
+  // Dimension conversion handlers
+  const handleLargeurFeetChange = (value: string) => {
+    setLargeurFeet(value)
+    if (value) {
+      const meters = (parseFloat(value) * FEET_TO_METERS).toFixed(2)
+      setLargeurMeters(meters)
+    } else {
+      setLargeurMeters('')
+    }
+  }
+
+  const handleLongueurFeetChange = (value: string) => {
+    setLongueurFeet(value)
+    if (value) {
+      const meters = (parseFloat(value) * FEET_TO_METERS).toFixed(2)
+      setLongueurMeters(meters)
+    } else {
+      setLongueurMeters('')
+    }
+  }
+
+  const handleLargeurMetersChange = (value: string) => {
+    setLargeurMeters(value)
+    if (value) {
+      const feet = (parseFloat(value) / FEET_TO_METERS).toFixed(2)
+      setLargeurFeet(feet)
+    } else {
+      setLargeurFeet('')
+    }
+  }
+
+  const handleLongueurMetersChange = (value: string) => {
+    setLongueurMeters(value)
+    if (value) {
+      const feet = (parseFloat(value) / FEET_TO_METERS).toFixed(2)
+      setLongueurFeet(feet)
+    } else {
+      setLongueurFeet('')
+    }
+  }
+
+  const calculateAreaFeet = () => {
+    if (largeurFeet && longueurFeet) {
+      return (parseFloat(largeurFeet) * parseFloat(longueurFeet)).toFixed(2)
+    }
+    return ''
+  }
+
+  const calculateAreaMeters = () => {
+    if (largeurMeters && longueurMeters) {
+      return (parseFloat(largeurMeters) * parseFloat(longueurMeters)).toFixed(2)
+    }
+    return ''
+  }
+
+  const renderChipField = (label: string, fieldId: string, options: string[], multiselect: boolean = false) => {
+    const currentValue = formData[fieldId]
+
+    return (
+      <Box>
+        <Typography variant="h6" fontWeight={600} sx={{ mb: 2, color: '#4CAF50' }}>
+          {label}
+        </Typography>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
+          {options.map((option) => {
+            const isOther = option === 'Autres' || option === 'Autre'
+            const customValue = isOther ? customValues[fieldId] : null
+            const displayLabel = customValue || option
+
+            const isSelected = multiselect
+              ? Array.isArray(currentValue) && currentValue.includes(option)
+              : currentValue === option
+
+            const handleClick = () => {
+              if (isOther && !isSelected) {
+                setCurrentField(fieldId)
+                setTempCustomValue(customValue || '')
+                setCustomDialogOpen(true)
+              }
+
+              if (multiselect) {
+                const current = Array.isArray(currentValue) ? currentValue : []
+                const newValue = current.includes(option)
+                  ? current.filter(v => v !== option)
+                  : [...current, option]
+                handleFieldChange(fieldId, newValue)
+              } else {
+                handleFieldChange(fieldId, option)
+              }
+            }
+
+            return (
+              <Chip
+                key={option}
+                label={displayLabel}
+                onClick={handleClick}
+                sx={{
+                  bgcolor: isSelected ? '#4CAF50' : 'white',
+                  color: isSelected ? 'white' : 'text.primary',
+                  border: '1px solid',
+                  borderColor: isSelected ? '#4CAF50' : 'divider',
+                  fontWeight: isSelected ? 600 : 400,
+                  fontSize: '0.9rem',
+                  px: 2,
+                  py: 2.5,
+                  height: 'auto',
+                  '&:hover': {
+                    bgcolor: isSelected ? '#45a049' : '#E8F5E9',
+                    borderColor: '#4CAF50'
+                  },
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+              />
+            )
+          })}
+        </Box>
+      </Box>
+    )
   }
 
   if (loading) {
@@ -145,10 +304,10 @@ export default function GaragePage() {
           >
             {t('inspection.breadcrumb.categories')}
           </Link>
-          <Typography color="text.primary">Garage</Typography>
+          <Typography color="text.primary">{t('inspection.garage.title')}</Typography>
         </Breadcrumbs>
 
-        {/* Property Address - Clickable to Google Maps */}
+        {/* Property Address */}
         <Box sx={{ mb: 3 }}>
           <Typography
             variant="h5"
@@ -186,123 +345,156 @@ export default function GaragePage() {
               <ArrowBack />
             </IconButton>
             <Typography variant="h4" fontWeight={700}>
-              Garage
+              {t('inspection.garage.title')}
             </Typography>
           </Box>
         </Box>
 
         {/* Form */}
         <Paper elevation={0} sx={{ p: 4, border: '1px solid', borderColor: 'divider' }}>
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Type de garage</InputLabel>
-                <Select
-                  value={formData.type}
-                  onChange={(e) => handleFieldChange('type', e.target.value)}
-                  label="Type de garage"
-                >
-                  <MenuItem value="Attaché">Attaché</MenuItem>
-                  <MenuItem value="Détaché">Détaché</MenuItem>
-                  <MenuItem value="Intégré">Intégré</MenuItem>
-                  <MenuItem value="Carport">Carport</MenuItem>
-                  <MenuItem value="Aucun">Aucun</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
 
-            <Grid item xs={12} md={6}>
+            {/* Type de garage */}
+            {renderChipField('Type de garage', 'type_garage', [
+              t('inspection.garageOptions.typeOptions.attache'),
+              t('inspection.garageOptions.typeOptions.detache'),
+              t('inspection.garageOptions.typeOptions.integre'),
+              t('inspection.garageOptions.typeOptions.auSousSol'),
+              t('inspection.garageOptions.typeOptions.abriAuto')
+            ])}
+
+            {/* Finition */}
+            {renderChipField('Finition', 'finition', [
+              t('inspection.garageOptions.finitionOptions.fini'),
+              t('inspection.garageOptions.finitionOptions.nonFini')
+            ])}
+
+            {/* Porte électrique */}
+            {renderChipField('Porte électrique', 'porte_electrique', [
+              t('inspection.options.yes'),
+              t('inspection.options.no')
+            ])}
+
+            {/* Dimension */}
+            <Box>
+              <Typography variant="h6" fontWeight={600} sx={{ mb: 2, color: '#4CAF50' }}>
+                Dimension
+              </Typography>
+
+              {/* Feet row */}
+              <Box sx={{ display: 'flex', gap: 2, mb: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                <TextField
+                  label="Largeur"
+                  type="number"
+                  value={largeurFeet}
+                  onChange={(e) => handleLargeurFeetChange(e.target.value)}
+                  InputProps={{
+                    endAdornment: <InputAdornment position="end">pi</InputAdornment>
+                  }}
+                  sx={{ width: 150 }}
+                />
+                <TextField
+                  label="Longueur"
+                  type="number"
+                  value={longueurFeet}
+                  onChange={(e) => handleLongueurFeetChange(e.target.value)}
+                  InputProps={{
+                    endAdornment: <InputAdornment position="end">pi</InputAdornment>
+                  }}
+                  sx={{ width: 150 }}
+                />
+                <TextField
+                  label="Superficie"
+                  value={calculateAreaFeet()}
+                  InputProps={{
+                    readOnly: true,
+                    endAdornment: <InputAdornment position="end">pi²</InputAdornment>
+                  }}
+                  sx={{ width: 150, bgcolor: '#f5f5f5' }}
+                />
+              </Box>
+
+              {/* Meters row */}
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                <TextField
+                  label="Largeur"
+                  type="number"
+                  value={largeurMeters}
+                  onChange={(e) => handleLargeurMetersChange(e.target.value)}
+                  InputProps={{
+                    endAdornment: <InputAdornment position="end">m</InputAdornment>
+                  }}
+                  sx={{ width: 150 }}
+                />
+                <TextField
+                  label="Longueur"
+                  type="number"
+                  value={longueurMeters}
+                  onChange={(e) => handleLongueurMetersChange(e.target.value)}
+                  InputProps={{
+                    endAdornment: <InputAdornment position="end">m</InputAdornment>
+                  }}
+                  sx={{ width: 150 }}
+                />
+                <TextField
+                  label="Superficie"
+                  value={calculateAreaMeters()}
+                  InputProps={{
+                    readOnly: true,
+                    endAdornment: <InputAdornment position="end">m²</InputAdornment>
+                  }}
+                  sx={{ width: 150, bgcolor: '#f5f5f5' }}
+                />
+              </Box>
+            </Box>
+
+            {/* Matériaux */}
+            {renderChipField('Matériaux', 'materiaux', [
+              t('inspection.garageOptions.materiauxOptions.briques'),
+              t('inspection.garageOptions.materiauxOptions.beton'),
+              t('inspection.options.other')
+            ], true)}
+
+            {/* Notes */}
+            <Box>
+              <Typography variant="h6" fontWeight={600} sx={{ mb: 2, color: '#4CAF50' }}>
+                Notes
+              </Typography>
               <TextField
                 fullWidth
-                label="Nombre de places"
-                type="number"
-                value={formData.nombre_places}
-                onChange={(e) => handleFieldChange('nombre_places', e.target.value)}
-              />
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Largeur (pieds)"
-                value={formData.largeur}
-                onChange={(e) => handleFieldChange('largeur', e.target.value)}
-              />
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Profondeur (pieds)"
-                value={formData.profondeur}
-                onChange={(e) => handleFieldChange('profondeur', e.target.value)}
-              />
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Type de porte</InputLabel>
-                <Select
-                  value={formData.type_porte}
-                  onChange={(e) => handleFieldChange('type_porte', e.target.value)}
-                  label="Type de porte"
-                >
-                  <MenuItem value="Basculante">Basculante</MenuItem>
-                  <MenuItem value="Sectionnelle">Sectionnelle</MenuItem>
-                  <MenuItem value="Enroulable">Enroulable</MenuItem>
-                  <MenuItem value="Battante">Battante</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Ouvre-porte</InputLabel>
-                <Select
-                  value={formData.ouvre_porte}
-                  onChange={(e) => handleFieldChange('ouvre_porte', e.target.value)}
-                  label="Ouvre-porte"
-                >
-                  <MenuItem value="Manuel">Manuel</MenuItem>
-                  <MenuItem value="Électrique">Électrique</MenuItem>
-                  <MenuItem value="N/A">N/A</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>État général</InputLabel>
-                <Select
-                  value={formData.etat}
-                  onChange={(e) => handleFieldChange('etat', e.target.value)}
-                  label="État général"
-                >
-                  <MenuItem value="Excellent">Excellent</MenuItem>
-                  <MenuItem value="Bon">Bon</MenuItem>
-                  <MenuItem value="Moyen">Moyen</MenuItem>
-                  <MenuItem value="Mauvais">Mauvais</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Notes"
                 multiline
                 rows={4}
-                value={formData.notes}
+                placeholder="Notes (optionnel)"
+                value={formData.notes || ''}
                 onChange={(e) => handleFieldChange('notes', e.target.value)}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '&:hover fieldset': {
+                      borderColor: '#4CAF50'
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#4CAF50'
+                    }
+                  }
+                }}
               />
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
 
+          {/* Action Buttons */}
           <Box sx={{ display: 'flex', gap: 2, mt: 4 }}>
             <Button
               variant="outlined"
               onClick={() => router.push(`/${locale}/inspection/${propertyId}/categories`)}
               disabled={saving}
+              sx={{
+                borderColor: '#4CAF50',
+                color: '#4CAF50',
+                '&:hover': {
+                  borderColor: '#45a049',
+                  bgcolor: '#E8F5E9'
+                }
+              }}
             >
               {t('common.cancel')}
             </Button>
@@ -310,12 +502,41 @@ export default function GaragePage() {
               variant="contained"
               onClick={handleSave}
               disabled={saving}
+              sx={{
+                bgcolor: '#4CAF50',
+                '&:hover': {
+                  bgcolor: '#45a049'
+                }
+              }}
             >
               {saving ? <CircularProgress size={24} /> : t('common.save')}
             </Button>
           </Box>
         </Paper>
       </Box>
+
+      {/* Custom Value Dialog */}
+      <Dialog open={customDialogOpen} onClose={() => setCustomDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>{t('inspection.customValue.title')}</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            fullWidth
+            label={t('inspection.customValue.label')}
+            value={tempCustomValue}
+            onChange={(e) => setTempCustomValue(e.target.value)}
+            sx={{ mt: 2 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCustomDialogOpen(false)}>
+            {t('common.cancel')}
+          </Button>
+          <Button onClick={handleCustomValueSave} variant="contained" sx={{ bgcolor: '#4CAF50', '&:hover': { bgcolor: '#45a049' } }}>
+            {t('common.save')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </MaterialDashboardLayout>
   )
 }

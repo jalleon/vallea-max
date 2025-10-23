@@ -20,7 +20,12 @@ import {
   CircularProgress,
   Alert,
   Autocomplete,
-  IconButton
+  IconButton,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material'
 import {
   Settings,
@@ -39,52 +44,134 @@ import { propertiesSupabaseService } from '@/features/library/_api/properties-su
 import { Property } from '@/features/library/types/property.types'
 import { MaterialDashboardLayout } from '@/components/layout/MaterialDashboardLayout'
 
-const SUBCATEGORIES = [
+const getSubcategories = (t: any) => [
   {
-    id: 'chauffage',
-    name: 'Chauffage',
+    id: 'chauffage_ventilation',
+    name: t('inspection.mecanique.chauffageVentilation'),
     icon: Thermostat,
     fields: [
-      { id: 'type', label: 'Type de système', type: 'autocomplete', options: ['Électrique', 'Gaz naturel', 'Mazout', 'Thermopompe', 'Géothermie', 'Bois/Granules'] },
-      { id: 'age', label: 'Âge approximatif (années)', type: 'number' },
-      { id: 'marque', label: 'Marque', type: 'text' },
-      { id: 'etat', label: 'État', type: 'select', options: ['Excellent', 'Bon', 'Moyen', 'Mauvais'] },
-      { id: 'notes', label: 'Notes', type: 'text', multiline: true }
+      {
+        id: 'type_chauffage',
+        label: t('inspection.mecanique.typeSystemeChauffage'),
+        type: 'multiselect',
+        options: [
+          t('inspection.mecaniqueOptions.chauffageOptions.electricite'),
+          t('inspection.mecaniqueOptions.chauffageOptions.gaz'),
+          t('inspection.mecaniqueOptions.chauffageOptions.airChaud'),
+          t('inspection.mecaniqueOptions.chauffageOptions.eauChaude'),
+          t('inspection.mecaniqueOptions.chauffageOptions.planchersChauffants'),
+          t('inspection.mecaniqueOptions.chauffageOptions.convectaires'),
+          t('inspection.mecaniqueOptions.chauffageOptions.plinthesElectrique'),
+          t('inspection.mecaniqueOptions.chauffageOptions.radiant'),
+          t('inspection.mecaniqueOptions.chauffageOptions.huileMazout'),
+          t('inspection.options.other')
+        ],
+        multiselect: true
+      },
+      {
+        id: 'climatisation',
+        label: t('inspection.mecanique.climatisation'),
+        type: 'multiselect',
+        options: [
+          t('inspection.mecaniqueOptions.climatisationOptions.thermopompeCentrale'),
+          t('inspection.mecaniqueOptions.climatisationOptions.thermopompeMurale'),
+          t('inspection.mecaniqueOptions.climatisationOptions.climatiseurMural'),
+          t('inspection.mecaniqueOptions.climatisationOptions.systemeCentralise'),
+          t('inspection.mecaniqueOptions.climatisationOptions.echangeurAir')
+        ],
+        multiselect: true
+      },
+      { id: 'notes', label: t('inspection.fields.notes'), type: 'text', multiline: true }
     ]
   },
   {
     id: 'plomberie',
-    name: 'Plomberie',
+    name: t('inspection.mecanique.plomberie'),
     icon: Plumbing,
     fields: [
-      { id: 'materiau_entree', label: 'Matériau d\'entrée d\'eau', type: 'select', options: ['Cuivre', 'PEX', 'Galvanisé', 'Autre'] },
-      { id: 'chauffe_eau_type', label: 'Type de chauffe-eau', type: 'select', options: ['Réservoir électrique', 'Réservoir gaz', 'Sans réservoir (tankless)', 'Thermopompe'] },
-      { id: 'chauffe_eau_age', label: 'Âge chauffe-eau (années)', type: 'number' },
-      { id: 'drainage', label: 'Type de drainage', type: 'select', options: ['Municipal', 'Fosse septique', 'Champ d\'épuration'] },
-      { id: 'notes', label: 'Notes', type: 'text', multiline: true }
+      {
+        id: 'materiau_entree',
+        label: t('inspection.mecanique.materiauEntreeEau'),
+        type: 'multiselect',
+        options: [
+          t('inspection.mecaniqueOptions.plomberieMateriauOptions.cuivre'),
+          t('inspection.mecaniqueOptions.plomberieMateriauOptions.pex'),
+          t('inspection.mecaniqueOptions.plomberieMateriauOptions.polyB')
+        ],
+        multiselect: true
+      },
+      {
+        id: 'type',
+        label: t('inspection.mecanique.type'),
+        type: 'multiselect',
+        options: [
+          t('inspection.mecaniqueOptions.plomberieTypeOptions.standard'),
+          t('inspection.mecaniqueOptions.plomberieTypeOptions.ancienne'),
+          t('inspection.mecaniqueOptions.plomberieTypeOptions.luxe')
+        ],
+        multiselect: true
+      },
+      {
+        id: 'entree_laveuse',
+        label: t('inspection.mecanique.entreeLaveuse'),
+        type: 'select',
+        options: [t('inspection.options.yes'), t('inspection.options.no')]
+      },
+      {
+        id: 'chauffe_eau',
+        label: t('inspection.mecanique.chauffeEau'),
+        type: 'multiselect',
+        options: [
+          t('inspection.mecaniqueOptions.chauffeEauOptions.40gallons'),
+          t('inspection.mecaniqueOptions.chauffeEauOptions.60gallons'),
+          t('inspection.options.other')
+        ],
+        multiselect: true
+      },
+      {
+        id: 'type_energie',
+        label: t('inspection.mecanique.typeEnergie'),
+        type: 'multiselect',
+        options: [
+          t('inspection.mecaniqueOptions.energieOptions.electrique'),
+          t('inspection.mecaniqueOptions.energieOptions.gaz'),
+          t('inspection.mecaniqueOptions.energieOptions.huileMazout')
+        ],
+        multiselect: true
+      },
+      { id: 'notes', label: t('inspection.fields.notes'), type: 'text', multiline: true }
     ]
   },
   {
     id: 'electricite',
-    name: 'Électricité',
+    name: t('inspection.mecanique.electricite'),
     icon: ElectricBolt,
     fields: [
-      { id: 'amperage', label: 'Ampérage du panneau principal', type: 'select', options: ['60A', '100A', '200A', '400A'] },
-      { id: 'type_cablage', label: 'Type de câblage', type: 'select', options: ['Cuivre', 'Aluminium', 'Mixte'] },
-      { id: 'annee_mise_niveau', label: 'Année de mise à niveau', type: 'number' },
-      { id: 'etat', label: 'État', type: 'select', options: ['Excellent', 'Bon', 'Moyen', 'Mauvais'] },
-      { id: 'notes', label: 'Notes', type: 'text', multiline: true }
-    ]
-  },
-  {
-    id: 'ventilation',
-    name: 'Ventilation/Climatisation',
-    icon: Air,
-    fields: [
-      { id: 'type_ventilation', label: 'Type de ventilation', type: 'select', options: ['VRC (Échangeur d\'air)', 'VRE (Récupérateur de chaleur)', 'Naturelle', 'Aucune'] },
-      { id: 'climatisation', label: 'Climatisation', type: 'select', options: ['Centrale', 'Murale (split)', 'Fenêtre', 'Aucune'] },
-      { id: 'age', label: 'Âge approximatif (années)', type: 'number' },
-      { id: 'notes', label: 'Notes', type: 'text', multiline: true }
+      {
+        id: 'type_panneau',
+        label: t('inspection.mecanique.typePanneau'),
+        type: 'multiselect',
+        options: [
+          t('inspection.mecaniqueOptions.panneauOptions.disjoncteurs'),
+          t('inspection.mecaniqueOptions.panneauOptions.fusibles')
+        ],
+        multiselect: true
+      },
+      {
+        id: 'amperage',
+        label: t('inspection.mecanique.amperage'),
+        type: 'multiselect',
+        options: [
+          t('inspection.mecaniqueOptions.amperageOptions.60'),
+          t('inspection.mecaniqueOptions.amperageOptions.100'),
+          t('inspection.mecaniqueOptions.amperageOptions.125'),
+          t('inspection.mecaniqueOptions.amperageOptions.150'),
+          t('inspection.mecaniqueOptions.amperageOptions.200'),
+          t('inspection.mecaniqueOptions.amperageOptions.400')
+        ],
+        multiselect: true
+      },
+      { id: 'notes', label: t('inspection.fields.notes'), type: 'text', multiline: true }
     ]
   }
 ]
@@ -102,6 +189,10 @@ export default function MecaniquePage() {
   const [error, setError] = useState<string | null>(null)
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null)
   const [formData, setFormData] = useState<Record<string, any>>({})
+  const [customValues, setCustomValues] = useState<Record<string, Record<string, string>>>({})
+  const [customDialogOpen, setCustomDialogOpen] = useState(false)
+  const [currentField, setCurrentField] = useState<string | null>(null)
+  const [tempCustomValue, setTempCustomValue] = useState('')
 
   useEffect(() => {
     loadProperty()
@@ -117,6 +208,11 @@ export default function MecaniquePage() {
 
       if (prop.inspection_mecanique) {
         setFormData(prop.inspection_mecanique)
+
+        // Load custom values
+        if (prop.inspection_mecanique.customValues) {
+          setCustomValues(prop.inspection_mecanique.customValues)
+        }
       }
     } catch (err) {
       console.error('Error loading property:', err)
@@ -136,7 +232,8 @@ export default function MecaniquePage() {
         [selectedSubcategory]: {
           ...formData[selectedSubcategory],
           completedAt: new Date().toISOString()
-        }
+        },
+        customValues
       }
 
       await propertiesSupabaseService.updateProperty(propertyId, {
@@ -175,6 +272,88 @@ export default function MecaniquePage() {
     }
   }
 
+  const handleCustomValueSave = () => {
+    if (selectedSubcategory && currentField && tempCustomValue.trim()) {
+      setCustomValues(prev => ({
+        ...prev,
+        [selectedSubcategory]: {
+          ...(prev[selectedSubcategory] || {}),
+          [currentField]: tempCustomValue
+        }
+      }))
+    }
+    setCustomDialogOpen(false)
+    setCurrentField(null)
+    setTempCustomValue('')
+  }
+
+  const renderChipField = (label: string, fieldId: string, options: string[], multiselect: boolean = false) => {
+    if (!selectedSubcategory) return null
+    const currentValue = formData[selectedSubcategory]?.[fieldId]
+
+    return (
+      <Box>
+        <Typography variant="h6" fontWeight={600} sx={{ mb: 2, color: '#9C27B0' }}>
+          {label}
+        </Typography>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
+          {options.map((option) => {
+            const isOther = option === 'Autres' || option === 'Autre'
+            const customValue = isOther ? customValues[selectedSubcategory]?.[fieldId] : null
+            const displayLabel = customValue || option
+
+            const isSelected = multiselect
+              ? Array.isArray(currentValue) && currentValue.includes(option)
+              : currentValue === option
+
+            const handleClick = () => {
+              if (isOther && !isSelected) {
+                setCurrentField(fieldId)
+                setTempCustomValue(customValue || '')
+                setCustomDialogOpen(true)
+              }
+
+              if (multiselect) {
+                const current = Array.isArray(currentValue) ? currentValue : []
+                const newValue = current.includes(option)
+                  ? current.filter(v => v !== option)
+                  : [...current, option]
+                handleFieldChange(selectedSubcategory, fieldId, newValue)
+              } else {
+                handleFieldChange(selectedSubcategory, fieldId, option)
+              }
+            }
+
+            return (
+              <Chip
+                key={option}
+                label={displayLabel}
+                onClick={handleClick}
+                sx={{
+                  bgcolor: isSelected ? '#9C27B0' : 'white',
+                  color: isSelected ? 'white' : 'text.primary',
+                  border: '1px solid',
+                  borderColor: isSelected ? '#9C27B0' : 'divider',
+                  fontWeight: isSelected ? 600 : 400,
+                  fontSize: '0.9rem',
+                  px: 2,
+                  py: 2.5,
+                  height: 'auto',
+                  '&:hover': {
+                    bgcolor: isSelected ? '#7B1FA2' : '#F3E5F5',
+                    borderColor: '#9C27B0'
+                  },
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+              />
+            )
+          })}
+        </Box>
+      </Box>
+    )
+  }
+
   if (loading) {
     return (
       <MaterialDashboardLayout>
@@ -193,6 +372,7 @@ export default function MecaniquePage() {
     )
   }
 
+  const SUBCATEGORIES = getSubcategories(t)
   const currentSubcategory = SUBCATEGORIES.find(s => s.id === selectedSubcategory)
 
   return (
@@ -214,7 +394,7 @@ export default function MecaniquePage() {
           >
             {t('inspection.breadcrumb.categories')}
           </Link>
-          <Typography color="text.primary">Mécanique</Typography>
+          <Typography color="text.primary">{t('inspection.mecanique.title')}</Typography>
         </Breadcrumbs>
 
         {/* Property Address - Clickable to Google Maps */}
@@ -255,7 +435,7 @@ export default function MecaniquePage() {
               <ArrowBack />
             </IconButton>
             <Typography variant="h4" fontWeight={700}>
-              Mécanique
+              {t('inspection.mecanique.title')}
             </Typography>
           </Box>
         </Box>
@@ -311,7 +491,7 @@ export default function MecaniquePage() {
                         <CardContent sx={{ p: 0, width: '100%', textAlign: 'center' }}>
                           <Icon sx={{
                             fontSize: 48,
-                            color: isCompleted ? '#9C27B0' : '#9e9e9e',
+                            color: '#9C27B0',
                             mb: 2
                           }} />
                           <Typography
@@ -337,51 +517,114 @@ export default function MecaniquePage() {
             </Typography>
 
             <Paper elevation={0} sx={{ p: 4, border: '1px solid', borderColor: 'divider' }}>
-              <Grid container spacing={3}>
-                {currentSubcategory?.fields.map((field) => (
-                  <Grid item xs={12} md={6} key={field.id}>
-                    {field.type === 'select' ? (
-                      <FormControl fullWidth>
-                        <InputLabel>{field.label}</InputLabel>
-                        <Select
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {currentSubcategory?.fields.map((field) => {
+                  if (field.type === 'select' && field.options) {
+                    return (
+                      <Box key={field.id}>
+                        {renderChipField(field.label, field.id, field.options, false)}
+                      </Box>
+                    )
+                  } else if (field.type === 'multiselect' && field.options) {
+                    return (
+                      <Box key={field.id}>
+                        {renderChipField(field.label, field.id, field.options, true)}
+                      </Box>
+                    )
+                  } else if (field.type === 'number') {
+                    return (
+                      <Box key={field.id}>
+                        <Typography variant="h6" fontWeight={600} sx={{ mb: 2, color: '#9C27B0' }}>
+                          {field.label}
+                        </Typography>
+                        <TextField
+                          fullWidth
+                          type="number"
+                          placeholder={field.label}
                           value={formData[selectedSubcategory]?.[field.id] || ''}
-                          onChange={(e) => handleFieldChange(selectedSubcategory, field.id, e.target.value)}
-                          label={field.label}
-                        >
-                          {field.options?.map(option => (
-                            <MenuItem key={option} value={option}>{option}</MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    ) : field.type === 'autocomplete' ? (
-                      <Autocomplete
-                        freeSolo
-                        options={field.options || []}
-                        value={formData[selectedSubcategory]?.[field.id] || ''}
-                        onChange={(e, newValue) => handleFieldChange(selectedSubcategory, field.id, newValue)}
-                        onInputChange={(e, newValue) => handleFieldChange(selectedSubcategory, field.id, newValue)}
-                        renderInput={(params) => <TextField {...params} label={field.label} />}
-                      />
-                    ) : (
-                      <TextField
-                        fullWidth
-                        label={field.label}
-                        type={field.type}
-                        multiline={field.multiline}
-                        rows={field.multiline ? 4 : 1}
-                        value={formData[selectedSubcategory]?.[field.id] || ''}
-                        onChange={(e) => handleFieldChange(selectedSubcategory, field.id, e.target.value)}
-                      />
-                    )}
-                  </Grid>
-                ))}
-              </Grid>
+                          onChange={(e) => selectedSubcategory && handleFieldChange(selectedSubcategory, field.id, e.target.value)}
+                          sx={{
+                            maxWidth: 300,
+                            '& .MuiOutlinedInput-root': {
+                              '&:hover fieldset': {
+                                borderColor: '#9C27B0'
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: '#9C27B0'
+                              }
+                            }
+                          }}
+                        />
+                      </Box>
+                    )
+                  } else if (field.type === 'text' && !field.multiline) {
+                    return (
+                      <Box key={field.id}>
+                        <Typography variant="h6" fontWeight={600} sx={{ mb: 2, color: '#9C27B0' }}>
+                          {field.label}
+                        </Typography>
+                        <TextField
+                          fullWidth
+                          placeholder={field.label}
+                          value={formData[selectedSubcategory]?.[field.id] || ''}
+                          onChange={(e) => selectedSubcategory && handleFieldChange(selectedSubcategory, field.id, e.target.value)}
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              '&:hover fieldset': {
+                                borderColor: '#9C27B0'
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: '#9C27B0'
+                              }
+                            }
+                          }}
+                        />
+                      </Box>
+                    )
+                  } else if (field.type === 'text' && field.multiline) {
+                    return (
+                      <Box key={field.id}>
+                        <Typography variant="h6" fontWeight={600} sx={{ mb: 2, color: '#9C27B0' }}>
+                          {field.label}
+                        </Typography>
+                        <TextField
+                          fullWidth
+                          multiline
+                          rows={4}
+                          placeholder={field.label}
+                          value={formData[selectedSubcategory]?.[field.id] || ''}
+                          onChange={(e) => selectedSubcategory && handleFieldChange(selectedSubcategory, field.id, e.target.value)}
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              '&:hover fieldset': {
+                                borderColor: '#9C27B0'
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: '#9C27B0'
+                              }
+                            }
+                          }}
+                        />
+                      </Box>
+                    )
+                  }
+                  return null
+                })}
+              </Box>
 
               <Box sx={{ display: 'flex', gap: 2, mt: 4 }}>
                 <Button
                   variant="outlined"
                   onClick={() => setSelectedSubcategory(null)}
                   disabled={saving}
+                  sx={{
+                    borderColor: '#9C27B0',
+                    color: '#9C27B0',
+                    '&:hover': {
+                      borderColor: '#7B1FA2',
+                      bgcolor: '#F3E5F5'
+                    }
+                  }}
                 >
                   {t('common.cancel')}
                 </Button>
@@ -389,6 +632,12 @@ export default function MecaniquePage() {
                   variant="contained"
                   onClick={handleSaveSubcategory}
                   disabled={saving}
+                  sx={{
+                    bgcolor: '#9C27B0',
+                    '&:hover': {
+                      bgcolor: '#7B1FA2'
+                    }
+                  }}
                 >
                   {saving ? <CircularProgress size={24} /> : t('common.save')}
                 </Button>
@@ -397,6 +646,29 @@ export default function MecaniquePage() {
           </>
         )}
       </Box>
+
+      {/* Custom Value Dialog */}
+      <Dialog open={customDialogOpen} onClose={() => setCustomDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>{t('inspection.customValue.title')}</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            fullWidth
+            label={t('inspection.customValue.label')}
+            value={tempCustomValue}
+            onChange={(e) => setTempCustomValue(e.target.value)}
+            sx={{ mt: 2 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCustomDialogOpen(false)}>
+            {t('common.cancel')}
+          </Button>
+          <Button onClick={handleCustomValueSave} variant="contained" sx={{ bgcolor: '#9C27B0', '&:hover': { bgcolor: '#7B1FA2' } }}>
+            {t('common.save')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </MaterialDashboardLayout>
   )
 }

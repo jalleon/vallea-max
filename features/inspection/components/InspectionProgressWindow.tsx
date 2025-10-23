@@ -24,13 +24,23 @@ import {
   CheckCircle,
   KeyboardArrowUp,
   KeyboardArrowDown,
-  Assessment
+  Assessment,
+  Countertops,
+  Kitchen,
+  Bathtub,
+  Shower,
+  Chair,
+  Bed,
+  Weekend,
+  MeetingRoom
 } from '@mui/icons-material'
 import { useTranslations } from 'next-intl'
 import { Property } from '@/features/library/types/property.types'
+import { propertiesSupabaseService } from '@/features/library/_api/properties-supabase.service'
 
 interface InspectionProgressWindowProps {
   property: Property
+  onPropertyUpdate?: (property: Property) => void
 }
 
 const CATEGORIES = [
@@ -78,8 +88,8 @@ const CATEGORIES = [
   }
 ]
 
-export function InspectionProgressWindow({ property }: InspectionProgressWindowProps) {
-  const t = useTranslations('inspection.progress')
+export function InspectionProgressWindow({ property, onPropertyUpdate }: InspectionProgressWindowProps) {
+  const t = useTranslations()
   const [expandedCategories, setExpandedCategories] = useState<string[]>([])
 
   const toggleCategory = (categoryId: string) => {
@@ -88,6 +98,97 @@ export function InspectionProgressWindow({ property }: InspectionProgressWindowP
         ? prev.filter(id => id !== categoryId)
         : [...prev, categoryId]
     )
+  }
+
+  // Calculate room counts from inspection data
+  const calculateRoomCounts = () => {
+    if (!property.inspection_pieces?.floors) {
+      return { bedrooms: 0, bathrooms: 0, powderRooms: 0, totalRooms: 0 }
+    }
+
+    let bedrooms = 0
+    let bathrooms = 0
+    let powderRooms = 0
+    let totalRooms = 0
+
+    // Room types that count towards total (excluding basement)
+    const countableRoomTypes = ['chambre', 'cuisine', 'salle_a_manger', 'salle_familiale', 'bureau']
+
+    // Helper function to check if a room has been filled (has any data besides type)
+    const isRoomCompleted = (roomData: any): boolean => {
+      if (!roomData) return false
+
+      // Check if room has any fields filled besides 'type' and 'customValues'
+      const filledFields = Object.entries(roomData).filter(([key, value]) => {
+        if (key === 'type' || key === 'customValues' || key === 'completedAt') return false
+
+        // Check if value is not empty
+        if (Array.isArray(value)) {
+          return value.length > 0
+        }
+        return value !== null && value !== undefined && value !== ''
+      })
+
+      return filledFields.length > 0
+    }
+
+    Object.entries(property.inspection_pieces.floors).forEach(([floorId, floor]) => {
+      // Exclude basement (sous_sol) from bedroom and total room counts
+      const isBasement = floorId === 'sous_sol' || floor.name?.toLowerCase().includes('sous-sol')
+
+      Object.entries(floor.rooms || {}).forEach(([_, roomData]: [string, any]) => {
+        // Only count rooms that have been completed/filled
+        if (!isRoomCompleted(roomData)) return
+
+        const roomType = roomData.type
+
+        // Count bedrooms (excluding basement)
+        if (roomType === 'chambre' && !isBasement) {
+          bedrooms++
+        }
+
+        // Count bathrooms (including basement)
+        if (roomType === 'salle_bain') {
+          bathrooms++
+        }
+
+        // Count powder rooms (including basement)
+        if (roomType === 'salle_eau') {
+          powderRooms++
+        }
+
+        // Count total rooms (excluding basement, only specific types)
+        if (!isBasement && countableRoomTypes.includes(roomType)) {
+          totalRooms++
+        }
+      })
+    })
+
+    return { bedrooms, bathrooms, powderRooms, totalRooms }
+  }
+
+  // Update library record with room counts
+  const updateLibraryRecordCounts = async () => {
+    const counts = calculateRoomCounts()
+
+    try {
+      const updatedProperty = await propertiesSupabaseService.updateProperty(property.id, {
+        nombre_chambres: counts.bedrooms,
+        salle_bain: counts.bathrooms,
+        salle_eau: counts.powderRooms
+      })
+
+      // Notify parent component if callback provided
+      if (onPropertyUpdate) {
+        onPropertyUpdate(updatedProperty)
+      }
+
+      console.log('Library record updated:', counts)
+      return updatedProperty
+    } catch (error) {
+      console.error('Error updating library record:', error)
+      throw error
+    }
   }
 
   const isCategoryCompleted = (categoryId: string): boolean => {
@@ -120,59 +221,170 @@ export function InspectionProgressWindow({ property }: InspectionProgressWindowP
   }
 
   const overallProgress = calculateOverallProgress()
+  const roomCounts = calculateRoomCounts()
+
+  const getMaterialIcon = (fieldName: string) => {
+    switch (fieldName.toLowerCase()) {
+      case 'plancher':
+      case 'flooring':
+        return <Layers sx={{ fontSize: 14, mr: 0.5 }} />
+      case 'armoires':
+      case 'cabinets':
+        return <Kitchen sx={{ fontSize: 14, mr: 0.5 }} />
+      case 'comptoirs':
+      case 'counters':
+        return <Countertops sx={{ fontSize: 14, mr: 0.5 }} />
+      case 'dosseret':
+      case 'backsplash':
+        return <Home sx={{ fontSize: 14, mr: 0.5 }} />
+      case 'murs':
+      case 'walls':
+        return <Weekend sx={{ fontSize: 14, mr: 0.5 }} />
+      case 'plafond':
+      case 'ceiling':
+        return <ExpandMore sx={{ fontSize: 14, mr: 0.5 }} />
+      default:
+        return null
+    }
+  }
+
+  const getRoomTypeLabel = (roomType: string) => {
+    const roomTranslations: Record<string, string> = {
+      'cuisine': 'Cuisine',
+      'salon': 'Salon',
+      'salle_a_manger': 'Salle à manger',
+      'chambre': 'Chambre',
+      'bureau': 'Bureau',
+      'salle_sejour': 'Salle de séjour',
+      'salle_bain': 'Salle de bain',
+      'salle_eau': 'Salle d\'eau',
+      'salle_familiale': 'Salle familiale',
+      'buanderie': 'Buanderie',
+      'rangement': 'Rangement',
+      'salle_mecanique': 'Salle mécanique',
+      'vestibule': 'Vestibule',
+      'solarium': 'Solarium'
+    }
+    return roomTranslations[roomType] || roomType
+  }
+
+  const getFieldLabel = (fieldName: string) => {
+    const fieldTranslations: Record<string, string> = {
+      'plancher': 'Plancher',
+      'armoires': 'Armoires',
+      'comptoirs': 'Comptoirs',
+      'dosseret': 'Dosseret',
+      'murs': 'Murs',
+      'plafond': 'Plafond',
+      'grandeur': 'Grandeur',
+      'nombreAppareils': 'Appareils',
+      'notes': 'Notes'
+    }
+    const label = fieldTranslations[fieldName] || fieldName
+    // Capitalize first letter
+    return label.charAt(0).toUpperCase() + label.slice(1)
+  }
+
+  // Helper to translate values that might be translation keys
+  const translateValue = (value: any): string => {
+    // Ensure value is a string
+    if (typeof value !== 'string') {
+      return String(value)
+    }
+
+    // Check if value looks like a translation key (contains dots and starts with 'inspection')
+    if (value.includes('.') && value.startsWith('inspection')) {
+      try {
+        const translated = t(value)
+        // If translation returns the same key, it means translation doesn't exist
+        return translated !== value ? translated : value
+      } catch {
+        return value
+      }
+    }
+    return value
+  }
 
   const renderPiecesDetails = () => {
     if (!property.inspection_pieces?.floors) return null
 
     return (
-      <Box sx={{ pl: 4, mt: 1 }}>
+      <Box sx={{ mt: 1 }}>
         {Object.entries(property.inspection_pieces.floors).map(([floorId, floor]) => {
-          const totalRooms = Object.keys(floor.rooms || {}).length
-          const completedRooms = Object.values(floor.rooms || {}).filter(
-            (room: any) => room.completedAt
-          ).length
+          const roomsData = Object.entries(floor.rooms || {})
+          if (roomsData.length === 0) return null
+
+          // Collect room types and their materials
+          const roomsWithMaterials: Array<{ roomType: string; materials: Array<{ icon: any; label: string; value: string }> }> = []
+
+          roomsData.forEach(([roomId, roomData]: [string, any]) => {
+            const customValues = roomData.customValues || {}
+            const roomType = roomData.type
+            const roomTypeLabel = getRoomTypeLabel(roomType)
+
+            // Collect materials for this room
+            const materials: Array<{ icon: any; label: string; value: string }> = []
+            Object.entries(roomData).forEach(([key, value]) => {
+              if (key === 'type' || key === 'completedAt' || key === 'customValues') return
+
+              let displayValue = value
+              if (Array.isArray(value) && value.length > 0) {
+                displayValue = value.map(v => {
+                  if (v === 'other' && customValues[key]) {
+                    return customValues[key]
+                  }
+                  return translateValue(v)
+                }).join(', ')
+              } else if (!value || (Array.isArray(value) && value.length === 0)) {
+                return
+              } else {
+                displayValue = translateValue(displayValue)
+              }
+
+              materials.push({
+                icon: getMaterialIcon(getFieldLabel(key)),
+                label: getFieldLabel(key),
+                value: displayValue
+              })
+            })
+
+            if (materials.length > 0) {
+              roomsWithMaterials.push({ roomType: roomTypeLabel, materials })
+            }
+          })
+
+          if (roomsWithMaterials.length === 0) return null
 
           return (
-            <Box key={floorId} sx={{ mb: 2 }}>
-              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>
-                {floor.name}
-              </Typography>
-              {Object.entries(floor.rooms || {}).map(([roomId, roomData]: [string, any]) => {
-                if (!roomData.completedAt) return null
+            <Box key={floorId} sx={{ mb: 1.5 }}>
+              {/* Line 1: Icon + Floor name */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+                <Layers sx={{ fontSize: 16, color: '#2196F3' }} />
+                <Typography variant="body2" fontWeight={700} sx={{ color: '#2196F3', fontSize: '13px' }}>
+                  {floor.name}
+                </Typography>
+              </Box>
 
-                return (
-                  <Box key={roomId} sx={{ pl: 2, mb: 1 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      {roomData.type}:
+              {/* Line 2+: Horizontal layout - room types as columns with materials underneath */}
+              <Box sx={{ pl: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                {roomsWithMaterials.map((room, idx) => (
+                  <Box key={idx} sx={{ minWidth: '120px' }}>
+                    {/* Room type header */}
+                    <Typography variant="caption" fontWeight={600} sx={{ fontSize: '12px', color: 'text.primary', display: 'block', mb: 0.5 }}>
+                      {room.roomType}
                     </Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
-                      {Object.entries(roomData).map(([key, value]) => {
-                        if (key === 'type' || key === 'completedAt' || key === 'customValues') return null
-                        if (Array.isArray(value) && value.length > 0) {
-                          return (
-                            <Chip
-                              key={key}
-                              label={`${key}: ${value.join(', ')}`}
-                              size="small"
-                              sx={{ fontSize: '11px' }}
-                            />
-                          )
-                        } else if (value && !Array.isArray(value)) {
-                          return (
-                            <Chip
-                              key={key}
-                              label={`${key}: ${value}`}
-                              size="small"
-                              sx={{ fontSize: '11px' }}
-                            />
-                          )
-                        }
-                        return null
-                      })}
-                    </Box>
+                    {/* Materials list vertically */}
+                    {room.materials.map((material, matIdx) => (
+                      <Box key={matIdx} sx={{ display: 'flex', alignItems: 'center', mb: 0.25 }}>
+                        {material.icon}
+                        <Typography variant="caption" sx={{ fontSize: '11px', color: 'text.secondary' }}>
+                          {material.label}: {material.value}
+                        </Typography>
+                      </Box>
+                    ))}
                   </Box>
-                )
-              })}
+                ))}
+              </Box>
             </Box>
           )
         })}
@@ -180,29 +392,321 @@ export function InspectionProgressWindow({ property }: InspectionProgressWindowP
     )
   }
 
-  const renderCategoryDetails = (categoryId: string) => {
-    if (categoryId === 'pieces') {
-      return renderPiecesDetails()
-    }
+  const renderBatimentDetails = () => {
+    const batimentData = property.inspection_batiment
+    if (!batimentData) return null
 
-    // For other categories, show JSONB data if available
-    const categoryData = (property as any)[`inspection_${categoryId}`]
-    if (!categoryData) return null
+    const subcategories = [
+      { id: 'fondation_mur_toiture', name: t('inspection.batiment.fondationMurToiture') },
+      { id: 'portes_fenetres', name: t('inspection.batiment.portesFenetres') },
+      { id: 'corniche_lucarnes_cheminee', name: t('inspection.batiment.cornicheLucarnesCheminee') }
+    ]
 
     return (
-      <Box sx={{ pl: 4, mt: 1 }}>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-          {Object.entries(categoryData).map(([key, value]) => (
-            <Chip
-              key={key}
-              label={`${key}: ${value}`}
-              size="small"
-              sx={{ fontSize: '11px' }}
-            />
-          ))}
+      <Box sx={{ mt: 1 }}>
+        {/* Line 1: Category name */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+          <Home sx={{ fontSize: 16, color: '#FF9800' }} />
+          <Typography variant="body2" fontWeight={700} sx={{ color: '#FF9800', fontSize: '13px' }}>
+            {t('inspection.categories.batiment')}
+          </Typography>
+        </Box>
+
+        {/* Horizontal layout - subcategories as columns */}
+        <Box sx={{ pl: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+          {subcategories.map((subcat) => {
+            const subcatData = (batimentData as any)[subcat.id]
+            if (!subcatData) return null
+
+            // Collect fields for this subcategory
+            const fields: Array<{ label: string; value: string }> = []
+            Object.entries(subcatData).forEach(([key, value]) => {
+              if (key === 'notes' || key === 'customValues' || key === 'completedAt' || !value) return
+
+              let displayValue = value
+              if (Array.isArray(value)) {
+                displayValue = value.map(v => translateValue(v)).join(', ')
+              } else {
+                displayValue = translateValue(displayValue)
+              }
+              const label = key.replace(/_/g, ' ')
+              const capitalizedLabel = label.charAt(0).toUpperCase() + label.slice(1)
+              fields.push({ label: capitalizedLabel, value: displayValue })
+            })
+
+            if (fields.length === 0) return null
+
+            return (
+              <Box key={subcat.id} sx={{ minWidth: '180px' }}>
+                {/* Subcategory name header */}
+                <Typography variant="caption" fontWeight={600} sx={{ fontSize: '12px', color: 'text.primary', display: 'block', mb: 0.5 }}>
+                  {subcat.name}
+                </Typography>
+                {/* Fields list vertically */}
+                {fields.map((field, idx) => (
+                  <Typography key={idx} variant="caption" sx={{ fontSize: '11px', color: 'text.secondary', display: 'block', mb: 0.25 }}>
+                    {field.label}: {field.value}
+                  </Typography>
+                ))}
+              </Box>
+            )
+          })}
         </Box>
       </Box>
     )
+  }
+
+  const renderGarageDetails = () => {
+    const garageData = property.inspection_garage
+    if (!garageData) return null
+
+    // Collect fields
+    const fields: Array<{ label: string; value: string }> = []
+    Object.entries(garageData).forEach(([key, value]) => {
+      if (key === 'notes' || key === 'customValues' || key === 'dimensions' || key === 'completedAt' || !value) return
+
+      let displayValue = value
+      if (Array.isArray(value)) {
+        displayValue = value.map(v => translateValue(v)).join(', ')
+      } else {
+        displayValue = translateValue(displayValue)
+      }
+      const label = key.replace(/_/g, ' ')
+      const capitalizedLabel = label.charAt(0).toUpperCase() + label.slice(1)
+      fields.push({ label: capitalizedLabel, value: displayValue })
+    })
+
+    if (fields.length === 0) return null
+
+    return (
+      <Box sx={{ mt: 1 }}>
+        {/* Line 1: Category name */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+          <DirectionsCar sx={{ fontSize: 16, color: '#4CAF50' }} />
+          <Typography variant="body2" fontWeight={700} sx={{ color: '#4CAF50', fontSize: '13px' }}>
+            {t('inspection.categories.garage')}
+          </Typography>
+        </Box>
+        {/* Line 2: All fields inline on same line */}
+        <Box sx={{ pl: 2 }}>
+          <Typography variant="caption" sx={{ fontSize: '11px', color: 'text.secondary' }}>
+            {fields.map((field, idx) => (
+              <span key={idx}>
+                {field.label}: {field.value}
+                {idx < fields.length - 1 ? ', ' : ''}
+              </span>
+            ))}
+          </Typography>
+        </Box>
+      </Box>
+    )
+  }
+
+  const renderMecaniqueDetails = () => {
+    const mecaniqueData = property.inspection_mecanique
+    if (!mecaniqueData) return null
+
+    const subcategories = [
+      { id: 'chauffage_ventilation', name: t('inspection.mecanique.chauffageVentilation') },
+      { id: 'plomberie', name: t('inspection.mecanique.plomberie') },
+      { id: 'electricite', name: t('inspection.mecanique.electricite') }
+    ]
+
+    return (
+      <Box sx={{ mt: 1 }}>
+        {/* Line 1: Category name */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+          <Settings sx={{ fontSize: 16, color: '#9C27B0' }} />
+          <Typography variant="body2" fontWeight={700} sx={{ color: '#9C27B0', fontSize: '13px' }}>
+            {t('inspection.categories.mecanique')}
+          </Typography>
+        </Box>
+
+        {/* Horizontal layout - subcategories as columns */}
+        <Box sx={{ pl: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+          {subcategories.map((subcat) => {
+            const subcatData = (mecaniqueData as any)[subcat.id]
+            if (!subcatData) return null
+
+            // Collect fields for this subcategory
+            const fields: Array<{ label: string; value: string }> = []
+            Object.entries(subcatData).forEach(([key, value]) => {
+              if (key === 'notes' || key === 'customValues' || key === 'completedAt' || !value) return
+
+              let displayValue = value
+              if (Array.isArray(value)) {
+                displayValue = value.map(v => translateValue(v)).join(', ')
+              } else {
+                displayValue = translateValue(displayValue)
+              }
+              const label = key.replace(/_/g, ' ')
+              const capitalizedLabel = label.charAt(0).toUpperCase() + label.slice(1)
+              fields.push({ label: capitalizedLabel, value: displayValue })
+            })
+
+            if (fields.length === 0) return null
+
+            return (
+              <Box key={subcat.id} sx={{ minWidth: '180px' }}>
+                {/* Subcategory name header */}
+                <Typography variant="caption" fontWeight={600} sx={{ fontSize: '12px', color: 'text.primary', display: 'block', mb: 0.5 }}>
+                  {subcat.name}
+                </Typography>
+                {/* Fields list vertically */}
+                {fields.map((field, idx) => (
+                  <Typography key={idx} variant="caption" sx={{ fontSize: '11px', color: 'text.secondary', display: 'block', mb: 0.25 }}>
+                    {field.label}: {field.value}
+                  </Typography>
+                ))}
+              </Box>
+            )
+          })}
+        </Box>
+      </Box>
+    )
+  }
+
+  const renderExterieurDetails = () => {
+    const exterieurData = property.inspection_exterieur
+    if (!exterieurData) return null
+
+    const subcategories = [
+      { id: 'amenagement_installations_entree', name: t('inspection.exterieur.amenagementInstallationsEntree') },
+      { id: 'piscine_spa', name: t('inspection.exterieur.piscineSpa') }
+    ]
+
+    return (
+      <Box sx={{ mt: 1 }}>
+        {/* Line 1: Category name */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+          <Landscape sx={{ fontSize: 16, color: '#795548' }} />
+          <Typography variant="body2" fontWeight={700} sx={{ color: '#795548', fontSize: '13px' }}>
+            {t('inspection.categories.exterieur')}
+          </Typography>
+        </Box>
+
+        {/* Horizontal layout - subcategories as columns */}
+        <Box sx={{ pl: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+          {subcategories.map((subcat) => {
+            const subcatData = (exterieurData as any)[subcat.id]
+            if (!subcatData) return null
+
+            // Collect fields for this subcategory
+            const fields: Array<{ label: string; value: string }> = []
+            Object.entries(subcatData).forEach(([key, value]) => {
+              if (key === 'notes' || key === 'customValues' || key === 'dimensions' || key === 'lengths' || key === 'completedAt' || !value) return
+
+              let displayValue = value
+              if (Array.isArray(value)) {
+                displayValue = value.join(', ')
+              }
+              fields.push({ label: key.replace(/_/g, ' '), value: displayValue })
+            })
+
+            if (fields.length === 0) return null
+
+            return (
+              <Box key={subcat.id} sx={{ minWidth: '180px' }}>
+                {/* Subcategory name header */}
+                <Typography variant="caption" fontWeight={600} sx={{ fontSize: '12px', color: 'text.primary', display: 'block', mb: 0.5 }}>
+                  {subcat.name}
+                </Typography>
+                {/* Fields list vertically */}
+                {fields.map((field, idx) => (
+                  <Typography key={idx} variant="caption" sx={{ fontSize: '11px', color: 'text.secondary', display: 'block', mb: 0.25 }}>
+                    {field.label}: {field.value}
+                  </Typography>
+                ))}
+              </Box>
+            )
+          })}
+        </Box>
+      </Box>
+    )
+  }
+
+  const renderDiversDetails = () => {
+    const diversData = property.inspection_divers
+    if (!diversData) return null
+
+    const subcategories = [
+      { id: 'services', name: t('inspection.divers.services') },
+      { id: 'voisinage', name: t('inspection.divers.voisinage') },
+      { id: 'foyer', name: t('inspection.divers.foyer') },
+      { id: 'divers', name: t('inspection.divers.diversSub') }
+    ]
+
+    return (
+      <Box sx={{ mt: 1 }}>
+        {/* Line 1: Category name */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+          <Build sx={{ fontSize: 16, color: '#607D8B' }} />
+          <Typography variant="body2" fontWeight={700} sx={{ color: '#607D8B', fontSize: '13px' }}>
+            {t('inspection.categories.divers')}
+          </Typography>
+        </Box>
+
+        {/* Horizontal layout - subcategories as columns */}
+        <Box sx={{ pl: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+          {subcategories.map((subcat) => {
+            const subcatData = (diversData as any)[subcat.id]
+            if (!subcatData) return null
+
+            // Collect fields for this subcategory
+            const fields: Array<{ label: string; value: string }> = []
+            Object.entries(subcatData).forEach(([key, value]) => {
+              if (key === 'notes' || key === 'customValues' || key === 'completedAt' || !value) return
+
+              let displayValue = value
+              if (Array.isArray(value)) {
+                displayValue = value.map(v => translateValue(v)).join(', ')
+              } else {
+                displayValue = translateValue(displayValue)
+              }
+              const label = key.replace(/_/g, ' ')
+              const capitalizedLabel = label.charAt(0).toUpperCase() + label.slice(1)
+              fields.push({ label: capitalizedLabel, value: displayValue })
+            })
+
+            if (fields.length === 0) return null
+
+            return (
+              <Box key={subcat.id} sx={{ minWidth: '180px' }}>
+                {/* Subcategory name header */}
+                <Typography variant="caption" fontWeight={600} sx={{ fontSize: '12px', color: 'text.primary', display: 'block', mb: 0.5 }}>
+                  {subcat.name}
+                </Typography>
+                {/* Fields list vertically */}
+                {fields.map((field, idx) => (
+                  <Typography key={idx} variant="caption" sx={{ fontSize: '11px', color: 'text.secondary', display: 'block', mb: 0.25 }}>
+                    {field.label}: {field.value}
+                  </Typography>
+                ))}
+              </Box>
+            )
+          })}
+        </Box>
+      </Box>
+    )
+  }
+
+  const renderCategoryDetails = (categoryId: string) => {
+    switch (categoryId) {
+      case 'pieces':
+        return renderPiecesDetails()
+      case 'batiment':
+        return renderBatimentDetails()
+      case 'garage':
+        return renderGarageDetails()
+      case 'mecanique':
+        return renderMecaniqueDetails()
+      case 'exterieur':
+        return renderExterieurDetails()
+      case 'divers':
+        return renderDiversDetails()
+      default:
+        return null
+    }
   }
 
   return (
@@ -219,19 +723,47 @@ export function InspectionProgressWindow({ property }: InspectionProgressWindowP
       <Box
         sx={{
           p: 2,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
           bgcolor: '#f5f5f5'
         }}
       >
-        <Assessment sx={{ fontSize: 32, color: 'primary.main' }} />
-        <Typography variant="h4" fontWeight={700}>
-          {t('title')}
-        </Typography>
-        <Typography variant="h4" fontWeight={700} color="primary">
-          {overallProgress}%
-        </Typography>
+        {/* Title and Progress */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          <Assessment sx={{ fontSize: 32, color: 'primary.main' }} />
+          <Typography variant="h4" fontWeight={700}>
+            {t('inspection.progress.title')}
+          </Typography>
+          <Typography variant="h4" fontWeight={700} color="primary">
+            {overallProgress}%
+          </Typography>
+        </Box>
+
+        {/* Room Counts */}
+        <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Bed sx={{ fontSize: 20, color: '#2196F3' }} />
+            <Typography variant="body2" fontWeight={600}>
+              {roomCounts.bedrooms} {t('inspection.rooms.bedrooms')}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Bathtub sx={{ fontSize: 20, color: '#9C27B0' }} />
+            <Typography variant="body2" fontWeight={600}>
+              {roomCounts.bathrooms} {t('inspection.rooms.bathrooms')}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Shower sx={{ fontSize: 20, color: '#FF9800' }} />
+            <Typography variant="body2" fontWeight={600}>
+              {roomCounts.powderRooms} {t('inspection.rooms.powderRooms')}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <MeetingRoom sx={{ fontSize: 20, color: '#4CAF50' }} />
+            <Typography variant="body2" fontWeight={600}>
+              {roomCounts.totalRooms} {t('inspection.rooms.totalRooms')}
+            </Typography>
+          </Box>
+        </Box>
       </Box>
 
       {/* Progress bar and category pills - always visible */}

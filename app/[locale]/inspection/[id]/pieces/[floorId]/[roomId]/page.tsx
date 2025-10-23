@@ -66,6 +66,11 @@ export default function RoomInspectionPage() {
       const existingRoomData = prop.inspection_pieces?.floors?.[floorId]?.rooms?.[roomId]
       if (existingRoomData) {
         setRoomData(existingRoomData)
+
+        // Load custom values if they exist
+        if (existingRoomData.customValues) {
+          setCustomValues(existingRoomData.customValues)
+        }
       }
     } catch (err) {
       console.error('Error loading property:', err)

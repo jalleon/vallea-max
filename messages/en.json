@@ -237,11 +237,17 @@
     "categories": {
       "title": "Inspection Categories",
       "pieces": "Rooms",
+      "piecesDesc": "Room by room inspection",
       "batiment": "Building",
+      "batimentDesc": "Structure and fixed elements",
       "garage": "Garage",
+      "garageDesc": "Garage and parking",
       "mecanique": "Mechanical",
-      "divers": "Miscellaneous",
+      "mecaniqueDesc": "Mechanical systems",
+      "divers": "Services, Neighborhood, Fireplace and Misc.",
+      "diversDesc": "Other systems",
       "exterieur": "Exterior",
+      "exterieurDesc": "Exterior landscaping",
       "comingSoon": "Coming Soon"
     },
     "progress": {
@@ -264,7 +270,11 @@
       "salleMecanique": "Mechanical Room",
       "vestibule": "Vestibule",
       "solarium": "Solarium",
-      "autre": "Other"
+      "autre": "Other",
+      "bedrooms": "Bedrooms",
+      "bathrooms": "Bathrooms",
+      "powderRooms": "Powder Rooms",
+      "totalRooms": "Total Rooms"
     },
     "floors": {
       "sousSol": "Basement",
@@ -279,6 +289,7 @@
         "melamine": "Melamine",
         "wood": "Wood",
         "lacquered": "Lacquered",
+        "mdf": "MDF",
         "other": "Other"
       },
       "counters": {
@@ -288,6 +299,7 @@
         "granite": "Granite",
         "ceramic": "Ceramic",
         "wood": "Wood",
+        "stainless": "Stainless Steel",
         "marble": "Marble",
         "other": "Other"
       },
@@ -320,17 +332,327 @@
         "other": "Other"
       },
       "ceiling": {
-        "label": "Ceiling"
+        "label": "Ceiling",
+        "drywall": "Drywall",
+        "suspended": "Suspended Ceiling",
+        "stucco": "Stucco",
+        "other": "Other"
       }
     },
     "fields": {
       "size": "Size",
-      "fixtureCount": "Number of Fixtures"
+      "fixtureCount": "Number of Plumbing Fixtures",
+      "notes": "Notes (optional)"
+    },
+    "fixtures": {
+      "1": "1",
+      "2": "2",
+      "3": "3",
+      "4": "4",
+      "5": "5",
+      "6": "6",
+      "7": "7",
+      "8": "8"
     },
     "sizes": {
       "large": "Large",
       "medium": "Medium",
       "small": "Small"
+    },
+    "batiment": {
+      "title": "Building",
+      "fondationMurToiture": "Foundation, Exterior Wall and Roofing",
+      "portesFenetres": "Doors and Windows",
+      "cornicheLucarnesCheminee": "Cornice, Dormers, Chimney",
+      "typeFondation": "Foundation type",
+      "murExterieur": "Exterior wall",
+      "gouttieres": "Gutters",
+      "toiture": "Roofing",
+      "ageToiture": "Approx. roof age",
+      "typePortes": "Door type",
+      "fenetresMateirau": "Windows - Material",
+      "fenetresType": "Windows - Type",
+      "corniche": "Cornice",
+      "lucarnesNombre": "Dormers - Number",
+      "lucarnesLongueur": "Dormers - Length",
+      "chemineeNombre": "Chimney - Number",
+      "chemineeMateirau": "Chimney - Material"
+    },
+    "garage": {
+      "title": "Garage",
+      "typeGarage": "Garage type",
+      "finition": "Finish",
+      "porteElectrique": "Electric door",
+      "dimension": "Dimension",
+      "materiaux": "Materials",
+      "largeur": "Width",
+      "longueur": "Length",
+      "superficie": "Area"
+    },
+    "mecanique": {
+      "title": "Mechanical",
+      "chauffageVentilation": "Heating and Ventilation/Air Conditioning",
+      "plomberie": "Plumbing",
+      "electricite": "Electricity",
+      "typeSystemeChauffage": "Heating system type",
+      "climatisation": "Air conditioning",
+      "materiauEntreeEau": "Water inlet material",
+      "type": "Type",
+      "entreeLaveuse": "Washer/dryer hookup",
+      "chauffeEau": "Water heater",
+      "typeEnergie": "Energy type",
+      "typePanneau": "Panel type",
+      "amperage": "Amperage"
+    },
+    "exterieur": {
+      "title": "Exterior",
+      "amenagementInstallationsEntree": "Landscaping, Outdoor Installations and Driveway",
+      "piscineSpa": "Pool/Spa",
+      "elementsAmenagement": "Landscaping elements",
+      "installationsExterieures": "Outdoor installations",
+      "typeEntree": "Driveway type",
+      "nbVehicules": "# of vehicles",
+      "longueur": "Length",
+      "dimensions": "Dimensions"
+    },
+    "divers": {
+      "title": "Services, Neighborhood, Fireplace and Miscellaneous",
+      "services": "Services",
+      "voisinage": "Neighborhood",
+      "foyer": "Fireplace",
+      "diversSub": "Miscellaneous",
+      "servicesDisponibles": "Available services",
+      "secteur": "Sector",
+      "intersection": "Intersection",
+      "facteursVoisinage": "Favorable or unfavorable factors",
+      "etage": "Floor",
+      "typeFoyer": "Type",
+      "equipementsInstallations": "Equipment and installations"
+    },
+    "batimentOptions": {
+      "fondationOptions": {
+        "betonCoule": "Poured concrete",
+        "blocsBeton": "Concrete blocks",
+        "dalleBeton": "Concrete slab",
+        "sousSolPartiel": "Partial basement",
+        "videSanitaire": "Crawl space",
+        "piliers": "Piers",
+        "pierreChamps": "Fieldstone"
+      },
+      "murOptions": {
+        "briques": "Brick",
+        "pierre": "Stone",
+        "aluminium": "Aluminum",
+        "vinyle": "Vinyl",
+        "agregat": "Aggregate",
+        "bois": "Wood",
+        "stucco": "Stucco",
+        "maybec": "Maybec",
+        "bardeauxAsphalte": "Asphalt shingles",
+        "canexel": "Canexel",
+        "acrylique": "Acrylic",
+        "blocsBeton": "Concrete blocks"
+      },
+      "toitureOptions": {
+        "bardeauxAsphalte": "Asphalt shingles",
+        "goudronGravier": "Tar and gravel",
+        "tole": "Metal",
+        "membraneElastomere": "Elastomeric membrane",
+        "acier": "Steel",
+        "bardeauxBois": "Wood shingles",
+        "tuilesBeton": "Concrete tiles"
+      },
+      "portesOptions": {
+        "acier": "Steel",
+        "portePatio": "Patio door",
+        "bois": "Wood",
+        "aluminium": "Aluminum",
+        "vitree": "Glass"
+      },
+      "fenetresMateriauOptions": {
+        "aluminium": "Aluminum",
+        "pvc": "PVC",
+        "vinyle": "Vinyl",
+        "bois": "Wood",
+        "vitreVitre": "Glass/glass"
+      },
+      "fenetresTypeOptions": {
+        "manivelles": "Crank",
+        "battant": "Casement",
+        "coulissantes": "Sliding",
+        "guillotine": "Double-hung",
+        "fixes": "Fixed"
+      },
+      "cornicheMouluresOptions": {
+        "oui": "Yes",
+        "non": "No"
+      },
+      "chemineesOptions": {
+        "briques": "Brick",
+        "prefabriquee": "Prefabricated"
+      }
+    },
+    "garageOptions": {
+      "typeOptions": {
+        "attache": "Attached",
+        "detache": "Detached",
+        "integre": "Integrated",
+        "auSousSol": "In basement",
+        "abriAuto": "Carport"
+      },
+      "finitionOptions": {
+        "fini": "Finished",
+        "nonFini": "Unfinished"
+      },
+      "materiauxOptions": {
+        "briques": "Brick",
+        "beton": "Concrete"
+      }
+    },
+    "mecaniqueOptions": {
+      "chauffageOptions": {
+        "electricite": "Electric",
+        "gaz": "Gas",
+        "airChaud": "Forced air",
+        "eauChaude": "Hot water",
+        "planchersChauffants": "Radiant floor heating",
+        "convectaires": "Convectors",
+        "plinthesElectrique": "Baseboard heaters",
+        "radiant": "Radiant",
+        "huileMazout": "Oil (fuel oil)"
+      },
+      "climatisationOptions": {
+        "thermopompeCentrale": "Central heat pump",
+        "thermopompeMurale": "Wall-mounted heat pump",
+        "climatiseurMural": "Wall-mounted air conditioner (mini-split)",
+        "systemeCentralise": "Central air conditioning system",
+        "echangeurAir": "Air exchanger"
+      },
+      "plomberieMateriauOptions": {
+        "cuivre": "Copper",
+        "pex": "PEX",
+        "polyB": "Poly-B"
+      },
+      "plomberieTypeOptions": {
+        "standard": "Standard",
+        "ancienne": "Old",
+        "luxe": "Luxury"
+      },
+      "chauffeEauOptions": {
+        "40gallons": "40 gallons",
+        "60gallons": "60 gallons"
+      },
+      "energieOptions": {
+        "electrique": "Electric",
+        "gaz": "Gas",
+        "huileMazout": "Oil (fuel oil)"
+      },
+      "panneauOptions": {
+        "disjoncteurs": "Circuit breakers",
+        "fusibles": "Fuses"
+      },
+      "amperageOptions": {
+        "60": "60",
+        "100": "100",
+        "125": "125",
+        "150": "150",
+        "200": "200",
+        "400": "400"
+      }
+    },
+    "exterieurOptions": {
+      "amenagementItems": {
+        "pelouse": "Lawn",
+        "arbres": "Trees",
+        "arbustes": "Shrubs",
+        "haie": "Hedge",
+        "rocailles": "Rock gardens",
+        "trottoirs": "Sidewalks",
+        "cloture": "Fence",
+        "terrassePavee": "Paved terrace",
+        "dalleBeton": "Concrete slab"
+      },
+      "installationItems": {
+        "perron": "Front porch",
+        "balcon": "Balcony",
+        "patio": "Patio",
+        "galeire": "Gallery",
+        "muretsRetenue": "Retaining walls",
+        "remise": "Shed",
+        "cabanon": "Garden shed",
+        "serre": "Greenhouse",
+        "gazebo": "Gazebo",
+        "garage": "Garage"
+      },
+      "entreeOptions": {
+        "asphaltee": "Asphalt",
+        "pavee": "Paved",
+        "gravier": "Gravel",
+        "beton": "Concrete",
+        "paves": "Pavers",
+        "terre": "Dirt"
+      },
+      "piscineItems": {
+        "piscineCreusee": "In-ground pool",
+        "piscineHorsTerre": "Above-ground pool",
+        "spa": "Spa"
+      }
+    },
+    "diversOptions": {
+      "servicesItems": {
+        "aqueduc": "Aqueduct",
+        "egoutSanitaire": "Sanitary sewer",
+        "egoutPluvial": "Storm sewer",
+        "ruePavee": "Paved street",
+        "rueNonPavee": "Unpaved street",
+        "eclairage": "Street lighting",
+        "trottoirs": "Sidewalks",
+        "puits": "Well",
+        "fosseSeptique": "Septic tank",
+        "fosse": "Ditch",
+        "champsEpuration": "Drain field",
+        "bordures": "Curbs",
+        "eauLac": "Lake water",
+        "pointeEau": "Water outlet"
+      },
+      "secteurOptions": {
+        "agricole": "Agricultural",
+        "mixte": "Mixed",
+        "commercial": "Commercial",
+        "residentiel": "Residential",
+        "industriel": "Industrial"
+      },
+      "foyerPlancher": {
+        "sousSol": "Basement",
+        "rdc": "Main floor",
+        "etage": "Upper floor"
+      },
+      "foyerType": {
+        "combustion": "Combustion",
+        "electrique": "Electric",
+        "gaz": "Gas",
+        "bois": "Wood",
+        "granules": "Pellets"
+      },
+      "diversItems": {
+        "interphone": "Intercom",
+        "systemeSon": "Sound system",
+        "systemeAlarme": "Alarm system",
+        "aspirateurCentral": "Central vacuum",
+        "generatrice": "Generator",
+        "borneRecharge": "Charging station",
+        "camera": "Camera"
+      }
+    },
+    "customValue": {
+      "title": "Enter a custom value",
+      "label": "Custom value"
+    },
+    "options": {
+      "yes": "Yes",
+      "no": "No",
+      "other": "Other",
+      "notes": "Notes"
     }
   },
 

@@ -56,6 +56,7 @@ import { FLOOR_OPTIONS, ROOM_CONFIG } from '@/features/inspection/constants/room
 
 const BASE_ROOM_TYPES = ['cuisine', 'salle_a_manger', 'salon', 'chambre', 'bureau', 'salle_sejour', 'salle_bain', 'salle_eau']
 const BASEMENT_ROOM_TYPES = ['salle_familiale', 'salle_sejour', 'chambre', 'bureau', 'buanderie', 'rangement', 'salle_mecanique', 'salle_bain', 'salle_eau']
+const UPPER_FLOOR_ROOM_TYPES = ['chambre', 'bureau', 'salle_bain', 'salle_eau']
 const ROOM_ICONS: Record<string, any> = {
   cuisine: Kitchen,
   salle_a_manger: RestaurantMenu,
@@ -215,8 +216,8 @@ export default function PiecesPage() {
       rooms: {}
     }
 
-    // Initialize base room types for the new floor
-    BASE_ROOM_TYPES.forEach(roomType => {
+    // Initialize upper floor room types for the new floor (2e+)
+    UPPER_FLOOR_ROOM_TYPES.forEach(roomType => {
       const roomId = `${roomType}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       newFloor.rooms[roomId] = {
         type: roomType
@@ -229,7 +230,7 @@ export default function PiecesPage() {
         ...currentData.floors,
         [floorId]: newFloor
       },
-      totalRooms: currentData.totalRooms + BASE_ROOM_TYPES.length
+      totalRooms: currentData.totalRooms + UPPER_FLOOR_ROOM_TYPES.length
     }
 
     await updateInspectionPieces(updatedData)
@@ -290,8 +291,14 @@ export default function PiecesPage() {
       rooms: {}
     }
 
-    // Use basement room types for sous_sol, otherwise use base room types
-    const roomTypes = floorValue === 'sous_sol' ? BASEMENT_ROOM_TYPES : BASE_ROOM_TYPES
+    // Determine room types based on floor
+    let roomTypes = BASE_ROOM_TYPES
+    if (floorValue === 'sous_sol') {
+      roomTypes = BASEMENT_ROOM_TYPES
+    } else if (floorValue === 'deuxieme' || floorValue === 'troisieme') {
+      // 2e and 3e floors use upper floor room types
+      roomTypes = UPPER_FLOOR_ROOM_TYPES
+    }
 
     // Initialize room types
     roomTypes.forEach(roomType => {
@@ -568,7 +575,14 @@ export default function PiecesPage() {
             <Grid container spacing={2}>
               {(() => {
                 const groupedRooms = getGroupedRooms(selectedFloor)
-                const roomTypesOrder = selectedFloor === 'sous_sol' ? BASEMENT_ROOM_TYPES : BASE_ROOM_TYPES
+                // Determine room types order based on floor
+                let roomTypesOrder = BASE_ROOM_TYPES
+                if (selectedFloor === 'sous_sol') {
+                  roomTypesOrder = BASEMENT_ROOM_TYPES
+                } else if (selectedFloor === 'deuxieme' || selectedFloor === 'troisieme' || selectedFloor?.startsWith('floor_')) {
+                  // For 2e, 3e, 4e+ floors use upper floor room types
+                  roomTypesOrder = UPPER_FLOOR_ROOM_TYPES
+                }
 
                 // Sort room types by their order
                 const sortedRoomTypes = Object.keys(groupedRooms).sort((a, b) => {

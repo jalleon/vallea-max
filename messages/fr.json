@@ -237,11 +237,17 @@
     "categories": {
       "title": "Catégories d'inspection",
       "pieces": "Pièces",
+      "piecesDesc": "Inspection pièce par pièce",
       "batiment": "Bâtiment",
+      "batimentDesc": "Structure et éléments fixes",
       "garage": "Garage",
+      "garageDesc": "Garage et stationnement",
       "mecanique": "Mécanique",
-      "divers": "Divers",
+      "mecaniqueDesc": "Systèmes mécaniques",
+      "divers": "Services, Voisinage, Foyer et Divers",
+      "diversDesc": "Autres systèmes",
       "exterieur": "Extérieur",
+      "exterieurDesc": "Aménagements extérieurs",
       "comingSoon": "Bientôt disponible"
     },
     "progress": {
@@ -264,7 +270,11 @@
       "salleMecanique": "Salle mécanique",
       "vestibule": "Vestibule",
       "solarium": "Solarium",
-      "autre": "Autre"
+      "autre": "Autre",
+      "bedrooms": "Chambres",
+      "bathrooms": "Salles de bain",
+      "powderRooms": "Salles d'eau",
+      "totalRooms": "Pièces totales"
     },
     "floors": {
       "sousSol": "Sous-sol",
@@ -279,7 +289,8 @@
         "melamine": "Mélamine",
         "wood": "Bois",
         "lacquered": "Laqué",
-        "other": "Autre"
+        "mdf": "MDF",
+        "other": "Autres"
       },
       "counters": {
         "label": "Comptoirs",
@@ -288,8 +299,9 @@
         "granite": "Granite",
         "ceramic": "Céramique",
         "wood": "Bois",
+        "stainless": "Inox",
         "marble": "Marbre",
-        "other": "Autre"
+        "other": "Autres"
       },
       "backsplash": {
         "label": "Dosseret",
@@ -297,7 +309,7 @@
         "stainless": "Inox",
         "quartz": "Quartz",
         "granite": "Granite",
-        "other": "Autre"
+        "other": "Autres"
       },
       "flooring": {
         "label": "Plancher",
@@ -307,7 +319,7 @@
         "floating": "Flottant",
         "vinyl": "Vinyle",
         "carpet": "Tapis",
-        "other": "Autre"
+        "other": "Autres"
       },
       "walls": {
         "label": "Murs",
@@ -317,20 +329,322 @@
         "brick": "Brique",
         "stone": "Pierre",
         "veneer": "Placage",
-        "other": "Autre"
+        "other": "Autres"
       },
       "ceiling": {
-        "label": "Plafond"
+        "label": "Plafond",
+        "drywall": "Gypse",
+        "suspended": "Plafond suspendu",
+        "stucco": "Stucco",
+        "other": "Autres"
       }
     },
     "fields": {
       "size": "Grandeur",
-      "fixtureCount": "Nombre d'appareils de plomberie"
+      "fixtureCount": "Nombre d'appareils de plomberie",
+      "notes": "Notes (optionnel)"
+    },
+    "fixtures": {
+      "1": "1",
+      "2": "2",
+      "3": "3",
+      "4": "4",
+      "5": "5",
+      "6": "6",
+      "7": "7",
+      "8": "8"
     },
     "sizes": {
       "large": "Grande",
       "medium": "Moyenne",
       "small": "Petite"
+    },
+    "batiment": {
+      "title": "Bâtiment",
+      "fondationMurToiture": "Fondation, Mur extérieur et Toiture",
+      "portesFenetres": "Portes et Fenêtres",
+      "cornicheLucarnesCheminee": "Corniche, Lucarnes, Cheminée",
+      "typeFondation": "Type de fondation",
+      "murExterieur": "Mur extérieur",
+      "gouttieres": "Gouttières",
+      "toiture": "Toiture",
+      "ageToiture": "Âge approx. toiture",
+      "typePortes": "Type de portes",
+      "fenetresMateirau": "Fenêtres - Matériau",
+      "fenetresType": "Fenêtres - Type",
+      "corniche": "Corniche",
+      "lucarnesNombre": "Lucarnes - Nombre",
+      "lucarnesLongueur": "Lucarnes - Longueur",
+      "chemineeNombre": "Cheminée - Nombre",
+      "chemineeMateirau": "Cheminée - Matériau",
+      "fondationOptions": {
+        "betonCoule": "Béton coulé",
+        "blocsBeton": "Blocs de béton",
+        "dalleBeton": "Dalle de Béton",
+        "sousSolPartiel": "Sous-sol partiel",
+        "videSanitaire": "Vide sanitaire",
+        "piliers": "Piliers",
+        "pierreChamps": "Pierre des champs"
+      },
+      "murOptions": {
+        "briques": "Briques",
+        "pierre": "Pierre",
+        "aluminium": "Aluminium",
+        "vinyle": "Vinyle",
+        "agregat": "Agrégat",
+        "bois": "Bois",
+        "stucco": "Stucco",
+        "maybec": "Maybec",
+        "bardeauxAsphalte": "Bardeaux d'asphalte",
+        "canexel": "Canexel",
+        "acrylique": "Acrylique",
+        "blocsBeton": "Blocs de Béton"
+      },
+      "toitureOptions": {
+        "bardeauxAsphalte": "Bardeaux d'asphalte",
+        "goudronGravier": "Goudron / Gravier",
+        "tole": "Tôle",
+        "membraneElastomere": "Membrane élastomère",
+        "acier": "Acier",
+        "bardeauxBois": "Bardeaux de bois",
+        "tuilesBeton": "Tuiles de béton"
+      },
+      "portesOptions": {
+        "acier": "Acier",
+        "portePatio": "Porte patio",
+        "bois": "Bois",
+        "aluminium": "Aluminium",
+        "vitree": "Vitrée"
+      },
+      "fenetresMateriauOptions": {
+        "aluminium": "Aluminium",
+        "pvc": "PVC",
+        "vinyle": "Vinyle",
+        "bois": "Bois",
+        "vitreVitre": "Vitre/vitre"
+      },
+      "fenetresTypeOptions": {
+        "manivelles": "Manivelles",
+        "aBattant": "À battant",
+        "coulissantes": "Coulissantes",
+        "guillotine": "Guillotine",
+        "fixes": "Fixes"
+      },
+      "cornicheOptions": {
+        "aluminium": "Aluminium"
+      },
+      "chemineeOptions": {
+        "brique": "Brique"
+      }
+    },
+    "garage": {
+      "title": "Garage",
+      "typeGarage": "Type de garage",
+      "finition": "Finition",
+      "porteElectrique": "Porte électrique",
+      "dimension": "Dimension",
+      "materiaux": "Matériaux",
+      "largeur": "Largeur",
+      "longueur": "Longueur",
+      "superficie": "Superficie",
+      "typeOptions": {
+        "attache": "Attaché",
+        "detache": "Détaché",
+        "integre": "Intégré",
+        "sousSol": "Au sous-sol",
+        "abriAuto": "Abri d'auto"
+      },
+      "finitionOptions": {
+        "fini": "Fini",
+        "nonFini": "Non fini"
+      },
+      "materiauxOptions": {
+        "briques": "Briques",
+        "beton": "Béton"
+      }
+    },
+    "mecanique": {
+      "title": "Mécanique",
+      "chauffageVentilation": "Chauffage et Ventilation/Climatisation",
+      "plomberie": "Plomberie",
+      "electricite": "Électricité",
+      "typeSystemeChauffage": "Type de système de chauffage",
+      "climatisation": "Climatisation",
+      "materiauEntreeEau": "Matériau d'entrée d'eau",
+      "type": "Type",
+      "entreeLaveuse": "Entrée laveuse sécheuse",
+      "chauffeEau": "Chauffe-eau",
+      "typeEnergie": "Type d'énergie",
+      "typePanneau": "Type de panneau",
+      "amperage": "Ampérage",
+      "chauffageOptions": {
+        "electricite": "Electricité",
+        "gaz": "Gaz",
+        "airChaud": "Air chaud",
+        "eauChaude": "Eau chaude",
+        "planchersChauffants": "Planchers chauffants",
+        "convectaires": "Convectaires",
+        "plinthesElectrique": "Plinthes électrique",
+        "radiant": "Radiant",
+        "huile": "Huile (Mazout)"
+      },
+      "climatisationOptions": {
+        "thermopompeCentrale": "Thermopompe centrale",
+        "thermopompeMurale": "Thermopompe murale",
+        "climatiseurMural": "Climatiseur mural (mini-split)",
+        "systemeCentrale": "Système de climatisation centrale",
+        "echangeurAir": "Échangeur d'air"
+      },
+      "plomberieMateriauOptions": {
+        "cuivre": "Cuivre",
+        "pex": "PEX",
+        "polyB": "Poly-B"
+      },
+      "plomberieTypeOptions": {
+        "standard": "Standard",
+        "ancienne": "Ancienne",
+        "luxe": "Luxe"
+      },
+      "chauffeEauOptions": {
+        "quaranteGallons": "40 gallons",
+        "soixanteGallons": "60 gallons"
+      },
+      "energieOptions": {
+        "electrique": "Électrique",
+        "gaz": "Gaz",
+        "huile": "Huile (Mazout)"
+      },
+      "panneauOptions": {
+        "disjoncteurs": "Disjoncteurs",
+        "fusibles": "Fusibles"
+      },
+      "amperageOptions": {
+        "60": "60",
+        "100": "100",
+        "125": "125",
+        "150": "150",
+        "200": "200",
+        "400": "400"
+      }
+    },
+    "exterieur": {
+      "title": "Extérieur",
+      "amenagementInstallationsEntree": "Aménagement paysager, Installations extérieures et Entrée",
+      "piscineSpa": "Piscine/Spa",
+      "elementsAmenagement": "Éléments d'aménagement paysager",
+      "installationsExterieures": "Installations extérieures",
+      "typeEntree": "Type d'entrée",
+      "nbVehicules": "# de véhicule",
+      "longueur": "Longueur",
+      "dimensions": "Dimensions"
+    },
+    "exterieurOptions": {
+      "amenagementItems": {
+        "pelouse": "Pelouse",
+        "arbres": "Arbres",
+        "arbustes": "Arbustes",
+        "haie": "Haie",
+        "rocailles": "Rocailles",
+        "trottoirs": "Trottoirs",
+        "cloture": "Clôture",
+        "terrassePavee": "Terrasse pavée",
+        "dalleBeton": "Dalle de béton"
+      },
+      "installationItems": {
+        "perron": "Perron",
+        "balcon": "Balcon",
+        "patio": "Patio",
+        "galeire": "Galerie",
+        "muretsRetenue": "Murets de retenue",
+        "remise": "Remise",
+        "cabanon": "Cabanon",
+        "serre": "Serre",
+        "gazebo": "Gazebo",
+        "garage": "Garage"
+      },
+      "entreeOptions": {
+        "asphaltee": "Asphaltée",
+        "pavee": "Pavée",
+        "gravier": "Gravier",
+        "beton": "Béton",
+        "paves": "Pavés",
+        "terre": "Terre"
+      },
+      "piscineItems": {
+        "piscineCreusee": "Piscine creusée",
+        "piscineHorsTerre": "Piscine hors-terre",
+        "spa": "Spa"
+      }
+    },
+    "divers": {
+      "title": "Services, Voisinage, Foyer et Divers",
+      "services": "Services",
+      "voisinage": "Voisinage",
+      "foyer": "Foyer",
+      "diversSub": "Divers",
+      "servicesDisponibles": "Services disponibles",
+      "secteur": "Secteur",
+      "intersection": "Intersection",
+      "facteursVoisinage": "Facteurs favorables ou défavorables",
+      "etage": "Étage",
+      "typeFoyer": "Type",
+      "equipementsInstallations": "Équipements et installations"
+    },
+    "diversOptions": {
+      "servicesItems": {
+        "aqueduc": "Aqueduc",
+        "egoutSanitaire": "Égout Sanitaire",
+        "egoutPluvial": "Égout Pluvial",
+        "ruePavee": "Rue Pavée",
+        "rueNonPavee": "Rue non-pavée",
+        "eclairage": "Éclairage",
+        "trottoirs": "Trottoirs",
+        "puits": "Puits",
+        "fosseSeptique": "Fosse septique",
+        "fosse": "Fossé",
+        "champsEpuration": "Champs d'épuration",
+        "bordures": "Bordures",
+        "eauLac": "Eau du lac",
+        "pointeEau": "Pointe d'eau"
+      },
+      "secteurOptions": {
+        "agricole": "Agricole",
+        "mixte": "Mixte",
+        "commercial": "Commercial",
+        "residentiel": "Résidentiel",
+        "industriel": "Industriel"
+      },
+      "foyerPlancher": {
+        "sousSol": "Sous-sol",
+        "rdc": "RDC",
+        "etage": "Étage"
+      },
+      "foyerType": {
+        "combustion": "Combustion",
+        "electrique": "Électrique",
+        "gaz": "Gaz",
+        "bois": "Bois",
+        "granules": "Granules"
+      },
+      "diversItems": {
+        "interphone": "Interphone",
+        "systemeSon": "Système de son",
+        "systemeAlarme": "Système d'alarme",
+        "aspirateurCentral": "Aspirateur central",
+        "generatrice": "Génératrice",
+        "borneRecharge": "Borne de recharge",
+        "camera": "Caméra"
+      }
+    },
+    "customValue": {
+      "title": "Entrer une valeur personnalisée",
+      "label": "Valeur personnalisée"
+    },
+    "options": {
+      "yes": "Oui",
+      "no": "Non",
+      "other": "Autres",
+      "notes": "Notes"
     }
   },
 
