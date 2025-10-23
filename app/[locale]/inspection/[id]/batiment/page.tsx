@@ -232,18 +232,17 @@ export default function BatimentPage() {
 
       // Load existing data if available
       if (prop.inspection_batiment) {
-        setFormData(prop.inspection_batiment)
+        const batimentData = prop.inspection_batiment
+        setFormData(batimentData)
 
         // Load custom values for each subcategory
         const loadedCustomValues: Record<string, Record<string, string>> = {}
-        if (prop.inspection_batiment) {
-          Object.keys(prop.inspection_batiment).forEach(subcategoryId => {
-            const subcategoryData = prop.inspection_batiment?.[subcategoryId]
-            if (subcategoryData?.customValues) {
-              loadedCustomValues[subcategoryId] = subcategoryData.customValues
-            }
-          })
-        }
+        Object.keys(batimentData).forEach(subcategoryId => {
+          const subcategoryData = batimentData[subcategoryId]
+          if (subcategoryData?.customValues) {
+            loadedCustomValues[subcategoryId] = subcategoryData.customValues
+          }
+        })
         setCustomValues(loadedCustomValues)
       }
     } catch (err) {
