@@ -116,10 +116,32 @@ export function PropertyView({
     // Room types to EXCLUDE from total count
     const excludedRoomTypes = ['salle_bain', 'salle_eau', 'vestibule', 'solarium']
 
-    Object.entries(property.inspection_pieces.floors).forEach(([floorId, floorData]: [string, any]) => {
-      const isBasement = floorData.type === 'basement'
+    // Helper function to check if a room has been filled (has any data besides type)
+    const isRoomCompleted = (roomData: any): boolean => {
+      if (!roomData) return false
 
-      Object.entries(floorData.rooms || {}).forEach(([roomId, roomData]: [string, any]) => {
+      // Check if room has any fields filled besides 'type' and 'customValues'
+      const filledFields = Object.entries(roomData).filter(([key, value]) => {
+        if (key === 'type' || key === 'customValues' || key === 'completedAt') return false
+
+        // Check if value is not empty
+        if (Array.isArray(value)) {
+          return value.length > 0
+        }
+        return value !== null && value !== undefined && value !== ''
+      })
+
+      return filledFields.length > 0
+    }
+
+    Object.entries(property.inspection_pieces.floors).forEach(([floorId, floor]) => {
+      // Exclude basement (sous_sol) from bedroom and total room counts
+      const isBasement = floorId === 'sous_sol' || floor.name?.toLowerCase().includes('sous-sol')
+
+      Object.entries(floor.rooms || {}).forEach(([_, roomData]: [string, any]) => {
+        // Only count rooms that have been completed/filled
+        if (!isRoomCompleted(roomData)) return
+
         const roomType = roomData.type
 
         // Count bedrooms (excluding basement)
