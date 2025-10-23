@@ -342,7 +342,7 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
             Object.entries(roomData).forEach(([key, value]) => {
               if (key === 'type' || key === 'completedAt' || key === 'customValues') return
 
-              let displayValue = value
+              let displayValue: string
               if (Array.isArray(value) && value.length > 0) {
                 displayValue = value.map(v => {
                   if (v === 'other' && customValues[key]) {
@@ -353,7 +353,7 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
               } else if (!value || (Array.isArray(value) && value.length === 0)) {
                 return
               } else {
-                displayValue = translateValue(displayValue)
+                displayValue = translateValue(value)
               }
 
               materials.push({
@@ -438,11 +438,11 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
             Object.entries(subcatData).forEach(([key, value]) => {
               if (key === 'notes' || key === 'customValues' || key === 'completedAt' || !value) return
 
-              let displayValue = value
+              let displayValue: string
               if (Array.isArray(value)) {
                 displayValue = value.map(v => translateValue(v)).join(', ')
               } else {
-                displayValue = translateValue(displayValue)
+                displayValue = translateValue(value)
               }
               const label = key.replace(/_/g, ' ')
               const capitalizedLabel = label.charAt(0).toUpperCase() + label.slice(1)
@@ -548,11 +548,11 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
             Object.entries(subcatData).forEach(([key, value]) => {
               if (key === 'notes' || key === 'customValues' || key === 'completedAt' || !value) return
 
-              let displayValue = value
+              let displayValue: string
               if (Array.isArray(value)) {
                 displayValue = value.map(v => translateValue(v)).join(', ')
               } else {
-                displayValue = translateValue(displayValue)
+                displayValue = translateValue(value)
               }
               const label = key.replace(/_/g, ' ')
               const capitalizedLabel = label.charAt(0).toUpperCase() + label.slice(1)
@@ -611,9 +611,11 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
             Object.entries(subcatData).forEach(([key, value]) => {
               if (key === 'notes' || key === 'customValues' || key === 'dimensions' || key === 'lengths' || key === 'completedAt' || !value) return
 
-              let displayValue = value
+              let displayValue: string
               if (Array.isArray(value)) {
                 displayValue = value.join(', ')
+              } else {
+                displayValue = String(value)
               }
               fields.push({ label: key.replace(/_/g, ' '), value: displayValue })
             })
@@ -672,11 +674,11 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
             Object.entries(subcatData).forEach(([key, value]) => {
               if (key === 'notes' || key === 'customValues' || key === 'completedAt' || !value) return
 
-              let displayValue = value
+              let displayValue: string
               if (Array.isArray(value)) {
                 displayValue = value.map(v => translateValue(v)).join(', ')
               } else {
-                displayValue = translateValue(displayValue)
+                displayValue = translateValue(value)
               }
               const label = key.replace(/_/g, ' ')
               const capitalizedLabel = label.charAt(0).toUpperCase() + label.slice(1)
