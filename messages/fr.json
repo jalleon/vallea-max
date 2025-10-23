@@ -437,6 +437,67 @@
         "brique": "Brique"
       }
     },
+    "batimentOptions": {
+      "fondationOptions": {
+        "betonCoule": "Béton coulé",
+        "blocsBeton": "Blocs de béton",
+        "dalleBeton": "Dalle de Béton",
+        "sousSolPartiel": "Sous-sol partiel",
+        "videSanitaire": "Vide sanitaire",
+        "piliers": "Piliers",
+        "pierreChamps": "Pierre des champs"
+      },
+      "murOptions": {
+        "briques": "Briques",
+        "pierre": "Pierre",
+        "aluminium": "Aluminium",
+        "vinyle": "Vinyle",
+        "agregat": "Agrégat",
+        "bois": "Bois",
+        "stucco": "Stucco",
+        "maybec": "Maybec",
+        "bardeauxAsphalte": "Bardeaux d'asphalte",
+        "canexel": "Canexel",
+        "acrylique": "Acrylique",
+        "blocsBeton": "Blocs de Béton"
+      },
+      "toitureOptions": {
+        "bardeauxAsphalte": "Bardeaux d'asphalte",
+        "goudronGravier": "Goudron / Gravier",
+        "tole": "Tôle",
+        "membraneElastomere": "Membrane élastomère",
+        "acier": "Acier",
+        "bardeauxBois": "Bardeaux de bois",
+        "tuilesBeton": "Tuiles de béton"
+      },
+      "portesOptions": {
+        "acier": "Acier",
+        "portePatio": "Porte patio",
+        "bois": "Bois",
+        "aluminium": "Aluminium",
+        "vitree": "Vitrée"
+      },
+      "fenetresMateriauOptions": {
+        "aluminium": "Aluminium",
+        "pvc": "PVC",
+        "vinyle": "Vinyle",
+        "bois": "Bois",
+        "vitreVitre": "Vitre/vitre"
+      },
+      "fenetresTypeOptions": {
+        "manivelles": "Manivelles",
+        "battant": "À battant",
+        "coulissantes": "Coulissantes",
+        "guillotine": "Guillotine",
+        "fixes": "Fixes"
+      },
+      "murOptions": {
+        "aluminium": "Aluminium"
+      },
+      "chemineesOptions": {
+        "briques": "Briques"
+      }
+    },
     "garage": {
       "title": "Garage",
       "typeGarage": "Type de garage",
@@ -461,6 +522,19 @@
       "materiauxOptions": {
         "briques": "Briques",
         "beton": "Béton"
+      }
+    },
+    "garageOptions": {
+      "typeOptions": {
+        "attache": "Attaché",
+        "detache": "Détaché",
+        "integre": "Intégré",
+        "auSousSol": "Au sous-sol",
+        "abriAuto": "Abri d'auto"
+      },
+      "finitionOptions": {
+        "fini": "Fini",
+        "nonFini": "Non fini"
       }
     },
     "mecanique": {
@@ -513,6 +587,57 @@
         "electrique": "Électrique",
         "gaz": "Gaz",
         "huile": "Huile (Mazout)"
+      },
+      "panneauOptions": {
+        "disjoncteurs": "Disjoncteurs",
+        "fusibles": "Fusibles"
+      },
+      "amperageOptions": {
+        "60": "60",
+        "100": "100",
+        "125": "125",
+        "150": "150",
+        "200": "200",
+        "400": "400"
+      }
+    },
+    "mecaniqueOptions": {
+      "chauffageOptions": {
+        "electricite": "Électricité",
+        "gaz": "Gaz",
+        "airChaud": "Air chaud",
+        "eauChaude": "Eau chaude",
+        "planchersChauffants": "Planchers chauffants",
+        "convectaires": "Convectaires",
+        "plinthesElectrique": "Plinthes électrique",
+        "radiant": "Radiant",
+        "huileMazout": "Huile (Mazout)"
+      },
+      "climatisationOptions": {
+        "thermopompeCentrale": "Thermopompe centrale",
+        "thermopompeMurale": "Thermopompe murale",
+        "climatiseurMural": "Climatiseur mural (mini-split)",
+        "systemeCentralise": "Système de climatisation centrale",
+        "echangeurAir": "Échangeur d'air"
+      },
+      "plomberieMateriauOptions": {
+        "cuivre": "Cuivre",
+        "pex": "PEX",
+        "polyB": "Poly-B"
+      },
+      "plomberieTypeOptions": {
+        "standard": "Standard",
+        "ancienne": "Ancienne",
+        "luxe": "Luxe"
+      },
+      "chauffeEauOptions": {
+        "40gallons": "40 gallons",
+        "60gallons": "60 gallons"
+      },
+      "energieOptions": {
+        "electrique": "Électrique",
+        "gaz": "Gaz",
+        "huileMazout": "Huile (Mazout)"
       },
       "panneauOptions": {
         "disjoncteurs": "Disjoncteurs",
