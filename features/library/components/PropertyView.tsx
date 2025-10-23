@@ -686,7 +686,9 @@ export function PropertyView({
                           const roomTypeCounts: Record<string, number> = {}
                           const roomNames = completedRooms.map((room: any) => {
                             const roomType = room.type
-                            const translationKey = `inspection.rooms.${roomType}`
+                            // Convert snake_case to camelCase for translation key
+                            const camelCaseType = roomType.replace(/_([a-z])/g, (match: string, letter: string) => letter.toUpperCase())
+                            const translationKey = `inspection.rooms.${camelCaseType}`
                             let roomName = t(translationKey)
 
                             // Count occurrences for numbering
