@@ -677,28 +677,51 @@ export function PropertyView({
                       </Typography>
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                         {Object.entries(property.inspection_pieces.floors).map(([floorId, floor]) => {
-                          const totalRooms = Object.keys(floor.rooms || {}).length
+                          // Get completed rooms and their types
                           const completedRooms = Object.values(floor.rooms || {}).filter(
                             (room: any) => room.completedAt
-                          ).length
+                          )
+
+                          // Get room type names with numbering for duplicates
+                          const roomTypeCounts: Record<string, number> = {}
+                          const roomNames = completedRooms.map((room: any) => {
+                            const roomType = room.type
+                            const translationKey = `inspection.rooms.${roomType}`
+                            let roomName = t(translationKey)
+
+                            // Count occurrences for numbering
+                            roomTypeCounts[roomType] = (roomTypeCounts[roomType] || 0) + 1
+                            if (roomTypeCounts[roomType] > 1) {
+                              roomName = `${roomName} #${roomTypeCounts[roomType]}`
+                            }
+
+                            return roomName
+                          })
+
                           return (
                             <Box
                               key={floorId}
                               sx={{
                                 display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
+                                flexDirection: 'column',
+                                gap: 0.5,
                                 p: 1,
                                 borderRadius: 1,
                                 backgroundColor: 'rgba(255,255,255,0.1)'
                               }}
                             >
-                              <Typography variant="body2" sx={{ color: 'white' }}>
+                              <Typography variant="body2" sx={{ color: 'white', fontWeight: 600 }}>
                                 {floor.name}
                               </Typography>
-                              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.9)' }}>
-                                {completedRooms}/{totalRooms} pièces
-                              </Typography>
+                              {roomNames.length > 0 ? (
+                                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                                  {roomNames.join(', ')}
+                                </Typography>
+                              ) : (
+                                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)', fontStyle: 'italic' }}>
+                                  Aucune pièce inspectée
+                                </Typography>
+                              )}
                             </Box>
                           )
                         })}
