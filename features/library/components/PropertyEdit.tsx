@@ -127,6 +127,14 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
         }
       }
 
+      // Calculate room counts from inspection if available
+      const hasInspectionData = property.inspection_pieces?.floors && Object.keys(property.inspection_pieces.floors).length > 0
+      let calculatedRoomCounts = { bedrooms: 0, bathrooms: 0, powderRooms: 0, totalRooms: 0 }
+
+      if (hasInspectionData) {
+        calculatedRoomCounts = calculateRoomCounts()
+      }
+
       setFormData({
         adresse: property.adresse,
         ville: property.ville || '',
@@ -152,10 +160,10 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
         superficie_habitable_pi2: property.superficie_habitable_pi2,
         perimetre_batiment_m2: property.perimetre_batiment_m2,
         perimetre_batiment_pi2: property.perimetre_batiment_pi2,
-        nombre_pieces: property.nombre_pieces,
-        nombre_chambres: property.nombre_chambres,
-        salle_bain: property.salle_bain,
-        salle_eau: property.salle_eau,
+        nombre_pieces: property.nombre_pieces ?? (hasInspectionData ? calculatedRoomCounts.totalRooms : undefined),
+        nombre_chambres: property.nombre_chambres ?? (hasInspectionData ? calculatedRoomCounts.bedrooms : undefined),
+        salle_bain: property.salle_bain ?? (hasInspectionData ? calculatedRoomCounts.bathrooms : undefined),
+        salle_eau: property.salle_eau ?? (hasInspectionData ? calculatedRoomCounts.powderRooms : undefined),
         stationnement: property.stationnement,
         dimension_garage: property.dimension_garage || '',
         type_sous_sol: property.type_sous_sol,
@@ -646,7 +654,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         fullWidth
                         label="Nombre de pièces"
                         type="number"
-                        value={hasInspectionData ? roomCounts.totalRooms : (formData.nombre_pieces || '')}
+                        value={formData.nombre_pieces || ''}
                         onChange={(e) => handleInputChange('nombre_pieces', e.target.value ? parseInt(e.target.value) : undefined)}
                         variant="outlined"
                         size="small"
@@ -657,7 +665,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         fullWidth
                         label="Nombre de chambres"
                         type="number"
-                        value={hasInspectionData ? roomCounts.bedrooms : (formData.nombre_chambres || '')}
+                        value={formData.nombre_chambres || ''}
                         onChange={(e) => handleInputChange('nombre_chambres', e.target.value ? parseInt(e.target.value) : undefined)}
                         variant="outlined"
                         size="small"
@@ -668,7 +676,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         fullWidth
                         label="Salle de bain"
                         type="number"
-                        value={hasInspectionData ? roomCounts.bathrooms : (formData.salle_bain || '')}
+                        value={formData.salle_bain || ''}
                         onChange={(e) => handleInputChange('salle_bain', e.target.value ? parseFloat(e.target.value) : undefined)}
                         variant="outlined"
                         size="small"
@@ -681,7 +689,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         label="Salle d'eau"
                         type="number"
                         inputProps={{ step: 0.5 }}
-                        value={hasInspectionData ? roomCounts.powderRooms : (formData.salle_eau || '')}
+                        value={formData.salle_eau || ''}
                         onChange={(e) => handleInputChange('salle_eau', e.target.value ? parseFloat(e.target.value) : undefined)}
                         variant="outlined"
                         size="small"
