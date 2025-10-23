@@ -174,6 +174,28 @@ export default function LibraryPage() {
     loadProperties()
   }, [])
 
+  // Keyboard shortcut handler
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Only trigger if not typing in an input field
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return
+      }
+
+      // "E" key - edit selected property or first selected
+      if (e.key.toLowerCase() === 'e' && selectedRows.length > 0) {
+        const firstSelectedId = selectedRows[0]
+        const tableProperty = tableProperties.find(p => p.id === firstSelectedId)
+        if (tableProperty) {
+          handleEdit(tableProperty)
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [selectedRows, tableProperties])
+
   const loadProperties = async () => {
     try {
       setLoading(true)
@@ -874,6 +896,7 @@ export default function LibraryPage() {
                       }
                     }}
                     onClick={() => handleRowSelect(property.id)}
+                    onDoubleClick={() => handleView(property)}
                   >
                     <TableCell padding="checkbox">
                       <Checkbox
