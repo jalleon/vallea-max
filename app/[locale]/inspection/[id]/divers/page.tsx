@@ -47,7 +47,8 @@ import {
   VolumeUp,
   Microwave,
   DinnerDining,
-  ElectricBolt
+  ElectricBolt,
+  Light
 } from '@mui/icons-material'
 import { useTranslations } from 'next-intl'
 import { useRouter, useParams } from 'next/navigation'
