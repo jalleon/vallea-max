@@ -41,7 +41,9 @@ import {
 } from '@mui/icons-material'
 import { Property } from '../types/property.types'
 import { formatCurrency, formatDate, formatMeasurement } from '@/lib/utils/formatting'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import { calculateInspectionProgress, getCompletedCategories, getCategoryTranslationKey } from '@/features/inspection/utils/progress.utils'
 
 interface PropertyViewProps {
   property: Property | null
@@ -64,6 +66,9 @@ export function PropertyView({
 }: PropertyViewProps) {
   const theme = useTheme()
   const router = useRouter()
+  const params = useParams()
+  const locale = params.locale as string
+  const t = useTranslations()
 
   // Keyboard navigation
   useEffect(() => {
@@ -92,6 +97,19 @@ export function PropertyView({
   }, [open, canNavigatePrev, canNavigateNext, onNavigate, onClose])
 
   if (!property) return null
+
+  const inspectionProgress = calculateInspectionProgress(property)
+  const completedCategories = getCompletedCategories(property)
+
+  const getInspectionButtonText = () => {
+    if (!property.inspection_status || property.inspection_status === 'not_started') {
+      return 'Commencer l\'inspection'
+    }
+    if (property.inspection_status === 'completed') {
+      return 'Voir l\'inspection'
+    }
+    return 'Continuer l\'inspection'
+  }
 
   const getStatusColor = (status?: string) => {
     switch (status) {
@@ -562,7 +580,7 @@ export function PropertyView({
                         Progrès global
                       </Typography>
                       <Typography variant="body2" sx={{ color: 'white', fontWeight: 600 }}>
-                        {property.inspection_completion || 0}%
+                        {inspectionProgress}%
                       </Typography>
                     </Box>
                     <Box
@@ -576,7 +594,7 @@ export function PropertyView({
                     >
                       <Box
                         sx={{
-                          width: `${property.inspection_completion || 0}%`,
+                          width: `${inspectionProgress}%`,
                           height: '100%',
                           backgroundColor: 'white',
                           borderRadius: 4,
@@ -627,17 +645,17 @@ export function PropertyView({
                   </Grid>
 
                   {/* Completed Categories */}
-                  {property.inspection_categories_completed && property.inspection_categories_completed.length > 0 && (
+                  {completedCategories.length > 0 && (
                     <Box sx={{ mb: 2, p: 2, borderRadius: 1, backgroundColor: 'rgba(255,255,255,0.15)' }}>
                       <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)', mb: 1, display: 'block' }}>
                         Catégories complétées
                       </Typography>
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                        {property.inspection_categories_completed.map((category) => (
+                        {completedCategories.map((categoryId) => (
                           <Chip
-                            key={category}
+                            key={categoryId}
                             icon={<CheckCircle sx={{ fontSize: 16 }} />}
-                            label={category}
+                            label={t(getCategoryTranslationKey(categoryId))}
                             size="small"
                             sx={{
                               backgroundColor: 'rgba(255,255,255,0.9)',
@@ -691,7 +709,7 @@ export function PropertyView({
                     variant="contained"
                     onClick={() => {
                       onClose()
-                      router.push(`/fr/inspection/${property.id}/categories`)
+                      router.push(`/${locale}/inspection/${property.id}/categories`)
                     }}
                     fullWidth
                     sx={{
@@ -704,7 +722,7 @@ export function PropertyView({
                       }
                     }}
                   >
-                    Voir détails
+                    {getInspectionButtonText()}
                   </Button>
                 </CardContent>
               </Card>

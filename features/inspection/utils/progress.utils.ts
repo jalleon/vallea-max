@@ -45,3 +45,19 @@ export const calculateInspectionProgress = (property: Property): number => {
 
   return Math.round(total)
 }
+
+/**
+ * Get list of completed category IDs
+ */
+export const getCompletedCategories = (property: Property): string[] => {
+  return INSPECTION_CATEGORIES
+    .filter(cat => isCategoryCompleted(cat.id, property))
+    .map(cat => cat.id)
+}
+
+/**
+ * Get category name translation key
+ */
+export const getCategoryTranslationKey = (categoryId: string): string => {
+  return `inspection.categories.${categoryId}`
+}
