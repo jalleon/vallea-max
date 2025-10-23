@@ -111,8 +111,8 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
     let powderRooms = 0
     let totalRooms = 0
 
-    // Room types that count towards total (excluding basement)
-    const countableRoomTypes = ['chambre', 'cuisine', 'salle_a_manger', 'salle_familiale', 'bureau']
+    // Room types to EXCLUDE from total count
+    const excludedRoomTypes = ['salle_bain', 'salle_eau', 'vestibule', 'solarium']
 
     // Helper function to check if a room has been filled (has any data besides type)
     const isRoomCompleted = (roomData: any): boolean => {
@@ -157,8 +157,8 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
           powderRooms++
         }
 
-        // Count total rooms (excluding basement, only specific types)
-        if (!isBasement && countableRoomTypes.includes(roomType)) {
+        // Count total rooms (excluding basement and excluded room types)
+        if (!isBasement && !excludedRoomTypes.includes(roomType)) {
           totalRooms++
         }
       })
@@ -314,13 +314,28 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
           const roomsData = Object.entries(floor.rooms || {})
           if (roomsData.length === 0) return null
 
+          // Count room types to add numbering for duplicates
+          const roomTypeCounts: Record<string, number> = {}
+          const roomTypeIndices: Record<string, number> = {}
+
+          roomsData.forEach(([_, roomData]: [string, any]) => {
+            const roomType = roomData.type
+            roomTypeCounts[roomType] = (roomTypeCounts[roomType] || 0) + 1
+          })
+
           // Collect room types and their materials
           const roomsWithMaterials: Array<{ roomType: string; materials: Array<{ icon: any; label: string; value: string }> }> = []
 
           roomsData.forEach(([roomId, roomData]: [string, any]) => {
             const customValues = roomData.customValues || {}
             const roomType = roomData.type
-            const roomTypeLabel = getRoomTypeLabel(roomType)
+            let roomTypeLabel = getRoomTypeLabel(roomType)
+
+            // Add numbering if there are multiple rooms of the same type
+            if (roomTypeCounts[roomType] > 1) {
+              roomTypeIndices[roomType] = (roomTypeIndices[roomType] || 0) + 1
+              roomTypeLabel = `${roomTypeLabel} #${roomTypeIndices[roomType]}`
+            }
 
             // Collect materials for this room
             const materials: Array<{ icon: any; label: string; value: string }> = []
