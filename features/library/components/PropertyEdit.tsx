@@ -44,7 +44,10 @@ import {
 } from '@mui/icons-material'
 import { Property, PropertyCreateInput, PropertyType, PropertyStatus, BasementType, ParkingType, FloorType, FloorArea } from '../types/property.types'
 import { v4 as uuidv4 } from 'uuid'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
+import { calculateInspectionProgress, getCompletedCategories, getCategoryTranslationKey } from '@/features/inspection/utils/progress.utils'
+import { useTranslations } from 'next-intl'
+import { CheckCircle } from '@mui/icons-material'
 
 interface PropertyEditProps {
   property: Property | null
@@ -56,6 +59,9 @@ interface PropertyEditProps {
 export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditProps) {
   const theme = useTheme()
   const router = useRouter()
+  const params = useParams()
+  const locale = params.locale as string
+  const t = useTranslations()
   const [formData, setFormData] = useState<PropertyCreateInput>({
     adresse: '',
     ville: '',
@@ -205,6 +211,63 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
       setFloorAreas([])
     }
   }, [property])
+
+  // Calculate room counts from inspection data (same logic as PropertyView)
+  const calculateRoomCounts = () => {
+    if (!property?.inspection_pieces?.floors) {
+      return { bedrooms: 0, bathrooms: 0, powderRooms: 0, totalRooms: 0 }
+    }
+
+    let bedrooms = 0
+    let bathrooms = 0
+    let powderRooms = 0
+    let totalRooms = 0
+
+    const excludedRoomTypes = ['salle_bain', 'salle_eau', 'vestibule', 'solarium']
+
+    const isRoomCompleted = (roomData: any): boolean => {
+      if (!roomData) return false
+      const filledFields = Object.entries(roomData).filter(([key, value]) => {
+        if (key === 'type' || key === 'customValues' || key === 'completedAt') return false
+        if (Array.isArray(value)) {
+          return value.length > 0
+        }
+        return value !== null && value !== undefined && value !== ''
+      })
+      return filledFields.length > 0
+    }
+
+    Object.entries(property.inspection_pieces.floors).forEach(([floorId, floor]) => {
+      const isBasement = floorId === 'sous_sol' || floor.name?.toLowerCase().includes('sous-sol')
+
+      Object.entries(floor.rooms || {}).forEach(([_, roomData]: [string, any]) => {
+        if (!isRoomCompleted(roomData)) return
+
+        const roomType = roomData.type
+
+        if (roomType === 'chambre' && !isBasement) {
+          bedrooms++
+        }
+        if (roomType === 'salle_bain') {
+          bathrooms++
+        }
+        if (roomType === 'salle_eau') {
+          powderRooms++
+        }
+        if (!isBasement && !excludedRoomTypes.includes(roomType)) {
+          totalRooms++
+        }
+      })
+    })
+
+    return { bedrooms, bathrooms, powderRooms, totalRooms }
+  }
+
+  const roomCounts = property ? calculateRoomCounts() : { bedrooms: 0, bathrooms: 0, powderRooms: 0, totalRooms: 0 }
+  const hasInspectionData = property?.inspection_pieces?.floors && Object.keys(property.inspection_pieces.floors).length > 0
+  const inspectionProgress = property ? calculateInspectionProgress(property) : 0
+  const completedCategories = property ? getCompletedCategories(property) : []
+  const isInspectionComplete = inspectionProgress === 100
 
   const handleInputChange = (field: keyof PropertyCreateInput, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -583,10 +646,14 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         fullWidth
                         label="Nombre de pièces"
                         type="number"
-                        value={formData.nombre_pieces || ''}
+                        value={hasInspectionData ? roomCounts.totalRooms : (formData.nombre_pieces || '')}
                         onChange={(e) => handleInputChange('nombre_pieces', e.target.value ? parseInt(e.target.value) : undefined)}
                         variant="outlined"
                         size="small"
+                        disabled={hasInspectionData}
+                        InputProps={{
+                          sx: hasInspectionData ? { bgcolor: 'action.disabledBackground' } : {}
+                        }}
                       />
                     </Grid>
                     <Grid item xs={12} md={3}>
@@ -594,10 +661,14 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         fullWidth
                         label="Nombre de chambres"
                         type="number"
-                        value={formData.nombre_chambres || ''}
+                        value={hasInspectionData ? roomCounts.bedrooms : (formData.nombre_chambres || '')}
                         onChange={(e) => handleInputChange('nombre_chambres', e.target.value ? parseInt(e.target.value) : undefined)}
                         variant="outlined"
                         size="small"
+                        disabled={hasInspectionData}
+                        InputProps={{
+                          sx: hasInspectionData ? { bgcolor: 'action.disabledBackground' } : {}
+                        }}
                       />
                     </Grid>
                     <Grid item xs={12} md={3}>
@@ -605,11 +676,15 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         fullWidth
                         label="Salle de bain"
                         type="number"
-                        value={formData.salle_bain || ''}
+                        value={hasInspectionData ? roomCounts.bathrooms : (formData.salle_bain || '')}
                         onChange={(e) => handleInputChange('salle_bain', e.target.value ? parseFloat(e.target.value) : undefined)}
                         variant="outlined"
                         size="small"
                         inputProps={{ step: 0.5 }}
+                        disabled={hasInspectionData}
+                        InputProps={{
+                          sx: hasInspectionData ? { bgcolor: 'action.disabledBackground' } : {}
+                        }}
                       />
                     </Grid>
                     <Grid item xs={12} md={3}>
@@ -618,10 +693,14 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         label="Salle d'eau"
                         type="number"
                         inputProps={{ step: 0.5 }}
-                        value={formData.salle_eau || ''}
+                        value={hasInspectionData ? roomCounts.powderRooms : (formData.salle_eau || '')}
                         onChange={(e) => handleInputChange('salle_eau', e.target.value ? parseFloat(e.target.value) : undefined)}
                         variant="outlined"
                         size="small"
+                        disabled={hasInspectionData}
+                        InputProps={{
+                          sx: hasInspectionData ? { bgcolor: 'action.disabledBackground' } : {}
+                        }}
                       />
                     </Grid>
 
@@ -1106,36 +1185,62 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                   }}
                 >
                   <CardContent>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                      <InspectionIcon sx={{ color: 'white', mr: 1 }} />
-                      <Typography variant="h6" sx={{ color: 'white', fontWeight: 600 }}>
-                        Inspection
-                      </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <InspectionIcon sx={{ color: 'white', mr: 1 }} />
+                        <Typography variant="h6" sx={{ color: 'white', fontWeight: 600 }}>
+                          Inspection
+                        </Typography>
+                      </Box>
+                      <Chip
+                        label={
+                          isInspectionComplete ? 'Complété' :
+                          property.inspection_status === 'in_progress' ? 'En cours' :
+                          'Non commencé'
+                        }
+                        sx={{
+                          backgroundColor:
+                            isInspectionComplete ? '#4CAF50' :
+                            property.inspection_status === 'in_progress' ? '#FF9800' :
+                            '#9E9E9E',
+                          color: 'white',
+                          fontWeight: 600
+                        }}
+                      />
+                    </Box>
+
+                    {/* Progress Bar */}
+                    <Box sx={{ mb: 3 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.9)' }}>
+                          Progrès global
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: 'white', fontWeight: 600 }}>
+                          {inspectionProgress}%
+                        </Typography>
+                      </Box>
+                      <Box
+                        sx={{
+                          width: '100%',
+                          height: 8,
+                          backgroundColor: 'rgba(255,255,255,0.2)',
+                          borderRadius: 4,
+                          overflow: 'hidden'
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            width: `${inspectionProgress}%`,
+                            height: '100%',
+                            backgroundColor: isInspectionComplete ? '#4CAF50' : 'white',
+                            borderRadius: 4,
+                            transition: 'width 0.3s ease, background-color 0.3s ease'
+                          }}
+                        />
+                      </Box>
                     </Box>
 
                     <Grid container spacing={2} sx={{ mb: 2 }}>
-                      <Grid item xs={12} md={4}>
-                        <Box sx={{ p: 2, borderRadius: 1, backgroundColor: 'rgba(255,255,255,0.15)' }}>
-                          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                            Statut
-                          </Typography>
-                          <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
-                            {property.inspection_status === 'in_progress' ? 'En cours' :
-                             property.inspection_status === 'completed' ? 'Complété' :
-                             'Non commencé'}
-                          </Typography>
-                        </Box>
-                      </Grid>
-                      <Grid item xs={12} md={4}>
-                        <Box sx={{ p: 2, borderRadius: 1, backgroundColor: 'rgba(255,255,255,0.15)' }}>
-                          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                            Progrès
-                          </Typography>
-                          <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
-                            {property.inspection_completion || 0}% complété
-                          </Typography>
-                        </Box>
-                      </Grid>
                       <Grid item xs={12} md={4}>
                         <Box sx={{ p: 2, borderRadius: 1, backgroundColor: 'rgba(255,255,255,0.15)' }}>
                           <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
@@ -1146,19 +1251,45 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                           </Typography>
                         </Box>
                       </Grid>
+
+                      {property.inspection_pieces && (
+                        <>
+                          <Grid item xs={12} md={4}>
+                            <Box sx={{ p: 2, borderRadius: 1, backgroundColor: 'rgba(255,255,255,0.15)' }}>
+                              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                                Pièces inspectées
+                              </Typography>
+                              <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
+                                {property.inspection_pieces.completedRooms || 0} / {property.inspection_pieces.totalRooms || 0}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                          <Grid item xs={12} md={4}>
+                            <Box sx={{ p: 2, borderRadius: 1, backgroundColor: 'rgba(255,255,255,0.15)' }}>
+                              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                                Étages
+                              </Typography>
+                              <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
+                                {Object.keys(property.inspection_pieces.floors || {}).length}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                        </>
+                      )}
                     </Grid>
 
-                    {/* Completed Categories Summary */}
-                    {property.inspection_categories_completed && property.inspection_categories_completed.length > 0 && (
+                    {/* Completed Categories */}
+                    {completedCategories.length > 0 && (
                       <Box sx={{ mb: 2, p: 2, borderRadius: 1, backgroundColor: 'rgba(255,255,255,0.15)' }}>
                         <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)', mb: 1, display: 'block' }}>
                           Catégories complétées
                         </Typography>
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                          {property.inspection_categories_completed.map((category) => (
+                          {completedCategories.map((categoryId) => (
                             <Chip
-                              key={category}
-                              label={category}
+                              key={categoryId}
+                              icon={<CheckCircle sx={{ fontSize: 16 }} />}
+                              label={t(getCategoryTranslationKey(categoryId))}
                               size="small"
                               sx={{
                                 backgroundColor: 'rgba(255,255,255,0.9)',
@@ -1174,13 +1305,11 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                     <Button
                       variant="contained"
                       onClick={() => {
-                        // If no inspection started, show confirmation dialog
                         if (!property.inspection_status || property.inspection_status === 'not_started') {
                           setInspectionConfirmOpen(true)
                         } else {
-                          // Navigate directly if inspection already exists
                           onClose()
-                          router.push(`/fr/inspection/${property.id}/categories`)
+                          router.push(`/${locale}/inspection/${property.id}/categories`)
                         }
                       }}
                       sx={{
@@ -1192,7 +1321,8 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         }
                       }}
                     >
-                      {property.inspection_status && property.inspection_status !== 'not_started' ? 'Modifier l\'inspection' : 'Commencer l\'inspection'}
+                      {isInspectionComplete ? 'Voir inspection' :
+                       (property.inspection_status && property.inspection_status !== 'not_started' ? 'Continuer l\'inspection' : 'Commencer l\'inspection')}
                     </Button>
                   </CardContent>
                 </Card>
