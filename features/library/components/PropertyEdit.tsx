@@ -658,6 +658,10 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         onChange={(e) => handleInputChange('nombre_pieces', e.target.value ? parseInt(e.target.value) : undefined)}
                         variant="outlined"
                         size="small"
+                        disabled={hasInspectionData}
+                        InputProps={{
+                          sx: hasInspectionData ? { bgcolor: 'action.disabledBackground' } : {}
+                        }}
                       />
                     </Grid>
                     <Grid item xs={12} md={3}>
@@ -669,6 +673,10 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         onChange={(e) => handleInputChange('nombre_chambres', e.target.value ? parseInt(e.target.value) : undefined)}
                         variant="outlined"
                         size="small"
+                        disabled={hasInspectionData}
+                        InputProps={{
+                          sx: hasInspectionData ? { bgcolor: 'action.disabledBackground' } : {}
+                        }}
                       />
                     </Grid>
                     <Grid item xs={12} md={3}>
@@ -681,6 +689,10 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         variant="outlined"
                         size="small"
                         inputProps={{ step: 0.5 }}
+                        disabled={hasInspectionData}
+                        InputProps={{
+                          sx: hasInspectionData ? { bgcolor: 'action.disabledBackground' } : {}
+                        }}
                       />
                     </Grid>
                     <Grid item xs={12} md={3}>
@@ -693,6 +705,10 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         onChange={(e) => handleInputChange('salle_eau', e.target.value ? parseFloat(e.target.value) : undefined)}
                         variant="outlined"
                         size="small"
+                        disabled={hasInspectionData}
+                        InputProps={{
+                          sx: hasInspectionData ? { bgcolor: 'action.disabledBackground' } : {}
+                        }}
                       />
                     </Grid>
 
