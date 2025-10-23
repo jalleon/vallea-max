@@ -978,7 +978,7 @@ export default function LibraryPage() {
             </Table>
           </TableContainer>
             <TablePagination
-              rowsPerPageOptions={[5, 10, 25, 50]}
+              rowsPerPageOptions={[5, 10, 25, 50, 100]}
               component="div"
               count={sortedProperties.length}
               rowsPerPage={rowsPerPage}
