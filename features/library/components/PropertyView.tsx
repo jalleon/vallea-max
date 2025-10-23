@@ -100,13 +100,14 @@ export function PropertyView({
 
   const inspectionProgress = calculateInspectionProgress(property)
   const completedCategories = getCompletedCategories(property)
+  const isInspectionComplete = inspectionProgress === 100
 
   const getInspectionButtonText = () => {
+    if (isInspectionComplete) {
+      return 'Voir inspection'
+    }
     if (!property.inspection_status || property.inspection_status === 'not_started') {
       return 'Commencer l\'inspection'
-    }
-    if (property.inspection_status === 'completed') {
-      return 'Voir l\'inspection'
     }
     return 'Continuer l\'inspection'
   }
@@ -558,13 +559,13 @@ export function PropertyView({
                   </Box>
                   <Chip
                     label={
-                      property.inspection_status === 'completed' ? 'Complété' :
+                      isInspectionComplete ? 'Complété' :
                       property.inspection_status === 'in_progress' ? 'En cours' :
                       'Non commencé'
                     }
                     sx={{
                       backgroundColor:
-                        property.inspection_status === 'completed' ? '#4CAF50' :
+                        isInspectionComplete ? '#4CAF50' :
                         property.inspection_status === 'in_progress' ? '#FF9800' :
                         '#9E9E9E',
                       color: 'white',
@@ -596,9 +597,9 @@ export function PropertyView({
                         sx={{
                           width: `${inspectionProgress}%`,
                           height: '100%',
-                          backgroundColor: 'white',
+                          backgroundColor: isInspectionComplete ? '#4CAF50' : 'white',
                           borderRadius: 4,
-                          transition: 'width 0.3s ease'
+                          transition: 'width 0.3s ease, background-color 0.3s ease'
                         }}
                       />
                     </Box>
