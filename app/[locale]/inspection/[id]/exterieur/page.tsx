@@ -65,22 +65,21 @@ const getInstallationsItems = (t: any) => [
   { id: 'perron', label: t('inspection.exterieurOptions.installationItems.perron'), icon: Home },
   { id: 'balcon', label: t('inspection.exterieurOptions.installationItems.balcon'), icon: Deck },
   { id: 'patio', label: t('inspection.exterieurOptions.installationItems.patio'), icon: Deck },
-  { id: 'galeire', label: t('inspection.exterieurOptions.installationItems.galeire'), icon: Deck },
-  { id: 'murets_retenue', label: t('inspection.exterieurOptions.installationItems.muretsRetenue'), icon: FenceIcon },
-  { id: 'remise', label: t('inspection.exterieurOptions.installationItems.remise'), icon: Storage },
-  { id: 'cabanon', label: t('inspection.exterieurOptions.installationItems.cabanon'), icon: Storage },
-  { id: 'serre', label: t('inspection.exterieurOptions.installationItems.serre'), icon: Light },
-  { id: 'gazebo', label: t('inspection.exterieurOptions.installationItems.gazebo'), icon: Deck },
-  { id: 'garage', label: t('inspection.exterieurOptions.installationItems.garage'), icon: DirectionsCar }
+  { id: 'terrasse', label: t('inspection.exterieurOptions.installationItems.terrasse'), icon: Deck },
+  { id: 'galerie', label: t('inspection.exterieurOptions.installationItems.galerie'), icon: Deck },
+  { id: 'veranda_solarium', label: t('inspection.exterieurOptions.installationItems.verandaSolarium'), icon: Light },
+  { id: 'gazebo_pergola', label: t('inspection.exterieurOptions.installationItems.gazeboPergola'), icon: Deck },
+  { id: 'murets', label: t('inspection.exterieurOptions.installationItems.murets'), icon: FenceIcon },
+  { id: 'cabanons', label: t('inspection.exterieurOptions.installationItems.cabanons'), icon: Storage },
+  { id: 'eclairage_exterieur', label: t('inspection.exterieurOptions.installationItems.eclairageExterieur'), icon: Light },
+  { id: 'systeme_arrosage', label: t('inspection.exterieurOptions.installationItems.systemeArrosage'), icon: WaterDrop }
 ]
 
 const getEntreeOptions = (t: any) => [
-  t('inspection.exterieurOptions.entreeOptions.asphaltee'),
-  t('inspection.exterieurOptions.entreeOptions.pavee'),
-  t('inspection.exterieurOptions.entreeOptions.gravier'),
+  t('inspection.exterieurOptions.entreeOptions.paveUni'),
   t('inspection.exterieurOptions.entreeOptions.beton'),
-  t('inspection.exterieurOptions.entreeOptions.paves'),
-  t('inspection.exterieurOptions.entreeOptions.terre'),
+  t('inspection.exterieurOptions.entreeOptions.asphalte'),
+  t('inspection.exterieurOptions.entreeOptions.gravier'),
   t('inspection.options.other')
 ]
 
@@ -780,8 +779,8 @@ export default function ExterieurPage() {
                       <Grid container spacing={2}>
                         {[
                           { id: 'piscine_creusee', label: t('inspection.exterieurOptions.piscineItems.piscineCreusee') },
-                          { id: 'piscine_hors_terre', label: t('inspection.exterieurOptions.piscineItems.piscineHorsTerre') },
-                          { id: 'spa', label: t('inspection.exterieurOptions.piscineItems.spa') }
+                          { id: 'piscine_semi_creusee', label: t('inspection.exterieurOptions.piscineItems.piscineSemiCreusee') },
+                          { id: 'plage_piscine', label: t('inspection.exterieurOptions.piscineItems.plagePiscine') }
                         ].map(item => (
                           <Grid item xs={6} sm={4} key={item.id}>
                             {renderItemCard(

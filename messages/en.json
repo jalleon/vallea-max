@@ -576,26 +576,25 @@
         "perron": "Front porch",
         "balcon": "Balcony",
         "patio": "Patio",
-        "galeire": "Gallery",
-        "muretsRetenue": "Retaining walls",
-        "remise": "Shed",
-        "cabanon": "Garden shed",
-        "serre": "Greenhouse",
-        "gazebo": "Gazebo",
-        "garage": "Garage"
+        "terrasse": "Terrace",
+        "galerie": "Gallery",
+        "verandaSolarium": "Veranda/Solarium",
+        "gazeboPergola": "Gazebo/Pergola",
+        "murets": "Retaining walls",
+        "cabanons": "Sheds",
+        "eclairageExterieur": "Outdoor lighting",
+        "systemeArrosage": "Sprinkler system"
       },
       "entreeOptions": {
-        "asphaltee": "Asphalt",
-        "pavee": "Paved",
-        "gravier": "Gravel",
+        "paveUni": "Interlocking pavers",
         "beton": "Concrete",
-        "paves": "Pavers",
-        "terre": "Dirt"
+        "asphalte": "Asphalt",
+        "gravier": "Gravel"
       },
       "piscineItems": {
         "piscineCreusee": "In-ground pool",
-        "piscineHorsTerre": "Above-ground pool",
-        "spa": "Spa"
+        "piscineSemiCreusee": "Semi-inground pool",
+        "plagePiscine": "Pool deck"
       }
     },
     "diversOptions": {
@@ -616,11 +615,8 @@
         "pointeEau": "Water outlet"
       },
       "secteurOptions": {
-        "agricole": "Agricultural",
-        "mixte": "Mixed",
-        "commercial": "Commercial",
-        "residentiel": "Residential",
-        "industriel": "Industrial"
+        "homogene": "Homogeneous area",
+        "mixte": "Mixed area"
       },
       "foyerPlancher": {
         "sousSol": "Basement",
@@ -628,20 +624,29 @@
         "etage": "Upper floor"
       },
       "foyerType": {
-        "combustion": "Combustion",
-        "electrique": "Electric",
-        "gaz": "Gas",
-        "bois": "Wood",
-        "granules": "Pellets"
+        "acierPrefab": "Steel (prefab.)",
+        "foyerGaz": "Gas fireplace",
+        "acierCombLenteInt": "Steel + slow comb. insert",
+        "briques": "Brick",
+        "pierres": "Stone",
+        "poeleCombLenteBois": "Wood burning stove"
       },
       "diversItems": {
-        "interphone": "Intercom",
-        "systemeSon": "Sound system",
-        "systemeAlarme": "Alarm system",
+        "laveVaisselle": "Dishwasher",
+        "ventilateurSalleBain": "Bathroom fan",
+        "hotte": "Range hood",
         "aspirateurCentral": "Central vacuum",
-        "generatrice": "Generator",
-        "borneRecharge": "Charging station",
-        "camera": "Camera"
+        "systemeAlarme": "Alarm system",
+        "bainTourbillon": "Whirlpool or therapeutic bath",
+        "spaIntegre": "Spa (Built-in or recessed)",
+        "sauna": "Sauna",
+        "puitsLumiere": "Skylight",
+        "entreeSousSol": "Basement entrance",
+        "radioIntercom": "Radio/Intercom",
+        "systemeSon": "Sound system",
+        "fourEncastre": "Built-in oven",
+        "plaqueEncastree": "Built-in cooktop",
+        "microOndeEncastre": "Built-in microwave"
       }
     },
     "customValue": {

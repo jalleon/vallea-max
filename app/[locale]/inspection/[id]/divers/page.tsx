@@ -73,13 +73,21 @@ const getServicesItems = (t: any) => [
 ]
 
 const getDiversItems = (t: any) => [
-  { id: 'interphone', label: t('inspection.diversOptions.diversItems.interphone'), icon: Radio },
-  { id: 'systeme_son', label: t('inspection.diversOptions.diversItems.systemeSon'), icon: VolumeUp },
-  { id: 'systeme_alarme', label: t('inspection.diversOptions.diversItems.systemeAlarme'), icon: Security },
+  { id: 'lave_vaisselle', label: t('inspection.diversOptions.diversItems.laveVaisselle'), icon: Kitchen },
+  { id: 'ventilateur_salle_bain', label: t('inspection.diversOptions.diversItems.ventilateurSalleBain'), icon: Air },
+  { id: 'hotte', label: t('inspection.diversOptions.diversItems.hotte'), icon: Air },
   { id: 'aspirateur_central', label: t('inspection.diversOptions.diversItems.aspirateurCentral'), icon: MiscellaneousServices },
-  { id: 'generatrice', label: t('inspection.diversOptions.diversItems.generatrice'), icon: SolarPower },
-  { id: 'borne_recharge', label: t('inspection.diversOptions.diversItems.borneRecharge'), icon: ElectricBolt },
-  { id: 'camera', label: t('inspection.diversOptions.diversItems.camera'), icon: Security }
+  { id: 'systeme_alarme', label: t('inspection.diversOptions.diversItems.systemeAlarme'), icon: Security },
+  { id: 'bain_tourbillon', label: t('inspection.diversOptions.diversItems.bainTourbillon'), icon: Bathtub },
+  { id: 'spa_integre', label: t('inspection.diversOptions.diversItems.spaIntegre'), icon: HotTub },
+  { id: 'sauna', label: t('inspection.diversOptions.diversItems.sauna'), icon: HotTub },
+  { id: 'puits_lumiere', label: t('inspection.diversOptions.diversItems.puitsLumiere'), icon: Light },
+  { id: 'entree_sous_sol', label: t('inspection.diversOptions.diversItems.entreeSousSol'), icon: Stairs },
+  { id: 'radio_intercom', label: t('inspection.diversOptions.diversItems.radioIntercom'), icon: Radio },
+  { id: 'systeme_son', label: t('inspection.diversOptions.diversItems.systemeSon'), icon: VolumeUp },
+  { id: 'four_encastre', label: t('inspection.diversOptions.diversItems.fourEncastre'), icon: Microwave },
+  { id: 'plaque_encastree', label: t('inspection.diversOptions.diversItems.plaqueEncastree'), icon: DinnerDining },
+  { id: 'micro_onde_encastre', label: t('inspection.diversOptions.diversItems.microOndeEncastre'), icon: Microwave }
 ]
 
 const getSubcategories = (t: any) => [
@@ -542,11 +550,8 @@ export default function DiversPage() {
                   <>
                     {/* Secteur */}
                     {renderChipField('Secteur', 'secteur', [
-                      t('inspection.diversOptions.secteurOptions.agricole'),
-                      t('inspection.diversOptions.secteurOptions.mixte'),
-                      t('inspection.diversOptions.secteurOptions.commercial'),
-                      t('inspection.diversOptions.secteurOptions.residentiel'),
-                      t('inspection.diversOptions.secteurOptions.industriel')
+                      t('inspection.diversOptions.secteurOptions.homogene'),
+                      t('inspection.diversOptions.secteurOptions.mixte')
                     ])}
 
                     {/* Intersection */}
@@ -610,11 +615,12 @@ export default function DiversPage() {
 
                     {/* Type */}
                     {renderChipField('Type', 'type', [
-                      t('inspection.diversOptions.foyerType.combustion'),
-                      t('inspection.diversOptions.foyerType.electrique'),
-                      t('inspection.diversOptions.foyerType.gaz'),
-                      t('inspection.diversOptions.foyerType.bois'),
-                      t('inspection.diversOptions.foyerType.granules'),
+                      t('inspection.diversOptions.foyerType.acierPrefab'),
+                      t('inspection.diversOptions.foyerType.foyerGaz'),
+                      t('inspection.diversOptions.foyerType.acierCombLenteInt'),
+                      t('inspection.diversOptions.foyerType.briques'),
+                      t('inspection.diversOptions.foyerType.pierres'),
+                      t('inspection.diversOptions.foyerType.poeleCombLenteBois'),
                       t('inspection.options.other')
                     ])}
 

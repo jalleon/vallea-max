@@ -683,26 +683,25 @@
         "perron": "Perron",
         "balcon": "Balcon",
         "patio": "Patio",
-        "galeire": "Galerie",
-        "muretsRetenue": "Murets de retenue",
-        "remise": "Remise",
-        "cabanon": "Cabanon",
-        "serre": "Serre",
-        "gazebo": "Gazebo",
-        "garage": "Garage"
+        "terrasse": "Terrasse",
+        "galerie": "Galerie",
+        "verandaSolarium": "Véranda/Solarium",
+        "gazeboPergola": "Gazebo/Pergola",
+        "murets": "Murets",
+        "cabanons": "Cabanons",
+        "eclairageExterieur": "Éclairage extérieur",
+        "systemeArrosage": "Système d'arrosage"
       },
       "entreeOptions": {
-        "asphaltee": "Asphaltée",
-        "pavee": "Pavée",
-        "gravier": "Gravier",
+        "paveUni": "Pavé uni",
         "beton": "Béton",
-        "paves": "Pavés",
-        "terre": "Terre"
+        "asphalte": "Asphalté",
+        "gravier": "Gravier"
       },
       "piscineItems": {
         "piscineCreusee": "Piscine creusée",
-        "piscineHorsTerre": "Piscine hors-terre",
-        "spa": "Spa"
+        "piscineSemiCreusee": "Piscine semi-creusée",
+        "plagePiscine": "Plage de piscine"
       }
     },
     "divers": {
@@ -737,11 +736,8 @@
         "pointeEau": "Pointe d'eau"
       },
       "secteurOptions": {
-        "agricole": "Agricole",
-        "mixte": "Mixte",
-        "commercial": "Commercial",
-        "residentiel": "Résidentiel",
-        "industriel": "Industriel"
+        "homogene": "Secteur homogène",
+        "mixte": "Secteur mixte"
       },
       "foyerPlancher": {
         "sousSol": "Sous-sol",
@@ -749,20 +745,29 @@
         "etage": "Étage"
       },
       "foyerType": {
-        "combustion": "Combustion",
-        "electrique": "Électrique",
-        "gaz": "Gaz",
-        "bois": "Bois",
-        "granules": "Granules"
+        "acierPrefab": "Acier (préfab.)",
+        "foyerGaz": "Foyer au gaz",
+        "acierCombLenteInt": "Acier + comb. lente int.",
+        "briques": "Briques",
+        "pierres": "Pierres",
+        "poeleCombLenteBois": "Poêle à combustion lente ou bois"
       },
       "diversItems": {
-        "interphone": "Interphone",
-        "systemeSon": "Système de son",
+        "laveVaisselle": "Lave-vaisselle",
+        "ventilateurSalleBain": "Ventilateur de salle de bain",
+        "hotte": "Hotte",
+        "aspirateurCentral": "Aspirateur Central",
         "systemeAlarme": "Système d'alarme",
-        "aspirateurCentral": "Aspirateur central",
-        "generatrice": "Génératrice",
-        "borneRecharge": "Borne de recharge",
-        "camera": "Caméra"
+        "bainTourbillon": "Bain tourbillon ou thérapeutique",
+        "spaIntegre": "Spa (Intégré ou encastré)",
+        "sauna": "Sauna",
+        "puitsLumiere": "Puits de lumière",
+        "entreeSousSol": "Entrée au sous-sol",
+        "radioIntercom": "Radio/Intercom",
+        "systemeSon": "Système de son",
+        "fourEncastre": "Four encastré",
+        "plaqueEncastree": "Plaque encastrée",
+        "microOndeEncastre": "Micro-onde encastré"
       }
     },
     "customValue": {
