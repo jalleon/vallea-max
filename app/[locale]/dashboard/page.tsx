@@ -39,17 +39,6 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<UserDashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    if (user) {
-      if (user.user_metadata?.organization_id) {
-        loadDashboardData()
-      } else {
-        // No organization ID, stop loading
-        setLoading(false)
-      }
-    }
-  }, [user])
-
   const loadDashboardData = async () => {
     if (!user) return
 
@@ -66,6 +55,18 @@ export default function DashboardPage() {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (user) {
+      if (user.user_metadata?.organization_id) {
+        loadDashboardData()
+      } else {
+        // No organization ID, stop loading
+        setLoading(false)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id])
 
   if (loading) {
     return (

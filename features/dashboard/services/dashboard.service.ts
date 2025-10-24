@@ -17,53 +17,84 @@ export interface UserDashboardStats {
 
 export class DashboardService {
   async getUserDashboardStats(userId: string, organizationId: string): Promise<UserDashboardStats> {
-    // Get properties created by this user
-    const { count: myPropertiesCount } = await supabase
-      .from('properties')
-      .select('*', { count: 'exact', head: true })
-      .eq('created_by', userId)
+    try {
+      // Get properties created by this user
+      const { count: myPropertiesCount } = await supabase
+        .from('properties')
+        .select('*', { count: 'exact', head: true })
+        .eq('created_by', userId)
 
-    // Get all org properties count
-    const { count: orgPropertiesCount } = await supabase
-      .from('properties')
-      .select('*', { count: 'exact', head: true })
-      .eq('organization_id', organizationId)
+      // Get all org properties count
+      const { count: orgPropertiesCount } = await supabase
+        .from('properties')
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', organizationId)
 
-    // Get appraisals created by this user
-    const { count: myAppraisalsCount } = await supabase
-      .from('appraisals')
-      .select('*', { count: 'exact', head: true })
-      .eq('created_by', userId)
+      // Get appraisals created by this user (gracefully handle if table doesn't exist)
+      let myAppraisalsCount = 0
+      const appraisalsResult = await supabase
+        .from('appraisals')
+        .select('*', { count: 'exact', head: true })
+        .eq('created_by', userId)
 
-    // Get comparables created by this user
-    const { count: myComparablesCount } = await supabase
-      .from('comparables')
-      .select('*', { count: 'exact', head: true })
-      .eq('created_by', userId)
+      if (!appraisalsResult.error) {
+        myAppraisalsCount = appraisalsResult.count || 0
+      } else {
+        console.warn('Appraisals table error (table may not exist):', appraisalsResult.error.message)
+      }
 
-    // Get recent activity from activity_log
-    const { data: activities } = await supabase
-      .from('activity_log')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(5)
+      // Get comparables created by this user (gracefully handle if table doesn't exist)
+      let myComparablesCount = 0
+      const comparablesResult = await supabase
+        .from('comparables')
+        .select('*', { count: 'exact', head: true })
+        .eq('created_by', userId)
 
-    const recentActivities = (activities || []).map(activity => ({
-      id: activity.id,
-      type: activity.action,
-      title: this.formatActivityTitle(activity.action),
-      subtitle: activity.entity_id || '',
-      time: this.formatTimeAgo(new Date(activity.created_at!)),
-      created_at: new Date(activity.created_at!)
-    }))
+      if (!comparablesResult.error) {
+        myComparablesCount = comparablesResult.count || 0
+      } else {
+        console.warn('Comparables table error (table may not exist):', comparablesResult.error.message)
+      }
 
-    return {
-      myPropertiesCount: myPropertiesCount || 0,
-      myAppraisalsCount: myAppraisalsCount || 0,
-      myComparablesCount: myComparablesCount || 0,
-      orgPropertiesCount: orgPropertiesCount || 0,
-      recentActivities
+      // Get recent activity from activity_log (gracefully handle if table doesn't exist)
+      let recentActivities: any[] = []
+      const { data: activities, error: activityError } = await supabase
+        .from('activity_log')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(5)
+
+      if (!activityError && activities) {
+        recentActivities = activities.map(activity => ({
+          id: activity.id,
+          type: activity.action,
+          title: this.formatActivityTitle(activity.action),
+          subtitle: activity.entity_id || '',
+          time: this.formatTimeAgo(new Date(activity.created_at!)),
+          created_at: new Date(activity.created_at!)
+        }))
+      } else if (activityError) {
+        console.warn('Activity log error (table may not exist):', activityError.message)
+      }
+
+      return {
+        myPropertiesCount: myPropertiesCount || 0,
+        myAppraisalsCount,
+        myComparablesCount,
+        orgPropertiesCount: orgPropertiesCount || 0,
+        recentActivities
+      }
+    } catch (error) {
+      console.error('Error in getUserDashboardStats:', error)
+      // Return empty stats on error
+      return {
+        myPropertiesCount: 0,
+        myAppraisalsCount: 0,
+        myComparablesCount: 0,
+        orgPropertiesCount: 0,
+        recentActivities: []
+      }
     }
   }
 

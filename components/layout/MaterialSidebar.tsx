@@ -391,7 +391,9 @@ export function MaterialSidebar({
         open={mobileOpen}
         onClose={onMobileClose}
         ModalProps={{
-          keepMounted: true
+          keepMounted: true,
+          disableEnforceFocus: true,
+          disableRestoreFocus: true
         }}
         sx={{
           display: { xs: 'block', sm: 'none' },

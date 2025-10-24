@@ -36,7 +36,7 @@ import {
   Language as LanguageIcon,
   ArrowBack,
 } from '@mui/icons-material'
-import { createClient } from '@/lib/supabase/client'
+import { supabase } from '@/lib/supabase/client'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -45,7 +45,6 @@ export default function LoginPage() {
   const { t: tCommon } = useTranslation('common')
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
-  const supabase = createClient()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -58,16 +57,23 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
 
-    // Clear any existing session first to avoid conflicts with OAuth
-    await supabase.auth.signOut()
+    try {
+      const { error } = await signIn(email, password)
 
-    const { error } = await signIn(email, password)
-
-    if (error) {
-      setError(t('error'))
+      if (error) {
+        console.error('Login error:', error)
+        setError(t('error'))
+        setLoading(false)
+      } else {
+        // Wait a bit for session to be established
+        await new Promise(resolve => setTimeout(resolve, 500))
+        router.push(`/${locale}/dashboard`)
+        router.refresh()
+      }
+    } catch (err: any) {
+      console.error('Login exception:', err)
+      setError(err.message || t('error'))
       setLoading(false)
-    } else {
-      router.push(`/${locale}/dashboard`)
     }
   }
 
