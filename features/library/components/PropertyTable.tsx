@@ -203,7 +203,7 @@ export function PropertyTable({
                 </TableCell>
                 <TableCell>
                   <Typography variant="body2" fontFamily="monospace" color="text.secondary">
-                    {property.id_no || '-'}
+                    {property.property_id_no || '-'}
                   </Typography>
                 </TableCell>
                 <TableCell>
