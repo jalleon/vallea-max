@@ -446,7 +446,7 @@ export function PropertyView({
                     </>
                   ) : (
                     <>
-                      <Grid item xs={12} md={4}>
+                      <Grid item xs={12} md={3}>
                         <Typography variant="body2" color="text.secondary">Prix de vente</Typography>
                         <Typography variant="body1" fontWeight={700} fontSize="1.1rem">
                           {property.prix_vente ? formatCurrency(property.prix_vente) : 'N/A'}
@@ -464,7 +464,7 @@ export function PropertyView({
                           {property.date_vente ? formatDate(property.date_vente) : 'N/A'}
                         </Typography>
                       </Grid>
-                      <Grid item xs={12} md={1}>
+                      <Grid item xs={12} md={2}>
                         <Typography variant="body2" color="text.secondary">Jours marché</Typography>
                         <Typography variant="body1">{property.jours_sur_marche || 'N/A'}</Typography>
                       </Grid>
@@ -474,7 +474,9 @@ export function PropertyView({
                           label={property.status || 'N/A'}
                           size="small"
                           sx={{
-                            bgcolor: theme.palette.primary.main,
+                            bgcolor: property.status === 'Vendu' ? theme.palette.success.main :
+                                     property.status === 'Actif' ? '#FFC107' :
+                                     theme.palette.primary.main,
                             color: 'white',
                             fontWeight: 600
                           }}
