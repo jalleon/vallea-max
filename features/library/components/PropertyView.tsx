@@ -482,11 +482,11 @@ export function PropertyView({
                           }}
                         />
                       </Grid>
-                      <Grid item xs={12} md={4}>
+                      <Grid item xs={12} md={3}>
                         <Typography variant="body2" color="text.secondary">Type de propriété</Typography>
                         <Typography variant="body1" fontWeight={600}>{property.type_propriete || 'N/A'}</Typography>
                       </Grid>
-                      <Grid item xs={12} md={4}>
+                      <Grid item xs={12} md={3}>
                         <Typography variant="body2" color="text.secondary">Genre de propriété</Typography>
                         <Typography variant="body1">{property.genre_propriete || 'N/A'}</Typography>
                       </Grid>
