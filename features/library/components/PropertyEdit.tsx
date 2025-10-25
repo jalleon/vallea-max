@@ -558,24 +558,27 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         }}
                       />
                     </Grid>
-                    <Grid item xs={12} md={2}>
-                      <TextField
-                        fullWidth
-                        label="Prix demandé"
-                        type="number"
-                        value={formData.prix_demande || ''}
-                        onChange={(e) => handleInputChange('prix_demande', e.target.value ? parseFloat(e.target.value) : undefined)}
-                        variant="outlined"
-                        size="small"
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <AttachMoney sx={{ color: theme.palette.warning.main }} />
-                            </InputAdornment>
-                          ),
-                        }}
-                      />
-                    </Grid>
+                    {/* Hide Prix demandé when status is Sujet */}
+                    {formData.status !== 'Sujet' && (
+                      <Grid item xs={12} md={2}>
+                        <TextField
+                          fullWidth
+                          label="Prix demandé"
+                          type="number"
+                          value={formData.prix_demande || ''}
+                          onChange={(e) => handleInputChange('prix_demande', e.target.value ? parseFloat(e.target.value) : undefined)}
+                          variant="outlined"
+                          size="small"
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <AttachMoney sx={{ color: theme.palette.warning.main }} />
+                              </InputAdornment>
+                            ),
+                          }}
+                        />
+                      </Grid>
+                    )}
                     <Grid item xs={12} md={2}>
                       <TextField
                         fullWidth
@@ -591,17 +594,20 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         InputLabelProps={{ shrink: true }}
                       />
                     </Grid>
-                    <Grid item xs={12} md={2}>
-                      <TextField
-                        fullWidth
-                        label="Jours sur marché"
-                        type="number"
-                        value={formData.jours_sur_marche || ''}
-                        onChange={(e) => handleInputChange('jours_sur_marche', e.target.value ? parseInt(e.target.value) : undefined)}
-                        variant="outlined"
-                        size="small"
-                      />
-                    </Grid>
+                    {/* Hide Jours sur marché when status is Sujet */}
+                    {formData.status !== 'Sujet' && (
+                      <Grid item xs={12} md={2}>
+                        <TextField
+                          fullWidth
+                          label="Jours sur marché"
+                          type="number"
+                          value={formData.jours_sur_marche || ''}
+                          onChange={(e) => handleInputChange('jours_sur_marche', e.target.value ? parseInt(e.target.value) : undefined)}
+                          variant="outlined"
+                          size="small"
+                        />
+                      </Grid>
+                    )}
                     <Grid item xs={12} md={2}>
                       <FormControl fullWidth size="small">
                         <InputLabel>Statut</InputLabel>
