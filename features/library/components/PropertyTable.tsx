@@ -227,9 +227,9 @@ export function PropertyTable({
                   )}
                 </TableCell>
                 <TableCell>
-                  {(property.prix_vente || property.valeur_evaluation) && (
+                  {property.prix_vente && (
                     <Typography variant="body2" fontWeight="medium">
-                      {formatCurrency(property.prix_vente || property.valeur_evaluation || 0)}
+                      {formatCurrency(property.prix_vente)}
                     </Typography>
                   )}
                   {property.prix_demande && property.prix_demande !== property.prix_vente && (
@@ -239,9 +239,9 @@ export function PropertyTable({
                   )}
                 </TableCell>
                 <TableCell sx={{ minWidth: 120 }}>
-                  {(property.date_vente || property.date_effective) && (
+                  {property.date_vente && (
                     <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
-                      {formatDate((property.date_vente || property.date_effective)!)}
+                      {formatDate(property.date_vente)}
                     </Typography>
                   )}
                 </TableCell>

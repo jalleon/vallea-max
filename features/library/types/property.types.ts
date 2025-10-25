@@ -61,8 +61,7 @@ export interface Property {
   type_propriete?: PropertyType
 
   // Sujet-specific fields (when status is "Sujet")
-  valeur_evaluation?: number  // Replaces prix_vente when status is Sujet
-  date_effective?: Date  // Replaces date_vente when status is Sujet
+  // Note: valeur_evaluation and date_effective are UI-only fields that map to prix_vente and date_vente
   type_evaluation?: EvaluationType  // Only shown when status is Sujet
 
   // Occupancy fields
@@ -159,8 +158,7 @@ export interface PropertyCreateInput {
   type_propriete?: PropertyType
 
   // Sujet-specific fields
-  valeur_evaluation?: number
-  date_effective?: string
+  // Note: valeur_evaluation and date_effective are UI-only fields that map to prix_vente and date_vente
   type_evaluation?: EvaluationType
 
   // Occupancy fields
