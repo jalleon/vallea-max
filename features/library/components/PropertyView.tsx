@@ -603,7 +603,7 @@ export function PropertyView({
                         if (largeurFeet && longueurFeet && largeurMeters && longueurMeters) {
                           const areaFeet = (parseFloat(largeurFeet) * parseFloat(longueurFeet)).toFixed(0)
                           const areaMeters = (parseFloat(largeurMeters) * parseFloat(longueurMeters)).toFixed(0)
-                          return `${largeurFeet}' x ${longueurFeet}' (${largeurMeters}m x ${longueurMeters}m) = ${areaFeet} pi² (${areaMeters} m²)`
+                          return `${areaFeet} pi² (${areaMeters} m²)`
                         }
 
                         // Fallback to property field
