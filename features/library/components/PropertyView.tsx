@@ -360,7 +360,7 @@ export function PropertyView({
                 </Box>
                 <CardContent sx={{ p: 3 }}>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} md={3}>
+                  <Grid item xs={12} md={1}>
                     <Typography variant="body2" color="text.secondary">ID No</Typography>
                     <Typography variant="body1" fontWeight={600} color="primary">
                       {property.property_id_no || 'N/A'}
@@ -370,54 +370,87 @@ export function PropertyView({
                     <Typography variant="body2" color="text.secondary">Adresse</Typography>
                     <Typography variant="body1">{property.adresse}</Typography>
                   </Grid>
+                  <Grid item xs={12} md={2}>
+                    <Typography variant="body2" color="text.secondary">Ville</Typography>
+                    <Typography variant="body1">{property.ville || 'N/A'}</Typography>
+                  </Grid>
+                  <Grid item xs={12} md={2}>
+                    <Typography variant="body2" color="text.secondary">Arrondissement</Typography>
+                    <Typography variant="body1">{property.municipalite || 'N/A'}</Typography>
+                  </Grid>
+                  <Grid item xs={12} md={1}>
+                    <Typography variant="body2" color="text.secondary">Code postal</Typography>
+                    <Typography variant="body1">{property.code_postal || 'N/A'}</Typography>
+                  </Grid>
+                  <Grid item xs={12} md={1}>
+                    <Typography variant="body2" color="text.secondary">Province</Typography>
+                    <Typography variant="body1">{property.province || 'N/A'}</Typography>
+                  </Grid>
+
+                  {/* Conditional fields based on status */}
+                  {property.status === 'Sujet' ? (
+                    <>
+                      <Grid item xs={12} md={4}>
+                        <Typography variant="body2" color="text.secondary">Valeur d'évaluation</Typography>
+                        <Typography variant="body1">
+                          {property.prix_vente ? formatCurrency(property.prix_vente) : 'N/A'}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} md={4}>
+                        <Typography variant="body2" color="text.secondary">Date effective</Typography>
+                        <Typography variant="body1">
+                          {property.date_vente ? formatDate(property.date_vente) : 'N/A'}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} md={4}>
+                        <Typography variant="body2" color="text.secondary">Statut</Typography>
+                        <Typography variant="body1">{property.status || 'N/A'}</Typography>
+                      </Grid>
+                    </>
+                  ) : (
+                    <>
+                      <Grid item xs={12} md={3}>
+                        <Typography variant="body2" color="text.secondary">Prix de vente</Typography>
+                        <Typography variant="body1">
+                          {property.prix_vente ? formatCurrency(property.prix_vente) : 'N/A'}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} md={3}>
+                        <Typography variant="body2" color="text.secondary">Prix demandé</Typography>
+                        <Typography variant="body1">
+                          {property.prix_demande ? formatCurrency(property.prix_demande) : 'N/A'}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} md={2}>
+                        <Typography variant="body2" color="text.secondary">Date de vente</Typography>
+                        <Typography variant="body1">
+                          {property.date_vente ? formatDate(property.date_vente) : 'N/A'}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} md={2}>
+                        <Typography variant="body2" color="text.secondary">Jours sur marché</Typography>
+                        <Typography variant="body1">{property.jours_sur_marche || 'N/A'}</Typography>
+                      </Grid>
+                      <Grid item xs={12} md={2}>
+                        <Typography variant="body2" color="text.secondary">Statut</Typography>
+                        <Typography variant="body1">{property.status || 'N/A'}</Typography>
+                      </Grid>
+                    </>
+                  )}
+
                   <Grid item xs={12} md={4}>
-                    <Typography variant="body2" color="text.secondary">Ville, arrondissement</Typography>
-                    <Typography variant="body1">
-                      {[property.ville, property.municipalite].filter(Boolean).join(', ') || 'N/A'}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <Typography variant="body2" color="text.secondary">Code postal, province</Typography>
-                    <Typography variant="body1">
-                      {[property.code_postal, property.province].filter(Boolean).join(', ') || 'N/A'}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <Typography variant="body2" color="text.secondary">Prix de vente, prix demandé</Typography>
-                    <Typography variant="body1">
-                      {property.prix_vente ? formatCurrency(property.prix_vente) : 'N/A'}
-                      {property.prix_demande && property.prix_demande !== property.prix_vente &&
-                        ` (Demandé: ${formatCurrency(property.prix_demande)})`
-                      }
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} md={4}>
-                    <Typography variant="body2" color="text.secondary">Date de vente</Typography>
-                    <Typography variant="body1">
-                      {property.date_vente ? formatDate(property.date_vente) : 'N/A'}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} md={4}>
-                    <Typography variant="body2" color="text.secondary"># jours sur le marché</Typography>
-                    <Typography variant="body1">{property.jours_sur_marche || 'N/A'}</Typography>
-                  </Grid>
-                  <Grid item xs={12} md={4}>
-                    <Typography variant="body2" color="text.secondary">Statut</Typography>
-                    <Typography variant="body1">{property.status || 'N/A'}</Typography>
-                  </Grid>
-                  <Grid item xs={12} md={6}>
                     <Typography variant="body2" color="text.secondary">Type de propriété</Typography>
                     <Typography variant="body1">{property.type_propriete || 'N/A'}</Typography>
                   </Grid>
-                  <Grid item xs={12} md={6}>
+                  <Grid item xs={12} md={4}>
                     <Typography variant="body2" color="text.secondary">Genre de propriété</Typography>
                     <Typography variant="body1">{property.genre_propriete || 'N/A'}</Typography>
                   </Grid>
-                  <Grid item xs={12} md={6}>
-                    <Typography variant="body2" color="text.secondary">Année de construction</Typography>
+                  <Grid item xs={12} md={2}>
+                    <Typography variant="body2" color="text.secondary">Année construction</Typography>
                     <Typography variant="body1">{property.annee_construction || 'N/A'}</Typography>
                   </Grid>
-                  <Grid item xs={12} md={6}>
+                  <Grid item xs={12} md={2}>
                     <Typography variant="body2" color="text.secondary">Zonage</Typography>
                     <Typography variant="body1">{property.zonage || 'N/A'}</Typography>
                   </Grid>
