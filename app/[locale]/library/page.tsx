@@ -381,6 +381,7 @@ export default function LibraryPage() {
     try {
       if (editProperty) {
         // Update existing property
+        console.log('Updating property:', editProperty.id, propertyData)
         await propertiesService.update(editProperty.id, propertyData)
         showSnackbar('Property updated successfully')
       } else if (isNewProperty) {
@@ -406,9 +407,10 @@ export default function LibraryPage() {
       await loadProperties() // Reload data
       setEditProperty(null)
       setIsNewProperty(false)
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error saving property:', err)
-      showSnackbar('Failed to save property', 'error')
+      console.error('Error details:', err?.message, err?.details, err?.hint)
+      showSnackbar(`Failed to save property: ${err?.message || 'Unknown error'}`, 'error')
     }
   }
 

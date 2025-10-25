@@ -159,9 +159,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
         status: property.status || 'Vendu',
         type_propriete: property.type_propriete,
 
-        // New conditional fields
-        valeur_evaluation: property.valeur_evaluation,
-        date_effective: property.date_effective ? new Date(property.date_effective).toISOString().split('T')[0] : undefined,
+        // Conditional fields (Note: valeur_evaluation and date_effective use prix_vente and date_vente in DB)
         type_evaluation: property.type_evaluation,
         occupancy: property.occupancy,
         loyer_en_place: property.loyer_en_place,
@@ -542,9 +540,9 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         fullWidth
                         label={formData.status === 'Sujet' ? "Valeur d'évaluation" : "Prix de vente"}
                         type="number"
-                        value={formData.status === 'Sujet' ? (formData.valeur_evaluation || '') : (formData.prix_vente || '')}
+                        value={formData.prix_vente || ''}
                         onChange={(e) => handleInputChange(
-                          formData.status === 'Sujet' ? 'valeur_evaluation' : 'prix_vente',
+                          'prix_vente',
                           e.target.value ? parseFloat(e.target.value) : undefined
                         )}
                         variant="outlined"
@@ -584,9 +582,9 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         fullWidth
                         label={formData.status === 'Sujet' ? "Date effective" : "Date de vente"}
                         type="date"
-                        value={formData.status === 'Sujet' ? (formData.date_effective || '') : (formData.date_vente || '')}
+                        value={formData.date_vente || ''}
                         onChange={(e) => handleInputChange(
-                          formData.status === 'Sujet' ? 'date_effective' : 'date_vente',
+                          'date_vente',
                           e.target.value
                         )}
                         variant="outlined"
