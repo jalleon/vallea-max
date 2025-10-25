@@ -299,7 +299,9 @@ export function PropertyView({
               <Box display="flex" alignItems="center" gap={1}>
                 <AttachMoney sx={{ color: theme.palette.success.main }} />
                 <Box>
-                  <Typography variant="body2" color="text.secondary">Prix de vente</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {property.status === 'Sujet' ? "Valeur d'évaluation" : 'Prix de vente'}
+                  </Typography>
                   <Typography variant="h4" fontWeight={700} color="success.main">
                     {property.prix_vente ? formatCurrency(property.prix_vente) : 'N/A'}
                   </Typography>
@@ -310,7 +312,9 @@ export function PropertyView({
               <Box display="flex" alignItems="center" gap={1}>
                 <CalendarToday sx={{ color: theme.palette.primary.main }} />
                 <Box>
-                  <Typography variant="body2" color="text.secondary">Date de vente</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {property.status === 'Sujet' ? 'Date effective' : 'Date de vente'}
+                  </Typography>
                   <Typography variant="h6" fontWeight={600}>
                     {property.date_vente ? formatDate(property.date_vente) : 'N/A'}
                   </Typography>
