@@ -125,11 +125,10 @@ const convertToTableFormat = (property: Property, index: number): any => {
     idNo,
     address: property.adresse,
     city: property.ville || property.municipalite,
-    soldDate: (property.date_vente || property.date_effective) ?
-      (property.date_vente instanceof Date ? property.date_vente.toISOString().split('T')[0] : property.date_vente) ||
-      (property.date_effective instanceof Date ? property.date_effective.toISOString().split('T')[0] : property.date_effective) :
+    soldDate: property.date_vente ?
+      (property.date_vente instanceof Date ? property.date_vente.toISOString().split('T')[0] : property.date_vente) :
       null,
-    soldPrice: property.prix_vente || property.valeur_evaluation || null,
+    soldPrice: property.prix_vente || null,
     propertyType: property.type_propriete || property.genre_propriete || 'Autre',
     status: property.status || '-',
     constructionYear: property.annee_construction || null,
