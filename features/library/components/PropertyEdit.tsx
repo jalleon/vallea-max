@@ -856,8 +856,8 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                     </Typography>
                   </Box>
                   <Grid container spacing={2}>
-                    {/* Row 1 */}
-                    <Grid item xs={12} md={3}>
+                    {/* Row 1 - Building characteristics */}
+                    <Grid item xs={12} md={2.4}>
                       <FormControl fullWidth size="small">
                         <InputLabel>Genre de propriété</InputLabel>
                         <Select
@@ -875,7 +875,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         </Select>
                       </FormControl>
                     </Grid>
-                    <Grid item xs={12} md={3}>
+                    <Grid item xs={12} md={2.4}>
                       <FormControl fullWidth size="small">
                         <InputLabel>Type de bâtiment</InputLabel>
                         <Select
@@ -890,8 +890,41 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         </Select>
                       </FormControl>
                     </Grid>
+                    <Grid item xs={12} md={2.4}>
+                      <TextField
+                        fullWidth
+                        label="Année de construction"
+                        type="number"
+                        value={formData.annee_construction || ''}
+                        onChange={(e) => handleInputChange('annee_construction', e.target.value ? parseInt(e.target.value) : undefined)}
+                        variant="outlined"
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={2.4}>
+                      <TextField
+                        fullWidth
+                        label="Chrono. Age"
+                        type="number"
+                        value={formData.chrono_age || ''}
+                        onChange={(e) => handleInputChange('chrono_age', e.target.value ? parseInt(e.target.value) : undefined)}
+                        variant="outlined"
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={2.4}>
+                      <TextField
+                        fullWidth
+                        label="Eff. Age"
+                        type="number"
+                        value={formData.eff_age || ''}
+                        onChange={(e) => handleInputChange('eff_age', e.target.value ? parseInt(e.target.value) : undefined)}
+                        variant="outlined"
+                        size="small"
+                      />
+                    </Grid>
 
-                    {/* Conditional Condo fields */}
+                    {/* Row 1b - Conditional Condo fields */}
                     {formData.type_propriete === 'Condo' && (
                       <>
                         <Grid item xs={12} md={3}>
@@ -923,39 +956,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                       </>
                     )}
 
-                    <Grid item xs={12} md={3}>
-                      <TextField
-                        fullWidth
-                        label="Année de construction"
-                        type="number"
-                        value={formData.annee_construction || ''}
-                        onChange={(e) => handleInputChange('annee_construction', e.target.value ? parseInt(e.target.value) : undefined)}
-                        variant="outlined"
-                        size="small"
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={3}>
-                      <TextField
-                        fullWidth
-                        label="Chrono. Age"
-                        type="number"
-                        value={formData.chrono_age || ''}
-                        onChange={(e) => handleInputChange('chrono_age', e.target.value ? parseInt(e.target.value) : undefined)}
-                        variant="outlined"
-                        size="small"
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={3}>
-                      <TextField
-                        fullWidth
-                        label="Eff. Age"
-                        type="number"
-                        value={formData.eff_age || ''}
-                        onChange={(e) => handleInputChange('eff_age', e.target.value ? parseInt(e.target.value) : undefined)}
-                        variant="outlined"
-                        size="small"
-                      />
-                    </Grid>
+                    {/* Row 2 - Zonage */}
                     <Grid item xs={12} md={3}>
                       <TextField
                         fullWidth
