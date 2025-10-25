@@ -67,6 +67,12 @@ class PropertiesSupabaseService {
       notes: data.notes || undefined,
       is_template: data.is_template || false,
       is_shared: data.is_shared || false,
+      // Rental/evaluation fields
+      frais_condo: data.frais_condo || undefined,
+      loyer_en_place: data.loyer_en_place || undefined,
+      unit_rents: data.unit_rents as any,
+      type_evaluation: data.type_evaluation || undefined,
+      occupancy: data.occupancy || undefined,
       // Inspection fields
       inspection_status: data.inspection_status as any,
       inspection_date: data.inspection_date ? new Date(data.inspection_date) : undefined,
