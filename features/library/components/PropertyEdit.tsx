@@ -1040,7 +1040,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                     </Grid>
 
                     {/* Row 3 */}
-                    <Grid item xs={12} md={3}>
+                    <Grid item xs={12} md={2.4}>
                       <FormControl fullWidth size="small">
                         <InputLabel>Stationnement</InputLabel>
                         <Select
@@ -1054,7 +1054,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         </Select>
                       </FormControl>
                     </Grid>
-                    <Grid item xs={12} md={3}>
+                    <Grid item xs={12} md={2.4}>
                       <FormControl fullWidth size="small">
                         <InputLabel>Type de garage</InputLabel>
                         <Select
@@ -1070,7 +1070,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         </Select>
                       </FormControl>
                     </Grid>
-                    <Grid item xs={12} md={3}>
+                    <Grid item xs={12} md={2.4}>
                       <TextField
                         fullWidth
                         label="Dimension garage"
@@ -1080,7 +1080,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         size="small"
                       />
                     </Grid>
-                    <Grid item xs={12} md={3}>
+                    <Grid item xs={12} md={2.4}>
                       <FormControl fullWidth size="small">
                         <InputLabel>Type de sous-sol</InputLabel>
                         <Select
@@ -1094,7 +1094,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         </Select>
                       </FormControl>
                     </Grid>
-                    <Grid item xs={12} md={3}>
+                    <Grid item xs={12} md={2.4}>
                       <TextField
                         fullWidth
                         label="Toiture"
