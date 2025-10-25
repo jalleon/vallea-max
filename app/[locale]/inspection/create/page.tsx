@@ -27,7 +27,9 @@ const provinces = [
 const propertyTypes = [
   'Condo',
   'Unifamiliale',
-  'Plex',
+  'Duplex',
+  'Triplex',
+  'Quadriplex+',
   'Appartement',
   'Semi-commercial',
   'Terrain',
@@ -90,6 +92,7 @@ export default function CreateInspectionPage() {
         ville: formData.city,
         province: formData.province,
         type_propriete: formData.propertyType as PropertyType,
+        status: 'Sujet', // Automatically assign Sujet status for inspection properties
         source: 'Inspection',
         inspection_status: 'in_progress',
         inspection_completion: 0,
