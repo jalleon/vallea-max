@@ -403,8 +403,8 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
     }
   }
 
-  const propertyTypes: PropertyType[] = ['Condo', 'Unifamiliale', 'Duplex', 'Triplex', 'Quadriplex+', 'Appartement', 'Semi-commercial', 'Autre']
-  const propertyStatuses: PropertyStatus[] = ['Vendu', 'Sujet', 'À vendre', 'Actif']
+  const propertyTypes: PropertyType[] = ['Condo', 'Unifamiliale', 'Duplex', 'Triplex', 'Quadriplex+', 'Appartement', 'Semi-commercial', 'Commercial', 'Terrain', 'Autre']
+  const propertyStatuses: PropertyStatus[] = ['Vendu', 'Sujet', 'Actif']
   const basementTypes: BasementType[] = ['Aucun', 'Complet aménagé', 'Complet non-aménagé', 'Partiel aménagé', 'Partiel non-aménagé', 'Vide sanitaire', 'Dalle de béton']
   const parkingTypes: ParkingType[] = ['Allée', 'Garage', 'Abri d\'auto', 'Rue', 'Aucun']
   const occupancyTypes: OccupancyType[] = ['Propriétaire', 'Locataire']

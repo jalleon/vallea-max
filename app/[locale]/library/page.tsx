@@ -529,17 +529,17 @@ export default function LibraryPage() {
                 Bibliothèque de Propriétés
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Gérez votre portefeuille immobilier et créez de nouvelles fiches
+                Gérez vos propriétés immobilières
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
               {selectedRows.length > 0 && (
                 <Button
                   variant="outlined"
                   color="error"
                   startIcon={<DeleteForever />}
                   onClick={handleDeleteSelected}
-                  sx={{ borderRadius: 3 }}
+                  sx={{ borderRadius: 3, whiteSpace: 'nowrap' }}
                 >
                   Supprimer ({selectedRows.length})
                 </Button>
@@ -547,14 +547,14 @@ export default function LibraryPage() {
               <Button
                 variant="outlined"
                 startIcon={<Download />}
-                sx={{ borderRadius: 3 }}
+                sx={{ borderRadius: 3, whiteSpace: 'nowrap' }}
               >
                 Exporter
               </Button>
               <Button
                 variant="contained"
                 startIcon={<Add />}
-                sx={{ borderRadius: 3 }}
+                sx={{ borderRadius: 3, whiteSpace: 'nowrap' }}
                 onClick={() => handleEdit()}
               >
                 Nouvelle Propriété

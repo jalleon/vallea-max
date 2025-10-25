@@ -8,15 +8,14 @@ export const PROPERTY_TYPES = [
   'Quadriplex+',
   'Appartement',
   'Semi-commercial',
-  'Terrain',
   'Commercial',
+  'Terrain',
   'Autre'
 ] as const
 
 export const PROPERTY_STATUSES = [
   'Vendu',
   'Sujet',
-  'À vendre',
   'Actif'
 ] as const
 
