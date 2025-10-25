@@ -613,7 +613,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                     </Grid>
                     {/* Hide Jours sur marché when status is Sujet */}
                     {formData.status !== 'Sujet' && (
-                      <Grid item xs={12} md={2}>
+                      <Grid item xs={12} md={1.5}>
                         <TextField
                           fullWidth
                           label="Jours sur marché"
@@ -625,7 +625,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         />
                       </Grid>
                     )}
-                    <Grid item xs={12} md={2}>
+                    <Grid item xs={12} md={1.5}>
                       <FormControl fullWidth size="small">
                         <InputLabel>Statut</InputLabel>
                         <Select
