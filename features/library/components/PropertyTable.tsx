@@ -241,7 +241,7 @@ export function PropertyTable({
                 <TableCell sx={{ minWidth: 120 }}>
                   {(property.date_vente || property.date_effective) && (
                     <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
-                      {formatDate(property.date_vente || property.date_effective)}
+                      {formatDate((property.date_vente || property.date_effective)!)}
                     </Typography>
                   )}
                 </TableCell>
