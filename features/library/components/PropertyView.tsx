@@ -174,12 +174,12 @@ export function PropertyView({
 
   const getInspectionButtonText = () => {
     if (isInspectionComplete) {
-      return 'Voir inspection'
+      return "Voir inspection"
     }
     if (!property.inspection_status || property.inspection_status === 'not_started') {
-      return 'Commencer l\'inspection'
+      return "Commencer l'inspection"
     }
-    return 'Continuer l\'inspection'
+    return "Continuer l'inspection"
   }
 
   const getStatusColor = (status?: string) => {
