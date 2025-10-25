@@ -320,6 +320,11 @@ export type Database = {
           inspection_exterieur: Json | null
           inspection_divers: Json | null
           inspection_categories_completed: string[] | null
+          frais_condo: number | null
+          loyer_en_place: number | null
+          unit_rents: Json | null
+          type_evaluation: string | null
+          occupancy: string | null
         }
         Insert: {
           adresse: string
@@ -379,6 +384,11 @@ export type Database = {
           inspection_exterieur?: Json | null
           inspection_divers?: Json | null
           inspection_categories_completed?: string[] | null
+          frais_condo?: number | null
+          loyer_en_place?: number | null
+          unit_rents?: Json | null
+          type_evaluation?: string | null
+          occupancy?: string | null
         }
         Update: {
           adresse?: string
@@ -438,6 +448,11 @@ export type Database = {
           inspection_exterieur?: Json | null
           inspection_divers?: Json | null
           inspection_categories_completed?: string[] | null
+          frais_condo?: number | null
+          loyer_en_place?: number | null
+          unit_rents?: Json | null
+          type_evaluation?: string | null
+          occupancy?: string | null
         }
         Relationships: [
           {
