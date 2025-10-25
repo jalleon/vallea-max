@@ -3,7 +3,9 @@
 export const PROPERTY_TYPES = [
   'Condo',
   'Unifamiliale',
-  'Plex',
+  'Duplex',
+  'Triplex',
+  'Quadriplex+',
   'Appartement',
   'Semi-commercial',
   'Terrain',
@@ -13,11 +15,22 @@ export const PROPERTY_TYPES = [
 
 export const PROPERTY_STATUSES = [
   'Vendu',
+  'Sujet',
   'À vendre',
   'Actif',
   'Retiré',
   'Conditionnel',
   'Expiré'
+] as const
+
+export const OCCUPANCY_TYPES = [
+  'Propriétaire',
+  'Locataire'
+] as const
+
+export const EVALUATION_TYPES = [
+  'Valeur marchande',
+  'Assurable'
 ] as const
 
 export const BASEMENT_TYPES = [

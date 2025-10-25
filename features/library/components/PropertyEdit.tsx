@@ -42,7 +42,7 @@ import {
   AttachMoney,
   Search as InspectionIcon
 } from '@mui/icons-material'
-import { Property, PropertyCreateInput, PropertyType, PropertyStatus, BasementType, ParkingType, FloorType, FloorArea } from '../types/property.types'
+import { Property, PropertyCreateInput, PropertyType, PropertyStatus, BasementType, ParkingType, FloorType, FloorArea, OccupancyType, EvaluationType, UnitRent } from '../types/property.types'
 import { v4 as uuidv4 } from 'uuid'
 import { useRouter, useParams } from 'next/navigation'
 import { calculateInspectionProgress, getCompletedCategories, getCategoryTranslationKey } from '@/features/inspection/utils/progress.utils'
@@ -111,6 +111,15 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
     area_ft2: 0
   })
   const [inspectionConfirmOpen, setInspectionConfirmOpen] = useState(false)
+  const [unitRents, setUnitRents] = useState<UnitRent[]>([])
+
+  // Helper to get number of units based on property type
+  const getUnitCount = (type?: PropertyType): number => {
+    if (type === 'Duplex') return 2
+    if (type === 'Triplex') return 3
+    if (type === 'Quadriplex+') return 4
+    return 0
+  }
 
   useEffect(() => {
     if (property) {
@@ -147,6 +156,16 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
         jours_sur_marche: property.jours_sur_marche,
         status: property.status || 'Vendu',
         type_propriete: property.type_propriete,
+
+        // New conditional fields
+        valeur_evaluation: property.valeur_evaluation,
+        date_effective: property.date_effective ? new Date(property.date_effective).toISOString().split('T')[0] : undefined,
+        type_evaluation: property.type_evaluation,
+        occupancy: property.occupancy,
+        loyer_en_place: property.loyer_en_place,
+        frais_condo: property.frais_condo,
+        unit_rents: property.unit_rents,
+
         genre_propriete: property.genre_propriete || '',
         annee_construction: property.annee_construction,
         zonage: property.zonage || '',
@@ -176,6 +195,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
         is_shared: property.is_shared
       })
       setFloorAreas(property.floor_areas || [])
+      setUnitRents(property.unit_rents || [])
     } else {
       // Reset for new property
       setFormData({
@@ -367,10 +387,12 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
     }
   }
 
-  const propertyTypes: PropertyType[] = ['Condo', 'Unifamiliale', 'Plex', 'Appartement', 'Semi-commercial', 'Autre']
-  const propertyStatuses: PropertyStatus[] = ['Vendu', 'Actif', 'Retiré', 'Conditionnel', 'Expiré']
+  const propertyTypes: PropertyType[] = ['Condo', 'Unifamiliale', 'Duplex', 'Triplex', 'Quadriplex+', 'Appartement', 'Semi-commercial', 'Autre']
+  const propertyStatuses: PropertyStatus[] = ['Vendu', 'Sujet', 'Actif', 'Retiré', 'Conditionnel', 'Expiré']
   const basementTypes: BasementType[] = ['Aucun', 'Complet aménagé', 'Complet non-aménagé', 'Partiel aménagé', 'Partiel non-aménagé', 'Vide sanitaire', 'Dalle de béton']
   const parkingTypes: ParkingType[] = ['Allée', 'Garage', 'Abri d\'auto', 'Rue', 'Aucun']
+  const occupancyTypes: OccupancyType[] = ['Propriétaire', 'Locataire']
+  const evaluationTypes: EvaluationType[] = ['Valeur marchande', 'Assurable']
   const floorTypes: FloorType[] = ['Sous-sol', 'Rez-de-chaussée', '2e étage', '3e étage', 'Comble', 'Mezzanine']
 
   const totals = calculateTotalHabitable()
@@ -487,14 +509,17 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                       </FormControl>
                     </Grid>
 
-                    {/* Row 2 */}
+                    {/* Row 2 - Conditional based on status */}
                     <Grid item xs={12} md={2}>
                       <TextField
                         fullWidth
-                        label="Prix de vente"
+                        label={formData.status === 'Sujet' ? "Valeur d'évaluation" : "Prix de vente"}
                         type="number"
-                        value={formData.prix_vente || ''}
-                        onChange={(e) => handleInputChange('prix_vente', e.target.value ? parseFloat(e.target.value) : undefined)}
+                        value={formData.status === 'Sujet' ? (formData.valeur_evaluation || '') : (formData.prix_vente || '')}
+                        onChange={(e) => handleInputChange(
+                          formData.status === 'Sujet' ? 'valeur_evaluation' : 'prix_vente',
+                          e.target.value ? parseFloat(e.target.value) : undefined
+                        )}
                         variant="outlined"
                         size="small"
                         InputProps={{
@@ -527,10 +552,13 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                     <Grid item xs={12} md={2}>
                       <TextField
                         fullWidth
-                        label="Date de vente"
+                        label={formData.status === 'Sujet' ? "Date effective" : "Date de vente"}
                         type="date"
-                        value={formData.date_vente}
-                        onChange={(e) => handleInputChange('date_vente', e.target.value)}
+                        value={formData.status === 'Sujet' ? (formData.date_effective || '') : (formData.date_vente || '')}
+                        onChange={(e) => handleInputChange(
+                          formData.status === 'Sujet' ? 'date_effective' : 'date_vente',
+                          e.target.value
+                        )}
                         variant="outlined"
                         size="small"
                         InputLabelProps={{ shrink: true }}
@@ -575,6 +603,126 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         </Select>
                       </FormControl>
                     </Grid>
+
+                    {/* Conditional fields for Sujet status */}
+                    {formData.status === 'Sujet' && (
+                      <>
+                        <Grid item xs={12} md={3}>
+                          <FormControl fullWidth size="small">
+                            <InputLabel>Type d'évaluation</InputLabel>
+                            <Select
+                              value={formData.type_evaluation || ''}
+                              onChange={(e) => handleInputChange('type_evaluation', e.target.value as EvaluationType)}
+                              label="Type d'évaluation"
+                            >
+                              {evaluationTypes.map((type) => (
+                                <MenuItem key={type} value={type}>{type}</MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={12} md={3}>
+                          <FormControl fullWidth size="small">
+                            <InputLabel>Occupancy</InputLabel>
+                            <Select
+                              value={formData.occupancy || ''}
+                              onChange={(e) => handleInputChange('occupancy', e.target.value as OccupancyType)}
+                              label="Occupancy"
+                            >
+                              {occupancyTypes.map((type) => (
+                                <MenuItem key={type} value={type}>{type}</MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+                        </Grid>
+                        {formData.occupancy === 'Locataire' && (
+                          <Grid item xs={12} md={3}>
+                            <TextField
+                              fullWidth
+                              label="Loyer en place"
+                              type="number"
+                              value={formData.loyer_en_place || ''}
+                              onChange={(e) => handleInputChange('loyer_en_place', e.target.value ? parseFloat(e.target.value) : undefined)}
+                              variant="outlined"
+                              size="small"
+                              InputProps={{
+                                startAdornment: (
+                                  <InputAdornment position="start">
+                                    <AttachMoney sx={{ color: theme.palette.info.main }} />
+                                  </InputAdornment>
+                                ),
+                              }}
+                            />
+                          </Grid>
+                        )}
+                      </>
+                    )}
+
+                    {/* Conditional field for Condo */}
+                    {formData.type_propriete === 'Condo' && (
+                      <Grid item xs={12} md={3}>
+                        <TextField
+                          fullWidth
+                          label="Frais de condo"
+                          type="number"
+                          value={formData.frais_condo || ''}
+                          onChange={(e) => handleInputChange('frais_condo', e.target.value ? parseFloat(e.target.value) : undefined)}
+                          variant="outlined"
+                          size="small"
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <AttachMoney sx={{ color: theme.palette.secondary.main }} />
+                              </InputAdornment>
+                            ),
+                          }}
+                        />
+                      </Grid>
+                    )}
+
+                    {/* Conditional fields for multi-unit properties */}
+                    {(formData.type_propriete === 'Duplex' || formData.type_propriete === 'Triplex' || formData.type_propriete === 'Quadriplex+') && (
+                      <Grid item xs={12}>
+                        <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(0,0,0,0.02)', borderRadius: 1 }}>
+                          <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
+                            Loyer par unité
+                          </Typography>
+                          <Grid container spacing={2}>
+                            {Array.from({ length: getUnitCount(formData.type_propriete) }, (_, i) => {
+                              const unitRent = unitRents[i] || { unitNumber: `Unité ${i + 1}`, monthlyRent: 0 }
+                              return (
+                                <Grid item xs={12} md={3} key={i}>
+                                  <TextField
+                                    fullWidth
+                                    label={`Unité ${i + 1} - Loyer mensuel`}
+                                    type="number"
+                                    value={unitRent.monthlyRent || ''}
+                                    onChange={(e) => {
+                                      const newRents = [...unitRents]
+                                      newRents[i] = {
+                                        unitNumber: `Unité ${i + 1}`,
+                                        monthlyRent: e.target.value ? parseFloat(e.target.value) : 0
+                                      }
+                                      setUnitRents(newRents)
+                                      handleInputChange('unit_rents', newRents)
+                                    }}
+                                    variant="outlined"
+                                    size="small"
+                                    InputProps={{
+                                      startAdornment: (
+                                        <InputAdornment position="start">
+                                          <AttachMoney sx={{ color: theme.palette.info.main }} />
+                                        </InputAdornment>
+                                      ),
+                                    }}
+                                  />
+                                </Grid>
+                              )
+                            })}
+                          </Grid>
+                        </Box>
+                      </Grid>
+                    )}
                   </Grid>
                 </CardContent>
               </Card>

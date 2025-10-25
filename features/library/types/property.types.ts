@@ -1,5 +1,5 @@
 import { MediaReference } from '@/types/common.types'
-import { PROPERTY_TYPES, PROPERTY_STATUSES, BASEMENT_TYPES, PARKING_TYPES, FLOOR_TYPES } from '../constants/property.constants'
+import { PROPERTY_TYPES, PROPERTY_STATUSES, BASEMENT_TYPES, PARKING_TYPES, FLOOR_TYPES, OCCUPANCY_TYPES, EVALUATION_TYPES } from '../constants/property.constants'
 
 // Inspection types
 export type InspectionStatus = 'not_started' | 'in_progress' | 'completed'
@@ -34,6 +34,12 @@ export interface InspectionPieces {
   completedRooms: number
 }
 
+// Rent information for multi-unit properties
+export interface UnitRent {
+  unitNumber: string
+  monthlyRent: number
+}
+
 export interface Property {
   id: string
   organization_id: string
@@ -52,6 +58,21 @@ export interface Property {
   jours_sur_marche?: number
   status?: PropertyStatus
   type_propriete?: PropertyType
+
+  // Sujet-specific fields (when status is "Sujet")
+  valeur_evaluation?: number  // Replaces prix_vente when status is Sujet
+  date_effective?: Date  // Replaces date_vente when status is Sujet
+  type_evaluation?: EvaluationType  // Only shown when status is Sujet
+
+  // Occupancy fields
+  occupancy?: OccupancyType
+  loyer_en_place?: number  // Single rent for when occupancy is Locataire
+
+  // Condo-specific fields
+  frais_condo?: number  // Condo fees when type is Condo
+
+  // Multi-unit property rents (Duplex, Triplex, Quadriplex+)
+  unit_rents?: UnitRent[]  // Array of rents for multi-unit properties
   genre_propriete?: string
   annee_construction?: number
   zonage?: string
@@ -111,6 +132,8 @@ export type PropertyStatus = typeof PROPERTY_STATUSES[number]
 export type BasementType = typeof BASEMENT_TYPES[number]
 export type ParkingType = typeof PARKING_TYPES[number]
 export type FloorType = typeof FLOOR_TYPES[number]
+export type OccupancyType = typeof OCCUPANCY_TYPES[number]
+export type EvaluationType = typeof EVALUATION_TYPES[number]
 
 export interface FloorArea {
   id: string
@@ -133,6 +156,22 @@ export interface PropertyCreateInput {
   jours_sur_marche?: number
   status?: PropertyStatus
   type_propriete?: PropertyType
+
+  // Sujet-specific fields
+  valeur_evaluation?: number
+  date_effective?: string
+  type_evaluation?: EvaluationType
+
+  // Occupancy fields
+  occupancy?: OccupancyType
+  loyer_en_place?: number
+
+  // Condo-specific fields
+  frais_condo?: number
+
+  // Multi-unit property rents
+  unit_rents?: UnitRent[]
+
   genre_propriete?: string
   annee_construction?: number
   zonage?: string
