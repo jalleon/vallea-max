@@ -387,6 +387,11 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
       // Sanitize data: convert empty strings to null for all fields
       const sanitizedData: any = { ...formData }
 
+      // Note: valeur_evaluation and date_effective are UI-only fields that map to prix_vente and date_vente
+      // They are already removed from formData initialization, so no need to delete them here
+      delete sanitizedData.valeur_evaluation
+      delete sanitizedData.date_effective
+
       // Convert empty strings to null for all fields to avoid database type errors
       Object.keys(sanitizedData).forEach(key => {
         if (sanitizedData[key] === '') {
