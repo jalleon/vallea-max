@@ -71,8 +71,8 @@ class PropertiesSupabaseService {
       frais_condo: data.frais_condo || undefined,
       loyer_en_place: data.loyer_en_place || undefined,
       unit_rents: data.unit_rents as any,
-      type_evaluation: data.type_evaluation || undefined,
-      occupancy: data.occupancy || undefined,
+      type_evaluation: data.type_evaluation as any,
+      occupancy: data.occupancy as any,
       // Inspection fields
       inspection_status: data.inspection_status as any,
       inspection_date: data.inspection_date ? new Date(data.inspection_date) : undefined,
