@@ -394,28 +394,53 @@ export function PropertyView({
                   {/* Conditional fields based on status */}
                   {property.status === 'Sujet' ? (
                     <>
-                      <Grid item xs={12} md={4}>
+                      <Grid item xs={12} md={3}>
                         <Typography variant="body2" color="text.secondary">Valeur d'évaluation</Typography>
-                        <Typography variant="body1">
+                        <Typography variant="body1" fontWeight={700} fontSize="1.1rem">
                           {property.prix_vente ? formatCurrency(property.prix_vente) : 'N/A'}
                         </Typography>
                       </Grid>
-                      <Grid item xs={12} md={4}>
+                      <Grid item xs={12} md={3}>
                         <Typography variant="body2" color="text.secondary">Date effective</Typography>
                         <Typography variant="body1">
                           {property.date_vente ? formatDate(property.date_vente) : 'N/A'}
                         </Typography>
                       </Grid>
-                      <Grid item xs={12} md={4}>
+                      <Grid item xs={12} md={2}>
                         <Typography variant="body2" color="text.secondary">Statut</Typography>
-                        <Typography variant="body1">{property.status || 'N/A'}</Typography>
+                        <Chip
+                          label={property.status || 'N/A'}
+                          size="small"
+                          sx={{
+                            bgcolor: theme.palette.primary.main,
+                            color: 'white',
+                            fontWeight: 600
+                          }}
+                        />
                       </Grid>
+                      <Grid item xs={12} md={2}>
+                        <Typography variant="body2" color="text.secondary">Type d'évaluation</Typography>
+                        <Typography variant="body1">{property.type_evaluation || 'N/A'}</Typography>
+                      </Grid>
+                      <Grid item xs={12} md={2}>
+                        <Typography variant="body2" color="text.secondary">Occupancy</Typography>
+                        <Typography variant="body1">{property.occupancy || 'N/A'}</Typography>
+                      </Grid>
+                      {/* Show Loyer en place if occupancy is Locataire */}
+                      {property.occupancy === 'Locataire' && (
+                        <Grid item xs={12} md={3}>
+                          <Typography variant="body2" color="text.secondary">Loyer en place</Typography>
+                          <Typography variant="body1" fontWeight={600}>
+                            {property.loyer_en_place ? formatCurrency(property.loyer_en_place) : 'N/A'}
+                          </Typography>
+                        </Grid>
+                      )}
                     </>
                   ) : (
                     <>
                       <Grid item xs={12} md={3}>
                         <Typography variant="body2" color="text.secondary">Prix de vente</Typography>
-                        <Typography variant="body1">
+                        <Typography variant="body1" fontWeight={700} fontSize="1.1rem">
                           {property.prix_vente ? formatCurrency(property.prix_vente) : 'N/A'}
                         </Typography>
                       </Grid>
@@ -437,14 +462,22 @@ export function PropertyView({
                       </Grid>
                       <Grid item xs={12} md={2}>
                         <Typography variant="body2" color="text.secondary">Statut</Typography>
-                        <Typography variant="body1">{property.status || 'N/A'}</Typography>
+                        <Chip
+                          label={property.status || 'N/A'}
+                          size="small"
+                          sx={{
+                            bgcolor: theme.palette.primary.main,
+                            color: 'white',
+                            fontWeight: 600
+                          }}
+                        />
                       </Grid>
                     </>
                   )}
 
                   <Grid item xs={12} md={4}>
                     <Typography variant="body2" color="text.secondary">Type de propriété</Typography>
-                    <Typography variant="body1">{property.type_propriete || 'N/A'}</Typography>
+                    <Typography variant="body1" fontWeight={600}>{property.type_propriete || 'N/A'}</Typography>
                   </Grid>
                   <Grid item xs={12} md={4}>
                     <Typography variant="body2" color="text.secondary">Genre de propriété</Typography>
@@ -458,6 +491,41 @@ export function PropertyView({
                     <Typography variant="body2" color="text.secondary">Zonage</Typography>
                     <Typography variant="body1">{property.zonage || 'N/A'}</Typography>
                   </Grid>
+
+                  {/* Conditional field for Condo */}
+                  {property.type_propriete === 'Condo' && property.frais_condo && (
+                    <Grid item xs={12} md={3}>
+                      <Typography variant="body2" color="text.secondary">Frais de condo</Typography>
+                      <Typography variant="body1" fontWeight={600}>
+                        {formatCurrency(property.frais_condo)}
+                      </Typography>
+                    </Grid>
+                  )}
+
+                  {/* Conditional fields for multi-unit properties */}
+                  {(property.type_propriete === 'Duplex' || property.type_propriete === 'Triplex' || property.type_propriete === 'Quadriplex+') && property.unit_rents && property.unit_rents.length > 0 && (
+                    <Grid item xs={12}>
+                      <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(0,0,0,0.02)', borderRadius: 1 }}>
+                        <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
+                          Loyer par unité
+                        </Typography>
+                        <Grid container spacing={2}>
+                          {property.unit_rents.map((unit, index) => (
+                            <Grid item xs={12} sm={6} md={4} key={index}>
+                              <Box sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+                                <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                                  {unit.unitNumber}
+                                </Typography>
+                                <Typography variant="body1" fontWeight={600}>
+                                  {unit.isOwnerOccupied ? 'Occupé par propriétaire' : formatCurrency(unit.monthlyRent || 0)}
+                                </Typography>
+                              </Box>
+                            </Grid>
+                          ))}
+                        </Grid>
+                      </Box>
+                    </Grid>
+                  )}
                 </Grid>
               </CardContent>
             </Card>
