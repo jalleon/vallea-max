@@ -394,13 +394,13 @@ export function PropertyView({
                   {/* Conditional fields based on status */}
                   {property.status === 'Sujet' ? (
                     <>
-                      <Grid item xs={12} md={3}>
+                      <Grid item xs={12} md={4}>
                         <Typography variant="body2" color="text.secondary">Valeur d'évaluation</Typography>
                         <Typography variant="body1" fontWeight={700} fontSize="1.1rem">
                           {property.prix_vente ? formatCurrency(property.prix_vente) : 'N/A'}
                         </Typography>
                       </Grid>
-                      <Grid item xs={12} md={3}>
+                      <Grid item xs={12} md={4}>
                         <Typography variant="body2" color="text.secondary">Date effective</Typography>
                         <Typography variant="body1">
                           {property.date_vente ? formatDate(property.date_vente) : 'N/A'}
@@ -422,13 +422,21 @@ export function PropertyView({
                         <Typography variant="body2" color="text.secondary">Type d'évaluation</Typography>
                         <Typography variant="body1">{property.type_evaluation || 'N/A'}</Typography>
                       </Grid>
+                      <Grid item xs={12} md={4}>
+                        <Typography variant="body2" color="text.secondary">Type de propriété</Typography>
+                        <Typography variant="body1" fontWeight={600}>{property.type_propriete || 'N/A'}</Typography>
+                      </Grid>
+                      <Grid item xs={12} md={4}>
+                        <Typography variant="body2" color="text.secondary">Genre de propriété</Typography>
+                        <Typography variant="body1">{property.genre_propriete || 'N/A'}</Typography>
+                      </Grid>
                       <Grid item xs={12} md={2}>
                         <Typography variant="body2" color="text.secondary">Occupancy</Typography>
                         <Typography variant="body1">{property.occupancy || 'N/A'}</Typography>
                       </Grid>
                       {/* Show Loyer en place if occupancy is Locataire */}
                       {property.occupancy === 'Locataire' && (
-                        <Grid item xs={12} md={3}>
+                        <Grid item xs={12} md={2}>
                           <Typography variant="body2" color="text.secondary">Loyer en place</Typography>
                           <Typography variant="body1" fontWeight={600}>
                             {property.loyer_en_place ? formatCurrency(property.loyer_en_place) : 'N/A'}
@@ -438,7 +446,7 @@ export function PropertyView({
                     </>
                   ) : (
                     <>
-                      <Grid item xs={12} md={3}>
+                      <Grid item xs={12} md={4}>
                         <Typography variant="body2" color="text.secondary">Prix de vente</Typography>
                         <Typography variant="body1" fontWeight={700} fontSize="1.1rem">
                           {property.prix_vente ? formatCurrency(property.prix_vente) : 'N/A'}
@@ -456,8 +464,8 @@ export function PropertyView({
                           {property.date_vente ? formatDate(property.date_vente) : 'N/A'}
                         </Typography>
                       </Grid>
-                      <Grid item xs={12} md={2}>
-                        <Typography variant="body2" color="text.secondary">Jours sur marché</Typography>
+                      <Grid item xs={12} md={1}>
+                        <Typography variant="body2" color="text.secondary">Jours marché</Typography>
                         <Typography variant="body1">{property.jours_sur_marche || 'N/A'}</Typography>
                       </Grid>
                       <Grid item xs={12} md={2}>
@@ -472,17 +480,16 @@ export function PropertyView({
                           }}
                         />
                       </Grid>
+                      <Grid item xs={12} md={4}>
+                        <Typography variant="body2" color="text.secondary">Type de propriété</Typography>
+                        <Typography variant="body1" fontWeight={600}>{property.type_propriete || 'N/A'}</Typography>
+                      </Grid>
+                      <Grid item xs={12} md={4}>
+                        <Typography variant="body2" color="text.secondary">Genre de propriété</Typography>
+                        <Typography variant="body1">{property.genre_propriete || 'N/A'}</Typography>
+                      </Grid>
                     </>
                   )}
-
-                  <Grid item xs={12} md={4}>
-                    <Typography variant="body2" color="text.secondary">Type de propriété</Typography>
-                    <Typography variant="body1" fontWeight={600}>{property.type_propriete || 'N/A'}</Typography>
-                  </Grid>
-                  <Grid item xs={12} md={4}>
-                    <Typography variant="body2" color="text.secondary">Genre de propriété</Typography>
-                    <Typography variant="body1">{property.genre_propriete || 'N/A'}</Typography>
-                  </Grid>
                   <Grid item xs={12} md={2}>
                     <Typography variant="body2" color="text.secondary">Année construction</Typography>
                     <Typography variant="body1">{property.annee_construction || 'N/A'}</Typography>
