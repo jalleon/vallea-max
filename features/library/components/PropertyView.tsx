@@ -592,7 +592,24 @@ export function PropertyView({
                   </Grid>
                   <Grid item xs={12} md={6}>
                     <Typography variant="body2" color="text.secondary">Dimension garage</Typography>
-                    <Typography variant="body1">{property.dimension_garage || 'N/A'}</Typography>
+                    <Typography variant="body1">
+                      {(() => {
+                        // Try to get dimensions from inspection data first
+                        const largeurFeet = property.inspection_garage?.largeur_feet
+                        const longueurFeet = property.inspection_garage?.longueur_feet
+                        const largeurMeters = property.inspection_garage?.largeur_meters
+                        const longueurMeters = property.inspection_garage?.longueur_meters
+
+                        if (largeurFeet && longueurFeet && largeurMeters && longueurMeters) {
+                          const areaFeet = (parseFloat(largeurFeet) * parseFloat(longueurFeet)).toFixed(0)
+                          const areaMeters = (parseFloat(largeurMeters) * parseFloat(longueurMeters)).toFixed(0)
+                          return `${largeurFeet}' x ${longueurFeet}' (${largeurMeters}m x ${longueurMeters}m) = ${areaFeet} pi² (${areaMeters} m²)`
+                        }
+
+                        // Fallback to property field
+                        return property.dimension_garage || 'N/A'
+                      })()}
+                    </Typography>
                   </Grid>
                   <Grid item xs={12} md={6}>
                     <Typography variant="body2" color="text.secondary">Type de sous-sol</Typography>
@@ -600,7 +617,23 @@ export function PropertyView({
                   </Grid>
                   <Grid item xs={12} md={6}>
                     <Typography variant="body2" color="text.secondary">Toiture</Typography>
-                    <Typography variant="body1">{property.toiture || 'N/A'}</Typography>
+                    <Typography variant="body1">
+                      {(() => {
+                        // Try to get roof type from inspection batiment data
+                        const toitureFromInspection = property.inspection_batiment?.fondation_mur_toiture?.type_toiture
+
+                        if (toitureFromInspection) {
+                          // If it's an array (multiselect), join with comma
+                          if (Array.isArray(toitureFromInspection)) {
+                            return toitureFromInspection.join(', ')
+                          }
+                          return toitureFromInspection
+                        }
+
+                        // Fallback to property field
+                        return property.toiture || 'N/A'
+                      })()}
+                    </Typography>
                   </Grid>
                   <Grid item xs={12}>
                     <Typography variant="body2" color="text.secondary">Améliorations hors sol</Typography>
