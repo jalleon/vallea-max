@@ -654,39 +654,44 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                             </Select>
                           </FormControl>
                         </Grid>
-                        <Grid item xs={12} md={3}>
-                          <FormControl fullWidth size="small">
-                            <InputLabel>Occupancy</InputLabel>
-                            <Select
-                              value={formData.occupancy || ''}
-                              onChange={(e) => handleInputChange('occupancy', e.target.value as OccupancyType)}
-                              label="Occupancy"
-                            >
-                              {occupancyTypes.map((type) => (
-                                <MenuItem key={type} value={type}>{type}</MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
-                        </Grid>
-                        {formData.occupancy === 'Locataire' && (
-                          <Grid item xs={12} md={3}>
-                            <TextField
-                              fullWidth
-                              label="Loyer en place"
-                              type="number"
-                              value={formData.loyer_en_place || ''}
-                              onChange={(e) => handleInputChange('loyer_en_place', e.target.value ? parseFloat(e.target.value) : undefined)}
-                              variant="outlined"
-                              size="small"
-                              InputProps={{
-                                startAdornment: (
-                                  <InputAdornment position="start">
-                                    <AttachMoney sx={{ color: theme.palette.info.main }} />
-                                  </InputAdornment>
-                                ),
-                              }}
-                            />
-                          </Grid>
+                        {/* Only show Occupancy for non-multi-unit properties */}
+                        {!(formData.type_propriete === 'Duplex' || formData.type_propriete === 'Triplex' || formData.type_propriete === 'Quadriplex+') && (
+                          <>
+                            <Grid item xs={12} md={3}>
+                              <FormControl fullWidth size="small">
+                                <InputLabel>Occupancy</InputLabel>
+                                <Select
+                                  value={formData.occupancy || ''}
+                                  onChange={(e) => handleInputChange('occupancy', e.target.value as OccupancyType)}
+                                  label="Occupancy"
+                                >
+                                  {occupancyTypes.map((type) => (
+                                    <MenuItem key={type} value={type}>{type}</MenuItem>
+                                  ))}
+                                </Select>
+                              </FormControl>
+                            </Grid>
+                            {formData.occupancy === 'Locataire' && (
+                              <Grid item xs={12} md={3}>
+                                <TextField
+                                  fullWidth
+                                  label="Loyer en place"
+                                  type="number"
+                                  value={formData.loyer_en_place || ''}
+                                  onChange={(e) => handleInputChange('loyer_en_place', e.target.value ? parseFloat(e.target.value) : undefined)}
+                                  variant="outlined"
+                                  size="small"
+                                  InputProps={{
+                                    startAdornment: (
+                                      <InputAdornment position="start">
+                                        <AttachMoney sx={{ color: theme.palette.info.main }} />
+                                      </InputAdornment>
+                                    ),
+                                  }}
+                                />
+                              </Grid>
+                            )}
+                          </>
                         )}
                       </>
                     )}
@@ -722,33 +727,79 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                           </Typography>
                           <Grid container spacing={2}>
                             {Array.from({ length: getUnitCount(formData.type_propriete) }, (_, i) => {
-                              const unitRent = unitRents[i] || { unitNumber: `Unité ${i + 1}`, monthlyRent: 0 }
+                              const unitRent = unitRents[i] || { unitNumber: `Unité ${i + 1}`, monthlyRent: 0, isOwnerOccupied: false }
                               return (
-                                <Grid item xs={12} md={3} key={i}>
-                                  <TextField
-                                    fullWidth
-                                    label={`Unité ${i + 1} - Loyer mensuel`}
-                                    type="number"
-                                    value={unitRent.monthlyRent || ''}
-                                    onChange={(e) => {
-                                      const newRents = [...unitRents]
-                                      newRents[i] = {
-                                        unitNumber: `Unité ${i + 1}`,
-                                        monthlyRent: e.target.value ? parseFloat(e.target.value) : 0
-                                      }
-                                      setUnitRents(newRents)
-                                      handleInputChange('unit_rents', newRents)
-                                    }}
-                                    variant="outlined"
-                                    size="small"
-                                    InputProps={{
-                                      startAdornment: (
-                                        <InputAdornment position="start">
-                                          <AttachMoney sx={{ color: theme.palette.info.main }} />
-                                        </InputAdornment>
-                                      ),
-                                    }}
-                                  />
+                                <Grid item xs={12} md={6} key={i}>
+                                  <Box sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+                                    <Grid container spacing={2}>
+                                      <Grid item xs={12} sm={4}>
+                                        <TextField
+                                          fullWidth
+                                          label="No. d'unité"
+                                          value={unitRent.unitNumber}
+                                          onChange={(e) => {
+                                            const newRents = [...unitRents]
+                                            newRents[i] = {
+                                              ...unitRent,
+                                              unitNumber: e.target.value
+                                            }
+                                            setUnitRents(newRents)
+                                            handleInputChange('unit_rents', newRents)
+                                          }}
+                                          variant="outlined"
+                                          size="small"
+                                        />
+                                      </Grid>
+                                      <Grid item xs={12} sm={5}>
+                                        <TextField
+                                          fullWidth
+                                          label="Loyer mensuel"
+                                          type="number"
+                                          value={unitRent.isOwnerOccupied ? '' : (unitRent.monthlyRent || '')}
+                                          onChange={(e) => {
+                                            const newRents = [...unitRents]
+                                            newRents[i] = {
+                                              ...unitRent,
+                                              monthlyRent: e.target.value ? parseFloat(e.target.value) : 0
+                                            }
+                                            setUnitRents(newRents)
+                                            handleInputChange('unit_rents', newRents)
+                                          }}
+                                          variant="outlined"
+                                          size="small"
+                                          disabled={unitRent.isOwnerOccupied}
+                                          InputProps={{
+                                            startAdornment: (
+                                              <InputAdornment position="start">
+                                                <AttachMoney sx={{ color: theme.palette.info.main }} />
+                                              </InputAdornment>
+                                            ),
+                                          }}
+                                        />
+                                      </Grid>
+                                      <Grid item xs={12} sm={3}>
+                                        <FormControl fullWidth size="small">
+                                          <InputLabel>Occupant</InputLabel>
+                                          <Select
+                                            value={unitRent.isOwnerOccupied ? 'owner' : 'tenant'}
+                                            label="Occupant"
+                                            onChange={(e) => {
+                                              const newRents = [...unitRents]
+                                              newRents[i] = {
+                                                ...unitRent,
+                                                isOwnerOccupied: e.target.value === 'owner'
+                                              }
+                                              setUnitRents(newRents)
+                                              handleInputChange('unit_rents', newRents)
+                                            }}
+                                          >
+                                            <MenuItem value="tenant">Locataire</MenuItem>
+                                            <MenuItem value="owner">Propriétaire</MenuItem>
+                                          </Select>
+                                        </FormControl>
+                                      </Grid>
+                                    </Grid>
+                                  </Box>
                                 </Grid>
                               )
                             })}

@@ -147,29 +147,37 @@ export function PropertyTable({
     )
   }
 
+  const handleKeyDown = (event: React.KeyboardEvent, property: Property) => {
+    if (event.key === 'Enter') {
+      event.preventDefault()
+      onView?.(property)
+    }
+  }
+
   return (
     <>
-      <TableContainer component={Paper} sx={{ overflow: 'auto' }}>
+      <TableContainer component={Paper} sx={{ overflow: 'auto', maxHeight: 'calc(100vh - 250px)' }}>
         <Table stickyHeader>
           <TableHead>
             <TableRow>
-              <TableCell padding="checkbox">
+              <TableCell padding="checkbox" sx={{ bgcolor: 'background.paper' }}>
                 <Checkbox
                   checked={allSelected}
                   indeterminate={indeterminate}
                   onChange={(e) => handleSelectAll(e.target.checked)}
                 />
               </TableCell>
-              <TableCell>Adresse</TableCell>
-              <TableCell>Ville</TableCell>
-              <TableCell>Type</TableCell>
-              <TableCell>Prix</TableCell>
-              <TableCell>Superficie</TableCell>
-              <TableCell>Année</TableCell>
-              <TableCell>Statut</TableCell>
-              <TableCell sx={{ minWidth: 120 }}>Date</TableCell>
-              <TableCell>MLS</TableCell>
-              <TableCell align="right">Actions</TableCell>
+              <TableCell sx={{ bgcolor: 'background.paper' }}>ID No.</TableCell>
+              <TableCell sx={{ bgcolor: 'background.paper' }}>Adresse</TableCell>
+              <TableCell sx={{ bgcolor: 'background.paper' }}>Ville</TableCell>
+              <TableCell sx={{ bgcolor: 'background.paper' }}>Prix de vente / Valeur effective</TableCell>
+              <TableCell sx={{ bgcolor: 'background.paper', minWidth: 120 }}>Date Vente / Effective</TableCell>
+              <TableCell sx={{ bgcolor: 'background.paper' }}>Type</TableCell>
+              <TableCell sx={{ bgcolor: 'background.paper' }}>Statut</TableCell>
+              <TableCell sx={{ bgcolor: 'background.paper' }}>Année constr.</TableCell>
+              <TableCell sx={{ bgcolor: 'background.paper' }}>Source</TableCell>
+              <TableCell sx={{ bgcolor: 'background.paper' }}>Matrix/MLS No.</TableCell>
+              <TableCell align="right" sx={{ bgcolor: 'background.paper' }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -179,6 +187,8 @@ export function PropertyTable({
                 hover
                 selected={property.selected}
                 onClick={() => onView?.(property)}
+                onKeyDown={(e) => handleKeyDown(e, property)}
+                tabIndex={0}
                 sx={{ cursor: 'pointer' }}
               >
                 <TableCell padding="checkbox">
@@ -190,6 +200,11 @@ export function PropertyTable({
                     }}
                     onClick={(e) => e.stopPropagation()}
                   />
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2" fontFamily="monospace" color="text.secondary">
+                    {property.id_no || '-'}
+                  </Typography>
                 </TableCell>
                 <TableCell>
                   <Typography variant="body2" fontWeight="medium">
@@ -212,19 +227,9 @@ export function PropertyTable({
                   )}
                 </TableCell>
                 <TableCell>
-                  <Typography variant="body2">
-                    {property.type_propriete}
-                  </Typography>
-                  {property.genre_propriete && (
-                    <Typography variant="caption" color="text.secondary">
-                      {property.genre_propriete}
-                    </Typography>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {property.prix_vente && (
+                  {(property.prix_vente || property.valeur_evaluation) && (
                     <Typography variant="body2" fontWeight="medium">
-                      {formatCurrency(property.prix_vente)}
+                      {formatCurrency(property.prix_vente || property.valeur_evaluation || 0)}
                     </Typography>
                   )}
                   {property.prix_demande && property.prix_demande !== property.prix_vente && (
@@ -233,17 +238,22 @@ export function PropertyTable({
                     </Typography>
                   )}
                 </TableCell>
-                <TableCell>
-                  {property.superficie_habitable_m2 && (
-                    <Typography variant="body2">
-                      {formatMeasurement(property.superficie_habitable_m2, 'area', 'm2')}
+                <TableCell sx={{ minWidth: 120 }}>
+                  {(property.date_vente || property.date_effective) && (
+                    <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+                      {formatDate(property.date_vente || property.date_effective)}
                     </Typography>
                   )}
                 </TableCell>
                 <TableCell>
                   <Typography variant="body2">
-                    {property.annee_construction}
+                    {property.type_propriete}
                   </Typography>
+                  {property.genre_propriete && (
+                    <Typography variant="caption" color="text.secondary">
+                      {property.genre_propriete}
+                    </Typography>
+                  )}
                 </TableCell>
                 <TableCell>
                   {property.status && (
@@ -255,12 +265,15 @@ export function PropertyTable({
                     />
                   )}
                 </TableCell>
-                <TableCell sx={{ minWidth: 120 }}>
-                  {property.date_vente && (
-                    <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
-                      {formatDate(property.date_vente)}
-                    </Typography>
-                  )}
+                <TableCell>
+                  <Typography variant="body2">
+                    {property.annee_construction}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2">
+                    {property.source || '-'}
+                  </Typography>
                 </TableCell>
                 <TableCell>
                   {property.numero_mls && (

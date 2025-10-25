@@ -125,12 +125,14 @@ const convertToTableFormat = (property: Property, index: number): any => {
     idNo,
     address: property.adresse,
     city: property.ville || property.municipalite,
-    soldDate: property.date_vente instanceof Date ?
-      property.date_vente.toISOString().split('T')[0] :
-      property.date_vente,
-    soldPrice: property.prix_vente || 0,
+    soldDate: (property.date_vente || property.date_effective) ?
+      (property.date_vente instanceof Date ? property.date_vente.toISOString().split('T')[0] : property.date_vente) ||
+      (property.date_effective instanceof Date ? property.date_effective.toISOString().split('T')[0] : property.date_effective) :
+      null,
+    soldPrice: property.prix_vente || property.valeur_evaluation || null,
     propertyType: property.type_propriete || property.genre_propriete || 'Autre',
-    constructionYear: property.annee_construction || 2000,
+    status: property.status || '-',
+    constructionYear: property.annee_construction || null,
     source: property.source || 'Manual',
     matrixMls: property.numero_mls || ''
   }
@@ -784,11 +786,11 @@ export default function LibraryPage() {
         {/* Properties Table */}
         {!loading && !error && (
           <Card>
-            <TableContainer>
+            <TableContainer sx={{ maxHeight: 'calc(100vh - 350px)' }}>
               <Table stickyHeader>
               <TableHead>
                 <TableRow sx={{ bgcolor: alpha('#1e3a8a', 0.05) }}>
-                  <TableCell padding="checkbox" sx={{ py: 1 }}>
+                  <TableCell padding="checkbox" sx={{ py: 1, bgcolor: 'background.paper' }}>
                     <Checkbox
                       size="small"
                       indeterminate={isIndeterminate}
@@ -796,16 +798,16 @@ export default function LibraryPage() {
                       onChange={handleSelectAll}
                     />
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 100, py: 1 }}>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 100, py: 1, bgcolor: 'background.paper' }}>
                     <TableSortLabel
                       active={orderBy === 'idNo'}
                       direction={orderBy === 'idNo' ? order : 'asc'}
                       onClick={() => handleRequestSort('idNo')}
                     >
-                      ID No
+                      ID No.
                     </TableSortLabel>
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 600, width: 'auto', py: 1 }}>
+                  <TableCell sx={{ fontWeight: 600, width: 'auto', py: 1, bgcolor: 'background.paper' }}>
                     <TableSortLabel
                       active={orderBy === 'address'}
                       direction={orderBy === 'address' ? order : 'asc'}
@@ -814,7 +816,7 @@ export default function LibraryPage() {
                       Adresse
                     </TableSortLabel>
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 120, py: 1 }}>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 120, py: 1, bgcolor: 'background.paper' }}>
                     <TableSortLabel
                       active={orderBy === 'city'}
                       direction={orderBy === 'city' ? order : 'asc'}
@@ -823,25 +825,27 @@ export default function LibraryPage() {
                       Ville
                     </TableSortLabel>
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 140, py: 1 }}>
-                    <TableSortLabel
-                      active={orderBy === 'soldDate'}
-                      direction={orderBy === 'soldDate' ? order : 'asc'}
-                      onClick={() => handleRequestSort('soldDate')}
-                    >
-                      Date Vente
-                    </TableSortLabel>
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 130, py: 1 }}>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 130, py: 1, bgcolor: 'background.paper' }}>
                     <TableSortLabel
                       active={orderBy === 'soldPrice'}
                       direction={orderBy === 'soldPrice' ? order : 'asc'}
                       onClick={() => handleRequestSort('soldPrice')}
                     >
-                      Prix Vente
+                      <Box component="span" sx={{ whiteSpace: 'normal', lineHeight: 1.2 }}>
+                        Prix vente/<br />Valeur eff.
+                      </Box>
                     </TableSortLabel>
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 150, py: 1 }}>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 140, py: 1, bgcolor: 'background.paper' }}>
+                    <TableSortLabel
+                      active={orderBy === 'soldDate'}
+                      direction={orderBy === 'soldDate' ? order : 'asc'}
+                      onClick={() => handleRequestSort('soldDate')}
+                    >
+                      Date Vente / Effective
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 150, py: 1, bgcolor: 'background.paper' }}>
                     <TableSortLabel
                       active={orderBy === 'propertyType'}
                       direction={orderBy === 'propertyType' ? order : 'asc'}
@@ -850,16 +854,25 @@ export default function LibraryPage() {
                       Type
                     </TableSortLabel>
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 110, py: 1 }}>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 100, py: 1, bgcolor: 'background.paper' }}>
+                    <TableSortLabel
+                      active={orderBy === 'status'}
+                      direction={orderBy === 'status' ? order : 'asc'}
+                      onClick={() => handleRequestSort('status')}
+                    >
+                      Statut
+                    </TableSortLabel>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 110, py: 1, bgcolor: 'background.paper' }}>
                     <TableSortLabel
                       active={orderBy === 'constructionYear'}
                       direction={orderBy === 'constructionYear' ? order : 'asc'}
                       onClick={() => handleRequestSort('constructionYear')}
                     >
-                      Année Const.
+                      Année constr.
                     </TableSortLabel>
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 100, py: 1 }}>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 100, py: 1, bgcolor: 'background.paper' }}>
                     <TableSortLabel
                       active={orderBy === 'source'}
                       direction={orderBy === 'source' ? order : 'asc'}
@@ -868,22 +881,23 @@ export default function LibraryPage() {
                       Source
                     </TableSortLabel>
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 130, py: 1 }}>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 130, py: 1, bgcolor: 'background.paper' }}>
                     <TableSortLabel
                       active={orderBy === 'matrixMls'}
                       direction={orderBy === 'matrixMls' ? order : 'asc'}
                       onClick={() => handleRequestSort('matrixMls')}
                     >
-                      Matrix/MLS No
+                      Matrix/MLS No.
                     </TableSortLabel>
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 120, py: 1 }}>Actions</TableCell>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 120, py: 1, bgcolor: 'background.paper' }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {sortedProperties.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((property) => (
                   <TableRow
                     key={property.id}
+                    tabIndex={0}
                     sx={{
                       cursor: 'pointer',
                       bgcolor: isSelected(property.id) ? alpha('#1e3a8a', 0.08) : 'transparent',
@@ -897,6 +911,12 @@ export default function LibraryPage() {
                     }}
                     onClick={() => handleRowSelect(property.id)}
                     onDoubleClick={() => handleView(property)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        handleView(property)
+                      }
+                    }}
                   >
                     <TableCell padding="checkbox">
                       <Checkbox
@@ -924,22 +944,22 @@ export default function LibraryPage() {
                         </Typography>
                       </Box>
                     </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" fontSize="0.875rem" fontWeight={600} color={property.soldPrice ? "success.main" : "text.secondary"}>
+                        {property.soldPrice ? property.soldPrice.toLocaleString('fr-CA', {
+                          style: 'currency',
+                          currency: 'CAD',
+                          minimumFractionDigits: 0
+                        }) : '-'}
+                      </Typography>
+                    </TableCell>
                     <TableCell sx={{ minWidth: 140 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         <CalendarToday fontSize="small" sx={{ fontSize: 16 }} color="action" />
                         <Typography variant="body2" fontSize="0.875rem" sx={{ whiteSpace: 'nowrap' }}>
-                          {new Date(property.soldDate).toLocaleDateString('fr-CA')}
+                          {property.soldDate ? new Date(property.soldDate).toLocaleDateString('fr-CA') : '-'}
                         </Typography>
                       </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" fontSize="0.875rem" fontWeight={600} color="success.main">
-                        {property.soldPrice.toLocaleString('fr-CA', {
-                          style: 'currency',
-                          currency: 'CAD',
-                          minimumFractionDigits: 0
-                        })}
-                      </Typography>
                     </TableCell>
                     <TableCell>
                       <Chip
@@ -947,12 +967,48 @@ export default function LibraryPage() {
                         variant="outlined"
                         size="small"
                         icon={getPropertyTypeIcon(property.propertyType)}
-                        sx={{ height: 24, '& .MuiChip-label': { fontSize: '0.75rem', px: 1 } }}
+                        sx={{
+                          height: 24,
+                          '& .MuiChip-label': { fontSize: '0.75rem', px: 1 },
+                          ...(property.propertyType === 'Condo' && {
+                            bgcolor: '#e3f2fd',
+                            borderColor: '#90caf9',
+                            color: '#1976d2'
+                          }),
+                          ...(property.propertyType === 'Unifamiliale' && {
+                            bgcolor: '#e8f5e9',
+                            borderColor: '#81c784',
+                            color: '#388e3c'
+                          })
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={property.status}
+                        variant="filled"
+                        size="small"
+                        sx={{
+                          height: 24,
+                          '& .MuiChip-label': { fontSize: '0.75rem', px: 1 },
+                          ...(property.status === 'Sujet' && {
+                            bgcolor: '#1976d2',
+                            color: '#ffffff'
+                          }),
+                          ...(property.status === 'Vendu' && {
+                            bgcolor: '#2e7d32',
+                            color: '#ffffff'
+                          }),
+                          ...(property.status === 'Actif' && {
+                            bgcolor: '#f57f17',
+                            color: '#ffffff'
+                          })
+                        }}
                       />
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2" fontSize="0.875rem">
-                        {property.constructionYear}
+                        {property.constructionYear || '-'}
                       </Typography>
                     </TableCell>
                     <TableCell>

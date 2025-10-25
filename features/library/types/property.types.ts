@@ -38,6 +38,7 @@ export interface InspectionPieces {
 export interface UnitRent {
   unitNumber: string
   monthlyRent: number
+  isOwnerOccupied?: boolean  // True if the owner lives in this unit
 }
 
 export interface Property {
