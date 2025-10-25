@@ -857,7 +857,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                   </Box>
                   <Grid container spacing={2}>
                     {/* Row 1 - Building characteristics */}
-                    <Grid item xs={12} md={2.4}>
+                    <Grid item xs={12} md={2}>
                       <FormControl fullWidth size="small">
                         <InputLabel>Genre de propriété</InputLabel>
                         <Select
@@ -875,7 +875,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         </Select>
                       </FormControl>
                     </Grid>
-                    <Grid item xs={12} md={2.4}>
+                    <Grid item xs={12} md={2}>
                       <FormControl fullWidth size="small">
                         <InputLabel>Type de bâtiment</InputLabel>
                         <Select
@@ -890,7 +890,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         </Select>
                       </FormControl>
                     </Grid>
-                    <Grid item xs={12} md={2.4}>
+                    <Grid item xs={12} md={2}>
                       <TextField
                         fullWidth
                         label="Année de construction"
@@ -901,7 +901,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         size="small"
                       />
                     </Grid>
-                    <Grid item xs={12} md={2.4}>
+                    <Grid item xs={12} md={2}>
                       <TextField
                         fullWidth
                         label="Chrono. Age"
@@ -912,13 +912,23 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         size="small"
                       />
                     </Grid>
-                    <Grid item xs={12} md={2.4}>
+                    <Grid item xs={12} md={2}>
                       <TextField
                         fullWidth
                         label="Eff. Age"
                         type="number"
                         value={formData.eff_age || ''}
                         onChange={(e) => handleInputChange('eff_age', e.target.value ? parseInt(e.target.value) : undefined)}
+                        variant="outlined"
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={2}>
+                      <TextField
+                        fullWidth
+                        label="Zonage"
+                        value={formData.zonage}
+                        onChange={(e) => handleInputChange('zonage', e.target.value)}
                         variant="outlined"
                         size="small"
                       />
@@ -956,19 +966,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                       </>
                     )}
 
-                    {/* Row 2 - Zonage */}
-                    <Grid item xs={12} md={3}>
-                      <TextField
-                        fullWidth
-                        label="Zonage"
-                        value={formData.zonage}
-                        onChange={(e) => handleInputChange('zonage', e.target.value)}
-                        variant="outlined"
-                        size="small"
-                      />
-                    </Grid>
-
-                    {/* Row 2 */}
+                    {/* Row 2 - Room counts */}
                     <Grid item xs={12} md={3}>
                       <TextField
                         fullWidth
