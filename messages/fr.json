@@ -284,6 +284,7 @@
       "addFloor": "Sélectionner un étage"
     },
     "materials": {
+      "other": "Autres",
       "cabinets": {
         "label": "Armoires",
         "melamine": "Mélamine",
