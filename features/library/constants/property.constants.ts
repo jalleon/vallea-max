@@ -17,10 +17,7 @@ export const PROPERTY_STATUSES = [
   'Vendu',
   'Sujet',
   'À vendre',
-  'Actif',
-  'Retiré',
-  'Conditionnel',
-  'Expiré'
+  'Actif'
 ] as const
 
 export const OCCUPANCY_TYPES = [
