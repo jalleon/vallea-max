@@ -1,5 +1,5 @@
 import { MediaReference } from '@/types/common.types'
-import { PROPERTY_TYPES, PROPERTY_STATUSES, BASEMENT_TYPES, PARKING_TYPES, FLOOR_TYPES, OCCUPANCY_TYPES, EVALUATION_TYPES } from '../constants/property.constants'
+import { PROPERTY_TYPES, PROPERTY_STATUSES, BASEMENT_TYPES, PARKING_TYPES, FLOOR_TYPES, OCCUPANCY_TYPES, EVALUATION_TYPES, BUILDING_TYPES, GARAGE_TYPES, CONDO_LOCATION_TYPES, COPROPRIETE_TYPES } from '../constants/property.constants'
 
 // Inspection types
 export type InspectionStatus = 'not_started' | 'in_progress' | 'completed'
@@ -70,11 +70,16 @@ export interface Property {
 
   // Condo-specific fields
   frais_condo?: number  // Condo fees when type is Condo
+  localisation?: CondoLocationType  // Coin or Centre
+  type_copropriete?: CoproprieteType  // Divise or Indivise
 
   // Multi-unit property rents (Duplex, Triplex, Quadriplex+)
   unit_rents?: UnitRent[]  // Array of rents for multi-unit properties
   genre_propriete?: string
+  type_batiment?: BuildingType
   annee_construction?: number
+  chrono_age?: number  // Chronological age
+  eff_age?: number  // Effective age
   zonage?: string
   superficie_terrain_m2?: number
   superficie_terrain_pi2?: number
@@ -91,9 +96,11 @@ export interface Property {
   salle_bain?: number
   salle_eau?: number
   stationnement?: ParkingType
+  type_garage?: GarageType
   dimension_garage?: string
   type_sous_sol?: BasementType
   toiture?: string
+  extras?: string
   ameliorations_hors_sol?: string
   numero_mls?: string
   floor_areas?: FloorArea[]
@@ -134,6 +141,10 @@ export type ParkingType = typeof PARKING_TYPES[number]
 export type FloorType = typeof FLOOR_TYPES[number]
 export type OccupancyType = typeof OCCUPANCY_TYPES[number]
 export type EvaluationType = typeof EVALUATION_TYPES[number]
+export type BuildingType = typeof BUILDING_TYPES[number]
+export type GarageType = typeof GARAGE_TYPES[number]
+export type CondoLocationType = typeof CONDO_LOCATION_TYPES[number]
+export type CoproprieteType = typeof COPROPRIETE_TYPES[number]
 
 export interface FloorArea {
   id: string
@@ -167,12 +178,17 @@ export interface PropertyCreateInput {
 
   // Condo-specific fields
   frais_condo?: number
+  localisation?: CondoLocationType
+  type_copropriete?: CoproprieteType
 
   // Multi-unit property rents
   unit_rents?: UnitRent[]
 
   genre_propriete?: string
+  type_batiment?: BuildingType
   annee_construction?: number
+  chrono_age?: number
+  eff_age?: number
   zonage?: string
   superficie_terrain_m2?: number
   superficie_terrain_pi2?: number
@@ -189,9 +205,11 @@ export interface PropertyCreateInput {
   salle_bain?: number
   salle_eau?: number
   stationnement?: ParkingType
+  type_garage?: GarageType
   dimension_garage?: string
   type_sous_sol?: BasementType
   toiture?: string
+  extras?: string
   ameliorations_hors_sol?: string
   numero_mls?: string
   floor_areas?: FloorArea[]

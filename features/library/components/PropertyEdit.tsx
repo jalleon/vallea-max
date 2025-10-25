@@ -76,7 +76,10 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
     status: 'Vendu',
     type_propriete: undefined,
     genre_propriete: '',
+    type_batiment: undefined,
     annee_construction: undefined,
+    chrono_age: undefined,
+    eff_age: undefined,
     zonage: '',
     superficie_terrain_m2: undefined,
     superficie_terrain_pi2: undefined,
@@ -93,10 +96,14 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
     salle_bain: undefined,
     salle_eau: undefined,
     stationnement: undefined,
+    type_garage: undefined,
     dimension_garage: '',
     type_sous_sol: undefined,
     toiture: '',
+    extras: '',
     ameliorations_hors_sol: '',
+    localisation: undefined,
+    type_copropriete: 'Divise',
     numero_mls: '',
     floor_areas: [],
     source: '',
@@ -164,10 +171,15 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
         occupancy: property.occupancy,
         loyer_en_place: property.loyer_en_place,
         frais_condo: property.frais_condo,
+        localisation: property.localisation,
+        type_copropriete: property.type_copropriete || 'Divise',
         unit_rents: property.unit_rents,
 
         genre_propriete: property.genre_propriete || '',
+        type_batiment: property.type_batiment,
         annee_construction: property.annee_construction,
+        chrono_age: property.chrono_age,
+        eff_age: property.eff_age,
         zonage: property.zonage || '',
         superficie_terrain_m2: property.superficie_terrain_m2,
         superficie_terrain_pi2: property.superficie_terrain_pi2,
@@ -184,9 +196,11 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
         salle_bain: property.salle_bain ?? (hasInspectionData ? calculatedRoomCounts.bathrooms : undefined),
         salle_eau: property.salle_eau ?? (hasInspectionData ? calculatedRoomCounts.powderRooms : undefined),
         stationnement: property.stationnement,
+        type_garage: property.type_garage,
         dimension_garage: property.dimension_garage || '',
         type_sous_sol: property.type_sous_sol,
         toiture: property.toiture || '',
+        extras: property.extras || '',
         ameliorations_hors_sol: property.ameliorations_hors_sol || '',
         numero_mls: property.numero_mls || '',
         floor_areas: property.floor_areas || [],
@@ -639,6 +653,16 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         </Select>
                       </FormControl>
                     </Grid>
+                    <Grid item xs={12} md={2}>
+                      <TextField
+                        fullWidth
+                        label="# MLS"
+                        value={formData.numero_mls}
+                        onChange={(e) => handleInputChange('numero_mls', e.target.value)}
+                        variant="outlined"
+                        size="small"
+                      />
+                    </Grid>
 
                     {/* Conditional fields for Sujet status */}
                     {formData.status === 'Sujet' && (
@@ -852,6 +876,54 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                       </FormControl>
                     </Grid>
                     <Grid item xs={12} md={3}>
+                      <FormControl fullWidth size="small">
+                        <InputLabel>Type de bâtiment</InputLabel>
+                        <Select
+                          value={formData.type_batiment || ''}
+                          label="Type de bâtiment"
+                          onChange={(e) => handleInputChange('type_batiment', e.target.value)}
+                        >
+                          <MenuItem value="Isolé">Isolé</MenuItem>
+                          <MenuItem value="Semi-détaché">Semi-détaché</MenuItem>
+                          <MenuItem value="En rangée">En rangée</MenuItem>
+                          <MenuItem value="En rangée sur coin">En rangée sur coin</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+
+                    {/* Conditional Condo fields */}
+                    {formData.type_propriete === 'Condo' && (
+                      <>
+                        <Grid item xs={12} md={3}>
+                          <FormControl fullWidth size="small">
+                            <InputLabel>Localisation</InputLabel>
+                            <Select
+                              value={formData.localisation || ''}
+                              label="Localisation"
+                              onChange={(e) => handleInputChange('localisation', e.target.value)}
+                            >
+                              <MenuItem value="Coin">Coin</MenuItem>
+                              <MenuItem value="Centre">Centre</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={12} md={3}>
+                          <FormControl fullWidth size="small">
+                            <InputLabel>Type de copropriété</InputLabel>
+                            <Select
+                              value={formData.type_copropriete || 'Divise'}
+                              label="Type de copropriété"
+                              onChange={(e) => handleInputChange('type_copropriete', e.target.value)}
+                            >
+                              <MenuItem value="Divise">Divise</MenuItem>
+                              <MenuItem value="Indivise">Indivise</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Grid>
+                      </>
+                    )}
+
+                    <Grid item xs={12} md={3}>
                       <TextField
                         fullWidth
                         label="Année de construction"
@@ -865,9 +937,10 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                     <Grid item xs={12} md={3}>
                       <TextField
                         fullWidth
-                        label="Zonage"
-                        value={formData.zonage}
-                        onChange={(e) => handleInputChange('zonage', e.target.value)}
+                        label="Chrono. Age"
+                        type="number"
+                        value={formData.chrono_age || ''}
+                        onChange={(e) => handleInputChange('chrono_age', e.target.value ? parseInt(e.target.value) : undefined)}
                         variant="outlined"
                         size="small"
                       />
@@ -875,9 +948,20 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                     <Grid item xs={12} md={3}>
                       <TextField
                         fullWidth
-                        label="# MLS"
-                        value={formData.numero_mls}
-                        onChange={(e) => handleInputChange('numero_mls', e.target.value)}
+                        label="Eff. Age"
+                        type="number"
+                        value={formData.eff_age || ''}
+                        onChange={(e) => handleInputChange('eff_age', e.target.value ? parseInt(e.target.value) : undefined)}
+                        variant="outlined"
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={3}>
+                      <TextField
+                        fullWidth
+                        label="Zonage"
+                        value={formData.zonage}
+                        onChange={(e) => handleInputChange('zonage', e.target.value)}
                         variant="outlined"
                         size="small"
                       />
@@ -963,6 +1047,22 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                       </FormControl>
                     </Grid>
                     <Grid item xs={12} md={3}>
+                      <FormControl fullWidth size="small">
+                        <InputLabel>Type de garage</InputLabel>
+                        <Select
+                          value={formData.type_garage || ''}
+                          onChange={(e) => handleInputChange('type_garage', e.target.value)}
+                          label="Type de garage"
+                        >
+                          <MenuItem value="Attaché">Attaché</MenuItem>
+                          <MenuItem value="Détaché">Détaché</MenuItem>
+                          <MenuItem value="Intégré">Intégré</MenuItem>
+                          <MenuItem value="Au sous-sol">Au sous-sol</MenuItem>
+                          <MenuItem value="Abri d'auto">Abri d'auto</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} md={3}>
                       <TextField
                         fullWidth
                         label="Dimension garage"
@@ -998,6 +1098,16 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                     </Grid>
 
                     {/* Row 4 */}
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        label="Extras"
+                        value={formData.extras}
+                        onChange={(e) => handleInputChange('extras', e.target.value)}
+                        variant="outlined"
+                        size="small"
+                      />
+                    </Grid>
                     <Grid item xs={12}>
                       <TextField
                         fullWidth

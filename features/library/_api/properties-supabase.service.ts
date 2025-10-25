@@ -73,6 +73,13 @@ class PropertiesSupabaseService {
       unit_rents: data.unit_rents as any,
       type_evaluation: data.type_evaluation as any,
       occupancy: data.occupancy as any,
+      localisation: data.localisation as any,
+      type_copropriete: data.type_copropriete as any,
+      type_batiment: data.type_batiment as any,
+      chrono_age: data.chrono_age || undefined,
+      eff_age: data.eff_age || undefined,
+      type_garage: data.type_garage as any,
+      extras: data.extras || undefined,
       // Inspection fields
       inspection_status: data.inspection_status as any,
       inspection_date: data.inspection_date ? new Date(data.inspection_date) : undefined,

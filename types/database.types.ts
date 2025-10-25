@@ -325,6 +325,13 @@ export type Database = {
           unit_rents: Json | null
           type_evaluation: string | null
           occupancy: string | null
+          localisation: string | null
+          type_copropriete: string | null
+          type_batiment: string | null
+          chrono_age: number | null
+          eff_age: number | null
+          type_garage: string | null
+          extras: string | null
         }
         Insert: {
           adresse: string
