@@ -29,7 +29,8 @@ import {
   Chip,
   Divider,
   InputAdornment,
-  useTheme
+  useTheme,
+  Alert
 } from '@mui/material'
 import {
   Add,
@@ -112,6 +113,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
   })
   const [inspectionConfirmOpen, setInspectionConfirmOpen] = useState(false)
   const [unitRents, setUnitRents] = useState<UnitRent[]>([])
+  const [validationError, setValidationError] = useState<string>('')
 
   // Helper to get number of units based on property type
   const getUnitCount = (type?: PropertyType): number => {
@@ -370,6 +372,20 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
 
   const handleSave = async () => {
     try {
+      // Validate required fields
+      if (!formData.adresse || formData.adresse.trim() === '') {
+        setValidationError('L\'adresse est obligatoire')
+        return
+      }
+
+      if (!formData.ville || formData.ville.trim() === '') {
+        setValidationError('La ville est obligatoire')
+        return
+      }
+
+      // Clear any previous validation errors
+      setValidationError('')
+
       // Sanitize data: convert empty strings to null for all fields
       const sanitizedData: any = { ...formData }
 
@@ -404,6 +420,11 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
         {property ? 'Modifier le comparable' : 'Nouveau comparable'}
       </DialogTitle>
       <DialogContent>
+        {validationError && (
+          <Alert severity="error" sx={{ mt: 2, mb: 2 }} onClose={() => setValidationError('')}>
+            {validationError}
+          </Alert>
+        )}
         <Box sx={{ mt: 2 }}>
           <Grid container spacing={3}>
             {/* Information générale */}
@@ -452,6 +473,9 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         onChange={(e) => handleInputChange('adresse', e.target.value)}
                         variant="outlined"
                         size="small"
+                        required
+                        error={validationError !== '' && (!formData.adresse || formData.adresse.trim() === '')}
+                        helperText={validationError !== '' && (!formData.adresse || formData.adresse.trim() === '') ? 'Champ requis' : ''}
                       />
                     </Grid>
                     <Grid item xs={12} md={2}>
@@ -462,6 +486,9 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         onChange={(e) => handleInputChange('ville', e.target.value)}
                         variant="outlined"
                         size="small"
+                        required
+                        error={validationError !== '' && (!formData.ville || formData.ville.trim() === '')}
+                        helperText={validationError !== '' && (!formData.ville || formData.ville.trim() === '') ? 'Champ requis' : ''}
                       />
                     </Grid>
                     <Grid item xs={12} md={2}>
