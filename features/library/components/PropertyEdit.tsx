@@ -896,7 +896,16 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         label="Année de construction"
                         type="number"
                         value={formData.annee_construction || ''}
-                        onChange={(e) => handleInputChange('annee_construction', e.target.value ? parseInt(e.target.value) : undefined)}
+                        onChange={(e) => {
+                          const year = e.target.value ? parseInt(e.target.value) : undefined
+                          handleInputChange('annee_construction', year)
+                          // Auto-calculate chrono age
+                          if (year) {
+                            const currentYear = new Date().getFullYear()
+                            const chronoAge = currentYear - year
+                            handleInputChange('chrono_age', chronoAge)
+                          }
+                        }}
                         variant="outlined"
                         size="small"
                       />
