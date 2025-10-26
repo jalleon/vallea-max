@@ -219,6 +219,22 @@ export function PropertyView({
 
   const totals = calculateTotalArea(property.floor_areas)
 
+  // Format lot number as # ### ###
+  const formatLotNumber = (lotNumber: string | null | undefined): string => {
+    if (!lotNumber) return 'N/A'
+
+    // Remove any non-digit characters
+    const digits = lotNumber.replace(/\D/g, '')
+
+    // Format as # ### ###
+    if (digits.length === 7) {
+      return `${digits[0]} ${digits.slice(1, 4)} ${digits.slice(4, 7)}`
+    }
+
+    // Return original if not 7 digits
+    return lotNumber
+  }
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xl" fullWidth>
       <DialogTitle
@@ -635,31 +651,36 @@ export function PropertyView({
               </Box>
               <CardContent sx={{ p: 3, bgcolor: 'rgba(33, 150, 243, 0.04)' }}>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} md={6}>
+                  <Grid item xs={12} md={3}>
                     <Typography variant="body2" color="text.secondary">Superficie de terrain</Typography>
                     <Typography variant="body1" fontWeight={600}>
-                      {property.superficie_terrain_m2 ?
-                        formatMeasurement(property.superficie_terrain_m2, 'area', 'm2')
-                        : 'N/A'
-                      }
+                      {property.superficie_terrain_m2 ? (
+                        <>
+                          {property.superficie_terrain_m2.toFixed(2)} m² / <span style={{ color: '#4CAF50' }}>{(property.superficie_terrain_m2 * 10.764).toFixed(0)} pi²</span>
+                        </>
+                      ) : 'N/A'}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12} md={6}>
+                  <Grid item xs={12} md={5}>
                     <Typography variant="body2" color="text.secondary">Frontage / Profondeur</Typography>
                     <Typography variant="body1" fontWeight={600}>
-                      {property.frontage_m2 && property.profondeur_m2 ?
-                        `${formatMeasurement(property.frontage_m2, 'length', 'm')} x ${formatMeasurement(property.profondeur_m2, 'length', 'm')}`
-                        : 'N/A'
-                      }
+                      {property.frontage_m2 && property.profondeur_m2 ? (
+                        <>
+                          {property.frontage_m2.toFixed(2)} m / <span style={{ color: '#4CAF50' }}>{(property.frontage_m2 * 3.281).toFixed(1)} pi</span>
+                          {' x '}
+                          {property.profondeur_m2.toFixed(2)} m / <span style={{ color: '#4CAF50' }}>{(property.profondeur_m2 * 3.281).toFixed(1)} pi</span>
+                        </>
+                      ) : 'N/A'}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12} md={6}>
+                  <Grid item xs={12} md={4}>
                     <Typography variant="body2" color="text.secondary">Périmètre du bâtiment</Typography>
                     <Typography variant="body1" fontWeight={600}>
-                      {property.perimetre_batiment_m2 ?
-                        formatMeasurement(property.perimetre_batiment_m2, 'length', 'm')
-                        : 'N/A'
-                      }
+                      {property.perimetre_batiment_m2 ? (
+                        <>
+                          {property.perimetre_batiment_m2.toFixed(2)} m / <span style={{ color: '#4CAF50' }}>{(property.perimetre_batiment_m2 * 3.281).toFixed(1)} pi</span>
+                        </>
+                      ) : 'N/A'}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -709,11 +730,11 @@ export function PropertyView({
                     </TableContainer>
                     <Box mt={2} sx={{ p: 2, bgcolor: 'rgba(33, 150, 243, 0.08)', borderRadius: 1, border: '1px solid rgba(33, 150, 243, 0.2)' }}>
                       <Typography variant="subtitle1" fontWeight={700} sx={{ color: '#1976D2', mb: 1 }}>
-                        Total superficie habitable (hors-sol): {totals.hors_sol.toFixed(2)} m² / {(totals.hors_sol * 10.764).toFixed(0)} pi²
+                        Total superficie habitable (hors-sol): {totals.hors_sol.toFixed(2)} m² / <span style={{ color: '#4CAF50' }}>{(totals.hors_sol * 10.764).toFixed(0)} pi²</span>
                       </Typography>
                       {totals.sous_sol > 0 && (
                         <Typography variant="subtitle1" fontWeight={700} sx={{ color: '#1976D2' }}>
-                          Total superficie sous-sol: {totals.sous_sol.toFixed(2)} m² / {(totals.sous_sol * 10.764).toFixed(0)} pi²
+                          Total superficie sous-sol: {totals.sous_sol.toFixed(2)} m² / <span style={{ color: '#4CAF50' }}>{(totals.sous_sol * 10.764).toFixed(0)} pi²</span>
                         </Typography>
                       )}
                     </Box>
@@ -915,11 +936,11 @@ export function PropertyView({
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={3}>
                     <Typography variant="body2" color="text.secondary">Numéro de lot</Typography>
-                    <Typography variant="body1" fontWeight={600}>{property.lot_number || 'N/A'}</Typography>
+                    <Typography variant="body1" fontWeight={600} sx={{ color: '#1565C0' }}>{formatLotNumber(property.lot_number)}</Typography>
                   </Grid>
                   <Grid item xs={12} md={3}>
                     <Typography variant="body2" color="text.secondary">Matricule</Typography>
-                    <Typography variant="body1" fontWeight={600}>{property.matricule || 'N/A'}</Typography>
+                    <Typography variant="body1" fontWeight={600} sx={{ color: '#1565C0' }}>{property.matricule || 'N/A'}</Typography>
                   </Grid>
                   {property.additional_lots && property.additional_lots.length > 0 && (
                     <Grid item xs={12}>
@@ -929,8 +950,8 @@ export function PropertyView({
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                         {property.additional_lots.map((lot, index) => (
                           <Box key={index} sx={{ p: 1, bgcolor: 'rgba(0,0,0,0.02)', borderRadius: 1 }}>
-                            <Typography variant="body2">
-                              <strong>Lot:</strong> {lot.lot_number} • <strong>Type:</strong> {lot.type_lot}
+                            <Typography variant="body2" sx={{ color: '#1565C0' }}>
+                              <strong>Lot:</strong> {formatLotNumber(lot.lot_number)} • <strong>Type:</strong> {lot.type_lot}
                             </Typography>
                           </Box>
                         ))}
