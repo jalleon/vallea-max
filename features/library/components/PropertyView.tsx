@@ -847,17 +847,17 @@ export function PropertyView({
             >
               <Box
                 sx={{
-                  background: `linear-gradient(135deg, ${theme.palette.secondary.main}15 0%, ${theme.palette.secondary.main}05 100%)`,
+                  background: `linear-gradient(135deg, ${theme.palette.success.main}25 0%, ${theme.palette.success.main}15 100%)`,
                   p: 2,
                   borderBottom: `1px solid ${theme.palette.divider}`
                 }}
               >
-                <Typography variant="h6" fontWeight={700} color="secondary.main">
+                <Typography variant="h6" fontWeight={700} color="success.main">
                   <Home sx={{ mr: 1, verticalAlign: 'middle' }} />
                   Caractéristiques du bâtiment
                 </Typography>
               </Box>
-              <CardContent sx={{ p: 3, bgcolor: 'rgba(156, 39, 176, 0.03)' }}>
+              <CardContent sx={{ p: 3, bgcolor: 'rgba(76, 175, 80, 0.04)' }}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={3}>
                     <Typography variant="body2" color="text.secondary">Type de bâtiment</Typography>
