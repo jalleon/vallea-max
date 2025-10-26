@@ -1388,6 +1388,9 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                       />
                     </Grid>
 
+                    {/* Force new line before taxes sections */}
+                    <Grid item xs={12} />
+
                     {/* Taxes municipales and Taxes scolaires on same line */}
                     <Grid item xs={12} md={1.5}>
                       <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
