@@ -1228,13 +1228,13 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                 elevation={0}
                 sx={{
                   border: `1px solid ${theme.palette.divider}`,
-                  background: `linear-gradient(135deg, ${theme.palette.secondary.main}08 0%, ${theme.palette.secondary.main}15 100%)`
+                  background: `linear-gradient(135deg, ${theme.palette.warning.main}08 0%, ${theme.palette.warning.main}15 100%)`
                 }}
               >
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <AccountBalance sx={{ color: theme.palette.secondary.main, mr: 1 }} />
-                    <Typography variant="h6" sx={{ color: theme.palette.secondary.main, fontWeight: 600 }}>
+                    <AccountBalance sx={{ color: theme.palette.warning.main, mr: 1 }} />
+                    <Typography variant="h6" sx={{ color: theme.palette.warning.main, fontWeight: 600 }}>
                       Données municipales
                     </Typography>
                   </Box>
