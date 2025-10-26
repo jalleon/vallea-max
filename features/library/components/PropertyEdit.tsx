@@ -187,7 +187,9 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
       let dateString = ''
       if (property.date_vente) {
         try {
-          const date = property.date_vente instanceof Date ? property.date_vente : new Date(property.date_vente)
+          const date = typeof property.date_vente === 'object' && property.date_vente instanceof Date
+            ? property.date_vente
+            : new Date(property.date_vente)
           if (!isNaN(date.getTime())) {
             dateString = date.toISOString().split('T')[0]
           }
