@@ -637,7 +637,7 @@ export function PropertyView({
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={6}>
                     <Typography variant="body2" color="text.secondary">Superficie de terrain</Typography>
-                    <Typography variant="body1">
+                    <Typography variant="body1" fontWeight={600}>
                       {property.superficie_terrain_m2 ?
                         formatMeasurement(property.superficie_terrain_m2, 'area', 'm2')
                         : 'N/A'
@@ -646,7 +646,7 @@ export function PropertyView({
                   </Grid>
                   <Grid item xs={12} md={6}>
                     <Typography variant="body2" color="text.secondary">Frontage / Profondeur</Typography>
-                    <Typography variant="body1">
+                    <Typography variant="body1" fontWeight={600}>
                       {property.frontage_m2 && property.profondeur_m2 ?
                         `${formatMeasurement(property.frontage_m2, 'length', 'm')} x ${formatMeasurement(property.profondeur_m2, 'length', 'm')}`
                         : 'N/A'
@@ -655,7 +655,7 @@ export function PropertyView({
                   </Grid>
                   <Grid item xs={12} md={6}>
                     <Typography variant="body2" color="text.secondary">Périmètre du bâtiment</Typography>
-                    <Typography variant="body1">
+                    <Typography variant="body1" fontWeight={600}>
                       {property.perimetre_batiment_m2 ?
                         formatMeasurement(property.perimetre_batiment_m2, 'length', 'm')
                         : 'N/A'
@@ -749,35 +749,35 @@ export function PropertyView({
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={3}>
                     <Typography variant="body2" color="text.secondary">Nombre de pièces</Typography>
-                    <Typography variant="body1">
+                    <Typography variant="body1" fontWeight={600}>
                       {hasInspectionData ? roomCounts.totalRooms : (property.nombre_pieces || 'N/A')}
                     </Typography>
                   </Grid>
                   <Grid item xs={12} md={3}>
                     <Typography variant="body2" color="text.secondary">Nombre de chambres</Typography>
-                    <Typography variant="body1">
+                    <Typography variant="body1" fontWeight={600}>
                       {hasInspectionData ? roomCounts.bedrooms : (property.nombre_chambres || 'N/A')}
                     </Typography>
                   </Grid>
                   <Grid item xs={12} md={3}>
                     <Typography variant="body2" color="text.secondary">Salle de bain</Typography>
-                    <Typography variant="body1">
+                    <Typography variant="body1" fontWeight={600}>
                       {hasInspectionData ? roomCounts.bathrooms : (property.salle_bain || 'N/A')}
                     </Typography>
                   </Grid>
                   <Grid item xs={12} md={3}>
                     <Typography variant="body2" color="text.secondary">Salle d'eau</Typography>
-                    <Typography variant="body1">
+                    <Typography variant="body1" fontWeight={600}>
                       {hasInspectionData ? roomCounts.powderRooms : (property.salle_eau || 'N/A')}
                     </Typography>
                   </Grid>
                   <Grid item xs={12} md={6}>
                     <Typography variant="body2" color="text.secondary">Stationnement</Typography>
-                    <Typography variant="body1">{property.stationnement || 'N/A'}</Typography>
+                    <Typography variant="body1" fontWeight={600}>{property.stationnement || 'N/A'}</Typography>
                   </Grid>
                   <Grid item xs={12} md={6}>
                     <Typography variant="body2" color="text.secondary">Dimension garage</Typography>
-                    <Typography variant="body1">
+                    <Typography variant="body1" fontWeight={600}>
                       {(() => {
                         // Try to get dimensions from inspection data first
                         const largeurFeet = property.inspection_garage?.largeur_feet
@@ -798,11 +798,11 @@ export function PropertyView({
                   </Grid>
                   <Grid item xs={12} md={6}>
                     <Typography variant="body2" color="text.secondary">Type de sous-sol</Typography>
-                    <Typography variant="body1">{property.type_sous_sol || 'N/A'}</Typography>
+                    <Typography variant="body1" fontWeight={600}>{property.type_sous_sol || 'N/A'}</Typography>
                   </Grid>
                   <Grid item xs={12} md={6}>
                     <Typography variant="body2" color="text.secondary">Toiture</Typography>
-                    <Typography variant="body1">
+                    <Typography variant="body1" fontWeight={600}>
                       {(() => {
                         // Try to get roof type from inspection batiment data
                         const toitureFromInspection = property.inspection_batiment?.fondation_mur_toiture?.type_toiture
@@ -822,11 +822,11 @@ export function PropertyView({
                   </Grid>
                   <Grid item xs={12}>
                     <Typography variant="body2" color="text.secondary">Améliorations hors sol</Typography>
-                    <Typography variant="body1">{property.ameliorations_hors_sol || 'N/A'}</Typography>
+                    <Typography variant="body1" fontWeight={600}>{property.ameliorations_hors_sol || 'N/A'}</Typography>
                   </Grid>
                   <Grid item xs={12}>
                     <Typography variant="body2" color="text.secondary">Numéro MLS</Typography>
-                    <Typography variant="body1" fontFamily="monospace">
+                    <Typography variant="body1" fontWeight={600} fontFamily="monospace">
                       {property.numero_mls || 'N/A'}
                     </Typography>
                   </Grid>
@@ -861,35 +861,35 @@ export function PropertyView({
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={3}>
                     <Typography variant="body2" color="text.secondary">Type de bâtiment</Typography>
-                    <Typography variant="body1">{property.type_batiment || 'N/A'}</Typography>
+                    <Typography variant="body1" fontWeight={600}>{property.type_batiment || 'N/A'}</Typography>
                   </Grid>
                   {property.type_propriete === 'Condo' && (
                     <>
                       <Grid item xs={12} md={3}>
                         <Typography variant="body2" color="text.secondary">Localisation</Typography>
-                        <Typography variant="body1">{property.localisation || 'N/A'}</Typography>
+                        <Typography variant="body1" fontWeight={600}>{property.localisation || 'N/A'}</Typography>
                       </Grid>
                       <Grid item xs={12} md={3}>
                         <Typography variant="body2" color="text.secondary">Type de copropriété</Typography>
-                        <Typography variant="body1">{property.type_copropriete || 'N/A'}</Typography>
+                        <Typography variant="body1" fontWeight={600}>{property.type_copropriete || 'N/A'}</Typography>
                       </Grid>
                     </>
                   )}
                   <Grid item xs={12} md={2}>
                     <Typography variant="body2" color="text.secondary">Chrono. Age</Typography>
-                    <Typography variant="body1">{property.chrono_age || 'N/A'}</Typography>
+                    <Typography variant="body1" fontWeight={600}>{property.chrono_age || 'N/A'}</Typography>
                   </Grid>
                   <Grid item xs={12} md={2}>
                     <Typography variant="body2" color="text.secondary">Eff. Age</Typography>
-                    <Typography variant="body1">{property.eff_age || 'N/A'}</Typography>
+                    <Typography variant="body1" fontWeight={600}>{property.eff_age || 'N/A'}</Typography>
                   </Grid>
                   <Grid item xs={12} md={2}>
                     <Typography variant="body2" color="text.secondary">Type de garage</Typography>
-                    <Typography variant="body1">{property.type_garage || 'N/A'}</Typography>
+                    <Typography variant="body1" fontWeight={600}>{property.type_garage || 'N/A'}</Typography>
                   </Grid>
                   <Grid item xs={12} md={12}>
                     <Typography variant="body2" color="text.secondary">Extras</Typography>
-                    <Typography variant="body1">{property.extras || 'N/A'}</Typography>
+                    <Typography variant="body1" fontWeight={600}>{property.extras || 'N/A'}</Typography>
                   </Grid>
                 </Grid>
               </CardContent>
@@ -922,11 +922,11 @@ export function PropertyView({
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={3}>
                     <Typography variant="body2" color="text.secondary">Numéro de lot</Typography>
-                    <Typography variant="body1">{property.lot_number || 'N/A'}</Typography>
+                    <Typography variant="body1" fontWeight={600}>{property.lot_number || 'N/A'}</Typography>
                   </Grid>
                   <Grid item xs={12} md={3}>
                     <Typography variant="body2" color="text.secondary">Matricule</Typography>
-                    <Typography variant="body1">{property.matricule || 'N/A'}</Typography>
+                    <Typography variant="body1" fontWeight={600}>{property.matricule || 'N/A'}</Typography>
                   </Grid>
                   {property.additional_lots && property.additional_lots.length > 0 && (
                     <Grid item xs={12}>
@@ -952,17 +952,17 @@ export function PropertyView({
                   </Grid>
                   <Grid item xs={12} md={2}>
                     <Typography variant="body2" color="text.secondary">Date</Typography>
-                    <Typography variant="body1">{property.eval_municipale_annee || 'N/A'}</Typography>
+                    <Typography variant="body1" fontWeight={600}>{property.eval_municipale_annee || 'N/A'}</Typography>
                   </Grid>
                   <Grid item xs={12} md={2}>
                     <Typography variant="body2" color="text.secondary">Terrain</Typography>
-                    <Typography variant="body1">
+                    <Typography variant="body1" fontWeight={600}>
                       {property.eval_municipale_terrain ? formatCurrency(property.eval_municipale_terrain) : 'N/A'}
                     </Typography>
                   </Grid>
                   <Grid item xs={12} md={2}>
                     <Typography variant="body2" color="text.secondary">Bâtiment</Typography>
-                    <Typography variant="body1">
+                    <Typography variant="body1" fontWeight={600}>
                       {property.eval_municipale_batiment ? formatCurrency(property.eval_municipale_batiment) : 'N/A'}
                     </Typography>
                   </Grid>
@@ -984,7 +984,7 @@ export function PropertyView({
                   </Grid>
                   <Grid item xs={12} md={2}>
                     <Typography variant="body2" color="text.secondary">Année</Typography>
-                    <Typography variant="body1">{property.taxes_municipales_annee || 'N/A'}</Typography>
+                    <Typography variant="body1" fontWeight={600}>{property.taxes_municipales_annee || 'N/A'}</Typography>
                   </Grid>
                   <Grid item xs={12} md={2}>
                     <Typography variant="body2" color="text.secondary">Montant</Typography>
@@ -1000,7 +1000,7 @@ export function PropertyView({
                   </Grid>
                   <Grid item xs={12} md={2}>
                     <Typography variant="body2" color="text.secondary">Année</Typography>
-                    <Typography variant="body1">{property.taxes_scolaires_annee || 'N/A'}</Typography>
+                    <Typography variant="body1" fontWeight={600}>{property.taxes_scolaires_annee || 'N/A'}</Typography>
                   </Grid>
                   <Grid item xs={12} md={2}>
                     <Typography variant="body2" color="text.secondary">Montant</Typography>
@@ -1015,7 +1015,7 @@ export function PropertyView({
 
                   <Grid item xs={12} md={6}>
                     <Typography variant="body2" color="text.secondary">Zonage - Usages permis</Typography>
-                    <Typography variant="body1">{property.zoning_usages_permis || 'N/A'}</Typography>
+                    <Typography variant="body1" fontWeight={600}>{property.zoning_usages_permis || 'N/A'}</Typography>
                   </Grid>
                 </Grid>
               </CardContent>
