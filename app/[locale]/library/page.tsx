@@ -68,6 +68,7 @@ import { PropertyEdit } from '../../../features/library/components/PropertyEdit'
 import { Property, PropertyCreateInput } from '../../../features/library/types/property.types'
 import { propertiesSupabaseService as propertiesService } from '../../../features/library/_api/properties-supabase.service'
 import { ProtectedRoute } from '../../../components/auth/ProtectedRoute'
+import { formatDate } from '../../../lib/utils/formatting'
 
 // Mock organization ID - in a real app this would come from auth context
 const MOCK_ORG_ID = 'mock-org-id'
@@ -958,7 +959,7 @@ export default function LibraryPage() {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         <CalendarToday fontSize="small" sx={{ fontSize: 16 }} color="action" />
                         <Typography variant="body2" fontSize="0.875rem" sx={{ whiteSpace: 'nowrap' }}>
-                          {property.soldDate ? new Date(property.soldDate).toLocaleDateString('fr-CA') : '-'}
+                          {property.soldDate ? formatDate(property.soldDate, 'fr') : '-'}
                         </Typography>
                       </Box>
                     </TableCell>
