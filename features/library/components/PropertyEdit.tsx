@@ -1323,7 +1323,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         Évaluation municipale
                       </Typography>
                     </Grid>
-                    <Grid item xs={12} md={1.5}>
+                    <Grid item xs={12} md={2}>
                       <TextField
                         fullWidth
                         label="Date"
