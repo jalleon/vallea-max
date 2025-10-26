@@ -1429,6 +1429,10 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         }}
                       />
                     </Grid>
+
+                    {/* Taxes scolaires on new line */}
+                    <Grid item xs={12} />
+
                     <Grid item xs={12} md={1.5}>
                       <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                         Taxes scolaires
