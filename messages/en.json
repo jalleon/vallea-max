@@ -494,6 +494,7 @@
     },
     "garageOptions": {
       "typeOptions": {
+        "aucun": "None",
         "attache": "Attached",
         "detache": "Detached",
         "integre": "Integrated",
