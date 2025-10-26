@@ -723,118 +723,6 @@ export function PropertyView({
             </Card>
           </Grid>
 
-          {/* Section 3 */}
-          <Grid item xs={12}>
-            <Card
-              elevation={0}
-              sx={{
-                border: `1px solid ${theme.palette.divider}`,
-                borderRadius: 2,
-                overflow: 'hidden'
-              }}
-            >
-              <Box
-                sx={{
-                  background: `linear-gradient(135deg, ${theme.palette.warning.main}25 0%, ${theme.palette.warning.main}15 100%)`,
-                  p: 2,
-                  borderBottom: `1px solid ${theme.palette.divider}`
-                }}
-              >
-                <Typography variant="h6" fontWeight={700} color="warning.main">
-                  <Home sx={{ mr: 1, verticalAlign: 'middle' }} />
-                  Détails de la propriété
-                </Typography>
-              </Box>
-              <CardContent sx={{ p: 3, bgcolor: 'rgba(255, 152, 0, 0.04)' }}>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} md={3}>
-                    <Typography variant="body2" color="text.secondary">Nombre de pièces</Typography>
-                    <Typography variant="body1" fontWeight={600}>
-                      {hasInspectionData ? roomCounts.totalRooms : (property.nombre_pieces || 'N/A')}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} md={3}>
-                    <Typography variant="body2" color="text.secondary">Nombre de chambres</Typography>
-                    <Typography variant="body1" fontWeight={600}>
-                      {hasInspectionData ? roomCounts.bedrooms : (property.nombre_chambres || 'N/A')}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} md={3}>
-                    <Typography variant="body2" color="text.secondary">Salle de bain</Typography>
-                    <Typography variant="body1" fontWeight={600}>
-                      {hasInspectionData ? roomCounts.bathrooms : (property.salle_bain || 'N/A')}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} md={3}>
-                    <Typography variant="body2" color="text.secondary">Salle d'eau</Typography>
-                    <Typography variant="body1" fontWeight={600}>
-                      {hasInspectionData ? roomCounts.powderRooms : (property.salle_eau || 'N/A')}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <Typography variant="body2" color="text.secondary">Stationnement</Typography>
-                    <Typography variant="body1" fontWeight={600}>{property.stationnement || 'N/A'}</Typography>
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <Typography variant="body2" color="text.secondary">Dimension garage</Typography>
-                    <Typography variant="body1" fontWeight={600}>
-                      {(() => {
-                        // Try to get dimensions from inspection data first
-                        const largeurFeet = property.inspection_garage?.largeur_feet
-                        const longueurFeet = property.inspection_garage?.longueur_feet
-                        const largeurMeters = property.inspection_garage?.largeur_meters
-                        const longueurMeters = property.inspection_garage?.longueur_meters
-
-                        if (largeurFeet && longueurFeet && largeurMeters && longueurMeters) {
-                          const areaFeet = (parseFloat(largeurFeet) * parseFloat(longueurFeet)).toFixed(0)
-                          const areaMeters = (parseFloat(largeurMeters) * parseFloat(longueurMeters)).toFixed(0)
-                          return `${areaFeet} pi² (${areaMeters} m²)`
-                        }
-
-                        // Fallback to property field
-                        return property.dimension_garage || 'N/A'
-                      })()}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <Typography variant="body2" color="text.secondary">Type de sous-sol</Typography>
-                    <Typography variant="body1" fontWeight={600}>{property.type_sous_sol || 'N/A'}</Typography>
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <Typography variant="body2" color="text.secondary">Toiture</Typography>
-                    <Typography variant="body1" fontWeight={600}>
-                      {(() => {
-                        // Try to get roof type from inspection batiment data
-                        const toitureFromInspection = property.inspection_batiment?.fondation_mur_toiture?.type_toiture
-
-                        if (toitureFromInspection) {
-                          // If it's an array (multiselect), join with comma
-                          if (Array.isArray(toitureFromInspection)) {
-                            return toitureFromInspection.join(', ')
-                          }
-                          return toitureFromInspection
-                        }
-
-                        // Fallback to property field
-                        return property.toiture || 'N/A'
-                      })()}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography variant="body2" color="text.secondary">Améliorations hors sol</Typography>
-                    <Typography variant="body1" fontWeight={600}>{property.ameliorations_hors_sol || 'N/A'}</Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography variant="body2" color="text.secondary">Numéro MLS</Typography>
-                    <Typography variant="body1" fontWeight={600} fontFamily="monospace">
-                      {property.numero_mls || 'N/A'}
-                    </Typography>
-                  </Grid>
-                </Grid>
-              </CardContent>
-            </Card>
-          </Grid>
-
           {/* Caractéristiques du bâtiment */}
           <Grid item xs={12}>
             <Card
@@ -859,38 +747,143 @@ export function PropertyView({
               </Box>
               <CardContent sx={{ p: 3, bgcolor: 'rgba(76, 175, 80, 0.04)' }}>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} md={3}>
-                    <Typography variant="body2" color="text.secondary">Type de bâtiment</Typography>
-                    <Typography variant="body1" fontWeight={600}>{property.type_batiment || 'N/A'}</Typography>
-                  </Grid>
-                  {property.type_propriete === 'Condo' && (
+                  {/* Line 1 - Conditional based on property type */}
+                  {property.type_propriete === 'Condo' ? (
                     <>
-                      <Grid item xs={12} md={3}>
+                      <Grid item xs={12} md={2.4}>
+                        <Typography variant="body2" color="text.secondary">Type de bâtiment</Typography>
+                        <Typography variant="body1" fontWeight={600}>{property.type_batiment || 'N/A'}</Typography>
+                      </Grid>
+                      <Grid item xs={12} md={2.4}>
                         <Typography variant="body2" color="text.secondary">Localisation</Typography>
                         <Typography variant="body1" fontWeight={600}>{property.localisation || 'N/A'}</Typography>
                       </Grid>
-                      <Grid item xs={12} md={3}>
+                      <Grid item xs={12} md={2.4}>
                         <Typography variant="body2" color="text.secondary">Type de copropriété</Typography>
                         <Typography variant="body1" fontWeight={600}>{property.type_copropriete || 'N/A'}</Typography>
                       </Grid>
+                      <Grid item xs={12} md={2.4}>
+                        <Typography variant="body2" color="text.secondary">Chrono. Age</Typography>
+                        <Typography variant="body1" fontWeight={600}>{property.chrono_age || 'N/A'}</Typography>
+                      </Grid>
+                      <Grid item xs={12} md={2.4}>
+                        <Typography variant="body2" color="text.secondary">Eff. Age</Typography>
+                        <Typography variant="body1" fontWeight={600}>{property.eff_age || 'N/A'}</Typography>
+                      </Grid>
+                    </>
+                  ) : (
+                    <>
+                      <Grid item xs={12} md={2.4}>
+                        <Typography variant="body2" color="text.secondary">Type de bâtiment</Typography>
+                        <Typography variant="body1" fontWeight={600}>{property.type_batiment || 'N/A'}</Typography>
+                      </Grid>
+                      <Grid item xs={12} md={2.4}>
+                        <Typography variant="body2" color="text.secondary">Chrono. Age</Typography>
+                        <Typography variant="body1" fontWeight={600}>{property.chrono_age || 'N/A'}</Typography>
+                      </Grid>
+                      <Grid item xs={12} md={7.2}>
+                        <Typography variant="body2" color="text.secondary">Eff. Age</Typography>
+                        <Typography variant="body1" fontWeight={600}>{property.eff_age || 'N/A'}</Typography>
+                      </Grid>
                     </>
                   )}
-                  <Grid item xs={12} md={2}>
-                    <Typography variant="body2" color="text.secondary">Chrono. Age</Typography>
-                    <Typography variant="body1" fontWeight={600}>{property.chrono_age || 'N/A'}</Typography>
+
+                  {/* Line 2 - Room counts (4 columns) */}
+                  <Grid item xs={12} md={2.4}>
+                    <Typography variant="body2" color="text.secondary">Nombre de pièces</Typography>
+                    <Typography variant="body1" fontWeight={600}>
+                      {hasInspectionData ? roomCounts.totalRooms : (property.nombre_pieces || 'N/A')}
+                    </Typography>
                   </Grid>
-                  <Grid item xs={12} md={2}>
-                    <Typography variant="body2" color="text.secondary">Eff. Age</Typography>
-                    <Typography variant="body1" fontWeight={600}>{property.eff_age || 'N/A'}</Typography>
+                  <Grid item xs={12} md={2.4}>
+                    <Typography variant="body2" color="text.secondary">Nombre de chambres</Typography>
+                    <Typography variant="body1" fontWeight={600}>
+                      {hasInspectionData ? roomCounts.bedrooms : (property.nombre_chambres || 'N/A')}
+                    </Typography>
                   </Grid>
-                  <Grid item xs={12} md={2}>
+                  <Grid item xs={12} md={2.4}>
+                    <Typography variant="body2" color="text.secondary">Salle de bain</Typography>
+                    <Typography variant="body1" fontWeight={600}>
+                      {hasInspectionData ? roomCounts.bathrooms : (property.salle_bain || 'N/A')}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={4.8}>
+                    <Typography variant="body2" color="text.secondary">Salle d'eau</Typography>
+                    <Typography variant="body1" fontWeight={600}>
+                      {hasInspectionData ? roomCounts.powderRooms : (property.salle_eau || 'N/A')}
+                    </Typography>
+                  </Grid>
+
+                  {/* Line 3 - Building details (5 columns) */}
+                  <Grid item xs={12} md={2.4}>
+                    <Typography variant="body2" color="text.secondary">Stationnement</Typography>
+                    <Typography variant="body1" fontWeight={600}>{property.stationnement || 'N/A'}</Typography>
+                  </Grid>
+                  <Grid item xs={12} md={2.4}>
                     <Typography variant="body2" color="text.secondary">Type de garage</Typography>
                     <Typography variant="body1" fontWeight={600}>{property.type_garage || 'N/A'}</Typography>
                   </Grid>
-                  <Grid item xs={12} md={12}>
-                    <Typography variant="body2" color="text.secondary">Extras</Typography>
-                    <Typography variant="body1" fontWeight={600}>{property.extras || 'N/A'}</Typography>
+                  <Grid item xs={12} md={2.4}>
+                    <Typography variant="body2" color="text.secondary">Dimension garage</Typography>
+                    <Typography variant="body1" fontWeight={600}>
+                      {(() => {
+                        // Try to get dimensions from inspection data first
+                        const largeurFeet = property.inspection_garage?.largeur_feet
+                        const longueurFeet = property.inspection_garage?.longueur_feet
+                        const largeurMeters = property.inspection_garage?.largeur_meters
+                        const longueurMeters = property.inspection_garage?.longueur_meters
+
+                        if (largeurFeet && longueurFeet && largeurMeters && longueurMeters) {
+                          const areaFeet = (parseFloat(largeurFeet) * parseFloat(longueurFeet)).toFixed(0)
+                          const areaMeters = (parseFloat(largeurMeters) * parseFloat(longueurMeters)).toFixed(0)
+                          return `${areaFeet} pi² (${areaMeters} m²)`
+                        }
+
+                        // Fallback to property field
+                        return property.dimension_garage || 'N/A'
+                      })()}
+                    </Typography>
                   </Grid>
+                  <Grid item xs={12} md={2.4}>
+                    <Typography variant="body2" color="text.secondary">Type de sous-sol</Typography>
+                    <Typography variant="body1" fontWeight={600}>{property.type_sous_sol || 'N/A'}</Typography>
+                  </Grid>
+                  <Grid item xs={12} md={2.4}>
+                    <Typography variant="body2" color="text.secondary">Toiture</Typography>
+                    <Typography variant="body1" fontWeight={600}>
+                      {(() => {
+                        // Try to get roof type from inspection batiment data
+                        const toitureFromInspection = property.inspection_batiment?.fondation_mur_toiture?.type_toiture
+
+                        if (toitureFromInspection) {
+                          // If it's an array (multiselect), join with comma
+                          if (Array.isArray(toitureFromInspection)) {
+                            return toitureFromInspection.join(', ')
+                          }
+                          return toitureFromInspection
+                        }
+
+                        // Fallback to property field
+                        return property.toiture || 'N/A'
+                      })()}
+                    </Typography>
+                  </Grid>
+
+                  {/* Line 4 - Extras (conditional) */}
+                  {property.extras && (
+                    <Grid item xs={12}>
+                      <Typography variant="body2" color="text.secondary">Extras</Typography>
+                      <Typography variant="body1" fontWeight={600}>{property.extras}</Typography>
+                    </Grid>
+                  )}
+
+                  {/* Line 5 - Améliorations hors sol (conditional) */}
+                  {property.ameliorations_hors_sol && (
+                    <Grid item xs={12}>
+                      <Typography variant="body2" color="text.secondary">Améliorations hors sol</Typography>
+                      <Typography variant="body1" fontWeight={600}>{property.ameliorations_hors_sol}</Typography>
+                    </Grid>
+                  )}
                 </Grid>
               </CardContent>
             </Card>
