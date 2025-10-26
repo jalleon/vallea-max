@@ -1057,10 +1057,8 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         size="small"
                       />
                     </Grid>
-
                     {/* Force line break for non-Condo properties */}
-                    {formData.type_propriete !== 'Condo' && <Grid item xs={12} />}
-
+                    {formData.type_propriete !== 'Condo' && <Grid item xs={12} sx={{ height: 0, padding: 0 }} />}
                     {/* Row 2 - Room counts (all 4 fields on same line) */}
                     <Grid item xs={12} md={3}>
                       <TextField
