@@ -959,10 +959,15 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         >
                           <MenuItem value="Plain-pied">Plain-pied</MenuItem>
                           <MenuItem value="À étages">À étages</MenuItem>
-                          <MenuItem value="Paliers multiples">Paliers multiples</MenuItem>
+                          <MenuItem value="1 Étage">1 Étage</MenuItem>
                           <MenuItem value="Un étage et demi">Un étage et demi</MenuItem>
+                          <MenuItem value="Deux étages">Deux étages</MenuItem>
+                          <MenuItem value="Deux étages et demi">Deux étages et demi</MenuItem>
+                          <MenuItem value="Trois étages">Trois étages</MenuItem>
+                          <MenuItem value="Paliers multiples">Paliers multiples</MenuItem>
                           <MenuItem value="Mobile">Mobile</MenuItem>
                           <MenuItem value="Maison de ville">Maison de ville</MenuItem>
+                          <MenuItem value="Tour d'appartement">Tour d'appartement</MenuItem>
                           <MenuItem value="Terrain vacant">Terrain vacant</MenuItem>
                         </Select>
                       </FormControl>
