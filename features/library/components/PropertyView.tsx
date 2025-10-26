@@ -372,7 +372,7 @@ export function PropertyView({
                       {property.property_id_no || 'N/A'}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12} md={5}>
+                  <Grid item xs={12} md={4}>
                     <Typography variant="body2" color="text.secondary">Adresse</Typography>
                     <Typography variant="body1">{property.adresse}</Typography>
                   </Grid>
@@ -454,7 +454,7 @@ export function PropertyView({
                           {property.prix_vente ? formatCurrency(property.prix_vente) : 'N/A'}
                         </Typography>
                       </Grid>
-                      <Grid item xs={12} md={3}>
+                      <Grid item xs={12} md={2}>
                         <Typography variant="body2" color="text.secondary">Prix demandé</Typography>
                         <Typography variant="body1">
                           {property.prix_demande ? formatCurrency(property.prix_demande) : 'N/A'}
@@ -484,11 +484,11 @@ export function PropertyView({
                           }}
                         />
                       </Grid>
-                      <Grid item xs={12} md={3}>
+                      <Grid item xs={12} md={2}>
                         <Typography variant="body2" color="text.secondary">Type de propriété</Typography>
                         <Typography variant="body1" fontWeight={600}>{property.type_propriete || 'N/A'}</Typography>
                       </Grid>
-                      <Grid item xs={12} md={3}>
+                      <Grid item xs={12} md={2}>
                         <Typography variant="body2" color="text.secondary">Genre de propriété</Typography>
                         <Typography variant="body1">{property.genre_propriete || 'N/A'}</Typography>
                       </Grid>
@@ -505,7 +505,7 @@ export function PropertyView({
 
                   {/* Conditional fields for Condo */}
                   {property.type_propriete === 'Condo' && property.numero_mls && (
-                    <Grid item xs={12} md={3}>
+                    <Grid item xs={12} md={2}>
                       <Typography variant="body2" color="text.secondary">#MLS</Typography>
                       <Box
                         sx={{
@@ -537,7 +537,7 @@ export function PropertyView({
                     </Grid>
                   )}
                   {property.type_propriete === 'Condo' && property.frais_condo && (
-                    <Grid item xs={12} md={3}>
+                    <Grid item xs={12} md={2}>
                       <Typography variant="body2" color="text.secondary">Frais de condo</Typography>
                       <Typography variant="body1" fontWeight={600}>
                         {formatCurrency(property.frais_condo)}
