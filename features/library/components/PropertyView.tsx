@@ -502,14 +502,39 @@ export function PropertyView({
                     <Typography variant="body1">{property.zonage || 'N/A'}</Typography>
                   </Grid>
 
-                  {/* Conditional field for Condo */}
-                  {property.type_propriete === 'Condo' && property.frais_condo && (
-                    <Grid item xs={12} md={3}>
-                      <Typography variant="body2" color="text.secondary">Frais de condo</Typography>
-                      <Typography variant="body1" fontWeight={600}>
-                        {formatCurrency(property.frais_condo)}
-                      </Typography>
-                    </Grid>
+                  {/* Conditional fields for Condo */}
+                  {property.type_propriete === 'Condo' && (
+                    <>
+                      <Grid item xs={12} md={3}>
+                        <Typography variant="body2" color="text.secondary">#MLS</Typography>
+                        <Typography
+                          variant="body1"
+                          fontFamily="monospace"
+                          sx={{
+                            cursor: 'pointer',
+                            '&:hover': {
+                              bgcolor: 'action.hover',
+                              borderRadius: 1,
+                              px: 0.5
+                            }
+                          }}
+                          onClick={() => {
+                            if (property.numero_mls) {
+                              navigator.clipboard.writeText(property.numero_mls)
+                            }
+                          }}
+                          title="Click to copy"
+                        >
+                          {property.numero_mls || 'N/A'}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} md={3}>
+                        <Typography variant="body2" color="text.secondary">Frais de condo</Typography>
+                        <Typography variant="body1" fontWeight={600}>
+                          {property.frais_condo ? formatCurrency(property.frais_condo) : 'N/A'}
+                        </Typography>
+                      </Grid>
+                    </>
                   )}
 
                   {/* Conditional fields for multi-unit properties */}
