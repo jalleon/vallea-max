@@ -98,7 +98,8 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
         ml: { sm: `${mobileOpen ? 0 : drawerWidth}px` },
         bgcolor: 'background.paper',
         color: 'text.primary',
-        transition: 'all 0.3s ease-in-out'
+        transition: 'all 0.3s ease-in-out',
+        borderRadius: 0
       }}
     >
       <Toolbar sx={{ justifyContent: 'space-between', px: 3 }}>

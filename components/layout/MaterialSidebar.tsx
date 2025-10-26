@@ -343,38 +343,6 @@ export function MaterialSidebar({
           </IconButton>
         </Tooltip>
       </Box>
-
-      {!desktopCollapsed && (
-        <>
-          <Divider />
-          {/* Footer */}
-          <Box sx={{ p: 2 }}>
-            <Paper
-              sx={{
-                p: 2,
-                bgcolor: 'grey.50',
-                textAlign: 'center'
-              }}
-            >
-              <Home color="primary" sx={{ mb: 1 }} />
-              <Typography variant="body2" fontWeight={600} gutterBottom>
-                Évaluation Immobilière
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Plateforme professionnelle certifiée
-              </Typography>
-              <Box sx={{ mt: 1 }}>
-                <Chip
-                  label="Certifié OEQ"
-                  size="small"
-                  color="primary"
-                  variant="outlined"
-                />
-              </Box>
-            </Paper>
-          </Box>
-        </>
-      )}
     </Box>
   )
 
@@ -399,7 +367,8 @@ export function MaterialSidebar({
           display: { xs: 'block', sm: 'none' },
           '& .MuiDrawer-paper': {
             boxSizing: 'border-box',
-            width: drawerWidth
+            width: drawerWidth,
+            borderRadius: 0
           }
         }}
       >
@@ -415,7 +384,8 @@ export function MaterialSidebar({
             boxSizing: 'border-box',
             width: currentWidth,
             transition: 'width 0.3s ease-in-out',
-            overflowX: 'hidden'
+            overflowX: 'hidden',
+            borderRadius: 0
           }
         }}
         open

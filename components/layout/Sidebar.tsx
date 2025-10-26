@@ -3,6 +3,8 @@
 import { usePathname, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
+// Square edges (no border radius)
+
 interface SidebarProps {
   isOpen: boolean
 }
@@ -111,7 +113,7 @@ export function Sidebar({ isOpen }: SidebarProps) {
         right: '24px',
         padding: '16px',
         backgroundColor: '#ffffff',
-        borderRadius: '8px',
+        borderRadius: '0',
         border: '1px solid #e5e7eb',
         fontSize: '12px',
         color: '#6b7280'
