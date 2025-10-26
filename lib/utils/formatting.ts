@@ -67,10 +67,11 @@ export const formatDate = (date: Date | string, locale: 'fr' | 'en' = 'fr'): str
   let dateObj: Date
 
   if (typeof date === 'string') {
-    // If it's a date string in YYYY-MM-DD format, parse it as local time to avoid timezone issues
-    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      const [year, month, day] = date.split('-').map(Number)
-      dateObj = new Date(year, month - 1, day) // month is 0-indexed
+    // Extract just the date part if it's a timestamp (e.g., "2021-07-01T00:00:00Z" -> "2021-07-01")
+    const dateOnlyMatch = date.match(/^(\d{4}-\d{2}-\d{2})/)
+    if (dateOnlyMatch) {
+      const [year, month, day] = dateOnlyMatch[1].split('-').map(Number)
+      dateObj = new Date(year, month - 1, day) // month is 0-indexed, parse in local time
     } else {
       dateObj = new Date(date)
     }
