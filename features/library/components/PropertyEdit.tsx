@@ -939,7 +939,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                       </>
                     )}
 
-                    <Grid item xs={12} md={2}>
+                    <Grid item xs={12} md={1.5}>
                       <TextField
                         fullWidth
                         label="Année de construction"
@@ -959,7 +959,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         size="small"
                       />
                     </Grid>
-                    <Grid item xs={12} md={2}>
+                    <Grid item xs={12} md={1.5}>
                       <TextField
                         fullWidth
                         label="Chrono. Age"
@@ -970,7 +970,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         size="small"
                       />
                     </Grid>
-                    <Grid item xs={12} md={2}>
+                    <Grid item xs={12} md={1.5}>
                       <TextField
                         fullWidth
                         label="Eff. Age"
