@@ -1399,7 +1399,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                     <Grid item xs={12} />
 
                     {/* Taxes municipales and Taxes scolaires on same line */}
-                    <Grid item xs={12} md={1.5}>
+                    <Grid item xs={12} md={1.2}>
                       <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                         Taxes municipales
                       </Typography>
@@ -1434,7 +1434,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         Taxes scolaires
                       </Typography>
                     </Grid>
-                    <Grid item xs={12} md={1.8}>
+                    <Grid item xs={12} md={1.5}>
                       <TextField
                         fullWidth
                         label="Année"
