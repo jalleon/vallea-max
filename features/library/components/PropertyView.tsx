@@ -623,7 +623,7 @@ export function PropertyView({
             >
               <Box
                 sx={{
-                  background: `linear-gradient(135deg, ${theme.palette.info.main}15 0%, ${theme.palette.info.main}05 100%)`,
+                  background: `linear-gradient(135deg, ${theme.palette.info.main}25 0%, ${theme.palette.info.main}15 100%)`,
                   p: 2,
                   borderBottom: `1px solid ${theme.palette.divider}`
                 }}
@@ -633,7 +633,7 @@ export function PropertyView({
                   Superficies
                 </Typography>
               </Box>
-              <CardContent sx={{ p: 3, bgcolor: 'rgba(33, 150, 243, 0.03)' }}>
+              <CardContent sx={{ p: 3, bgcolor: 'rgba(33, 150, 243, 0.04)' }}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={6}>
                     <Typography variant="body2" color="text.secondary">Superficie de terrain</Typography>
@@ -735,7 +735,7 @@ export function PropertyView({
             >
               <Box
                 sx={{
-                  background: `linear-gradient(135deg, ${theme.palette.warning.main}15 0%, ${theme.palette.warning.main}05 100%)`,
+                  background: `linear-gradient(135deg, ${theme.palette.warning.main}25 0%, ${theme.palette.warning.main}15 100%)`,
                   p: 2,
                   borderBottom: `1px solid ${theme.palette.divider}`
                 }}
@@ -745,7 +745,7 @@ export function PropertyView({
                   Détails de la propriété
                 </Typography>
               </Box>
-              <CardContent sx={{ p: 3, bgcolor: 'rgba(33, 150, 243, 0.03)' }}>
+              <CardContent sx={{ p: 3, bgcolor: 'rgba(255, 152, 0, 0.04)' }}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={3}>
                     <Typography variant="body2" color="text.secondary">Nombre de pièces</Typography>
