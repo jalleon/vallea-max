@@ -68,7 +68,6 @@ import { PropertyEdit } from '../../../features/library/components/PropertyEdit'
 import { Property, PropertyCreateInput } from '../../../features/library/types/property.types'
 import { propertiesSupabaseService as propertiesService } from '../../../features/library/_api/properties-supabase.service'
 import { ProtectedRoute } from '../../../components/auth/ProtectedRoute'
-import { formatDate } from '../../../lib/utils/formatting'
 
 // Mock organization ID - in a real app this would come from auth context
 const MOCK_ORG_ID = 'mock-org-id'
@@ -104,6 +103,19 @@ const stats = [
   }
 ]
 
+// Helper to format date as YYYY-MM-DD without timezone issues
+const formatDateShort = (date: string | Date | undefined): string | null => {
+  if (!date) return null
+
+  if (typeof date === 'string') {
+    // Extract just the date part if it's already in YYYY-MM-DD format or a timestamp
+    const match = date.match(/^(\d{4}-\d{2}-\d{2})/)
+    if (match) return match[1]
+  }
+
+  return null
+}
+
 // Convert Property format to table format for display
 const convertToTableFormat = (property: Property, index: number): any => {
   // Use stored property_id_no if available, otherwise generate a temporary one
@@ -126,9 +138,7 @@ const convertToTableFormat = (property: Property, index: number): any => {
     idNo,
     address: property.adresse,
     city: property.ville || property.municipalite,
-    soldDate: property.date_vente ?
-      (property.date_vente instanceof Date ? property.date_vente.toISOString().split('T')[0] : property.date_vente) :
-      null,
+    soldDate: formatDateShort(property.date_vente),
     soldPrice: property.prix_vente || null,
     propertyType: property.type_propriete || property.genre_propriete || 'Autre',
     status: property.status || '-',
@@ -959,7 +969,7 @@ export default function LibraryPage() {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         <CalendarToday fontSize="small" sx={{ fontSize: 16 }} color="action" />
                         <Typography variant="body2" fontSize="0.875rem" sx={{ whiteSpace: 'nowrap' }}>
-                          {property.soldDate ? formatDate(property.soldDate, 'fr') : '-'}
+                          {property.soldDate || '-'}
                         </Typography>
                       </Box>
                     </TableCell>
