@@ -64,7 +64,19 @@ export const convertPiToM = (pi: number): number => {
 }
 
 export const formatDate = (date: Date | string, locale: 'fr' | 'en' = 'fr'): string => {
-  const dateObj = typeof date === 'string' ? new Date(date) : date
+  let dateObj: Date
+
+  if (typeof date === 'string') {
+    // If it's a date string in YYYY-MM-DD format, parse it as local time to avoid timezone issues
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      const [year, month, day] = date.split('-').map(Number)
+      dateObj = new Date(year, month - 1, day) // month is 0-indexed
+    } else {
+      dateObj = new Date(date)
+    }
+  } else {
+    dateObj = date
+  }
 
   return new Intl.DateTimeFormat(locale === 'fr' ? 'fr-CA' : 'en-CA', {
     year: 'numeric',
