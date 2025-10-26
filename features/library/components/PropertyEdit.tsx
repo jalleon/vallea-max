@@ -1430,7 +1430,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                       />
                     </Grid>
                     <Grid item xs={12} md={1.2}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, pl: 2 }}>
                         Taxes scolaires
                       </Typography>
                     </Grid>
