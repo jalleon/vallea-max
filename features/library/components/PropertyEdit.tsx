@@ -1388,7 +1388,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                       />
                     </Grid>
 
-                    {/* Taxes municipales subsection */}
+                    {/* Taxes municipales and Taxes scolaires on same line */}
                     <Grid item xs={12} md={1.5}>
                       <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                         Taxes municipales
@@ -1419,8 +1419,6 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         }}
                       />
                     </Grid>
-
-                    {/* Taxes scolaires subsection */}
                     <Grid item xs={12} md={1.5}>
                       <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                         Taxes scolaires
