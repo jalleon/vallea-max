@@ -906,7 +906,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         </Select>
                       </FormControl>
                     </Grid>
-                    <Grid item xs={12} md={2}>
+                    <Grid item xs={12} md={formData.type_propriete === 'Condo' ? 1.5 : 2}>
                       <TextField
                         fullWidth
                         label="Année de construction"
@@ -926,7 +926,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         size="small"
                       />
                     </Grid>
-                    <Grid item xs={12} md={2}>
+                    <Grid item xs={12} md={formData.type_propriete === 'Condo' ? 1.5 : 2}>
                       <TextField
                         fullWidth
                         label="Chrono. Age"
@@ -937,7 +937,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         size="small"
                       />
                     </Grid>
-                    <Grid item xs={12} md={2}>
+                    <Grid item xs={12} md={formData.type_propriete === 'Condo' ? 1.5 : 2}>
                       <TextField
                         fullWidth
                         label="Eff. Age"
@@ -948,7 +948,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         size="small"
                       />
                     </Grid>
-                    <Grid item xs={12} md={2}>
+                    <Grid item xs={12} md={formData.type_propriete === 'Condo' ? 1.5 : 2}>
                       <TextField
                         fullWidth
                         label="Zonage"
@@ -959,10 +959,10 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                       />
                     </Grid>
 
-                    {/* Row 1b - Conditional Condo fields */}
+                    {/* Row 1b - Conditional Condo fields on same line */}
                     {formData.type_propriete === 'Condo' && (
                       <>
-                        <Grid item xs={12} md={3}>
+                        <Grid item xs={12} md={2}>
                           <FormControl fullWidth size="small">
                             <InputLabel>Localisation</InputLabel>
                             <Select
@@ -975,7 +975,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                             </Select>
                           </FormControl>
                         </Grid>
-                        <Grid item xs={12} md={3}>
+                        <Grid item xs={12} md={2}>
                           <FormControl fullWidth size="small">
                             <InputLabel>Type de copropriété</InputLabel>
                             <Select
