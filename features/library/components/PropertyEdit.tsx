@@ -641,7 +641,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         />
                       </Grid>
                     )}
-                    <Grid item xs={12} md={1}>
+                    <Grid item xs={12} md={1.5}>
                       <FormControl fullWidth size="small">
                         <InputLabel>Statut</InputLabel>
                         <Select
@@ -669,7 +669,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         </Select>
                       </FormControl>
                     </Grid>
-                    <Grid item xs={12} md={2}>
+                    <Grid item xs={12} md={1.5}>
                       <TextField
                         fullWidth
                         label="# MLS"
