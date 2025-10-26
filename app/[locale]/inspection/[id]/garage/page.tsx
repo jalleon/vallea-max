@@ -356,6 +356,7 @@ export default function GaragePage() {
 
             {/* Type de garage */}
             {renderChipField('Type de garage', 'type_garage', [
+              t('inspection.garageOptions.typeOptions.aucun'),
               t('inspection.garageOptions.typeOptions.attache'),
               t('inspection.garageOptions.typeOptions.detache'),
               t('inspection.garageOptions.typeOptions.integre'),

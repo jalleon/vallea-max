@@ -643,10 +643,10 @@ export default function PiecesPage() {
           <DialogTitle>{t('common.add')}</DialogTitle>
           <DialogContent>
             <FormControl fullWidth margin="dense">
-              <InputLabel>{t('inspection.form.propertyType')}</InputLabel>
+              <InputLabel>{t('inspection.form.roomType')}</InputLabel>
               <Select
                 value={newRoomType}
-                label={t('inspection.form.propertyType')}
+                label={t('inspection.form.roomType')}
                 onChange={(e) => setNewRoomType(e.target.value)}
               >
                 {ADDITIONAL_ROOM_TYPES.map((roomType) => {
