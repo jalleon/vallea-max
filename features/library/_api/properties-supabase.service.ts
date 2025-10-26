@@ -34,7 +34,7 @@ class PropertiesSupabaseService {
       province: data.province || undefined,
       prix_vente: data.prix_vente || undefined,
       prix_demande: data.prix_demande || undefined,
-      date_vente: data.date_vente ? new Date(data.date_vente) : undefined,
+      date_vente: data.date_vente || undefined,
       jours_sur_marche: data.jours_sur_marche || undefined,
       status: data.status as any,
       type_propriete: data.type_propriete as any,
@@ -61,7 +61,7 @@ class PropertiesSupabaseService {
       toiture: data.toiture || undefined,
       ameliorations_hors_sol: data.ameliorations_hors_sol || undefined,
       numero_mls: data.numero_mls || undefined,
-      date_vente_precedente: data.date_vente_precedente ? new Date(data.date_vente_precedente) : undefined,
+      date_vente_precedente: data.date_vente_precedente || undefined,
       prix_vente_precedente: data.prix_vente_precedente || undefined,
       source: data.source || undefined,
       notes: data.notes || undefined,
@@ -97,7 +97,7 @@ class PropertiesSupabaseService {
 
       // Inspection fields
       inspection_status: data.inspection_status as any,
-      inspection_date: data.inspection_date ? new Date(data.inspection_date) : undefined,
+      inspection_date: data.inspection_date || undefined,
       inspection_completion: data.inspection_completion || undefined,
       inspection_pieces: data.inspection_pieces as any,
       inspection_batiment: data.inspection_batiment as any,
@@ -393,8 +393,8 @@ class PropertiesSupabaseService {
     return this.createProperty({
       ...duplicateData,
       adresse: `${duplicateData.adresse} (Copy)`,
-      date_vente: duplicateData.date_vente?.toISOString(),
-      date_vente_precedente: duplicateData.date_vente_precedente?.toISOString(),
+      date_vente: duplicateData.date_vente,
+      date_vente_precedente: duplicateData.date_vente_precedente,
       floor_areas: duplicateData.floor_areas?.map(({ id, ...floor }) => ({
         floor: floor.floor,
         area_m2: floor.area_m2,

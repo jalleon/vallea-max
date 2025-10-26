@@ -62,7 +62,7 @@ export interface Property {
   province?: string
   prix_vente?: number
   prix_demande?: number
-  date_vente?: Date
+  date_vente?: string
   jours_sur_marche?: number
   status?: PropertyStatus
   type_propriete?: PropertyType
@@ -127,7 +127,7 @@ export interface Property {
   zoning_usages_permis?: string
 
   // Historical
-  date_vente_precedente?: Date
+  date_vente_precedente?: string
   prix_vente_precedente?: number
 
   // Media
@@ -141,7 +141,7 @@ export interface Property {
 
   // Inspection fields
   inspection_status?: InspectionStatus
-  inspection_date?: Date
+  inspection_date?: string
   inspection_completion?: number
   inspection_pieces?: InspectionPieces
   inspection_batiment?: Record<string, any>
