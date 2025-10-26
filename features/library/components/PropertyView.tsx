@@ -707,12 +707,12 @@ export function PropertyView({
                         </TableBody>
                       </Table>
                     </TableContainer>
-                    <Box mt={2} sx={{ p: 2, bgcolor: 'rgba(33, 150, 243, 0.08)', borderRadius: 1, border: '1px solid rgba(33, 150, 243, 0.2)' }}>
-                      <Typography variant="subtitle2" fontWeight={700} sx={{ color: '#1976D2', mb: 1 }}>
+                    <Box mt={2} sx={{ p: 2.5, bgcolor: 'rgba(33, 150, 243, 0.08)', borderRadius: 1, border: '1px solid rgba(33, 150, 243, 0.2)' }}>
+                      <Typography variant="h6" fontWeight={700} sx={{ color: '#1976D2', mb: 1, fontSize: '1.1rem' }}>
                         Total superficie habitable (hors-sol): {totals.hors_sol.toFixed(2)} m² / {(totals.hors_sol * 10.764).toFixed(0)} pi²
                       </Typography>
                       {totals.sous_sol > 0 && (
-                        <Typography variant="subtitle2" fontWeight={700} sx={{ color: '#1976D2' }}>
+                        <Typography variant="h6" fontWeight={700} sx={{ color: '#1976D2', fontSize: '1.1rem' }}>
                           Total superficie sous-sol: {totals.sous_sol.toFixed(2)} m² / {(totals.sous_sol * 10.764).toFixed(0)} pi²
                         </Typography>
                       )}
