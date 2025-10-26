@@ -364,7 +364,7 @@ export function PropertyView({
                     Informations générales
                   </Typography>
                 </Box>
-                <CardContent sx={{ p: 3, bgcolor: 'rgba(0,0,0,0.01)' }}>
+                <CardContent sx={{ p: 3, bgcolor: 'rgba(33, 150, 243, 0.03)' }}>
                 <Grid container spacing={1}>
                   <Grid item xs={12} md={1.5}>
                     <Typography variant="body2" color="text.secondary">ID No</Typography>
@@ -633,7 +633,7 @@ export function PropertyView({
                   Superficies
                 </Typography>
               </Box>
-              <CardContent sx={{ p: 3, bgcolor: 'rgba(0,0,0,0.01)' }}>
+              <CardContent sx={{ p: 3, bgcolor: 'rgba(33, 150, 243, 0.03)' }}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={6}>
                     <Typography variant="body2" color="text.secondary">Superficie de terrain</Typography>
@@ -745,7 +745,7 @@ export function PropertyView({
                   Détails de la propriété
                 </Typography>
               </Box>
-              <CardContent sx={{ p: 3, bgcolor: 'rgba(0,0,0,0.01)' }}>
+              <CardContent sx={{ p: 3, bgcolor: 'rgba(33, 150, 243, 0.03)' }}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={3}>
                     <Typography variant="body2" color="text.secondary">Nombre de pièces</Typography>
@@ -857,7 +857,7 @@ export function PropertyView({
                   Caractéristiques du bâtiment
                 </Typography>
               </Box>
-              <CardContent sx={{ p: 3, bgcolor: 'rgba(0,0,0,0.01)' }}>
+              <CardContent sx={{ p: 3, bgcolor: 'rgba(156, 39, 176, 0.03)' }}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={3}>
                     <Typography variant="body2" color="text.secondary">Type de bâtiment</Typography>
@@ -918,7 +918,7 @@ export function PropertyView({
                   Données municipales
                 </Typography>
               </Box>
-              <CardContent sx={{ p: 3, bgcolor: 'rgba(0,0,0,0.01)' }}>
+              <CardContent sx={{ p: 3, bgcolor: 'rgba(255, 152, 0, 0.03)' }}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={3}>
                     <Typography variant="body2" color="text.secondary">Numéro de lot</Typography>
