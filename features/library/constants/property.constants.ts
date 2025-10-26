@@ -57,3 +57,28 @@ export const FLOOR_TYPES = [
   'Comble',
   'Mezzanine'
 ] as const
+
+export const BUILDING_TYPES = [
+  'Isolé',
+  'Semi-détaché',
+  'En rangée',
+  'En rangée sur coin'
+] as const
+
+export const GARAGE_TYPES = [
+  'Attaché',
+  'Détaché',
+  'Intégré',
+  'Au sous-sol',
+  'Abri d\'auto'
+] as const
+
+export const CONDO_LOCATION_TYPES = [
+  'Coin',
+  'Centre'
+] as const
+
+export const COPROPRIETE_TYPES = [
+  'Divise',
+  'Indivise'
+] as const

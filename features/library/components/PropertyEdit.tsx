@@ -41,14 +41,16 @@ import {
   Stairs,
   SquareFoot,
   AttachMoney,
-  Search as InspectionIcon
+  Search as InspectionIcon,
+  AccountBalance
 } from '@mui/icons-material'
-import { Property, PropertyCreateInput, PropertyType, PropertyStatus, BasementType, ParkingType, FloorType, FloorArea, OccupancyType, EvaluationType, UnitRent } from '../types/property.types'
+import { Property, PropertyCreateInput, PropertyType, PropertyStatus, BasementType, ParkingType, FloorType, FloorArea, OccupancyType, EvaluationType, UnitRent, AdditionalLot } from '../types/property.types'
 import { v4 as uuidv4 } from 'uuid'
 import { useRouter, useParams } from 'next/navigation'
 import { calculateInspectionProgress, getCompletedCategories, getCategoryTranslationKey } from '@/features/inspection/utils/progress.utils'
 import { useTranslations } from 'next-intl'
 import { CheckCircle } from '@mui/icons-material'
+import { formatNumber } from '@/lib/utils/formatting'
 
 interface PropertyEditProps {
   property: Property | null
@@ -63,6 +65,39 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
   const params = useParams()
   const locale = params.locale as string
   const t = useTranslations()
+
+  // Helper functions for currency formatting
+  const formatCurrencyDisplay = (value: number | undefined): string => {
+    if (!value) return ''
+    return formatNumber(value, 0)
+  }
+
+  const parseCurrencyInput = (value: string): number | undefined => {
+    if (!value) return undefined
+    // Remove all spaces and non-numeric characters except decimal point
+    const cleaned = value.replace(/\s/g, '').replace(/[^0-9.]/g, '')
+    const parsed = parseFloat(cleaned)
+    return isNaN(parsed) ? undefined : parsed
+  }
+
+  // Helper function to format Quebec lot number: # ### ###
+  const formatLotNumber = (value: string): string => {
+    if (formData.province !== 'QC') return value
+    // Remove all non-numeric characters
+    const cleaned = value.replace(/\D/g, '')
+    // Limit to 7 digits
+    const limited = cleaned.substring(0, 7)
+    // Format as # ### ###
+    if (limited.length <= 1) return limited
+    if (limited.length <= 4) return `${limited[0]} ${limited.substring(1)}`
+    return `${limited[0]} ${limited.substring(1, 4)} ${limited.substring(4)}`
+  }
+
+  const parseLotNumber = (value: string): string => {
+    // Remove all spaces and non-numeric characters
+    return value.replace(/\s/g, '')
+  }
+
   const [formData, setFormData] = useState<PropertyCreateInput>({
     adresse: '',
     ville: '',
@@ -76,7 +111,10 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
     status: 'Vendu',
     type_propriete: undefined,
     genre_propriete: '',
+    type_batiment: undefined,
     annee_construction: undefined,
+    chrono_age: undefined,
+    eff_age: undefined,
     zonage: '',
     superficie_terrain_m2: undefined,
     superficie_terrain_pi2: undefined,
@@ -93,12 +131,31 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
     salle_bain: undefined,
     salle_eau: undefined,
     stationnement: undefined,
+    type_garage: undefined,
     dimension_garage: '',
     type_sous_sol: undefined,
     toiture: '',
+    extras: '',
     ameliorations_hors_sol: '',
+    localisation: undefined,
+    type_copropriete: 'Divise',
     numero_mls: '',
     floor_areas: [],
+
+    // Municipal data
+    lot_number: '',
+    additional_lots: [],
+    matricule: '',
+    eval_municipale_annee: '',
+    eval_municipale_terrain: undefined,
+    eval_municipale_batiment: undefined,
+    eval_municipale_total: undefined,
+    taxes_municipales_annee: undefined,
+    taxes_municipales_montant: undefined,
+    taxes_scolaires_annee: undefined,
+    taxes_scolaires_montant: undefined,
+    zoning_usages_permis: '',
+
     source: '',
     notes: '',
     is_template: false,
@@ -106,6 +163,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
   })
 
   const [floorAreas, setFloorAreas] = useState<FloorArea[]>([])
+  const [additionalLots, setAdditionalLots] = useState<AdditionalLot[]>([])
   const [newFloor, setNewFloor] = useState({
     floor: 'Rez-de-chaussée' as FloorType,
     area_m2: 0,
@@ -164,10 +222,15 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
         occupancy: property.occupancy,
         loyer_en_place: property.loyer_en_place,
         frais_condo: property.frais_condo,
+        localisation: property.localisation,
+        type_copropriete: property.type_copropriete || 'Divise',
         unit_rents: property.unit_rents,
 
         genre_propriete: property.genre_propriete || '',
+        type_batiment: property.type_batiment,
         annee_construction: property.annee_construction,
+        chrono_age: property.chrono_age,
+        eff_age: property.eff_age,
         zonage: property.zonage || '',
         superficie_terrain_m2: property.superficie_terrain_m2,
         superficie_terrain_pi2: property.superficie_terrain_pi2,
@@ -184,18 +247,36 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
         salle_bain: property.salle_bain ?? (hasInspectionData ? calculatedRoomCounts.bathrooms : undefined),
         salle_eau: property.salle_eau ?? (hasInspectionData ? calculatedRoomCounts.powderRooms : undefined),
         stationnement: property.stationnement,
+        type_garage: property.type_garage,
         dimension_garage: property.dimension_garage || '',
         type_sous_sol: property.type_sous_sol,
         toiture: property.toiture || '',
+        extras: property.extras || '',
         ameliorations_hors_sol: property.ameliorations_hors_sol || '',
         numero_mls: property.numero_mls || '',
         floor_areas: property.floor_areas || [],
+
+        // Municipal data
+        lot_number: property.lot_number || '',
+        additional_lots: property.additional_lots || [],
+        matricule: property.matricule || '',
+        eval_municipale_annee: property.eval_municipale_annee,
+        eval_municipale_terrain: property.eval_municipale_terrain,
+        eval_municipale_batiment: property.eval_municipale_batiment,
+        eval_municipale_total: property.eval_municipale_total,
+        taxes_municipales_annee: property.taxes_municipales_annee,
+        taxes_municipales_montant: property.taxes_municipales_montant,
+        taxes_scolaires_annee: property.taxes_scolaires_annee,
+        taxes_scolaires_montant: property.taxes_scolaires_montant,
+        zoning_usages_permis: property.zoning_usages_permis || '',
+
         notes: property.notes || '',
         is_template: property.is_template,
         is_shared: property.is_shared
       })
       setFloorAreas(property.floor_areas || [])
       setUnitRents(property.unit_rents || [])
+      setAdditionalLots(property.additional_lots || [])
     } else {
       // Reset for new property
       setFormData({
@@ -344,6 +425,31 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
     const updatedFloors = floorAreas.filter(floor => floor.id !== id)
     setFloorAreas(updatedFloors)
     setFormData(prev => ({ ...prev, floor_areas: updatedFloors }))
+  }
+
+  const addAdditionalLot = () => {
+    const newLot: AdditionalLot = {
+      id: uuidv4(),
+      lot_number: '',
+      type_lot: 'Exclusif'
+    }
+    const updatedLots = [...additionalLots, newLot]
+    setAdditionalLots(updatedLots)
+    setFormData(prev => ({ ...prev, additional_lots: updatedLots }))
+  }
+
+  const removeAdditionalLot = (id: string) => {
+    const updatedLots = additionalLots.filter(lot => lot.id !== id)
+    setAdditionalLots(updatedLots)
+    setFormData(prev => ({ ...prev, additional_lots: updatedLots }))
+  }
+
+  const updateAdditionalLot = (id: string, field: keyof AdditionalLot, value: any) => {
+    const updatedLots = additionalLots.map(lot =>
+      lot.id === id ? { ...lot, [field]: value } : lot
+    )
+    setAdditionalLots(updatedLots)
+    setFormData(prev => ({ ...prev, additional_lots: updatedLots }))
   }
 
   const calculateTotalHabitable = () => {
@@ -544,11 +650,11 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                       <TextField
                         fullWidth
                         label={formData.status === 'Sujet' ? "Valeur d'évaluation" : "Prix de vente"}
-                        type="number"
-                        value={formData.prix_vente || ''}
+                        type="text"
+                        value={formatCurrencyDisplay(formData.prix_vente)}
                         onChange={(e) => handleInputChange(
                           'prix_vente',
-                          e.target.value ? parseFloat(e.target.value) : undefined
+                          parseCurrencyInput(e.target.value)
                         )}
                         variant="outlined"
                         size="small"
@@ -567,9 +673,9 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         <TextField
                           fullWidth
                           label="Prix demandé"
-                          type="number"
-                          value={formData.prix_demande || ''}
-                          onChange={(e) => handleInputChange('prix_demande', e.target.value ? parseFloat(e.target.value) : undefined)}
+                          type="text"
+                          value={formatCurrencyDisplay(formData.prix_demande)}
+                          onChange={(e) => handleInputChange('prix_demande', parseCurrencyInput(e.target.value))}
                           variant="outlined"
                           size="small"
                           InputProps={{
@@ -599,7 +705,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                     </Grid>
                     {/* Hide Jours sur marché when status is Sujet */}
                     {formData.status !== 'Sujet' && (
-                      <Grid item xs={12} md={2}>
+                      <Grid item xs={12} md={1}>
                         <TextField
                           fullWidth
                           label="Jours sur marché"
@@ -611,7 +717,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         />
                       </Grid>
                     )}
-                    <Grid item xs={12} md={2}>
+                    <Grid item xs={12} md={1.5}>
                       <FormControl fullWidth size="small">
                         <InputLabel>Statut</InputLabel>
                         <Select
@@ -638,6 +744,16 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                           ))}
                         </Select>
                       </FormControl>
+                    </Grid>
+                    <Grid item xs={12} md={1.5}>
+                      <TextField
+                        fullWidth
+                        label="# MLS"
+                        value={formData.numero_mls}
+                        onChange={(e) => handleInputChange('numero_mls', e.target.value)}
+                        variant="outlined"
+                        size="small"
+                      />
                     </Grid>
 
                     {/* Conditional fields for Sujet status */}
@@ -832,8 +948,8 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                     </Typography>
                   </Box>
                   <Grid container spacing={2}>
-                    {/* Row 1 */}
-                    <Grid item xs={12} md={3}>
+                    {/* Row 1 - Building characteristics */}
+                    <Grid item xs={12} md={2}>
                       <FormControl fullWidth size="small">
                         <InputLabel>Genre de propriété</InputLabel>
                         <Select
@@ -843,47 +959,112 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         >
                           <MenuItem value="Plain-pied">Plain-pied</MenuItem>
                           <MenuItem value="À étages">À étages</MenuItem>
-                          <MenuItem value="Paliers multiples">Paliers multiples</MenuItem>
+                          <MenuItem value="1 Étage">1 Étage</MenuItem>
                           <MenuItem value="Un étage et demi">Un étage et demi</MenuItem>
+                          <MenuItem value="Deux étages">Deux étages</MenuItem>
+                          <MenuItem value="Deux étages et demi">Deux étages et demi</MenuItem>
+                          <MenuItem value="Trois étages">Trois étages</MenuItem>
+                          <MenuItem value="Paliers multiples">Paliers multiples</MenuItem>
                           <MenuItem value="Mobile">Mobile</MenuItem>
                           <MenuItem value="Maison de ville">Maison de ville</MenuItem>
+                          <MenuItem value="Tour d'appartement">Tour d'appartement</MenuItem>
                           <MenuItem value="Terrain vacant">Terrain vacant</MenuItem>
                         </Select>
                       </FormControl>
                     </Grid>
-                    <Grid item xs={12} md={3}>
+                    <Grid item xs={12} md={2}>
+                      <FormControl fullWidth size="small">
+                        <InputLabel>Type de bâtiment</InputLabel>
+                        <Select
+                          value={formData.type_batiment || ''}
+                          label="Type de bâtiment"
+                          onChange={(e) => handleInputChange('type_batiment', e.target.value)}
+                        >
+                          <MenuItem value="Isolé">Isolé</MenuItem>
+                          <MenuItem value="Semi-détaché">Semi-détaché</MenuItem>
+                          <MenuItem value="En rangée">En rangée</MenuItem>
+                          <MenuItem value="En rangée sur coin">En rangée sur coin</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+
+                    {/* Conditional Condo fields between Type de bâtiment and Année de construction */}
+                    {formData.type_propriete === 'Condo' && (
+                      <>
+                        <Grid item xs={12} md={2}>
+                          <FormControl fullWidth size="small">
+                            <InputLabel>Localisation</InputLabel>
+                            <Select
+                              value={formData.localisation || ''}
+                              label="Localisation"
+                              onChange={(e) => handleInputChange('localisation', e.target.value)}
+                            >
+                              <MenuItem value="Coin">Coin</MenuItem>
+                              <MenuItem value="Centre">Centre</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={12} md={2}>
+                          <FormControl fullWidth size="small">
+                            <InputLabel>Type de copropriété</InputLabel>
+                            <Select
+                              value={formData.type_copropriete || 'Divise'}
+                              label="Type de copropriété"
+                              onChange={(e) => handleInputChange('type_copropriete', e.target.value)}
+                            >
+                              <MenuItem value="Divise">Divise</MenuItem>
+                              <MenuItem value="Indivise">Indivise</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Grid>
+                      </>
+                    )}
+
+                    <Grid item xs={12} md={1.3}>
                       <TextField
                         fullWidth
                         label="Année de construction"
                         type="number"
                         value={formData.annee_construction || ''}
-                        onChange={(e) => handleInputChange('annee_construction', e.target.value ? parseInt(e.target.value) : undefined)}
+                        onChange={(e) => {
+                          const year = e.target.value ? parseInt(e.target.value) : undefined
+                          handleInputChange('annee_construction', year)
+                          // Auto-calculate chrono age
+                          if (year) {
+                            const currentYear = new Date().getFullYear()
+                            const chronoAge = currentYear - year
+                            handleInputChange('chrono_age', chronoAge)
+                          }
+                        }}
                         variant="outlined"
                         size="small"
                       />
                     </Grid>
-                    <Grid item xs={12} md={3}>
+                    <Grid item xs={12} md={1.1}>
                       <TextField
                         fullWidth
-                        label="Zonage"
-                        value={formData.zonage}
-                        onChange={(e) => handleInputChange('zonage', e.target.value)}
+                        label="Chrono. Age"
+                        type="number"
+                        value={formData.chrono_age || ''}
+                        onChange={(e) => handleInputChange('chrono_age', e.target.value ? parseInt(e.target.value) : undefined)}
                         variant="outlined"
                         size="small"
                       />
                     </Grid>
-                    <Grid item xs={12} md={3}>
+                    <Grid item xs={12} md={1.1}>
                       <TextField
                         fullWidth
-                        label="# MLS"
-                        value={formData.numero_mls}
-                        onChange={(e) => handleInputChange('numero_mls', e.target.value)}
+                        label="Eff. Age"
+                        type="number"
+                        value={formData.eff_age || ''}
+                        onChange={(e) => handleInputChange('eff_age', e.target.value ? parseInt(e.target.value) : undefined)}
                         variant="outlined"
                         size="small"
                       />
                     </Grid>
-
-                    {/* Row 2 */}
+                    {/* Force line break for non-Condo properties */}
+                    {formData.type_propriete !== 'Condo' && <Grid item xs={12} sx={{ height: 0, padding: 0 }} />}
+                    {/* Row 2 - Room counts (all 4 fields on same line) */}
                     <Grid item xs={12} md={3}>
                       <TextField
                         fullWidth
@@ -948,7 +1129,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                     </Grid>
 
                     {/* Row 3 */}
-                    <Grid item xs={12} md={3}>
+                    <Grid item xs={12} md={2.4}>
                       <FormControl fullWidth size="small">
                         <InputLabel>Stationnement</InputLabel>
                         <Select
@@ -962,7 +1143,23 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         </Select>
                       </FormControl>
                     </Grid>
-                    <Grid item xs={12} md={3}>
+                    <Grid item xs={12} md={2.4}>
+                      <FormControl fullWidth size="small">
+                        <InputLabel>Type de garage</InputLabel>
+                        <Select
+                          value={formData.type_garage || ''}
+                          onChange={(e) => handleInputChange('type_garage', e.target.value)}
+                          label="Type de garage"
+                        >
+                          <MenuItem value="Attaché">Attaché</MenuItem>
+                          <MenuItem value="Détaché">Détaché</MenuItem>
+                          <MenuItem value="Intégré">Intégré</MenuItem>
+                          <MenuItem value="Au sous-sol">Au sous-sol</MenuItem>
+                          <MenuItem value="Abri d'auto">Abri d'auto</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} md={2.4}>
                       <TextField
                         fullWidth
                         label="Dimension garage"
@@ -972,7 +1169,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         size="small"
                       />
                     </Grid>
-                    <Grid item xs={12} md={3}>
+                    <Grid item xs={12} md={2.4}>
                       <FormControl fullWidth size="small">
                         <InputLabel>Type de sous-sol</InputLabel>
                         <Select
@@ -986,7 +1183,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         </Select>
                       </FormControl>
                     </Grid>
-                    <Grid item xs={12} md={3}>
+                    <Grid item xs={12} md={2.4}>
                       <TextField
                         fullWidth
                         label="Toiture"
@@ -1001,9 +1198,290 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                     <Grid item xs={12}>
                       <TextField
                         fullWidth
+                        label="Extras"
+                        value={formData.extras}
+                        onChange={(e) => handleInputChange('extras', e.target.value)}
+                        variant="outlined"
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
                         label="Améliorations hors-sol"
                         value={formData.ameliorations_hors_sol}
                         onChange={(e) => handleInputChange('ameliorations_hors_sol', e.target.value)}
+                        variant="outlined"
+                        size="small"
+                        multiline
+                        rows={2}
+                      />
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Données municipales */}
+            <Grid item xs={12}>
+              <Card
+                elevation={0}
+                sx={{
+                  border: `1px solid ${theme.palette.divider}`,
+                  background: `linear-gradient(135deg, ${theme.palette.warning.main}08 0%, ${theme.palette.warning.main}15 100%)`
+                }}
+              >
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <AccountBalance sx={{ color: theme.palette.warning.main, mr: 1 }} />
+                    <Typography variant="h6" sx={{ color: theme.palette.warning.main, fontWeight: 600 }}>
+                      Données municipales
+                    </Typography>
+                  </Box>
+
+                  <Grid container spacing={2}>
+                    {/* Row 1: Lot Number and Matricule */}
+                    <Grid item xs={12} md={3}>
+                      <TextField
+                        fullWidth
+                        label="Numéro de lot"
+                        value={formData.province === 'QC' ? formatLotNumber(formData.lot_number || '') : formData.lot_number || ''}
+                        onChange={(e) => {
+                          const value = formData.province === 'QC' ? parseLotNumber(e.target.value) : e.target.value
+                          handleInputChange('lot_number', value)
+                        }}
+                        variant="outlined"
+                        size="small"
+                        placeholder={formData.province === 'QC' ? '# ### ###' : ''}
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={3}>
+                      <TextField
+                        fullWidth
+                        label="Matricule"
+                        value={formData.matricule || ''}
+                        onChange={(e) => handleInputChange('matricule', e.target.value)}
+                        variant="outlined"
+                        size="small"
+                      />
+                    </Grid>
+
+                    {/* Additional Lots */}
+                    {additionalLots.map((lot) => (
+                      <Grid item xs={12} key={lot.id}>
+                        <Grid container spacing={2} alignItems="center">
+                          <Grid item xs={12} md={3}>
+                            <TextField
+                              fullWidth
+                              label="Lot additionnel"
+                              value={formData.province === 'QC' ? formatLotNumber(lot.lot_number) : lot.lot_number}
+                              onChange={(e) => {
+                                const value = formData.province === 'QC' ? parseLotNumber(e.target.value) : e.target.value
+                                updateAdditionalLot(lot.id, 'lot_number', value)
+                              }}
+                              variant="outlined"
+                              size="small"
+                              placeholder={formData.province === 'QC' ? '# ### ###' : ''}
+                            />
+                          </Grid>
+                          <Grid item xs={12} md={2}>
+                            <FormControl fullWidth size="small">
+                              <InputLabel>Type de lot</InputLabel>
+                              <Select
+                                value={lot.type_lot}
+                                onChange={(e) => updateAdditionalLot(lot.id, 'type_lot', e.target.value)}
+                                label="Type de lot"
+                              >
+                                <MenuItem value="Exclusif">Exclusif</MenuItem>
+                                <MenuItem value="Commun">Commun</MenuItem>
+                              </Select>
+                            </FormControl>
+                          </Grid>
+                          <Grid item xs={12} md={1}>
+                            <IconButton onClick={() => removeAdditionalLot(lot.id)} size="small" color="error">
+                              <Delete />
+                            </IconButton>
+                          </Grid>
+                        </Grid>
+                      </Grid>
+                    ))}
+
+                    <Grid item xs={12}>
+                      <Button
+                        startIcon={<Add />}
+                        onClick={addAdditionalLot}
+                        size="small"
+                        variant="outlined"
+                      >
+                        Ajouter un lot additionnel
+                      </Button>
+                    </Grid>
+
+                    {/* Évaluation municipale subsection */}
+                    <Grid item xs={12}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, mt: 2, mb: 1 }}>
+                        Évaluation municipale
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={2}>
+                      <TextField
+                        fullWidth
+                        label="Date"
+                        type="date"
+                        value={formData.eval_municipale_annee || ''}
+                        onChange={(e) => handleInputChange('eval_municipale_annee', e.target.value)}
+                        variant="outlined"
+                        size="small"
+                        InputLabelProps={{ shrink: true }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={2}>
+                      <TextField
+                        fullWidth
+                        label="Terrain"
+                        type="text"
+                        value={formatCurrencyDisplay(formData.eval_municipale_terrain)}
+                        onChange={(e) => {
+                          const terrain = parseCurrencyInput(e.target.value)
+                          handleInputChange('eval_municipale_terrain', terrain)
+                          // Auto-calculate total
+                          const total = (terrain || 0) + (formData.eval_municipale_batiment || 0)
+                          handleInputChange('eval_municipale_total', total || undefined)
+                        }}
+                        variant="outlined"
+                        size="small"
+                        InputProps={{
+                          startAdornment: <InputAdornment position="start">$</InputAdornment>
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={2}>
+                      <TextField
+                        fullWidth
+                        label="Bâtiment"
+                        type="text"
+                        value={formatCurrencyDisplay(formData.eval_municipale_batiment)}
+                        onChange={(e) => {
+                          const batiment = parseCurrencyInput(e.target.value)
+                          handleInputChange('eval_municipale_batiment', batiment)
+                          // Auto-calculate total
+                          const total = (formData.eval_municipale_terrain || 0) + (batiment || 0)
+                          handleInputChange('eval_municipale_total', total || undefined)
+                        }}
+                        variant="outlined"
+                        size="small"
+                        InputProps={{
+                          startAdornment: <InputAdornment position="start">$</InputAdornment>
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={2}>
+                      <TextField
+                        fullWidth
+                        label="Total"
+                        type="text"
+                        value={formatCurrencyDisplay(formData.eval_municipale_total)}
+                        variant="outlined"
+                        size="small"
+                        InputProps={{
+                          readOnly: true,
+                          startAdornment: <InputAdornment position="start">$</InputAdornment>
+                        }}
+                        sx={{
+                          '& .MuiInputBase-input': {
+                            backgroundColor: theme.palette.action.hover
+                          }
+                        }}
+                      />
+                    </Grid>
+
+                    {/* Force new line before taxes sections */}
+                    <Grid item xs={12} />
+
+                    {/* Taxes municipales and Taxes scolaires on same line */}
+                    <Grid item xs={12} md={1.3}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                        Taxes municipales
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={1.2}>
+                      <TextField
+                        fullWidth
+                        label="Année"
+                        type="number"
+                        value={formData.taxes_municipales_annee || ''}
+                        onChange={(e) => handleInputChange('taxes_municipales_annee', e.target.value ? parseInt(e.target.value) : undefined)}
+                        variant="outlined"
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={2}>
+                      <TextField
+                        fullWidth
+                        label="Montant"
+                        type="text"
+                        value={formatCurrencyDisplay(formData.taxes_municipales_montant)}
+                        onChange={(e) => handleInputChange('taxes_municipales_montant', parseCurrencyInput(e.target.value))}
+                        variant="outlined"
+                        size="small"
+                        InputProps={{
+                          startAdornment: <InputAdornment position="start">$</InputAdornment>
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={1.3}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, pl: 2 }}>
+                        Taxes scolaires
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={1.2}>
+                      <TextField
+                        fullWidth
+                        label="Année"
+                        type="number"
+                        value={formData.taxes_scolaires_annee || ''}
+                        onChange={(e) => handleInputChange('taxes_scolaires_annee', e.target.value ? parseInt(e.target.value) : undefined)}
+                        variant="outlined"
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={2}>
+                      <TextField
+                        fullWidth
+                        label="Montant"
+                        type="text"
+                        value={formatCurrencyDisplay(formData.taxes_scolaires_montant)}
+                        onChange={(e) => handleInputChange('taxes_scolaires_montant', parseCurrencyInput(e.target.value))}
+                        variant="outlined"
+                        size="small"
+                        InputProps={{
+                          startAdornment: <InputAdornment position="start">$</InputAdornment>
+                        }}
+                      />
+                    </Grid>
+
+                    {/* Zonage section */}
+                    <Grid item xs={12}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, mt: 2, mb: 1 }}>
+                        Zonage
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={2}>
+                      <TextField
+                        fullWidth
+                        label="Zonage"
+                        value={formData.zonage || ''}
+                        onChange={(e) => handleInputChange('zonage', e.target.value)}
+                        variant="outlined"
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={10}>
+                      <TextField
+                        fullWidth
+                        label="Usages permis"
+                        value={formData.zoning_usages_permis || ''}
+                        onChange={(e) => handleInputChange('zoning_usages_permis', e.target.value)}
                         variant="outlined"
                         size="small"
                         multiline

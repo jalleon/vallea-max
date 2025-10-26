@@ -73,6 +73,28 @@ class PropertiesSupabaseService {
       unit_rents: data.unit_rents as any,
       type_evaluation: data.type_evaluation as any,
       occupancy: data.occupancy as any,
+      localisation: data.localisation as any,
+      type_copropriete: data.type_copropriete as any,
+      type_batiment: data.type_batiment as any,
+      chrono_age: data.chrono_age || undefined,
+      eff_age: data.eff_age || undefined,
+      type_garage: data.type_garage as any,
+      extras: data.extras || undefined,
+
+      // Municipal data
+      lot_number: data.lot_number || undefined,
+      additional_lots: data.additional_lots as any,
+      matricule: data.matricule || undefined,
+      eval_municipale_annee: data.eval_municipale_annee || undefined,
+      eval_municipale_terrain: data.eval_municipale_terrain || undefined,
+      eval_municipale_batiment: data.eval_municipale_batiment || undefined,
+      eval_municipale_total: data.eval_municipale_total || undefined,
+      taxes_municipales_annee: data.taxes_municipales_annee || undefined,
+      taxes_municipales_montant: data.taxes_municipales_montant || undefined,
+      taxes_scolaires_annee: data.taxes_scolaires_annee || undefined,
+      taxes_scolaires_montant: data.taxes_scolaires_montant || undefined,
+      zoning_usages_permis: data.zoning_usages_permis || undefined,
+
       // Inspection fields
       inspection_status: data.inspection_status as any,
       inspection_date: data.inspection_date ? new Date(data.inspection_date) : undefined,
