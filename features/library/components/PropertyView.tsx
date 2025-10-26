@@ -365,14 +365,14 @@ export function PropertyView({
                   </Typography>
                 </Box>
                 <CardContent sx={{ p: 3 }}>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} md={0.8}>
+                <Grid container spacing={1}>
+                  <Grid item xs={12} md={1.5}>
                     <Typography variant="body2" color="text.secondary">ID No</Typography>
                     <Typography variant="body1" fontWeight={600} color="primary">
                       {property.property_id_no || 'N/A'}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12} md={4.2}>
+                  <Grid item xs={12} md={3.5}>
                     <Typography variant="body2" color="text.secondary">Adresse</Typography>
                     <Typography variant="body1">{property.adresse}</Typography>
                   </Grid>
@@ -384,7 +384,7 @@ export function PropertyView({
                     <Typography variant="body2" color="text.secondary">Arrondissement</Typography>
                     <Typography variant="body1">{property.municipalite || 'N/A'}</Typography>
                   </Grid>
-                  <Grid item xs={12} md={1}>
+                  <Grid item xs={12} md={1.5}>
                     <Typography variant="body2" color="text.secondary">Code postal</Typography>
                     <Typography variant="body1">{property.code_postal || 'N/A'}</Typography>
                   </Grid>
@@ -396,19 +396,20 @@ export function PropertyView({
                   {/* Conditional fields based on status */}
                   {property.status === 'Sujet' ? (
                     <>
-                      <Grid item xs={12} md={4}>
+                      {/* Line 2: 7 columns */}
+                      <Grid item xs={12} md={1.5}>
                         <Typography variant="body2" color="text.secondary">Valeur d'évaluation</Typography>
                         <Typography variant="body1" fontWeight={700} fontSize="1.1rem">
                           {property.prix_vente ? formatCurrency(property.prix_vente) : 'N/A'}
                         </Typography>
                       </Grid>
-                      <Grid item xs={12} md={4}>
+                      <Grid item xs={12} md={2}>
                         <Typography variant="body2" color="text.secondary">Date effective</Typography>
                         <Typography variant="body1">
                           {property.date_vente ? formatDate(property.date_vente) : 'N/A'}
                         </Typography>
                       </Grid>
-                      <Grid item xs={12} md={2}>
+                      <Grid item xs={12} md={1.5}>
                         <Typography variant="body2" color="text.secondary">Statut</Typography>
                         <Chip
                           label={property.status || 'N/A'}
@@ -422,21 +423,30 @@ export function PropertyView({
                       </Grid>
                       <Grid item xs={12} md={2}>
                         <Typography variant="body2" color="text.secondary">Type d'évaluation</Typography>
-                        <Typography variant="body1">{property.type_evaluation || 'N/A'}</Typography>
-                      </Grid>
-                      <Grid item xs={12} md={4}>
-                        <Typography variant="body2" color="text.secondary">Type de propriété</Typography>
-                        <Typography variant="body1" fontWeight={600}>{property.type_propriete || 'N/A'}</Typography>
-                      </Grid>
-                      <Grid item xs={12} md={4}>
-                        <Typography variant="body2" color="text.secondary">Genre de propriété</Typography>
-                        <Typography variant="body1">{property.genre_propriete || 'N/A'}</Typography>
+                        <Typography variant="body1" sx={{ whiteSpace: 'nowrap' }}>{property.type_evaluation || 'N/A'}</Typography>
                       </Grid>
                       <Grid item xs={12} md={2}>
+                        <Typography variant="body2" color="text.secondary">Année construction</Typography>
+                        <Typography variant="body1">{property.annee_construction || 'N/A'}</Typography>
+                      </Grid>
+                      <Grid item xs={12} md={1.5}>
+                        <Typography variant="body2" color="text.secondary">Zonage</Typography>
+                        <Typography variant="body1">{property.zonage || 'N/A'}</Typography>
+                      </Grid>
+                      <Grid item xs={12} md={1}>
                         <Typography variant="body2" color="text.secondary">Occupancy</Typography>
                         <Typography variant="body1">{property.occupancy || 'N/A'}</Typography>
                       </Grid>
-                      {/* Show Loyer en place if occupancy is Locataire */}
+
+                      {/* Line 3: 7 columns */}
+                      <Grid item xs={12} md={1.5}>
+                        <Typography variant="body2" color="text.secondary">Type de propriété</Typography>
+                        <Typography variant="body1" fontWeight={600} sx={{ whiteSpace: 'nowrap' }}>{property.type_propriete || 'N/A'}</Typography>
+                      </Grid>
+                      <Grid item xs={12} md={2}>
+                        <Typography variant="body2" color="text.secondary">Genre de propriété</Typography>
+                        <Typography variant="body1">{property.genre_propriete || 'N/A'}</Typography>
+                      </Grid>
                       {property.occupancy === 'Locataire' && (
                         <Grid item xs={12} md={2}>
                           <Typography variant="body2" color="text.secondary">Loyer en place</Typography>
@@ -448,19 +458,20 @@ export function PropertyView({
                     </>
                   ) : (
                     <>
-                      <Grid item xs={12} md={2.5}>
+                      {/* Line 2: 7 columns */}
+                      <Grid item xs={12} md={1.5}>
                         <Typography variant="body2" color="text.secondary">Prix de vente</Typography>
                         <Typography variant="body1" fontWeight={700} fontSize="1.1rem">
                           {property.prix_vente ? formatCurrency(property.prix_vente) : 'N/A'}
                         </Typography>
                       </Grid>
-                      <Grid item xs={12} md={1.8}>
+                      <Grid item xs={12} md={2}>
                         <Typography variant="body2" color="text.secondary">Prix demandé</Typography>
                         <Typography variant="body1">
                           {property.prix_demande ? formatCurrency(property.prix_demande) : 'N/A'}
                         </Typography>
                       </Grid>
-                      <Grid item xs={12} md={2}>
+                      <Grid item xs={12} md={1.5}>
                         <Typography variant="body2" color="text.secondary">Date de vente</Typography>
                         <Typography variant="body1">
                           {property.date_vente ? formatDate(property.date_vente) : 'N/A'}
@@ -484,65 +495,67 @@ export function PropertyView({
                           }}
                         />
                       </Grid>
-                      <Grid item xs={12} md={1.8}>
-                        <Typography variant="body2" color="text.secondary">Type de propriété</Typography>
-                        <Typography variant="body1" fontWeight={600}>{property.type_propriete || 'N/A'}</Typography>
+                      <Grid item xs={12} md={1.5}>
+                        <Typography variant="body2" color="text.secondary">Année construction</Typography>
+                        <Typography variant="body1">{property.annee_construction || 'N/A'}</Typography>
                       </Grid>
-                      <Grid item xs={12} md={1.8}>
+                      <Grid item xs={12} md={1}>
+                        <Typography variant="body2" color="text.secondary">Zonage</Typography>
+                        <Typography variant="body1">{property.zonage || 'N/A'}</Typography>
+                      </Grid>
+
+                      {/* Line 3: 7 columns */}
+                      <Grid item xs={12} md={1.5}>
+                        <Typography variant="body2" color="text.secondary">Type de propriété</Typography>
+                        <Typography variant="body1" fontWeight={600} sx={{ whiteSpace: 'nowrap' }}>{property.type_propriete || 'N/A'}</Typography>
+                      </Grid>
+                      <Grid item xs={12} md={2}>
                         <Typography variant="body2" color="text.secondary">Genre de propriété</Typography>
                         <Typography variant="body1">{property.genre_propriete || 'N/A'}</Typography>
                       </Grid>
+                      {property.type_propriete === 'Condo' && (
+                        <>
+                          <Grid item xs={12} md={1.5}>
+                            <Typography variant="body2" color="text.secondary">#MLS</Typography>
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 0.5,
+                                cursor: 'pointer',
+                                '&:hover': {
+                                  bgcolor: 'action.hover',
+                                  borderRadius: 1,
+                                  px: 0.5,
+                                  ml: -0.5
+                                }
+                              }}
+                              onClick={() => {
+                                if (property.numero_mls) {
+                                  navigator.clipboard.writeText(property.numero_mls)
+                                }
+                              }}
+                              title="Click to copy"
+                            >
+                              <Typography
+                                variant="body1"
+                                fontFamily="monospace"
+                                fontWeight={700}
+                              >
+                                {property.numero_mls || 'N/A'}
+                              </Typography>
+                              {property.numero_mls && <ContentCopy sx={{ fontSize: 16, color: 'action.active' }} />}
+                            </Box>
+                          </Grid>
+                          <Grid item xs={12} md={2}>
+                            <Typography variant="body2" color="text.secondary">Frais de condo</Typography>
+                            <Typography variant="body1" fontWeight={600}>
+                              {property.frais_condo ? formatCurrency(property.frais_condo) : 'N/A'}
+                            </Typography>
+                          </Grid>
+                        </>
+                      )}
                     </>
-                  )}
-                  <Grid item xs={12} md={2}>
-                    <Typography variant="body2" color="text.secondary">Année construction</Typography>
-                    <Typography variant="body1">{property.annee_construction || 'N/A'}</Typography>
-                  </Grid>
-                  <Grid item xs={12} md={2}>
-                    <Typography variant="body2" color="text.secondary">Zonage</Typography>
-                    <Typography variant="body1">{property.zonage || 'N/A'}</Typography>
-                  </Grid>
-
-                  {/* Conditional fields for Condo */}
-                  {property.type_propriete === 'Condo' && property.numero_mls && (
-                    <Grid item xs={12} md={1.8}>
-                      <Typography variant="body2" color="text.secondary">#MLS</Typography>
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 0.5,
-                          cursor: 'pointer',
-                          '&:hover': {
-                            bgcolor: 'action.hover',
-                            borderRadius: 1,
-                            px: 0.5,
-                            ml: -0.5
-                          }
-                        }}
-                        onClick={() => {
-                          navigator.clipboard.writeText(property.numero_mls!)
-                        }}
-                        title="Click to copy"
-                      >
-                        <Typography
-                          variant="body1"
-                          fontFamily="monospace"
-                          fontWeight={700}
-                        >
-                          {property.numero_mls}
-                        </Typography>
-                        <ContentCopy sx={{ fontSize: 16, color: 'action.active' }} />
-                      </Box>
-                    </Grid>
-                  )}
-                  {property.type_propriete === 'Condo' && property.frais_condo && (
-                    <Grid item xs={12} md={1.8}>
-                      <Typography variant="body2" color="text.secondary">Frais de condo</Typography>
-                      <Typography variant="body1" fontWeight={600}>
-                        {formatCurrency(property.frais_condo)}
-                      </Typography>
-                    </Grid>
                   )}
 
                   {/* Conditional fields for multi-unit properties */}
