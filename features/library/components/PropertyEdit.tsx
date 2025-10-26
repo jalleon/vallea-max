@@ -1015,7 +1015,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                       </>
                     )}
 
-                    <Grid item xs={12} md={1.1}>
+                    <Grid item xs={12} md={1.3}>
                       <TextField
                         fullWidth
                         label="Année de construction"
