@@ -15,7 +15,7 @@ const mockProperties: Property[] = [
     province: 'QC',
     prix_vente: 450000,
     prix_demande: 475000,
-    date_vente: new Date('2024-08-15'),
+    date_vente: '2024-08-15',
     status: 'Vendu',
     type_propriete: 'Unifamiliale',
     genre_propriete: 'Détachée',
@@ -35,8 +35,8 @@ const mockProperties: Property[] = [
     source: 'Manuel',
     is_template: false,
     is_shared: true,
-    created_at: new Date('2024-08-01'),
-    updated_at: new Date('2024-08-15')
+    created_at: '2024-08-01T00:00:00Z',
+    updated_at: '2024-08-15T00:00:00Z'
   },
   {
     id: '2',
@@ -48,7 +48,7 @@ const mockProperties: Property[] = [
     province: 'QC',
     prix_vente: 320000,
     prix_demande: 335000,
-    date_vente: new Date('2024-09-10'),
+    date_vente: '2024-09-10',
     status: 'Vendu',
     type_propriete: 'Condo',
     annee_construction: 2018,
@@ -60,8 +60,8 @@ const mockProperties: Property[] = [
     media_references: [],
     is_template: false,
     is_shared: true,
-    created_at: new Date('2024-09-01'),
-    updated_at: new Date('2024-09-10')
+    created_at: '2024-09-01T00:00:00Z',
+    updated_at: '2024-09-10T00:00:00Z'
   }
 ]
 
@@ -94,8 +94,8 @@ export function useCreateProperty() {
       media_references: [],
       is_template: property.is_template || false,
       is_shared: property.is_shared !== false,
-      created_at: new Date(),
-      updated_at: new Date()
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString().toISOString()
     }
 
     setIsPending(false)
@@ -121,7 +121,7 @@ export function useUpdateProperty() {
       ...updates,
       date_vente: updates.date_vente ? new Date(updates.date_vente) : existingProperty.date_vente,
       inspection_date: updates.inspection_date ? new Date(updates.inspection_date) : existingProperty.inspection_date,
-      updated_at: new Date()
+      updated_at: new Date().toISOString()
     }
 
     setIsPending(false)
