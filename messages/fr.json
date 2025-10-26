@@ -225,6 +225,7 @@
       "cityPlaceholder": "Montréal",
       "province": "Province",
       "propertyType": "Type de propriété",
+      "roomType": "Type de pièce",
       "create": "Créer",
       "cancel": "Annuler",
       "creating": "Création en cours...",
