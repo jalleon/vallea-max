@@ -49,6 +49,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { calculateInspectionProgress, getCompletedCategories, getCategoryTranslationKey } from '@/features/inspection/utils/progress.utils'
 import { useTranslations } from 'next-intl'
 import { CheckCircle } from '@mui/icons-material'
+import { formatNumber } from '@/lib/utils/formatting'
 
 interface PropertyEditProps {
   property: Property | null
@@ -63,6 +64,21 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
   const params = useParams()
   const locale = params.locale as string
   const t = useTranslations()
+
+  // Helper functions for currency formatting
+  const formatCurrencyDisplay = (value: number | undefined): string => {
+    if (!value) return ''
+    return formatNumber(value, 0)
+  }
+
+  const parseCurrencyInput = (value: string): number | undefined => {
+    if (!value) return undefined
+    // Remove all spaces and non-numeric characters except decimal point
+    const cleaned = value.replace(/\s/g, '').replace(/[^0-9.]/g, '')
+    const parsed = parseFloat(cleaned)
+    return isNaN(parsed) ? undefined : parsed
+  }
+
   const [formData, setFormData] = useState<PropertyCreateInput>({
     adresse: '',
     ville: '',
@@ -558,11 +574,11 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                       <TextField
                         fullWidth
                         label={formData.status === 'Sujet' ? "Valeur d'évaluation" : "Prix de vente"}
-                        type="number"
-                        value={formData.prix_vente || ''}
+                        type="text"
+                        value={formatCurrencyDisplay(formData.prix_vente)}
                         onChange={(e) => handleInputChange(
                           'prix_vente',
-                          e.target.value ? parseFloat(e.target.value) : undefined
+                          parseCurrencyInput(e.target.value)
                         )}
                         variant="outlined"
                         size="small"
@@ -581,9 +597,9 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                         <TextField
                           fullWidth
                           label="Prix demandé"
-                          type="number"
-                          value={formData.prix_demande || ''}
-                          onChange={(e) => handleInputChange('prix_demande', e.target.value ? parseFloat(e.target.value) : undefined)}
+                          type="text"
+                          value={formatCurrencyDisplay(formData.prix_demande)}
+                          onChange={(e) => handleInputChange('prix_demande', parseCurrencyInput(e.target.value))}
                           variant="outlined"
                           size="small"
                           InputProps={{
