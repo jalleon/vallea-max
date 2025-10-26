@@ -38,7 +38,8 @@ import {
   Layers,
   Search as InspectionIcon,
   CheckCircle,
-  AccountBalance
+  AccountBalance,
+  ContentCopy
 } from '@mui/icons-material'
 import { Property } from '../types/property.types'
 import { formatCurrency, formatDate, formatMeasurement } from '@/lib/utils/formatting'
@@ -506,15 +507,17 @@ export function PropertyView({
                   {property.type_propriete === 'Condo' && property.numero_mls && (
                     <Grid item xs={12} md={3}>
                       <Typography variant="body2" color="text.secondary">#MLS</Typography>
-                      <Typography
-                        variant="body1"
-                        fontFamily="monospace"
+                      <Box
                         sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 0.5,
                           cursor: 'pointer',
                           '&:hover': {
                             bgcolor: 'action.hover',
                             borderRadius: 1,
-                            px: 0.5
+                            px: 0.5,
+                            ml: -0.5
                           }
                         }}
                         onClick={() => {
@@ -522,8 +525,15 @@ export function PropertyView({
                         }}
                         title="Click to copy"
                       >
-                        {property.numero_mls}
-                      </Typography>
+                        <Typography
+                          variant="body1"
+                          fontFamily="monospace"
+                          fontWeight={700}
+                        >
+                          {property.numero_mls}
+                        </Typography>
+                        <ContentCopy sx={{ fontSize: 16, color: 'action.active' }} />
+                      </Box>
                     </Grid>
                   )}
                   {property.type_propriete === 'Condo' && property.frais_condo && (
