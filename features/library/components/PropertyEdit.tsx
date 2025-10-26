@@ -1058,7 +1058,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                       />
                     </Grid>
 
-                    {/* Row 2 - Room counts */}
+                    {/* Row 2 - Room counts (all 4 fields on same line) */}
                     <Grid item xs={12} md={3}>
                       <TextField
                         fullWidth
