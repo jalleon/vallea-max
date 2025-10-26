@@ -332,6 +332,18 @@ export type Database = {
           eff_age: number | null
           type_garage: string | null
           extras: string | null
+          lot_number: string | null
+          additional_lots: Json | null
+          matricule: string | null
+          eval_municipale_annee: number | null
+          eval_municipale_terrain: number | null
+          eval_municipale_batiment: number | null
+          eval_municipale_total: number | null
+          taxes_municipales_annee: number | null
+          taxes_municipales_montant: number | null
+          taxes_scolaires_annee: number | null
+          taxes_scolaires_montant: number | null
+          zoning_usages_permis: string | null
         }
         Insert: {
           adresse: string
@@ -396,6 +408,25 @@ export type Database = {
           unit_rents?: Json | null
           type_evaluation?: string | null
           occupancy?: string | null
+          localisation?: string | null
+          type_copropriete?: string | null
+          type_batiment?: string | null
+          chrono_age?: number | null
+          eff_age?: number | null
+          type_garage?: string | null
+          extras?: string | null
+          lot_number?: string | null
+          additional_lots?: Json | null
+          matricule?: string | null
+          eval_municipale_annee?: number | null
+          eval_municipale_terrain?: number | null
+          eval_municipale_batiment?: number | null
+          eval_municipale_total?: number | null
+          taxes_municipales_annee?: number | null
+          taxes_municipales_montant?: number | null
+          taxes_scolaires_annee?: number | null
+          taxes_scolaires_montant?: number | null
+          zoning_usages_permis?: string | null
         }
         Update: {
           adresse?: string
@@ -460,6 +491,25 @@ export type Database = {
           unit_rents?: Json | null
           type_evaluation?: string | null
           occupancy?: string | null
+          localisation?: string | null
+          type_copropriete?: string | null
+          type_batiment?: string | null
+          chrono_age?: number | null
+          eff_age?: number | null
+          type_garage?: string | null
+          extras?: string | null
+          lot_number?: string | null
+          additional_lots?: Json | null
+          matricule?: string | null
+          eval_municipale_annee?: number | null
+          eval_municipale_terrain?: number | null
+          eval_municipale_batiment?: number | null
+          eval_municipale_total?: number | null
+          taxes_municipales_annee?: number | null
+          taxes_municipales_montant?: number | null
+          taxes_scolaires_annee?: number | null
+          taxes_scolaires_montant?: number | null
+          zoning_usages_permis?: string | null
         }
         Relationships: [
           {

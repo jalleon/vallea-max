@@ -41,6 +41,13 @@ export interface UnitRent {
   isOwnerOccupied?: boolean  // True if the owner lives in this unit
 }
 
+// Additional lot information
+export interface AdditionalLot {
+  id: string
+  lot_number: string
+  type_lot: 'Exclusif' | 'Commun'
+}
+
 export interface Property {
   id: string
   organization_id: string
@@ -104,6 +111,20 @@ export interface Property {
   ameliorations_hors_sol?: string
   numero_mls?: string
   floor_areas?: FloorArea[]
+
+  // Municipal data (Données municipales)
+  lot_number?: string
+  additional_lots?: AdditionalLot[]
+  matricule?: string
+  eval_municipale_annee?: number
+  eval_municipale_terrain?: number
+  eval_municipale_batiment?: number
+  eval_municipale_total?: number
+  taxes_municipales_annee?: number
+  taxes_municipales_montant?: number
+  taxes_scolaires_annee?: number
+  taxes_scolaires_montant?: number
+  zoning_usages_permis?: string
 
   // Historical
   date_vente_precedente?: Date
@@ -213,6 +234,21 @@ export interface PropertyCreateInput {
   ameliorations_hors_sol?: string
   numero_mls?: string
   floor_areas?: FloorArea[]
+
+  // Municipal data (Données municipales)
+  lot_number?: string
+  additional_lots?: AdditionalLot[]
+  matricule?: string
+  eval_municipale_annee?: number
+  eval_municipale_terrain?: number
+  eval_municipale_batiment?: number
+  eval_municipale_total?: number
+  taxes_municipales_annee?: number
+  taxes_municipales_montant?: number
+  taxes_scolaires_annee?: number
+  taxes_scolaires_montant?: number
+  zoning_usages_permis?: string
+
   source?: string
   notes?: string
   is_template?: boolean
