@@ -146,7 +146,7 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
     lot_number: '',
     additional_lots: [],
     matricule: '',
-    eval_municipale_annee: undefined,
+    eval_municipale_annee: '',
     eval_municipale_terrain: undefined,
     eval_municipale_batiment: undefined,
     eval_municipale_total: undefined,
@@ -1326,12 +1326,13 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                     <Grid item xs={12} md={1.5}>
                       <TextField
                         fullWidth
-                        label="Année"
-                        type="number"
+                        label="Date"
+                        type="date"
                         value={formData.eval_municipale_annee || ''}
-                        onChange={(e) => handleInputChange('eval_municipale_annee', e.target.value ? parseInt(e.target.value) : undefined)}
+                        onChange={(e) => handleInputChange('eval_municipale_annee', e.target.value)}
                         variant="outlined"
                         size="small"
+                        InputLabelProps={{ shrink: true }}
                       />
                     </Grid>
                     <Grid item xs={12} md={2}>

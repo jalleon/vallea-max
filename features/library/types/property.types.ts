@@ -116,7 +116,7 @@ export interface Property {
   lot_number?: string
   additional_lots?: AdditionalLot[]
   matricule?: string
-  eval_municipale_annee?: number
+  eval_municipale_annee?: string  // Changed to string for date input
   eval_municipale_terrain?: number
   eval_municipale_batiment?: number
   eval_municipale_total?: number
@@ -239,7 +239,7 @@ export interface PropertyCreateInput {
   lot_number?: string
   additional_lots?: AdditionalLot[]
   matricule?: string
-  eval_municipale_annee?: number
+  eval_municipale_annee?: string  // Changed to string for date input
   eval_municipale_terrain?: number
   eval_municipale_batiment?: number
   eval_municipale_total?: number

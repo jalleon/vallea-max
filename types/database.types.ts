@@ -335,7 +335,7 @@ export type Database = {
           lot_number: string | null
           additional_lots: Json | null
           matricule: string | null
-          eval_municipale_annee: number | null
+          eval_municipale_annee: string | null
           eval_municipale_terrain: number | null
           eval_municipale_batiment: number | null
           eval_municipale_total: number | null
