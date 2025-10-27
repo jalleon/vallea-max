@@ -39,7 +39,8 @@ import {
   Search as InspectionIcon,
   CheckCircle,
   AccountBalance,
-  ContentCopy
+  ContentCopy,
+  Map
 } from '@mui/icons-material'
 import { Property } from '../types/property.types'
 import { formatCurrency, formatDate, formatMeasurement } from '@/lib/utils/formatting'
@@ -249,9 +250,36 @@ export function PropertyView({
           <Box display="flex" alignItems="center" gap={2}>
             <Home sx={{ fontSize: 32 }} />
             <Box>
-              <Typography variant="h4" fontWeight={700} sx={{ color: 'white' }}>
-                {property.adresse}
-              </Typography>
+              <Box display="flex" alignItems="center" gap={1}>
+                <Typography
+                  variant="h4"
+                  fontWeight={700}
+                  component="a"
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${property.adresse}, ${property.ville || ''}, ${property.code_postal || ''}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{
+                    color: 'white',
+                    textDecoration: 'none',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      textDecoration: 'underline'
+                    }
+                  }}
+                >
+                  {property.adresse}
+                </Typography>
+                <IconButton
+                  size="small"
+                  component="a"
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${property.adresse}, ${property.ville || ''}, ${property.code_postal || ''}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{ color: 'white', opacity: 0.8, '&:hover': { opacity: 1 } }}
+                >
+                  <Map fontSize="small" />
+                </IconButton>
+              </Box>
               <Typography variant="h6" sx={{ opacity: 0.7, color: 'rgba(255, 255, 255, 0.8)', fontWeight: 400 }}>
                 {[property.ville, property.municipalite].filter(Boolean).join(', ')}
               </Typography>
@@ -304,20 +332,29 @@ export function PropertyView({
         </Box>
       </DialogTitle>
       <DialogContent sx={{ p: 0, bgcolor: '#f8fafc' }}>
-        {/* Price Banner */}
-        <Box
-          sx={{
-            background: `linear-gradient(135deg, ${theme.palette.success.main}20 0%, ${theme.palette.success.main}10 100%)`,
-            p: 3,
-            borderBottom: `1px solid ${theme.palette.divider}`
-          }}
-        >
-          <Grid container spacing={3} alignItems="center">
-            <Grid item xs={12} md={4}>
+        {/* Two-column layout: Price Banner + Google Maps */}
+        <Box sx={{
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          display: 'flex',
+          background: `linear-gradient(135deg, ${theme.palette.success.main}20 0%, ${theme.palette.success.main}10 100%)`
+        }}>
+          {/* Left Column - Price Banner */}
+          <Box
+            sx={{
+              p: 2.5,
+              flex: '0 0 50%',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              gap: 2
+            }}
+          >
+            {/* Line 1: Sale Price and Sale Date */}
+            <Box display="flex" alignItems="center" gap={4}>
               <Box display="flex" alignItems="center" gap={1}>
                 <AttachMoney sx={{ color: theme.palette.success.main }} />
                 <Box>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
                     {property.status === 'Sujet' ? "Valeur d'évaluation" : 'Prix de vente'}
                   </Typography>
                   <Typography variant="h4" fontWeight={700} color="success.main">
@@ -325,12 +362,10 @@ export function PropertyView({
                   </Typography>
                 </Box>
               </Box>
-            </Grid>
-            <Grid item xs={12} md={4}>
               <Box display="flex" alignItems="center" gap={1}>
                 <CalendarToday sx={{ color: theme.palette.primary.main }} />
                 <Box>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
                     {property.status === 'Sujet' ? 'Date effective' : 'Date de vente'}
                   </Typography>
                   <Typography variant="h6" fontWeight={600}>
@@ -338,22 +373,46 @@ export function PropertyView({
                   </Typography>
                 </Box>
               </Box>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Box display="flex" alignItems="center" gap={1}>
-                <Straighten sx={{ color: theme.palette.info.main }} />
-                <Box>
-                  <Typography variant="body2" color="text.secondary">Superficie habitable</Typography>
-                  <Typography variant="h6" fontWeight={600}>
-                    {property.superficie_habitable_m2 ?
-                      formatMeasurement(property.superficie_habitable_m2, 'area', 'm2')
-                      : 'N/A'
-                    }
-                  </Typography>
-                </Box>
+            </Box>
+
+            {/* Line 2: Superficie habitable */}
+            <Box display="flex" alignItems="center" gap={1}>
+              <Straighten sx={{ color: theme.palette.info.main }} />
+              <Box>
+                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                  Superficie habitable
+                </Typography>
+                <Typography variant="h6" fontWeight={600}>
+                  {property.superficie_habitable_m2 ?
+                    formatMeasurement(property.superficie_habitable_m2, 'area', 'm2')
+                    : 'N/A'
+                  }
+                </Typography>
               </Box>
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
+
+          {/* Right Column - Google Maps */}
+          <Box
+            sx={{
+              flex: '0 0 50%',
+              height: 160,
+              pr: 3,
+              display: 'flex',
+              alignItems: 'center',
+              position: 'relative'
+            }}
+          >
+            <iframe
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              loading="lazy"
+              allowFullScreen
+              referrerPolicy="no-referrer-when-downgrade"
+              src={`https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&q=${encodeURIComponent(`${property.adresse}, ${property.ville || ''}, ${property.code_postal || ''}`)}`}
+            />
+          </Box>
         </Box>
 
         <Box sx={{ p: 3 }}>
