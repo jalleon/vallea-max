@@ -411,7 +411,7 @@ export function PropertyView({
               loading="lazy"
               allowFullScreen
               referrerPolicy="no-referrer-when-downgrade"
-              src={`https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&q=${encodeURIComponent(`${property.adresse}, ${property.ville || ''}, ${property.code_postal || ''}`)}`}
+              src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyDADvWmeRywpjT0oP_Fa8WrxV0Lnt-bEaw&q=${encodeURIComponent(`${property.adresse}, ${property.ville || ''}, ${property.code_postal || ''}`)}`}
             />
           </Box>
         </Box>
