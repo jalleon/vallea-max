@@ -82,6 +82,24 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
     return isNaN(parsed) ? undefined : parsed
   }
 
+  // Excel-style formula evaluator
+  const evaluateFormula = (input: string): number | undefined => {
+    if (!input || !input.toString().startsWith('=')) return undefined
+
+    try {
+      const formula = input.substring(1).trim()
+      // Security: Only allow numbers, basic operators, parentheses, and decimal points
+      if (!/^[\d+\-*/().\s]+$/.test(formula)) {
+        return undefined
+      }
+      // Evaluate the expression
+      const result = Function(`'use strict'; return (${formula})`)()
+      return isNaN(result) ? undefined : parseFloat(result)
+    } catch (error) {
+      return undefined
+    }
+  }
+
   // Helper function to format Quebec lot number: # ### ###
   const formatLotNumber = (value: string): string => {
     if (formData.province !== 'QC') return value
@@ -171,9 +189,17 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
     area_m2: 0,
     area_ft2: 0
   })
+  const [newFloorRawInputs, setNewFloorRawInputs] = useState({ area_m2: '', area_ft2: '' })
   const [inspectionConfirmOpen, setInspectionConfirmOpen] = useState(false)
   const [unitRents, setUnitRents] = useState<UnitRent[]>([])
   const [validationError, setValidationError] = useState<string>('')
+
+  // Store raw input text for formula-enabled fields
+  const [rawInputs, setRawInputs] = useState<Record<string, string>>({})
+
+  const updateRawInput = (field: string, value: string) => {
+    setRawInputs(prev => ({ ...prev, [field]: value }))
+  }
 
   // Helper to get number of units based on property type
   const getUnitCount = (type?: PropertyType): number => {
@@ -425,6 +451,8 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
         area_m2: 0,
         area_ft2: 0
       })
+      // Clear raw inputs
+      setNewFloorRawInputs({ area_m2: '', area_ft2: '' })
     }
   }
 
@@ -1586,10 +1614,13 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       <TextField
                         fullWidth
                         label="Superficie terrain (m²)"
-                        type="number"
-                        value={formData.superficie_terrain_m2 || ''}
+                        type="text"
+                        value={rawInputs.superficie_terrain_m2 ?? (formData.superficie_terrain_m2?.toString() || '')}
                         onChange={(e) => {
-                          const val = e.target.value ? parseFloat(e.target.value) : undefined
+                          const input = e.target.value
+                          updateRawInput('superficie_terrain_m2', input)
+                          const formulaResult = evaluateFormula(input)
+                          const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
                           handleInputChange('superficie_terrain_m2', val)
                           if (val) {
                             handleInputChange('superficie_terrain_pi2', parseFloat((val * 10.764).toFixed(2)))
@@ -1597,17 +1628,27 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                             handleInputChange('superficie_terrain_pi2', undefined)
                           }
                         }}
+                        onBlur={() => {
+                          // Convert formula to result on blur
+                          if (formData.superficie_terrain_m2 !== undefined) {
+                            updateRawInput('superficie_terrain_m2', formData.superficie_terrain_m2.toString())
+                          }
+                        }}
                         size="small"
+                        placeholder="Ex: 100 ou =25+25+50"
                       />
                     </Grid>
                     <Grid item xs={6}>
                       <TextField
                         fullWidth
                         label="Superficie terrain (pi²)"
-                        type="number"
-                        value={formData.superficie_terrain_pi2 || ''}
+                        type="text"
+                        value={rawInputs.superficie_terrain_pi2 ?? (formData.superficie_terrain_pi2?.toString() || '')}
                         onChange={(e) => {
-                          const val = e.target.value ? parseFloat(e.target.value) : undefined
+                          const input = e.target.value
+                          updateRawInput('superficie_terrain_pi2', input)
+                          const formulaResult = evaluateFormula(input)
+                          const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
                           handleInputChange('superficie_terrain_pi2', val)
                           if (val) {
                             handleInputChange('superficie_terrain_m2', parseFloat((val / 10.764).toFixed(2)))
@@ -1615,7 +1656,14 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                             handleInputChange('superficie_terrain_m2', undefined)
                           }
                         }}
+                        onBlur={() => {
+                          // Convert formula to result on blur
+                          if (formData.superficie_terrain_pi2 !== undefined) {
+                            updateRawInput('superficie_terrain_pi2', formData.superficie_terrain_pi2.toString())
+                          }
+                        }}
                         size="small"
+                        placeholder="Ex: 1000 ou =250+250+500"
                       />
                     </Grid>
                   </Grid>
@@ -1626,11 +1674,13 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       <TextField
                         fullWidth
                         label="Frontage (m)"
-                        type="number"
-                        inputProps={{ step: 0.01 }}
-                        value={formData.frontage_m2 || ''}
+                        type="text"
+                        value={rawInputs.frontage_m2 ?? (formData.frontage_m2?.toString() || '')}
                         onChange={(e) => {
-                          const val = e.target.value ? parseFloat(e.target.value) : undefined
+                          const input = e.target.value
+                          updateRawInput('frontage_m2', input)
+                          const formulaResult = evaluateFormula(input)
+                          const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
                           handleInputChange('frontage_m2', val)
                           if (val) {
                             handleInputChange('frontage_pi2', parseFloat((val * 3.28084).toFixed(2)))
@@ -1638,18 +1688,26 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                             handleInputChange('frontage_pi2', undefined)
                           }
                         }}
+                        onBlur={() => {
+                          if (formData.frontage_m2 !== undefined) {
+                            updateRawInput('frontage_m2', formData.frontage_m2.toString())
+                          }
+                        }}
                         size="small"
+                        placeholder="Ex: =10+5"
                       />
                     </Grid>
                     <Grid item xs={3}>
                       <TextField
                         fullWidth
                         label="Frontage (pi)"
-                        type="number"
-                        inputProps={{ step: 0.01 }}
-                        value={formData.frontage_pi2 || ''}
+                        type="text"
+                        value={rawInputs.frontage_pi2 ?? (formData.frontage_pi2?.toString() || '')}
                         onChange={(e) => {
-                          const val = e.target.value ? parseFloat(e.target.value) : undefined
+                          const input = e.target.value
+                          updateRawInput('frontage_pi2', input)
+                          const formulaResult = evaluateFormula(input)
+                          const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
                           handleInputChange('frontage_pi2', val)
                           if (val) {
                             handleInputChange('frontage_m2', parseFloat((val / 3.28084).toFixed(2)))
@@ -1657,18 +1715,26 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                             handleInputChange('frontage_m2', undefined)
                           }
                         }}
+                        onBlur={() => {
+                          if (formData.frontage_pi2 !== undefined) {
+                            updateRawInput('frontage_pi2', formData.frontage_pi2.toString())
+                          }
+                        }}
                         size="small"
+                        placeholder="Ex: =30+15"
                       />
                     </Grid>
                     <Grid item xs={3}>
                       <TextField
                         fullWidth
                         label="Profondeur (m)"
-                        type="number"
-                        inputProps={{ step: 0.01 }}
-                        value={formData.profondeur_m2 || ''}
+                        type="text"
+                        value={rawInputs.profondeur_m2 ?? (formData.profondeur_m2?.toString() || '')}
                         onChange={(e) => {
-                          const val = e.target.value ? parseFloat(e.target.value) : undefined
+                          const input = e.target.value
+                          updateRawInput('profondeur_m2', input)
+                          const formulaResult = evaluateFormula(input)
+                          const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
                           handleInputChange('profondeur_m2', val)
                           if (val) {
                             handleInputChange('profondeur_pi2', parseFloat((val * 3.28084).toFixed(2)))
@@ -1676,18 +1742,26 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                             handleInputChange('profondeur_pi2', undefined)
                           }
                         }}
+                        onBlur={() => {
+                          if (formData.profondeur_m2 !== undefined) {
+                            updateRawInput('profondeur_m2', formData.profondeur_m2.toString())
+                          }
+                        }}
                         size="small"
+                        placeholder="Ex: =20+10"
                       />
                     </Grid>
                     <Grid item xs={3}>
                       <TextField
                         fullWidth
                         label="Profondeur (pi)"
-                        type="number"
-                        inputProps={{ step: 0.01 }}
-                        value={formData.profondeur_pi2 || ''}
+                        type="text"
+                        value={rawInputs.profondeur_pi2 ?? (formData.profondeur_pi2?.toString() || '')}
                         onChange={(e) => {
-                          const val = e.target.value ? parseFloat(e.target.value) : undefined
+                          const input = e.target.value
+                          updateRawInput('profondeur_pi2', input)
+                          const formulaResult = evaluateFormula(input)
+                          const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
                           handleInputChange('profondeur_pi2', val)
                           if (val) {
                             handleInputChange('profondeur_m2', parseFloat((val / 3.28084).toFixed(2)))
@@ -1695,7 +1769,13 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                             handleInputChange('profondeur_m2', undefined)
                           }
                         }}
+                        onBlur={() => {
+                          if (formData.profondeur_pi2 !== undefined) {
+                            updateRawInput('profondeur_pi2', formData.profondeur_pi2.toString())
+                          }
+                        }}
                         size="small"
+                        placeholder="Ex: =60+30"
                       />
                     </Grid>
                   </Grid>
@@ -1706,11 +1786,13 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       <TextField
                         fullWidth
                         label="Périmètre du bâtiment (m)"
-                        type="number"
-                        inputProps={{ step: 0.01 }}
-                        value={formData.perimetre_batiment_m2 || ''}
+                        type="text"
+                        value={rawInputs.perimetre_batiment_m2 ?? (formData.perimetre_batiment_m2?.toString() || '')}
                         onChange={(e) => {
-                          const val = e.target.value ? parseFloat(e.target.value) : undefined
+                          const input = e.target.value
+                          updateRawInput('perimetre_batiment_m2', input)
+                          const formulaResult = evaluateFormula(input)
+                          const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
                           handleInputChange('perimetre_batiment_m2', val)
                           if (val) {
                             handleInputChange('perimetre_batiment_pi2', parseFloat((val * 3.28084).toFixed(2)))
@@ -1718,18 +1800,26 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                             handleInputChange('perimetre_batiment_pi2', undefined)
                           }
                         }}
+                        onBlur={() => {
+                          if (formData.perimetre_batiment_m2 !== undefined) {
+                            updateRawInput('perimetre_batiment_m2', formData.perimetre_batiment_m2.toString())
+                          }
+                        }}
                         size="small"
+                        placeholder="Ex: =10+15+10+15"
                       />
                     </Grid>
                     <Grid item xs={6}>
                       <TextField
                         fullWidth
                         label="Périmètre du bâtiment (pi)"
-                        type="number"
-                        inputProps={{ step: 0.01 }}
-                        value={formData.perimetre_batiment_pi2 || ''}
+                        type="text"
+                        value={rawInputs.perimetre_batiment_pi2 ?? (formData.perimetre_batiment_pi2?.toString() || '')}
                         onChange={(e) => {
-                          const val = e.target.value ? parseFloat(e.target.value) : undefined
+                          const input = e.target.value
+                          updateRawInput('perimetre_batiment_pi2', input)
+                          const formulaResult = evaluateFormula(input)
+                          const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
                           handleInputChange('perimetre_batiment_pi2', val)
                           if (val) {
                             handleInputChange('perimetre_batiment_m2', parseFloat((val / 3.28084).toFixed(2)))
@@ -1737,7 +1827,13 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                             handleInputChange('perimetre_batiment_m2', undefined)
                           }
                         }}
+                        onBlur={() => {
+                          if (formData.perimetre_batiment_pi2 !== undefined) {
+                            updateRawInput('perimetre_batiment_pi2', formData.perimetre_batiment_pi2.toString())
+                          }
+                        }}
                         size="small"
+                        placeholder="Ex: =30+45+30+45"
                       />
                     </Grid>
                   </Grid>
@@ -1782,11 +1878,24 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         <TextField
                           fullWidth
                           label="Superficie (m²)"
-                          type="number"
-                          value={newFloor.area_m2 || ''}
-                          onChange={(e) => handleNewFloorAreaChange('area_m2', parseFloat(e.target.value) || 0)}
+                          type="text"
+                          value={newFloorRawInputs.area_m2 || (newFloor.area_m2 ? newFloor.area_m2.toString() : '')}
+                          onChange={(e) => {
+                            const input = e.target.value
+                            setNewFloorRawInputs(prev => ({ ...prev, area_m2: input }))
+                            const formulaResult = evaluateFormula(input)
+                            const val = formulaResult !== undefined ? formulaResult : (parseFloat(input) || 0)
+                            handleNewFloorAreaChange('area_m2', val)
+                          }}
+                          onBlur={() => {
+                            // Convert formula to result on blur
+                            if (newFloor.area_m2) {
+                              setNewFloorRawInputs(prev => ({ ...prev, area_m2: newFloor.area_m2.toString() }))
+                            }
+                          }}
                           variant="outlined"
                           size="small"
+                          placeholder="Ex: =10*8"
                           InputProps={{
                             startAdornment: (
                               <InputAdornment position="start">
@@ -1800,11 +1909,24 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         <TextField
                           fullWidth
                           label="Superficie (pi²)"
-                          type="number"
-                          value={newFloor.area_ft2 || ''}
-                          onChange={(e) => handleNewFloorAreaChange('area_ft2', parseFloat(e.target.value) || 0)}
+                          type="text"
+                          value={newFloorRawInputs.area_ft2 || (newFloor.area_ft2 ? newFloor.area_ft2.toString() : '')}
+                          onChange={(e) => {
+                            const input = e.target.value
+                            setNewFloorRawInputs(prev => ({ ...prev, area_ft2: input }))
+                            const formulaResult = evaluateFormula(input)
+                            const val = formulaResult !== undefined ? formulaResult : (parseFloat(input) || 0)
+                            handleNewFloorAreaChange('area_ft2', val)
+                          }}
+                          onBlur={() => {
+                            // Convert formula to result on blur
+                            if (newFloor.area_ft2) {
+                              setNewFloorRawInputs(prev => ({ ...prev, area_ft2: newFloor.area_ft2.toString() }))
+                            }
+                          }}
                           variant="outlined"
                           size="small"
+                          placeholder="Ex: =30*25"
                           InputProps={{
                             startAdornment: (
                               <InputAdornment position="start">
