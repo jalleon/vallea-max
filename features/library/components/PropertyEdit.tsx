@@ -42,7 +42,8 @@ import {
   SquareFoot,
   AttachMoney,
   Search as InspectionIcon,
-  AccountBalance
+  AccountBalance,
+  Visibility
 } from '@mui/icons-material'
 import { Property, PropertyCreateInput, PropertyType, PropertyStatus, BasementType, ParkingType, FloorType, FloorArea, OccupancyType, EvaluationType, UnitRent, AdditionalLot } from '../types/property.types'
 import { v4 as uuidv4 } from 'uuid'
@@ -57,9 +58,10 @@ interface PropertyEditProps {
   open: boolean
   onClose: () => void
   onSave: (property: PropertyCreateInput) => Promise<void>
+  onSaveAndView?: (property: PropertyCreateInput) => Promise<void>
 }
 
-export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditProps) {
+export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }: PropertyEditProps) {
   const theme = useTheme()
   const router = useRouter()
   const params = useParams()
@@ -511,6 +513,49 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
       })
 
       await onSave(sanitizedData)
+      onClose()
+    } catch (error) {
+      console.error('Error saving property:', error)
+    }
+  }
+
+  const handleSaveAndView = async () => {
+    try {
+      // Validate required fields
+      if (!formData.adresse || formData.adresse.trim() === '') {
+        setValidationError('L\'adresse est obligatoire')
+        return
+      }
+
+      if (!formData.ville || formData.ville.trim() === '') {
+        setValidationError('La ville est obligatoire')
+        return
+      }
+
+      // Clear any previous validation errors
+      setValidationError('')
+
+      // Sanitize data: convert empty strings to null for all fields
+      const sanitizedData: any = { ...formData }
+
+      // Note: valeur_evaluation and date_effective are UI-only fields that map to prix_vente and date_vente
+      delete sanitizedData.valeur_evaluation
+      delete sanitizedData.date_effective
+
+      // Convert empty strings to null for all fields to avoid database type errors
+      Object.keys(sanitizedData).forEach(key => {
+        if (sanitizedData[key] === '') {
+          sanitizedData[key] = null
+        }
+      })
+
+      // Use the onSaveAndView callback if provided, otherwise just save
+      if (onSaveAndView) {
+        await onSaveAndView(sanitizedData)
+      } else {
+        await onSave(sanitizedData)
+      }
+
       onClose()
     } catch (error) {
       console.error('Error saving property:', error)
@@ -2092,6 +2137,17 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Annuler</Button>
+        <Button
+          onClick={handleSaveAndView}
+          variant="contained"
+          startIcon={<Visibility />}
+          sx={{
+            bgcolor: '#9C27B0',
+            '&:hover': { bgcolor: '#7B1FA2' }
+          }}
+        >
+          Visionner
+        </Button>
         <Button onClick={handleSave} variant="contained" color="primary">
           Sauvegarder
         </Button>

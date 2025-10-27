@@ -1140,6 +1140,14 @@ export default function LibraryPage() {
             setIsNewProperty(false)
           }}
           onSave={handleSave}
+          onSaveAndView={async (propertyData) => {
+            await handleSave(propertyData)
+            // Find the saved property and open it in view mode
+            const savedProperty = editProperty || properties.find(p => p.adresse === propertyData.adresse)
+            if (savedProperty) {
+              setViewProperty(savedProperty)
+            }
+          }}
         />
 
         {/* Duplicate Address Detection Dialog */}
