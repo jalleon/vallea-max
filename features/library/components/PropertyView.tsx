@@ -1,5 +1,6 @@
 'use client'
 
+// Google Maps integration with API key from environment
 import { useEffect } from 'react'
 import {
   Dialog,
