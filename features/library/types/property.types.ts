@@ -44,8 +44,10 @@ export interface UnitRent {
 // Additional lot information
 export interface AdditionalLot {
   id: string
+  unit_number?: string
   lot_number: string
   type_lot: 'Exclusif' | 'Commun'
+  matricule?: string
 }
 
 export interface Property {

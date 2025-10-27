@@ -951,7 +951,9 @@ export function PropertyView({
                         {property.additional_lots.map((lot, index) => (
                           <Box key={index} sx={{ p: 1, bgcolor: 'rgba(0,0,0,0.02)', borderRadius: 1 }}>
                             <Typography variant="body2" sx={{ color: '#1565C0' }}>
+                              {lot.unit_number && <><strong>Unité:</strong> {lot.unit_number} • </>}
                               <strong>Lot:</strong> {formatLotNumber(lot.lot_number)} • <strong>Type:</strong> {lot.type_lot}
+                              {lot.matricule && <> • <strong>Matricule:</strong> {lot.matricule}</>}
                             </Typography>
                           </Box>
                         ))}

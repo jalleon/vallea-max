@@ -1275,6 +1275,16 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                     {additionalLots.map((lot) => (
                       <Grid item xs={12} key={lot.id}>
                         <Grid container spacing={2} alignItems="center">
+                          <Grid item xs={12} md={1}>
+                            <TextField
+                              fullWidth
+                              label="Unité"
+                              value={lot.unit_number || ''}
+                              onChange={(e) => updateAdditionalLot(lot.id, 'unit_number', e.target.value)}
+                              variant="outlined"
+                              size="small"
+                            />
+                          </Grid>
                           <Grid item xs={12} md={3}>
                             <TextField
                               fullWidth
@@ -1301,6 +1311,16 @@ export function PropertyEdit({ property, open, onClose, onSave }: PropertyEditPr
                                 <MenuItem value="Commun">Commun</MenuItem>
                               </Select>
                             </FormControl>
+                          </Grid>
+                          <Grid item xs={12} md={4}>
+                            <TextField
+                              fullWidth
+                              label="Matricule"
+                              value={lot.matricule || ''}
+                              onChange={(e) => updateAdditionalLot(lot.id, 'matricule', e.target.value)}
+                              variant="outlined"
+                              size="small"
+                            />
                           </Grid>
                           <Grid item xs={12} md={1}>
                             <IconButton onClick={() => removeAdditionalLot(lot.id)} size="small" color="error">
