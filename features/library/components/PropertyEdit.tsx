@@ -1615,23 +1615,24 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label="Superficie terrain (m²)"
                         type="text"
-                        value={rawInputs.superficie_terrain_m2 ?? (formData.superficie_terrain_m2?.toString() || '')}
+                        value={rawInputs.superficie_terrain_m2 ?? (formData.superficie_terrain_m2?.toFixed(2) || '')}
                         onChange={(e) => {
                           const input = e.target.value
                           updateRawInput('superficie_terrain_m2', input)
                           const formulaResult = evaluateFormula(input)
                           const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
                           handleInputChange('superficie_terrain_m2', val)
-                          if (val) {
-                            handleInputChange('superficie_terrain_pi2', parseFloat((val * 10.764).toFixed(2)))
+                          if (val !== undefined && !isNaN(val)) {
+                            const converted = parseFloat((val * 10.764).toFixed(2))
+                            handleInputChange('superficie_terrain_pi2', converted)
+                            setRawInputs(prev => ({ ...prev, superficie_terrain_pi2: '' }))
                           } else {
                             handleInputChange('superficie_terrain_pi2', undefined)
                           }
                         }}
                         onBlur={() => {
-                          // Convert formula to result on blur
                           if (formData.superficie_terrain_m2 !== undefined) {
-                            updateRawInput('superficie_terrain_m2', formData.superficie_terrain_m2.toString())
+                            updateRawInput('superficie_terrain_m2', formData.superficie_terrain_m2.toFixed(2))
                           }
                         }}
                         size="small"
@@ -1643,23 +1644,24 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label="Superficie terrain (pi²)"
                         type="text"
-                        value={rawInputs.superficie_terrain_pi2 ?? (formData.superficie_terrain_pi2?.toString() || '')}
+                        value={rawInputs.superficie_terrain_pi2 ?? (formData.superficie_terrain_pi2?.toFixed(2) || '')}
                         onChange={(e) => {
                           const input = e.target.value
                           updateRawInput('superficie_terrain_pi2', input)
                           const formulaResult = evaluateFormula(input)
                           const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
                           handleInputChange('superficie_terrain_pi2', val)
-                          if (val) {
-                            handleInputChange('superficie_terrain_m2', parseFloat((val / 10.764).toFixed(2)))
+                          if (val !== undefined && !isNaN(val)) {
+                            const converted = parseFloat((val / 10.764).toFixed(2))
+                            handleInputChange('superficie_terrain_m2', converted)
+                            setRawInputs(prev => ({ ...prev, superficie_terrain_m2: '' }))
                           } else {
                             handleInputChange('superficie_terrain_m2', undefined)
                           }
                         }}
                         onBlur={() => {
-                          // Convert formula to result on blur
                           if (formData.superficie_terrain_pi2 !== undefined) {
-                            updateRawInput('superficie_terrain_pi2', formData.superficie_terrain_pi2.toString())
+                            updateRawInput('superficie_terrain_pi2', formData.superficie_terrain_pi2.toFixed(2))
                           }
                         }}
                         size="small"
@@ -1675,22 +1677,24 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label="Frontage (m)"
                         type="text"
-                        value={rawInputs.frontage_m2 ?? (formData.frontage_m2?.toString() || '')}
+                        value={rawInputs.frontage_m2 ?? (formData.frontage_m2?.toFixed(2) || '')}
                         onChange={(e) => {
                           const input = e.target.value
                           updateRawInput('frontage_m2', input)
                           const formulaResult = evaluateFormula(input)
                           const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
                           handleInputChange('frontage_m2', val)
-                          if (val) {
-                            handleInputChange('frontage_pi2', parseFloat((val * 3.28084).toFixed(2)))
+                          if (val !== undefined && !isNaN(val)) {
+                            const converted = parseFloat((val * 3.28084).toFixed(2))
+                            handleInputChange('frontage_pi2', converted)
+                            setRawInputs(prev => ({ ...prev, frontage_pi2: '' }))
                           } else {
                             handleInputChange('frontage_pi2', undefined)
                           }
                         }}
                         onBlur={() => {
                           if (formData.frontage_m2 !== undefined) {
-                            updateRawInput('frontage_m2', formData.frontage_m2.toString())
+                            updateRawInput('frontage_m2', formData.frontage_m2.toFixed(2))
                           }
                         }}
                         size="small"
@@ -1702,22 +1706,24 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label="Frontage (pi)"
                         type="text"
-                        value={rawInputs.frontage_pi2 ?? (formData.frontage_pi2?.toString() || '')}
+                        value={rawInputs.frontage_pi2 ?? (formData.frontage_pi2?.toFixed(2) || '')}
                         onChange={(e) => {
                           const input = e.target.value
                           updateRawInput('frontage_pi2', input)
                           const formulaResult = evaluateFormula(input)
                           const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
                           handleInputChange('frontage_pi2', val)
-                          if (val) {
-                            handleInputChange('frontage_m2', parseFloat((val / 3.28084).toFixed(2)))
+                          if (val !== undefined && !isNaN(val)) {
+                            const converted = parseFloat((val / 3.28084).toFixed(2))
+                            handleInputChange('frontage_m2', converted)
+                            setRawInputs(prev => ({ ...prev, frontage_m2: '' }))
                           } else {
                             handleInputChange('frontage_m2', undefined)
                           }
                         }}
                         onBlur={() => {
                           if (formData.frontage_pi2 !== undefined) {
-                            updateRawInput('frontage_pi2', formData.frontage_pi2.toString())
+                            updateRawInput('frontage_pi2', formData.frontage_pi2.toFixed(2))
                           }
                         }}
                         size="small"
@@ -1729,22 +1735,24 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label="Profondeur (m)"
                         type="text"
-                        value={rawInputs.profondeur_m2 ?? (formData.profondeur_m2?.toString() || '')}
+                        value={rawInputs.profondeur_m2 ?? (formData.profondeur_m2?.toFixed(2) || '')}
                         onChange={(e) => {
                           const input = e.target.value
                           updateRawInput('profondeur_m2', input)
                           const formulaResult = evaluateFormula(input)
                           const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
                           handleInputChange('profondeur_m2', val)
-                          if (val) {
-                            handleInputChange('profondeur_pi2', parseFloat((val * 3.28084).toFixed(2)))
+                          if (val !== undefined && !isNaN(val)) {
+                            const converted = parseFloat((val * 3.28084).toFixed(2))
+                            handleInputChange('profondeur_pi2', converted)
+                            setRawInputs(prev => ({ ...prev, profondeur_pi2: '' }))
                           } else {
                             handleInputChange('profondeur_pi2', undefined)
                           }
                         }}
                         onBlur={() => {
                           if (formData.profondeur_m2 !== undefined) {
-                            updateRawInput('profondeur_m2', formData.profondeur_m2.toString())
+                            updateRawInput('profondeur_m2', formData.profondeur_m2.toFixed(2))
                           }
                         }}
                         size="small"
@@ -1756,22 +1764,24 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label="Profondeur (pi)"
                         type="text"
-                        value={rawInputs.profondeur_pi2 ?? (formData.profondeur_pi2?.toString() || '')}
+                        value={rawInputs.profondeur_pi2 ?? (formData.profondeur_pi2?.toFixed(2) || '')}
                         onChange={(e) => {
                           const input = e.target.value
                           updateRawInput('profondeur_pi2', input)
                           const formulaResult = evaluateFormula(input)
                           const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
                           handleInputChange('profondeur_pi2', val)
-                          if (val) {
-                            handleInputChange('profondeur_m2', parseFloat((val / 3.28084).toFixed(2)))
+                          if (val !== undefined && !isNaN(val)) {
+                            const converted = parseFloat((val / 3.28084).toFixed(2))
+                            handleInputChange('profondeur_m2', converted)
+                            setRawInputs(prev => ({ ...prev, profondeur_m2: '' }))
                           } else {
                             handleInputChange('profondeur_m2', undefined)
                           }
                         }}
                         onBlur={() => {
                           if (formData.profondeur_pi2 !== undefined) {
-                            updateRawInput('profondeur_pi2', formData.profondeur_pi2.toString())
+                            updateRawInput('profondeur_pi2', formData.profondeur_pi2.toFixed(2))
                           }
                         }}
                         size="small"
@@ -1787,22 +1797,24 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label="Périmètre du bâtiment (m)"
                         type="text"
-                        value={rawInputs.perimetre_batiment_m2 ?? (formData.perimetre_batiment_m2?.toString() || '')}
+                        value={rawInputs.perimetre_batiment_m2 ?? (formData.perimetre_batiment_m2?.toFixed(2) || '')}
                         onChange={(e) => {
                           const input = e.target.value
                           updateRawInput('perimetre_batiment_m2', input)
                           const formulaResult = evaluateFormula(input)
                           const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
                           handleInputChange('perimetre_batiment_m2', val)
-                          if (val) {
-                            handleInputChange('perimetre_batiment_pi2', parseFloat((val * 3.28084).toFixed(2)))
+                          if (val !== undefined && !isNaN(val)) {
+                            const converted = parseFloat((val * 3.28084).toFixed(2))
+                            handleInputChange('perimetre_batiment_pi2', converted)
+                            setRawInputs(prev => ({ ...prev, perimetre_batiment_pi2: '' }))
                           } else {
                             handleInputChange('perimetre_batiment_pi2', undefined)
                           }
                         }}
                         onBlur={() => {
                           if (formData.perimetre_batiment_m2 !== undefined) {
-                            updateRawInput('perimetre_batiment_m2', formData.perimetre_batiment_m2.toString())
+                            updateRawInput('perimetre_batiment_m2', formData.perimetre_batiment_m2.toFixed(2))
                           }
                         }}
                         size="small"
@@ -1814,22 +1826,24 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label="Périmètre du bâtiment (pi)"
                         type="text"
-                        value={rawInputs.perimetre_batiment_pi2 ?? (formData.perimetre_batiment_pi2?.toString() || '')}
+                        value={rawInputs.perimetre_batiment_pi2 ?? (formData.perimetre_batiment_pi2?.toFixed(2) || '')}
                         onChange={(e) => {
                           const input = e.target.value
                           updateRawInput('perimetre_batiment_pi2', input)
                           const formulaResult = evaluateFormula(input)
                           const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
                           handleInputChange('perimetre_batiment_pi2', val)
-                          if (val) {
-                            handleInputChange('perimetre_batiment_m2', parseFloat((val / 3.28084).toFixed(2)))
+                          if (val !== undefined && !isNaN(val)) {
+                            const converted = parseFloat((val / 3.28084).toFixed(2))
+                            handleInputChange('perimetre_batiment_m2', converted)
+                            setRawInputs(prev => ({ ...prev, perimetre_batiment_m2: '' }))
                           } else {
                             handleInputChange('perimetre_batiment_m2', undefined)
                           }
                         }}
                         onBlur={() => {
                           if (formData.perimetre_batiment_pi2 !== undefined) {
-                            updateRawInput('perimetre_batiment_pi2', formData.perimetre_batiment_pi2.toString())
+                            updateRawInput('perimetre_batiment_pi2', formData.perimetre_batiment_pi2.toFixed(2))
                           }
                         }}
                         size="small"
@@ -1879,7 +1893,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           fullWidth
                           label="Superficie (m²)"
                           type="text"
-                          value={newFloorRawInputs.area_m2 || (newFloor.area_m2 ? newFloor.area_m2.toString() : '')}
+                          value={newFloorRawInputs.area_m2 || (newFloor.area_m2 ? newFloor.area_m2.toFixed(2) : '')}
                           onChange={(e) => {
                             const input = e.target.value
                             setNewFloorRawInputs(prev => ({ ...prev, area_m2: input }))
@@ -1888,9 +1902,8 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                             handleNewFloorAreaChange('area_m2', val)
                           }}
                           onBlur={() => {
-                            // Convert formula to result on blur
                             if (newFloor.area_m2) {
-                              setNewFloorRawInputs(prev => ({ ...prev, area_m2: newFloor.area_m2.toString() }))
+                              setNewFloorRawInputs(prev => ({ ...prev, area_m2: newFloor.area_m2.toFixed(2) }))
                             }
                           }}
                           variant="outlined"
@@ -1910,7 +1923,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           fullWidth
                           label="Superficie (pi²)"
                           type="text"
-                          value={newFloorRawInputs.area_ft2 || (newFloor.area_ft2 ? newFloor.area_ft2.toString() : '')}
+                          value={newFloorRawInputs.area_ft2 || (newFloor.area_ft2 ? newFloor.area_ft2.toFixed(2) : '')}
                           onChange={(e) => {
                             const input = e.target.value
                             setNewFloorRawInputs(prev => ({ ...prev, area_ft2: input }))
@@ -1919,9 +1932,8 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                             handleNewFloorAreaChange('area_ft2', val)
                           }}
                           onBlur={() => {
-                            // Convert formula to result on blur
                             if (newFloor.area_ft2) {
-                              setNewFloorRawInputs(prev => ({ ...prev, area_ft2: newFloor.area_ft2.toString() }))
+                              setNewFloorRawInputs(prev => ({ ...prev, area_ft2: newFloor.area_ft2.toFixed(2) }))
                             }
                           }}
                           variant="outlined"
