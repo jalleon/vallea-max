@@ -1141,11 +1141,34 @@ export default function LibraryPage() {
           }}
           onSave={handleSave}
           onSaveAndView={async (propertyData) => {
-            await handleSave(propertyData)
-            // Find the saved property and open it in view mode
-            const savedProperty = editProperty || properties.find(p => p.adresse === propertyData.adresse)
-            if (savedProperty) {
-              setViewProperty(savedProperty)
+            try {
+              let savedPropertyId: string | null = null
+
+              if (editProperty) {
+                // Update existing property
+                await propertiesService.update(editProperty.id, propertyData)
+                savedPropertyId = editProperty.id
+                showSnackbar('Property updated successfully')
+              } else if (isNewProperty) {
+                // Create new property
+                const newProperty = await propertiesService.create(propertyData)
+                savedPropertyId = newProperty.id
+                showSnackbar('Property created successfully')
+              }
+
+              if (savedPropertyId) {
+                // Fetch the fresh property data and open view
+                const freshProperty = await propertiesService.getProperty(savedPropertyId)
+                if (freshProperty) {
+                  await loadProperties() // Reload the list
+                  setEditProperty(null)
+                  setIsNewProperty(false)
+                  setViewProperty(freshProperty)
+                }
+              }
+            } catch (err: any) {
+              console.error('Error saving property:', err)
+              showSnackbar(`Failed to save property: ${err?.message || 'Unknown error'}`, 'error')
             }
           }}
         />
