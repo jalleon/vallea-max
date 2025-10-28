@@ -794,7 +794,22 @@ export function PropertyView({
                           </TableRow>
                         </TableHead>
                         <TableBody>
-                          {property.floor_areas.map((floor) => (
+                          {[...property.floor_areas]
+                            .sort((a, b) => {
+                              // Define floor order
+                              const floorOrder: { [key: string]: number } = {
+                                'Sous-sol': 0,
+                                'Rez-de-chaussée': 1,
+                                '2e étage': 2,
+                                '3e étage': 3,
+                                'Comble': 4,
+                                'Mezzanine': 5
+                              }
+                              const orderA = floorOrder[a.floor] ?? 99
+                              const orderB = floorOrder[b.floor] ?? 99
+                              return orderA - orderB
+                            })
+                            .map((floor) => (
                             <TableRow key={floor.id}>
                               <TableCell>{floor.floor}</TableCell>
                               <TableCell>{floor.area_m2.toFixed(2)}</TableCell>
@@ -803,8 +818,11 @@ export function PropertyView({
                                 <Chip
                                   label={floor.type}
                                   size="small"
-                                  color={floor.type === 'hors-sol' ? 'primary' : 'default'}
-                                  variant="outlined"
+                                  sx={{
+                                    bgcolor: floor.type === 'hors-sol' ? '#4CAF50' : '#424242',
+                                    color: 'white',
+                                    fontWeight: 600
+                                  }}
                                 />
                               </TableCell>
                             </TableRow>
