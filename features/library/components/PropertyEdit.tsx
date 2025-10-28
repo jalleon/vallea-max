@@ -836,59 +836,59 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
 
                     {/* Conditional fields for Sujet status */}
                     {formData.status === 'Sujet' && (
+                      <Grid item xs={12} md={3}>
+                        <FormControl fullWidth size="small">
+                          <InputLabel>Type d'évaluation</InputLabel>
+                          <Select
+                            value={formData.type_evaluation || ''}
+                            onChange={(e) => handleInputChange('type_evaluation', e.target.value as EvaluationType)}
+                            label="Type d'évaluation"
+                          >
+                            {evaluationTypes.map((type) => (
+                              <MenuItem key={type} value={type}>{type}</MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    )}
+
+                    {/* Occupancy fields for Sujet and Vendu statuses, excluding multi-unit properties */}
+                    {(formData.status === 'Sujet' || formData.status === 'Vendu') &&
+                     !(formData.type_propriete === 'Duplex' || formData.type_propriete === 'Triplex' || formData.type_propriete === 'Quadriplex+') && (
                       <>
                         <Grid item xs={12} md={3}>
                           <FormControl fullWidth size="small">
-                            <InputLabel>Type d'évaluation</InputLabel>
+                            <InputLabel>Occupancy</InputLabel>
                             <Select
-                              value={formData.type_evaluation || ''}
-                              onChange={(e) => handleInputChange('type_evaluation', e.target.value as EvaluationType)}
-                              label="Type d'évaluation"
+                              value={formData.occupancy || ''}
+                              onChange={(e) => handleInputChange('occupancy', e.target.value as OccupancyType)}
+                              label="Occupancy"
                             >
-                              {evaluationTypes.map((type) => (
+                              {occupancyTypes.map((type) => (
                                 <MenuItem key={type} value={type}>{type}</MenuItem>
                               ))}
                             </Select>
                           </FormControl>
                         </Grid>
-                        {/* Only show Occupancy for non-multi-unit properties */}
-                        {!(formData.type_propriete === 'Duplex' || formData.type_propriete === 'Triplex' || formData.type_propriete === 'Quadriplex+') && (
-                          <>
-                            <Grid item xs={12} md={3}>
-                              <FormControl fullWidth size="small">
-                                <InputLabel>Occupancy</InputLabel>
-                                <Select
-                                  value={formData.occupancy || ''}
-                                  onChange={(e) => handleInputChange('occupancy', e.target.value as OccupancyType)}
-                                  label="Occupancy"
-                                >
-                                  {occupancyTypes.map((type) => (
-                                    <MenuItem key={type} value={type}>{type}</MenuItem>
-                                  ))}
-                                </Select>
-                              </FormControl>
-                            </Grid>
-                            {formData.occupancy === 'Locataire' && (
-                              <Grid item xs={12} md={3}>
-                                <TextField
-                                  fullWidth
-                                  label="Loyer en place"
-                                  type="number"
-                                  value={formData.loyer_en_place || ''}
-                                  onChange={(e) => handleInputChange('loyer_en_place', e.target.value ? parseFloat(e.target.value) : undefined)}
-                                  variant="outlined"
-                                  size="small"
-                                  InputProps={{
-                                    startAdornment: (
-                                      <InputAdornment position="start">
-                                        <AttachMoney sx={{ color: theme.palette.info.main }} />
-                                      </InputAdornment>
-                                    ),
-                                  }}
-                                />
-                              </Grid>
-                            )}
-                          </>
+                        {formData.occupancy === 'Locataire' && (
+                          <Grid item xs={12} md={3}>
+                            <TextField
+                              fullWidth
+                              label="Loyer en place"
+                              type="number"
+                              value={formData.loyer_en_place || ''}
+                              onChange={(e) => handleInputChange('loyer_en_place', e.target.value ? parseFloat(e.target.value) : undefined)}
+                              variant="outlined"
+                              size="small"
+                              InputProps={{
+                                startAdornment: (
+                                  <InputAdornment position="start">
+                                    <AttachMoney sx={{ color: theme.palette.info.main }} />
+                                  </InputAdornment>
+                                ),
+                              }}
+                            />
+                          </Grid>
                         )}
                       </>
                     )}
