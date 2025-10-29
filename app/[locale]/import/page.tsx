@@ -24,11 +24,12 @@ import {
   PictureAsPdf,
   CheckCircle,
 } from '@mui/icons-material';
+import { MaterialDashboardLayout } from '@/components/layout/MaterialDashboardLayout';
 import { DocumentType, ImportSession } from '@/features/import/types/import.types';
 import { importService } from '@/features/import/_api/import.service';
 import { DOCUMENT_TYPES, MAX_FILE_SIZE } from '@/features/import/constants/import.constants';
 
-export default function ImportPage() {
+function ImportPageContent() {
   const t = useTranslations('import');
   const tCommon = useTranslations('common');
   const router = useRouter();
@@ -454,5 +455,13 @@ export default function ImportPage() {
         {getStepContent(activeStep)}
       </Card>
     </Box>
+  );
+}
+
+export default function ImportPage() {
+  return (
+    <MaterialDashboardLayout>
+      <ImportPageContent />
+    </MaterialDashboardLayout>
   );
 }
