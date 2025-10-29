@@ -1,18 +1,16 @@
 /**
- * Main import service - orchestrates PDF reading, AI extraction, and property creation
+ * Main import service - orchestrates API calls and property creation
  */
 
 import { supabase } from '@/lib/supabase/client';
 import { PropertyCreateInput } from '@/features/library/types/property.types';
-import { propertiesService } from '@/features/library/_api/properties-supabase.service';
-import { pdfReaderService } from './pdf-reader.service';
-import { aiExtractionService } from './ai-extraction.service';
+import { propertiesSupabaseService } from '@/features/library/_api/properties-supabase.service';
 import { ExtractedPropertyData, DocumentType, ImportSession } from '../types/import.types';
 import { FIELD_MAPPINGS } from '../constants/import.constants';
 
 class ImportService {
   /**
-   * Process PDF file and extract property data
+   * Process PDF file via API route (server-side processing)
    */
   async processPDF(file: File, documentType: DocumentType): Promise<ImportSession> {
     const session: ImportSession = {
@@ -26,40 +24,29 @@ class ImportService {
     };
 
     try {
-      // Step 1: Extract text from PDF
-      const pdfText = await pdfReaderService.extractTextFromFile(file);
+      // Call API route for server-side PDF processing
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('documentType', documentType);
 
-      if (!pdfText || pdfText.length < 50) {
-        throw new Error('Insufficient text extracted from PDF');
+      const response = await fetch('/api/import/process-pdf', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to process PDF');
       }
 
-      // Step 2: Use AI to extract structured data
-      const extractedData = await aiExtractionService.extractFromText(pdfText, documentType);
+      const result = await response.json();
 
-      // Step 3: Calculate confidence scores
-      const confidences = await aiExtractionService.calculateConfidence(extractedData);
-
-      // Calculate statistics
-      const fieldConfidences = Object.entries(confidences).map(([field, confidence]) => ({
-        field,
-        value: extractedData[field as keyof ExtractedPropertyData],
-        confidence,
-      }));
-
-      const totalFields = Object.keys(FIELD_MAPPINGS).length;
-      const fieldsExtracted = Object.keys(extractedData).filter(
-        (key) => extractedData[key] !== null && extractedData[key] !== undefined
-      ).length;
-
-      const averageConfidence =
-        fieldConfidences.reduce((sum, fc) => sum + fc.confidence, 0) / fieldConfidences.length;
-
-      // Update session
-      session.extractedData = extractedData;
-      session.fieldConfidences = fieldConfidences;
-      session.averageConfidence = Math.round(averageConfidence);
-      session.fieldsExtracted = fieldsExtracted;
-      session.totalFields = totalFields;
+      // Update session with results
+      session.extractedData = result.extractedData;
+      session.fieldConfidences = result.fieldConfidences;
+      session.averageConfidence = result.averageConfidence;
+      session.fieldsExtracted = result.fieldsExtracted;
+      session.totalFields = Object.keys(FIELD_MAPPINGS).length;
       session.status = 'review';
 
       return session;
@@ -112,7 +99,7 @@ class ImportService {
     const propertyData = this.mapToPropertyInput(session.extractedData);
 
     // Create property using existing service
-    const property = await propertiesService.create(propertyData as PropertyCreateInput);
+    const property = await propertiesSupabaseService.create(propertyData as PropertyCreateInput);
 
     // Update session
     session.propertyId = property.id;
