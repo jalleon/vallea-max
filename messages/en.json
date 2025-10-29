@@ -78,6 +78,7 @@
   "navigation": {
     "dashboard": "Dashboard",
     "library": "Library",
+    "import": "Import",
     "inspection": "Inspections",
     "evaluations": "Appraisals",
     "adjustments": "Adjustments",
@@ -775,6 +776,94 @@
     },
     "footer": {
       "rights": "All rights reserved."
+    }
+  },
+
+  "import": {
+    "title": "Import Wizard",
+    "subtitle": "Import properties from PDFs or listing websites",
+
+    "steps": {
+      "source": "Choose Source",
+      "upload": "Upload Document",
+      "review": "Review Data",
+      "confirmation": "Confirmation"
+    },
+
+    "source": {
+      "title": "Choose import source",
+      "pdf": {
+        "title": "Import from PDF",
+        "description": "Upload PDF documents and automatically extract information.",
+        "button": "Choose a PDF"
+      },
+      "browser": {
+        "title": "Import from MLS/Centris",
+        "description": "Use the browser extension to extract data directly from real estate listing websites.",
+        "button": "Activate Extension",
+        "requirement": "Requires Valea Browser Helper extension"
+      }
+    },
+
+    "upload": {
+      "title": "Upload and analyze document",
+      "dropzone": {
+        "title": "Drag and drop your PDF here",
+        "subtitle": "or click to browse your files",
+        "button": "Choose a file"
+      },
+      "documentType": {
+        "title": "Document type",
+        "mls_listing": "MLS/Matrix Listing",
+        "role_foncier": "Property Assessment Roll",
+        "certificat_localisation": "Location Certificate"
+      },
+      "processing": {
+        "title": "Analyzing document...",
+        "description": "Extracting text and structured data"
+      }
+    },
+
+    "review": {
+      "title": "Review and adjust extracted data",
+      "subtitle": "Verify extracted information and correct if necessary",
+      "confidence": "Confidence: {percent}%",
+      "fieldsExtracted": "{count} fields extracted automatically",
+      "sections": {
+        "general": "General Information",
+        "dimensions": "Dimensions and Areas",
+        "municipal": "Municipal Data",
+        "market": "Market Information"
+      },
+      "fieldsNotFound": {
+        "title": "Fields not found ({count})",
+        "description": "You can complete this information manually after creation"
+      },
+      "actions": {
+        "cancel": "Cancel Import",
+        "create": "Create Property"
+      }
+    },
+
+    "success": {
+      "title": "Property created successfully!",
+      "summary": "Import Summary",
+      "fieldsImported": "Fields imported:",
+      "avgConfidence": "Average confidence:",
+      "fieldsRemaining": "{count} fields remaining to complete manually",
+      "actions": {
+        "importAnother": "Import Another",
+        "completeFields": "Complete Fields",
+        "viewProperty": "View Property"
+      }
+    },
+
+    "errors": {
+      "fileTooBig": "File is too large (max 10MB)",
+      "invalidType": "Unsupported file type",
+      "extractionFailed": "Failed to extract data",
+      "noText": "No text found in document",
+      "aiError": "AI analysis error"
     }
   }
 }

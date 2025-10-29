@@ -28,6 +28,12 @@ export function Sidebar({ isOpen }: SidebarProps) {
       path: '/library'
     },
     {
+      id: 'import',
+      label: t('import'),
+      icon: '📥',
+      path: '/import'
+    },
+    {
       id: 'evaluations',
       label: t('evaluations'),
       icon: '🏠',
