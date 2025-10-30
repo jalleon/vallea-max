@@ -101,9 +101,9 @@ function ImportPageContent() {
       const propertyId = await importService.createPropertyFromImport(session);
       setActiveStep(3); // Move to success step
 
-      // Redirect after a short delay
+      // Redirect to library list after a short delay
       setTimeout(() => {
-        router.push(`/library/${propertyId}`);
+        router.push('/library');
       }, 2000);
     } catch (err) {
       setError(t('errors.extractionFailed'));
