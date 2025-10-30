@@ -11,10 +11,17 @@ import { ExtractedPropertyData, DocumentType } from '../types/import.types';
 const SYSTEM_PROMPTS: Record<DocumentType, string> = {
   mls_listing: `You are an expert Quebec real estate data extraction assistant specializing in MLS/Matrix/Centris listings. Extract ALL property information precisely and return ONLY valid JSON.
 
+IMPORTANT: If the document contains MULTIPLE property listings, extract each one separately and return an array of objects. If only ONE listing, return an array with one object.
+
 CRITICAL RULES:
 1. Remove ALL formatting from numbers (commas, spaces, $, m², pi²)
 2. Convert ALL monetary values to numbers only (no $ sign)
-3. Extract FULL address including unit/apt number, city, municipality, postal code
+3. ADDRESS PARSING (VERY IMPORTANT):
+   - "address" = ONLY street address BEFORE first comma
+   - If apartment/unit number exists (app., apt., unit, #), add as PREFIX with dash (e.g., "app. 1408" becomes "1408-15 Boul. La Fayette")
+   - "city" = Text AFTER first comma UNTIL opening parenthesis (e.g., "Longueuil")
+   - "municipality" = Text INSIDE parenthesis (e.g., "Le Vieux-Longueuil")
+   - "postalCode" = Postal code if present (e.g., "J4K 0B2")
 4. Dates must be YYYY-MM-DD format
 5. Areas can be in m² or pi² - extract the NUMBER only
 6. For yes/no fields: true/false or 1/0
@@ -47,7 +54,7 @@ INPUT: "Magnifique condo 15 Boul. La Fayette, app. 1408, Longueuil (Le Vieux-Lon
 
 OUTPUT:
 {
-  "address": "15 Boul. La Fayette, app. 1408, Longueuil (Le Vieux-Longueuil), J4K 0B2",
+  "address": "1408-15 Boul. La Fayette",
   "city": "Longueuil",
   "municipality": "Le Vieux-Longueuil",
   "postalCode": "J4K 0B2",
@@ -76,7 +83,7 @@ INPUT: "Superbe unifamiliale au 2457 Rue des Érables, Brossard, J4Y 2K3. Prix: 
 
 OUTPUT:
 {
-  "address": "2457 Rue des Érables, Brossard, J4Y 2K3",
+  "address": "2457 Rue des Érables",
   "city": "Brossard",
   "postalCode": "J4Y 2K3",
   "sellPrice": 749500,
@@ -100,7 +107,7 @@ INPUT: "Triplex bien situé 850-852-854 Ave. Centrale, Montréal (Rosemont), H1X
 
 OUTPUT:
 {
-  "address": "850-852-854 Ave. Centrale, Montréal (Rosemont), H1X 2B5",
+  "address": "850-852-854 Ave. Centrale",
   "city": "Montréal",
   "municipality": "Rosemont",
   "postalCode": "H1X 2B5",
@@ -117,7 +124,11 @@ OUTPUT:
   "roomsAboveGround": 15
 }
 
-IMPORTANT: Return ONLY the JSON object. No explanations, no markdown, no extra text. Extract ALL available fields from the document.`,
+IMPORTANT: Return ONLY valid JSON. Format:
+- Multiple listings: {"properties": [{...}, {...}, {...}]}
+- Single listing: {"properties": [{...}]}
+
+Extract ALL available fields from each listing in the document.`,
 
   role_foncier: `You are a Quebec property tax roll (Rôle foncier) extraction assistant. Extract municipal property information from the provided text and return it in JSON format.
 
@@ -160,11 +171,12 @@ class AIExtractionService {
 
   /**
    * Extract property data from text using AI
+   * Returns array of extracted properties (supports multi-listing PDFs)
    */
   async extractFromText(
     text: string,
     documentType: DocumentType
-  ): Promise<ExtractedPropertyData> {
+  ): Promise<ExtractedPropertyData[]> {
     try {
       const systemPrompt = SYSTEM_PROMPTS[documentType];
 
@@ -186,8 +198,20 @@ class AIExtractionService {
 
       const parsed = JSON.parse(reply);
 
-      // Return the extracted data (handle both wrapped and unwrapped formats)
-      return parsed.infos?.[0] || parsed;
+      // Handle different response formats
+      if (parsed.properties && Array.isArray(parsed.properties)) {
+        // New multi-listing format
+        return parsed.properties;
+      } else if (parsed.infos && Array.isArray(parsed.infos)) {
+        // Old format with infos array
+        return parsed.infos;
+      } else if (Array.isArray(parsed)) {
+        // Direct array
+        return parsed;
+      } else {
+        // Single object - wrap in array
+        return [parsed];
+      }
     } catch (error) {
       console.error('AI extraction error:', error);
       throw new Error(`Failed to extract data: ${error instanceof Error ? error.message : 'Unknown error'}`);

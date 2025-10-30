@@ -948,8 +948,12 @@
 
     "review": {
       "title": "Réviser et ajuster les données extraites",
+      "titleMultiple": "{count} propriétés trouvées",
       "subtitle": "Vérifiez les informations extraites et corrigez si nécessaire",
-      "confidence": "Confiance: {percent}%",
+      "subtitleMultiple": "Choisissez l'action à effectuer pour chaque propriété",
+      "confidence": "confiance",
+      "unknownAddress": "Adresse inconnue",
+      "duplicateFound": "Doublon détecté: {address}",
       "fieldsExtracted": "{count} champs extraits automatiquement",
       "sections": {
         "general": "Informations générales",
@@ -963,7 +967,23 @@
       },
       "actions": {
         "cancel": "Annuler l'importation",
-        "create": "Créer la propriété"
+        "create": "Créer la propriété",
+        "merge": "Fusionner",
+        "createDuplicate": "Créer doublon",
+        "skip": "Ignorer",
+        "willCreate": "Sera créée",
+        "importAll": "Importer ({count})"
+      }
+    },
+
+    "duplicate": {
+      "title": "Adresse déjà existante",
+      "message": "Une propriété avec l'adresse '{address}' existe déjà dans votre bibliothèque.",
+      "existingProperty": "Propriété existante",
+      "salePrice": "Prix de vente",
+      "actions": {
+        "merge": "Fusionner les données",
+        "createDuplicate": "Créer un doublon"
       }
     },
 

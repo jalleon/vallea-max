@@ -11,6 +11,7 @@ import { FIELD_MAPPINGS } from '../constants/import.constants';
 class ImportService {
   /**
    * Process PDF file via API route (server-side processing)
+   * Supports multi-property PDFs
    */
   async processPDF(file: File, documentType: DocumentType): Promise<ImportSession> {
     const session: ImportSession = {
@@ -20,6 +21,7 @@ class ImportService {
       status: 'processing',
       fileName: file.name,
       fileSize: file.size,
+      properties: [],
       createdAt: new Date(),
     };
 
@@ -42,12 +44,16 @@ class ImportService {
       const result = await response.json();
 
       // Update session with results
-      session.extractedData = result.extractedData;
-      session.fieldConfidences = result.fieldConfidences;
-      session.averageConfidence = result.averageConfidence;
-      session.fieldsExtracted = result.fieldsExtracted;
-      session.totalFields = Object.keys(FIELD_MAPPINGS).length;
+      session.properties = result.properties || [];
+      session.totalProperties = result.totalProperties || session.properties.length;
       session.status = 'review';
+
+      // Legacy support for single property
+      if (session.properties.length > 0) {
+        session.extractedData = session.properties[0].extractedData;
+        session.averageConfidence = session.properties[0].averageConfidence;
+        session.fieldsExtracted = session.properties[0].fieldsExtracted;
+      }
 
       return session;
     } catch (error) {
@@ -107,6 +113,64 @@ class ImportService {
     session.completedAt = new Date();
 
     return property.id;
+  }
+
+  /**
+   * Merge imported data with existing property
+   */
+  async mergePropertyData(propertyId: string, session: ImportSession): Promise<void> {
+    if (!session.extractedData) {
+      throw new Error('No extracted data in session');
+    }
+
+    const propertyData = this.mapToPropertyInput(session.extractedData);
+
+    // Update existing property with new data (only non-null values)
+    await propertiesSupabaseService.update(propertyId, propertyData as Partial<PropertyCreateInput>);
+
+    // Update session
+    session.propertyId = propertyId;
+    session.status = 'completed';
+    session.completedAt = new Date();
+  }
+
+  /**
+   * Create/merge multiple properties from session
+   * Handles batch import for multi-listing PDFs
+   */
+  async createPropertiesFromImport(session: ImportSession): Promise<string[]> {
+    if (!session.properties || session.properties.length === 0) {
+      throw new Error('No properties in session');
+    }
+
+    const propertyIds: string[] = [];
+
+    for (const propertyExtraction of session.properties) {
+      const { extractedData, duplicateProperty, action } = propertyExtraction;
+
+      if (action === 'skip') {
+        continue; // User chose to skip this property
+      }
+
+      const propertyData = this.mapToPropertyInput(extractedData);
+
+      if (action === 'merge' && duplicateProperty) {
+        // Merge with existing property
+        await propertiesSupabaseService.update(duplicateProperty.id, propertyData as Partial<PropertyCreateInput>);
+        propertyIds.push(duplicateProperty.id);
+      } else {
+        // Create new property
+        const property = await propertiesSupabaseService.create(propertyData as PropertyCreateInput);
+        propertyIds.push(property.id);
+      }
+    }
+
+    // Update session
+    session.propertyIds = propertyIds;
+    session.status = 'completed';
+    session.completedAt = new Date();
+
+    return propertyIds;
   }
 
   /**

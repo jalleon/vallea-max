@@ -38,31 +38,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Use AI to extract structured data
-    const extractedData = await aiExtractionService.extractFromText(pdfText, documentType);
+    // Use AI to extract structured data (now returns array of properties)
+    const extractedPropertiesArray = await aiExtractionService.extractFromText(pdfText, documentType);
 
-    // Calculate confidence scores
-    const confidences = await aiExtractionService.calculateConfidence(extractedData);
+    // Process each property
+    const properties = await Promise.all(
+      extractedPropertiesArray.map(async (extractedData) => {
+        // Calculate confidence scores for this property
+        const confidences = await aiExtractionService.calculateConfidence(extractedData);
 
-    // Calculate statistics
-    const fieldConfidences = Object.entries(confidences).map(([field, confidence]) => ({
-      field,
-      value: extractedData[field as keyof typeof extractedData],
-      confidence,
-    }));
+        const fieldsExtracted = Object.keys(extractedData).filter(
+          (key) => extractedData[key] !== null && extractedData[key] !== undefined
+        ).length;
 
-    const fieldsExtracted = Object.keys(extractedData).filter(
-      (key) => extractedData[key] !== null && extractedData[key] !== undefined
-    ).length;
+        const confidenceValues = Object.values(confidences);
+        const averageConfidence = confidenceValues.length > 0
+          ? Math.round(confidenceValues.reduce((sum, conf) => sum + conf, 0) / confidenceValues.length)
+          : 0;
 
-    const averageConfidence =
-      fieldConfidences.reduce((sum, fc) => sum + fc.confidence, 0) / fieldConfidences.length;
+        return {
+          extractedData,
+          fieldConfidences: confidences,
+          averageConfidence,
+          fieldsExtracted,
+        };
+      })
+    );
 
     return NextResponse.json({
-      extractedData,
-      fieldConfidences,
-      averageConfidence: Math.round(averageConfidence),
-      fieldsExtracted,
+      properties,
+      totalProperties: properties.length,
     });
   } catch (error) {
     console.error('PDF processing error:', error);

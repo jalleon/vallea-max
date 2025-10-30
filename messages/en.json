@@ -826,8 +826,12 @@
 
     "review": {
       "title": "Review and adjust extracted data",
+      "titleMultiple": "{count} properties found",
       "subtitle": "Verify extracted information and correct if necessary",
-      "confidence": "Confidence: {percent}%",
+      "subtitleMultiple": "Choose the action for each property",
+      "confidence": "confidence",
+      "unknownAddress": "Unknown address",
+      "duplicateFound": "Duplicate detected: {address}",
       "fieldsExtracted": "{count} fields extracted automatically",
       "sections": {
         "general": "General Information",
@@ -841,7 +845,23 @@
       },
       "actions": {
         "cancel": "Cancel Import",
-        "create": "Create Property"
+        "create": "Create Property",
+        "merge": "Merge",
+        "createDuplicate": "Create Duplicate",
+        "skip": "Skip",
+        "willCreate": "Will be created",
+        "importAll": "Import ({count})"
+      }
+    },
+
+    "duplicate": {
+      "title": "Address Already Exists",
+      "message": "A property with the address '{address}' already exists in your library.",
+      "existingProperty": "Existing Property",
+      "salePrice": "Sale Price",
+      "actions": {
+        "merge": "Merge Data",
+        "createDuplicate": "Create Duplicate"
       }
     },
 

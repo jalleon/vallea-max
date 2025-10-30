@@ -369,6 +369,26 @@ class PropertiesSupabaseService {
     return (data || []).map(item => this.transformToProperty(item))
   }
 
+  async findByAddress(address: string): Promise<Property | null> {
+    const { data, error } = await supabase
+      .from('properties')
+      .select('*, floor_areas(*)')
+      .ilike('adresse', address)
+      .limit(1)
+      .single()
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // No rows returned
+        return null
+      }
+      console.error('Error finding property by address:', error)
+      throw error
+    }
+
+    return data ? this.transformToProperty(data) : null
+  }
+
   // Alias methods to match mock service interface
   async create(input: PropertyCreateInput): Promise<Property> {
     return this.createProperty(input)

@@ -81,6 +81,18 @@ export interface FieldConfidence {
 }
 
 /**
+ * Single property extraction result
+ */
+export interface PropertyExtraction {
+  extractedData: ExtractedPropertyData;
+  fieldConfidences?: Record<string, number>;
+  averageConfidence?: number;
+  fieldsExtracted?: number;
+  duplicateProperty?: any; // Existing property if duplicate found
+  action?: 'create' | 'merge' | 'skip'; // User's choice for this property
+}
+
+/**
  * Import session tracking
  */
 export interface ImportSession {
@@ -90,13 +102,21 @@ export interface ImportSession {
   status: ImportStatus;
   fileName?: string;
   fileSize?: number;
+
+  // Support for multiple properties
+  properties: PropertyExtraction[];
+  totalProperties?: number;
+
+  // Legacy single property support (deprecated)
   extractedData?: ExtractedPropertyData;
   fieldConfidences?: FieldConfidence[];
   averageConfidence?: number;
   fieldsExtracted?: number;
   totalFields?: number;
+
   errors?: string[];
   createdAt: Date;
   completedAt?: Date;
-  propertyId?: string; // ID of created property
+  propertyIds?: string[]; // IDs of created/updated properties
+  propertyId?: string; // Legacy single property ID
 }
