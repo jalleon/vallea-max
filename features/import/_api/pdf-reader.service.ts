@@ -1,61 +1,55 @@
 /**
- * PDF reading and text extraction service
+ * PDF reading and text extraction service using pdfjs-dist
  */
 
-const PDFParser = require('pdf2json');
+import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
+
+// Disable worker for Node.js environment
+pdfjsLib.GlobalWorkerOptions.workerSrc = '';
 
 class PdfReaderService {
   /**
-   * Extract text content from PDF buffer using pdf2json
+   * Extract text content from PDF buffer using pdfjs-dist
    */
   async extractText(buffer: Buffer): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const pdfParser = new PDFParser();
-
-      pdfParser.on('pdfParser_dataError', (errData: any) => {
-        console.error('PDF extraction error:', errData.parserError);
-        reject(new Error('Failed to extract text from PDF'));
+    try {
+      // Load PDF document
+      const loadingTask = pdfjsLib.getDocument({
+        data: new Uint8Array(buffer),
+        useSystemFonts: true,
+        standardFontDataUrl: undefined,
       });
 
-      pdfParser.on('pdfParser_dataReady', (pdfData: any) => {
-        try {
-          // Extract text from all pages
-          let fullText = '';
+      const pdfDocument = await loadingTask.promise;
 
-          if (pdfData.Pages) {
-            for (const page of pdfData.Pages) {
-              if (page.Texts) {
-                for (const text of page.Texts) {
-                  if (text.R) {
-                    for (const run of text.R) {
-                      if (run.T) {
-                        // Decode URI component (pdf2json encodes text)
-                        fullText += decodeURIComponent(run.T) + ' ';
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
+      let fullText = '';
+      const numPages = pdfDocument.numPages;
 
-          fullText = fullText.trim();
+      console.log(`[PDF Debug] Total pages: ${numPages}`);
 
-          // Detailed logging
-          console.log(`[PDF Debug] Pages: ${pdfData.Pages?.length || 0}`);
-          console.log(`[PDF Debug] Text length: ${fullText.length}`);
-          console.log(`[PDF Debug] First 200 chars: "${fullText.substring(0, 200)}"`);
+      // Extract text from all pages
+      for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+        const page = await pdfDocument.getPage(pageNum);
+        const textContent = await page.getTextContent();
 
-          resolve(fullText);
-        } catch (error) {
-          console.error('PDF parsing error:', error);
-          reject(new Error('Failed to parse PDF data'));
-        }
-      });
+        // Combine all text items
+        const pageText = textContent.items
+          .map((item: any) => item.str)
+          .join(' ');
 
-      // Parse the buffer
-      pdfParser.parseBuffer(buffer);
-    });
+        fullText += pageText + ' ';
+      }
+
+      fullText = fullText.trim();
+
+      console.log(`[PDF Debug] Total characters extracted: ${fullText.length}`);
+      console.log(`[PDF Debug] First 300 chars: "${fullText.substring(0, 300)}"`);
+
+      return fullText;
+    } catch (error) {
+      console.error('PDF extraction error:', error);
+      throw new Error('Failed to extract text from PDF');
+    }
   }
 
   /**
