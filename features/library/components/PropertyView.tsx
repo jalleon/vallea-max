@@ -1134,7 +1134,7 @@ export function PropertyView({
                   <Grid item xs={12} md={6}>
                     <Typography variant="body2" color="text.secondary">Aire habitable</Typography>
                     <Typography variant="body1" fontWeight={600}>
-                      {property.aire_habitable_m2 ? formatMeasurement(property.aire_habitable_m2, 'area', locale) : 'N/A'}
+                      {property.aire_habitable_m2 ? formatMeasurement(property.aire_habitable_m2, 'area', 'm2') : 'N/A'}
                     </Typography>
                   </Grid>
 

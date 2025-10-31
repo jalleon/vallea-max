@@ -1566,16 +1566,26 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12}>
                       <Divider sx={{ my: 1 }} />
                     </Grid>
-                    <Grid item xs={12} md={6}>
-                      <DualUnitInput
-                        label="Aire habitable"
-                        metricValue={formData.aire_habitable_m2}
-                        imperialValue={formData.aire_habitable_pi2}
-                        onMetricChange={(value) => handleInputChange('aire_habitable_m2', value)}
-                        onImperialChange={(value) => handleInputChange('aire_habitable_pi2', value)}
-                        metricUnit="m²"
-                        imperialUnit="pi²"
-                        conversionFactor={10.764}
+                    <Grid item xs={12} md={3}>
+                      <TextField
+                        fullWidth
+                        label="Aire habitable (m²)"
+                        type="number"
+                        value={formData.aire_habitable_m2 || ''}
+                        onChange={(e) => handleInputChange('aire_habitable_m2', e.target.value ? parseFloat(e.target.value) : undefined)}
+                        variant="outlined"
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={3}>
+                      <TextField
+                        fullWidth
+                        label="Aire habitable (pi²)"
+                        type="number"
+                        value={formData.aire_habitable_pi2 || ''}
+                        onChange={(e) => handleInputChange('aire_habitable_pi2', e.target.value ? parseFloat(e.target.value) : undefined)}
+                        variant="outlined"
+                        size="small"
                       />
                     </Grid>
 

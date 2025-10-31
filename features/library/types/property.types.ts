@@ -126,6 +126,8 @@ export interface Property {
   taxes_municipales_montant?: number
   taxes_scolaires_annee?: number
   taxes_scolaires_montant?: number
+  aire_habitable_m2?: number
+  aire_habitable_pi2?: number
   zoning_usages_permis?: string
 
   // Historical
@@ -249,6 +251,8 @@ export interface PropertyCreateInput {
   taxes_municipales_montant?: number
   taxes_scolaires_annee?: number
   taxes_scolaires_montant?: number
+  aire_habitable_m2?: number
+  aire_habitable_pi2?: number
   zoning_usages_permis?: string
 
   source?: string

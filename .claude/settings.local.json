@@ -25,7 +25,8 @@
       "Bash(cat:*)",
       "Bash(if [ -d .next ])",
       "Bash(then rm -rf .next)",
-      "Bash(else echo \".next folder not found\")"
+      "Bash(else echo \".next folder not found\")",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "ask": []
