@@ -36,6 +36,9 @@
       "title": "Page not found",
       "description": "The page you are looking for does not exist.",
       "goHome": "Back to dashboard"
+    },
+    "menu": {
+      "aiApiKeys": "AI API Keys"
     }
   },
 
@@ -238,7 +241,55 @@
       "priorityHint": "Click to set as primary provider",
       "priority1": "1st Choice",
       "priority2": "2nd Choice",
-      "priority3": "3rd Choice"
+      "priority3": "3rd Choice",
+      "best": "Best",
+      "models": {
+        "deepseek-chat": {
+          "description": "Cost-effective model excellent for structured data extraction",
+          "capabilities": {
+            "json": "JSON extraction",
+            "multiLanguage": "Multi-language support",
+            "fast": "Fast processing",
+            "bestPrice": "Best price/performance"
+          }
+        },
+        "deepseek-reasoner": {
+          "description": "Advanced reasoning model for complex document analysis",
+          "capabilities": {
+            "deepReasoning": "Deep reasoning",
+            "complexExtraction": "Complex extraction",
+            "highAccuracy": "High accuracy",
+            "difficultPdfs": "Better for difficult PDFs"
+          }
+        },
+        "gpt-4o-mini": {
+          "description": "Affordable, intelligent small model for everyday tasks",
+          "capabilities": {
+            "fastResponses": "Fast responses",
+            "goodAccuracy": "Good accuracy",
+            "balanced": "Balanced performance",
+            "costEffective": "Cost-effective"
+          }
+        },
+        "claude-3-5-haiku-20241022": {
+          "description": "Fast and cost-effective model for simple tasks",
+          "capabilities": {
+            "veryFast": "Very fast",
+            "simplePdfs": "Good for simple PDFs",
+            "costEffective": "Cost-effective",
+            "quickResponses": "Quick responses"
+          }
+        },
+        "claude-3-5-sonnet-20241022": {
+          "description": "Balanced model with excellent performance",
+          "capabilities": {
+            "excellentAccuracy": "Excellent accuracy",
+            "strongReasoning": "Strong reasoning",
+            "complexPdfs": "Great for complex PDFs",
+            "bestQuality": "Best overall quality"
+          }
+        }
+      }
     }
   },
 
@@ -865,7 +916,8 @@
       },
       "aiProvider": {
         "label": "AI Provider",
-        "using": "Using your {priority} priority provider. Change priority in Settings → AI API Keys."
+        "using": "Using your {priority} priority provider. Change priority in Settings → AI API Keys.",
+        "priority": "{priority} priority provider. Change in Settings → AI API Keys."
       }
     },
 

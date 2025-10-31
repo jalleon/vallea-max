@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import {
   Box,
@@ -40,10 +40,12 @@ import { DOCUMENT_TYPES, MAX_FILE_SIZE } from '@/features/import/constants/impor
 import { propertiesSupabaseService } from '@/features/library/_api/properties-supabase.service';
 import { Property } from '@/features/library/types/property.types';
 import { useSettings } from '@/contexts/SettingsContext';
+import AiApiKeysDialog from '@/features/user-settings/components/AiApiKeysDialog';
 
 function ImportPageContent() {
   const t = useTranslations('import');
   const tCommon = useTranslations('common');
+  const locale = useLocale();
   const router = useRouter();
   const { preferences } = useSettings();
 
@@ -57,6 +59,7 @@ function ImportPageContent() {
   const [duplicateProperty, setDuplicateProperty] = useState<Property | null>(null);
   const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
   const [mergeAction, setMergeAction] = useState<'merge' | 'duplicate' | null>(null);
+  const [showAiApiKeysDialog, setShowAiApiKeysDialog] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -89,6 +92,10 @@ function ImportPageContent() {
       anthropic: preferences?.aiModels?.anthropic || 'claude-3-5-haiku-20241022'
     };
     return models[provider] || '';
+  };
+
+  const getPriorityText = () => {
+    return locale === 'fr' ? '1ère' : '1st';
   };
 
   // Handle PDF file selection
@@ -371,50 +378,40 @@ function ImportPageContent() {
         </CardContent>
       </Card>
 
-      {/* AI Provider Info */}
-      <Card sx={{ borderRadius: '16px', mb: 3 }}>
-        <CardContent>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <AutoAwesome color="primary" />
-              <Box>
-                <Typography variant="subtitle2" color="text.secondary" sx={{ fontSize: '12px' }}>
-                  {t('upload.aiProvider.label')}
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                    {getProviderDisplayName(getActiveProvider())}
-                  </Typography>
-                  <Chip
-                    label={getProviderModel(getActiveProvider()).split('-').pop()?.toUpperCase() || 'CHAT'}
-                    size="small"
-                    color="primary"
-                    sx={{ height: 20, fontSize: '11px', fontWeight: 600 }}
-                  />
-                  {getActiveProvider() === 'deepseek' && (
-                    <Chip
-                      label="BEST"
-                      size="small"
-                      color="success"
-                      sx={{ height: 20, fontSize: '11px', fontWeight: 600 }}
-                    />
-                  )}
-                </Box>
-              </Box>
-            </Box>
-            <IconButton
-              size="small"
-              onClick={() => window.location.href = '#settings'}
-              sx={{ color: 'text.secondary' }}
-            >
-              <SettingsIcon fontSize="small" />
-            </IconButton>
-          </Box>
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: 'block' }}>
-            {t('upload.aiProvider.using', { priority: '1st' })}
-          </Typography>
-        </CardContent>
-      </Card>
+      {/* AI Provider Info - Compact */}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          mb: 3,
+          py: 1,
+          px: 2,
+          borderRadius: '8px',
+          bgcolor: 'action.hover'
+        }}
+      >
+        <AutoAwesome sx={{ fontSize: '18px', color: 'primary.main' }} />
+        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          {getProviderDisplayName(getActiveProvider())}
+        </Typography>
+        <Chip
+          label={getProviderModel(getActiveProvider()).split('-').pop()?.toUpperCase() || 'CHAT'}
+          size="small"
+          color="primary"
+          sx={{ height: 18, fontSize: '10px', fontWeight: 600 }}
+        />
+        <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+          {t('upload.aiProvider.priority', { priority: getPriorityText() })}
+        </Typography>
+        <IconButton
+          size="small"
+          onClick={() => setShowAiApiKeysDialog(true)}
+          sx={{ color: 'text.secondary', ml: 'auto' }}
+        >
+          <SettingsIcon sx={{ fontSize: '18px' }} />
+        </IconButton>
+      </Box>
 
       {/* Upload Zone */}
       <Paper
@@ -770,6 +767,12 @@ function ImportPageContent() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* AI API Keys Dialog */}
+      <AiApiKeysDialog
+        open={showAiApiKeysDialog}
+        onClose={() => setShowAiApiKeysDialog(false)}
+      />
     </Box>
   );
 }

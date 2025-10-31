@@ -206,7 +206,7 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
               <ListItemIcon>
                 <Key fontSize="small" />
               </ListItemIcon>
-              <ListItemText primary="Clés API IA / AI API Keys" />
+              <ListItemText primary={t('menu.aiApiKeys')} />
             </MenuItem>
           </Menu>
         </Box>

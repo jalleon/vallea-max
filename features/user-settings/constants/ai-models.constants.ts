@@ -8,6 +8,7 @@ export interface AIModelInfo {
   provider: 'deepseek' | 'openai' | 'anthropic';
   description: string;
   capabilities: string[];
+  capabilityKeys: string[]; // Translation keys for capabilities
   costPerPDF: string; // Estimated cost per typical MLS PDF
   tokensPerPDF: {
     input: number;   // Average input tokens per PDF
@@ -46,6 +47,7 @@ export const AI_MODELS: Record<string, AIModelInfo> = {
       'Fast processing',
       'Best price/performance'
     ],
+    capabilityKeys: ['json', 'multiLanguage', 'fast', 'bestPrice'],
     costPerPDF: '~$0.001',
     tokensPerPDF: {
       input: 4500,    // System prompt + PDF text
@@ -75,6 +77,7 @@ export const AI_MODELS: Record<string, AIModelInfo> = {
       'High accuracy',
       'Better for difficult PDFs'
     ],
+    capabilityKeys: ['deepReasoning', 'complexExtraction', 'highAccuracy', 'difficultPdfs'],
     costPerPDF: '~$0.005',
     tokensPerPDF: {
       input: 4500,
@@ -104,6 +107,7 @@ export const AI_MODELS: Record<string, AIModelInfo> = {
       'Balanced performance',
       'Cost-effective'
     ],
+    capabilityKeys: ['fastResponses', 'goodAccuracy', 'balanced', 'costEffective'],
     costPerPDF: '~$0.001',
     tokensPerPDF: {
       input: 4500,
@@ -134,6 +138,7 @@ export const AI_MODELS: Record<string, AIModelInfo> = {
       'Cost-effective',
       'Quick responses'
     ],
+    capabilityKeys: ['veryFast', 'simplePdfs', 'costEffective', 'quickResponses'],
     costPerPDF: '~$0.008',
     tokensPerPDF: {
       input: 4500,
@@ -162,6 +167,7 @@ export const AI_MODELS: Record<string, AIModelInfo> = {
       'Great for complex PDFs',
       'Best overall quality'
     ],
+    capabilityKeys: ['excellentAccuracy', 'strongReasoning', 'complexPdfs', 'bestQuality'],
     costPerPDF: '~$0.029',
     tokensPerPDF: {
       input: 4500,

@@ -31,6 +31,7 @@ import {
   Key,
   Info,
   Star,
+  EmojiEvents,
 } from '@mui/icons-material';
 import { useTranslations } from 'next-intl';
 import { useSettings } from '@/contexts/SettingsContext';
@@ -137,11 +138,11 @@ export default function AiApiKeysDialog({ open, onClose }: AiApiKeysDialogProps)
     return '';
   };
 
-  const getPriorityColor = (provider: 'deepseek' | 'openai' | 'anthropic'): 'primary' | 'default' | 'secondary' => {
+  const getPriorityColor = (provider: 'deepseek' | 'openai' | 'anthropic') => {
     const index = providerPriority.indexOf(provider);
-    if (index === 0) return 'primary';
-    if (index === 1) return 'default';
-    return 'secondary';
+    if (index === 0) return { backgroundColor: '#FFD700', color: '#000' }; // Gold
+    if (index === 1) return { backgroundColor: '#C0C0C0', color: '#000' }; // Silver
+    return { backgroundColor: '#CD7F32', color: '#FFF' }; // Bronze
   };
 
   const renderProviderSection = (
@@ -160,9 +161,11 @@ export default function AiApiKeysDialog({ open, onClose }: AiApiKeysDialogProps)
           </Typography>
           <Chip
             label={getPriorityLabel(provider)}
-            color={getPriorityColor(provider)}
             size="small"
-            sx={{ height: 20 }}
+            sx={{
+              height: 20,
+              ...getPriorityColor(provider)
+            }}
           />
           {providerPriority[0] !== provider && apiKey && (
             <Tooltip title={t('priorityHint')}>
@@ -242,10 +245,19 @@ export default function AiApiKeysDialog({ open, onClose }: AiApiKeysDialogProps)
                         <Box sx={{ ml: 'auto', display: 'flex', gap: 0.5 }}>
                           {modelInfo.best && (
                             <Chip
-                              label="BEST"
+                              label={t('best')}
                               size="small"
-                              color="success"
-                              sx={{ height: 20, fontSize: '10px', fontWeight: 600 }}
+                              icon={<EmojiEvents sx={{ fontSize: '14px !important' }} />}
+                              sx={{
+                                height: 20,
+                                fontSize: '10px',
+                                fontWeight: 600,
+                                backgroundColor: '#FFD700',
+                                color: '#000',
+                                '& .MuiChip-icon': {
+                                  color: '#000',
+                                }
+                              }}
                             />
                           )}
                           {modelInfo.recommended && (
@@ -296,20 +308,20 @@ export default function AiApiKeysDialog({ open, onClose }: AiApiKeysDialogProps)
           </Box>
         </DialogTitle>
         <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
             <Typography variant="body2" color="text.secondary">
-              {modelInfo.description}
+              {t(`models.${modelInfo.id}.description`)}
             </Typography>
 
-            <Paper variant="outlined" sx={{ p: 2 }}>
+            <Paper variant="outlined" sx={{ p: 1.5 }}>
               <Typography variant="subtitle2" fontWeight={600} gutterBottom>
                 {t('capabilities')}
               </Typography>
               <List dense>
-                {modelInfo.capabilities.map((capability, index) => (
-                  <ListItem key={index} sx={{ py: 0.5, px: 0 }}>
+                {modelInfo.capabilityKeys.map((capKey, index) => (
+                  <ListItem key={index} sx={{ py: 0.25, px: 0 }}>
                     <ListItemText
-                      primary={`• ${capability}`}
+                      primary={`• ${t(`models.${modelInfo.id}.capabilities.${capKey}`)}`}
                       primaryTypographyProps={{ variant: 'body2' }}
                     />
                   </ListItem>
@@ -317,16 +329,22 @@ export default function AiApiKeysDialog({ open, onClose }: AiApiKeysDialogProps)
               </List>
             </Paper>
 
-            <Paper variant="outlined" sx={{ p: 2, bgcolor: 'rgba(76, 175, 80, 0.08)' }}>
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 1.5,
+                background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%)'
+              }}
+            >
               <Typography variant="subtitle2" fontWeight={600} gutterBottom>
                 {t('pricing')}
               </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography variant="h6" color="success.main" fontWeight={700}>
+                  <Typography variant="h6" sx={{ color: '#667eea' }} fontWeight={700}>
                     {t('costPerPDF')}:
                   </Typography>
-                  <Typography variant="h6" color="success.main" fontWeight={700}>
+                  <Typography variant="h6" sx={{ color: '#667eea' }} fontWeight={700}>
                     {modelInfo.costPerPDF}
                   </Typography>
                 </Box>
@@ -338,7 +356,7 @@ export default function AiApiKeysDialog({ open, onClose }: AiApiKeysDialogProps)
                     {modelInfo.tokensPerPDF.total.toLocaleString()} tokens
                   </Typography>
                 </Box>
-                <Divider sx={{ my: 0.5 }} />
+                <Divider sx={{ my: 0.25 }} />
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Typography variant="body2" color="text.secondary">
                     {t('inputPrice')}:
@@ -355,7 +373,7 @@ export default function AiApiKeysDialog({ open, onClose }: AiApiKeysDialogProps)
                     {modelInfo.pricing.output} {t('perMillionTokens')}
                   </Typography>
                 </Box>
-                <Divider sx={{ my: 0.5 }} />
+                <Divider sx={{ my: 0.25 }} />
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Typography variant="body2" color="text.secondary">
                     {t('contextWindow')}:
@@ -367,11 +385,11 @@ export default function AiApiKeysDialog({ open, onClose }: AiApiKeysDialogProps)
               </Box>
             </Paper>
 
-            <Paper variant="outlined" sx={{ p: 2, bgcolor: 'rgba(33, 150, 243, 0.08)' }}>
+            <Paper variant="outlined" sx={{ p: 1.5, bgcolor: 'rgba(33, 150, 243, 0.08)' }}>
               <Typography variant="subtitle2" fontWeight={600} gutterBottom>
                 {t('bulkPricing')}
               </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography variant="body1" color="primary.main" fontWeight={600}>
                     {t('per1000PDFs')}:
