@@ -30,18 +30,23 @@ export const FIELD_MAPPINGS: Record<string, string> = {
   postalCode: 'code_postal',
   municipality: 'municipalite',
 
+  // Status and classification
+  status: 'status',
+  propType: 'type_propriete',
+  genrePropriete: 'genre_propriete',
+  typeBatiment: 'type_batiment',
+
   // Pricing
   sellPrice: 'prix_vente',
   askingPrice: 'prix_demande',
 
-  // Property type
-  propType: 'type_propriete',
+  // Property details
   yearBuilt: 'annee_construction',
 
   // Areas
   surface: 'superficie_terrain_m2',
   privateSurface: 'superficie_terrain_m2',
-  livingArea: 'superficie_habitable_m2',
+  livingArea: 'superficie_habitable_pi2',
 
   // Municipal evaluation
   terrainValue: 'eval_municipale_terrain',
@@ -52,7 +57,9 @@ export const FIELD_MAPPINGS: Record<string, string> = {
   // Taxes
   copropTax: 'frais_condo',
   schoolTax: 'taxes_scolaires_montant',
+  schoolTaxYear: 'taxes_scolaires_annee',
   municipalTax: 'taxes_municipales_montant',
+  municipalTaxYear: 'taxes_municipales_annee',
 
   // Market
   numeroMLS: 'numero_mls',
@@ -65,13 +72,16 @@ export const FIELD_MAPPINGS: Record<string, string> = {
   bathrooms: 'salle_bain',
 
   // Parking
+  stationnement: 'stationnement',
+  parkingExtras: 'extras',
   garages: 'stationnement',
   parkingSpaces: 'stationnement',
 
   // Lot
   lotNumber: 'lot_number',
 
-  // Notes/extras
+  // Notes/extras/inclusions
+  extras: 'extras',
   inclusions: 'notes',
 };
 

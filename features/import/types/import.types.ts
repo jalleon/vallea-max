@@ -18,12 +18,17 @@ export interface ExtractedPropertyData {
   postalCode?: string;
   municipality?: string;
 
+  // Status and classification
+  status?: string; // Always "Vendu" for MLS/Matrix
+  propType?: string;
+  genrePropriete?: string; // Plain-pied, etc.
+  typeBatiment?: string; // Isolé, Jumelé, En rangée, En rangée sur coin
+
   // Pricing
   sellPrice?: number;
   askingPrice?: number;
 
   // Property details
-  propType?: string;
   yearBuilt?: number;
 
   // Surfaces/Areas
@@ -40,7 +45,9 @@ export interface ExtractedPropertyData {
   // Taxes
   copropTax?: number;
   schoolTax?: number;
+  schoolTaxYear?: number;
   municipalTax?: number;
+  municipalTaxYear?: number;
 
   // Market info
   hasCentris?: boolean;
@@ -54,12 +61,15 @@ export interface ExtractedPropertyData {
   bathrooms?: number;
 
   // Parking
+  stationnement?: string; // Garage, Abri d'auto, Allée
+  parkingExtras?: string; // "Garage: 2, Allée: 3"
   walkways?: number;
   garages?: number;
   carport?: number;
   parkingSpaces?: number;
 
-  // Extras
+  // Extras and inclusions
+  extras?: string; // Combined from inclusions box
   inclusions?: string;
   pool?: number | boolean;
   foyerPoele?: number;
