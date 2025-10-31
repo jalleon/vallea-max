@@ -34,15 +34,26 @@ CRITICAL RULES:
    - Set "stationnement" to highest priority type found
    - Extract number in parenthesis and add to "parkingExtras" (e.g., "Garage (2)" → parkingExtras: "Garage: 2")
    - If multiple types: "Allée (3), Garage (1)" → stationnement: "Garage", parkingExtras: "Garage: 1, Allée: 3"
-8. INCLUSIONS/EXTRAS: Extract ALL text from "Inclusions" box and set as "extras"
-9. TAX YEARS:
+8. MULTI-UNIT PROPERTIES (Duplex/Triplex/Quadriplex/Apartment):
+   - Extract "Numéro log." values in order → "unitNumbers" as array (e.g., ["1", "2", "3"])
+   - Extract "Loyer mensuel" values in order → "unitRents" as array (e.g., [1200, 1350, 1400])
+   - Match quantities to property type: Duplex=2, Triplex=3, Quadriplex=4
+9. FOYER-POÊLE: If "foyer" is found next to "Foyer-Poêle" field:
+   - Add "Foyer" to "extras" field (append, don't overwrite)
+   - Combine with inclusions: "extras": "Frigidaire, cuisinière, Foyer"
+10. ROOM COUNTS (CRITICAL):
+   - "Chambres": Extract ONLY first number BEFORE + sign (e.g., "3 + 1" → bedrooms: 3)
+   - "Salle de bains": First number BEFORE + → bathrooms (e.g., "2 + 1" → bathrooms: 2)
+   - "Salle d'eau": Number AFTER + → powderRooms (e.g., "2 + 1" → powderRooms: 1)
+11. INCLUSIONS/EXTRAS: Extract ALL text from "Inclusions" box and set as "extras"
+12. TAX YEARS:
    - Extract year from "Taxes mun." (e.g., "4,250$ (2024)" → municipalTaxYear: 2024)
    - Extract year from "Taxes scol." (e.g., "580$ (2024)" → schoolTaxYear: 2024)
-10. Dates must be YYYY-MM-DD format
-11. Areas can be in m² or pi² - extract the NUMBER only
-12. For yes/no fields: true/false or 1/0
-13. Use null for missing/unavailable fields
-14. Property type: use exact French terms (Unifamiliale, Condo, Plex, Commercial, etc.)
+13. Dates must be YYYY-MM-DD format
+14. Areas can be in m² or pi² - extract the NUMBER only
+15. For yes/no fields: true/false or 1/0
+16. Use null for missing/unavailable fields
+17. Property type: use exact French terms (Unifamiliale, Condo, Plex, Commercial, etc.)
 
 FIELD MAPPING GUIDE:
 - Status: ALWAYS "Vendu" for MLS/Matrix → status
@@ -52,9 +63,13 @@ FIELD MAPPING GUIDE:
 - "Jours sur marché" / "DOM" / "vendu en X jours" → daysOnMarket
 - "Superficie terrain" / "Lot" → surface (in m²)
 - "Superficie habitable" / "Living area" → livingArea (in pi²)
-- "Chambres" / "Ch." / "CAC" → bedrooms
-- "Salles de bain" / "SDB" → bathrooms
+- "Chambres" (first number before +) → bedrooms (e.g., "3 + 1" → 3)
+- "Salle de bains" (first number before +) → bathrooms (e.g., "2 + 1" → 2)
+- "Salle d'eau" (number after +) → powderRooms (e.g., "2 + 1" → 1)
 - "Pièces hors-sol" / "Rooms" → roomsAboveGround
+- "Numéro log." (for multi-unit) → unitNumbers (array)
+- "Loyer mensuel" (for multi-unit) → unitRents (array)
+- "Foyer-Poêle": "foyer" → append "Foyer" to extras
 - "Éval. terrain" → terrainValue
 - "Éval. bâtiment" → batimentValue
 - "Éval. municipale totale" → totalValue
@@ -106,8 +121,8 @@ OUTPUT:
   "extras": "Frigidaire, cuisinière, laveuse-sécheuse, CAC mural"
 }
 
-EXAMPLE 2 - UNIFAMILIALE PLAIN-PIED:
-INPUT: "Superbe unifamiliale plain-pied au 2457 Rue des Érables, Brossard, J4Y 2K3. Prix: 749,500$. MLS: 98765432. Type de bâtiment: Jumelé. Terrain: 5,000 pi² (464 m²). Habitable: 2,150 pi². 4 CAC, 2 SDB + 1 SE. Piscine creusée chauffée. Stat. (total): Allée (2), Garage (2). Année: 1998. Taxes mun.: 4,250$ (2023). Taxes scol.: 580$ (2023). Inclusions: Piscine creusée chauffée, thermopompe, remise."
+EXAMPLE 2 - UNIFAMILIALE PLAIN-PIED WITH FOYER:
+INPUT: "Superbe unifamiliale plain-pied au 2457 Rue des Érables, Brossard, J4Y 2K3. Prix: 749,500$. MLS: 98765432. Type de bâtiment: Jumelé. Terrain: 5,000 pi² (464 m²). Habitable: 2,150 pi². Chambres: 3 + 1. Salle de bains et salles d'eau: 2 + 1. Foyer-Poêle: foyer au gaz. Piscine creusée chauffée. Stat. (total): Allée (2), Garage (2). Année: 1998. Taxes mun.: 4,250$ (2023). Taxes scol.: 580$ (2023). Inclusions: Piscine creusée chauffée, thermopompe, remise."
 
 OUTPUT:
 {
@@ -128,16 +143,17 @@ OUTPUT:
   "municipalTaxYear": 2023,
   "schoolTax": 580,
   "schoolTaxYear": 2023,
-  "bedrooms": 4,
+  "bedrooms": 3,
   "bathrooms": 2,
+  "powderRooms": 1,
   "stationnement": "Garage",
   "parkingExtras": "Garage: 2, Allée: 2",
   "pool": true,
-  "extras": "Piscine creusée chauffée, thermopompe, remise"
+  "extras": "Piscine creusée chauffée, thermopompe, remise, Foyer"
 }
 
-EXAMPLE 3 - PLEX:
-INPUT: "Triplex bien situé 850-852-854 Ave. Centrale, Montréal (Rosemont), H1X 2B5. Prix de vente: 895,000$. Centris 11223344. Type de bâtiment: En rangée. 3 logements 5½. Revenus: 2,850$/mois. Terrain: 3,200 pi². Bâti: 1985. Stat. (total): Allée (4). Matricule: 6543-21-9876. Éval. mun. 2024: Terrain 185,000$, Bâtiment 412,000$, Total 597,000$. Taxes mun.: 5,800$ (2024). Taxes scol.: 890$ (2024). Inclusions: 3 réfrigérateurs, 3 cuisinières, balcons."
+EXAMPLE 3 - TRIPLEX WITH MULTI-UNIT DATA:
+INPUT: "Triplex bien situé 850-852-854 Ave. Centrale, Montréal (Rosemont), H1X 2B5. Prix de vente: 895,000$. Centris 11223344. Type de bâtiment: En rangée. 3 logements 5½. Numéro log.: 850, 852, 854. Loyer mensuel: 1,200$, 1,350$, 1,300$. Revenus: 3,850$/mois. Terrain: 3,200 pi². Chambres: 9 + 3. Salle de bains et salles d'eau: 3 + 3. Bâti: 1985. Stat. (total): Allée (4). Matricule: 6543-21-9876. Éval. mun. 2024: Terrain 185,000$, Bâtiment 412,000$, Total 597,000$. Taxes mun.: 5,800$ (2024). Taxes scol.: 890$ (2024). Inclusions: 3 réfrigérateurs, 3 cuisinières, balcons."
 
 OUTPUT:
 {
@@ -147,7 +163,7 @@ OUTPUT:
   "municipality": "Rosemont",
   "postalCode": "H1X 2B5",
   "sellPrice": 895000,
-  "propType": "Plex",
+  "propType": "Triplex",
   "typeBatiment": "En rangée",
   "numeroMLS": "11223344",
   "hasCentris": true,
@@ -161,6 +177,11 @@ OUTPUT:
   "municipalTaxYear": 2024,
   "schoolTax": 890,
   "schoolTaxYear": 2024,
+  "bedrooms": 9,
+  "bathrooms": 3,
+  "powderRooms": 3,
+  "unitNumbers": ["850", "852", "854"],
+  "unitRents": [1200, 1350, 1300],
   "stationnement": "Allée",
   "parkingExtras": "Allée: 4",
   "roomsAboveGround": 15,

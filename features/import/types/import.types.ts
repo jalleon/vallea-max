@@ -59,6 +59,7 @@ export interface ExtractedPropertyData {
   roomsAboveGround?: number;
   bedrooms?: number;
   bathrooms?: number;
+  powderRooms?: number; // Salle d'eau (number after + sign)
 
   // Parking
   stationnement?: string; // Garage, Abri d'auto, Allée
@@ -76,6 +77,10 @@ export interface ExtractedPropertyData {
 
   // Lot info
   lotNumber?: string;
+
+  // Multi-unit properties (Duplex/Triplex/Quadriplex/Apartment)
+  unitNumbers?: string[]; // ["1", "2", "3"]
+  unitRents?: number[]; // [1200, 1350, 1400]
 
   // Raw fields for unmapped data
   [key: string]: any;

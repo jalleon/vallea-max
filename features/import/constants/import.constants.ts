@@ -70,6 +70,7 @@ export const FIELD_MAPPINGS: Record<string, string> = {
   roomsAboveGround: 'nombre_pieces',
   bedrooms: 'nombre_chambres',
   bathrooms: 'salle_bain',
+  powderRooms: 'salle_eau',
 
   // Parking
   stationnement: 'stationnement',

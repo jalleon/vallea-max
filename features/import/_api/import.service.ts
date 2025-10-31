@@ -88,6 +88,15 @@ class ImportService {
       if (addressParts.postalCode) mapped.code_postal = addressParts.postalCode;
     }
 
+    // Handle multi-unit data (unit_rents field expects JSONB array)
+    if (extracted.unitNumbers && extracted.unitRents) {
+      const units = extracted.unitNumbers.map((unitNumber, index) => ({
+        unit: unitNumber,
+        rent: extracted.unitRents?.[index] || 0
+      }));
+      mapped.unit_rents = units;
+    }
+
     // Set source
     mapped.source = 'import';
 
