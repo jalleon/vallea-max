@@ -1030,7 +1030,10 @@
         "title": "Type de document",
         "mls_listing": "Fiche MLS/Matrix",
         "role_foncier": "Rôle foncier",
-        "certificat_localisation": "Certificat de localisation"
+        "role_taxe": "Rôle de taxe",
+        "zonage": "Zonage",
+        "certificat_localisation": "Certificat de localisation",
+        "general": "Général"
       },
       "processing": {
         "title": "Analyse du document en cours...",

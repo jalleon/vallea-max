@@ -174,6 +174,8 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
     taxes_municipales_montant: undefined,
     taxes_scolaires_annee: undefined,
     taxes_scolaires_montant: undefined,
+    aire_habitable_m2: undefined,
+    aire_habitable_pi2: undefined,
     zoning_usages_permis: '',
 
     source: '',
@@ -301,6 +303,8 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
         taxes_municipales_montant: property.taxes_municipales_montant,
         taxes_scolaires_annee: property.taxes_scolaires_annee,
         taxes_scolaires_montant: property.taxes_scolaires_montant,
+        aire_habitable_m2: property.aire_habitable_m2,
+        aire_habitable_pi2: property.aire_habitable_pi2,
         zoning_usages_permis: property.zoning_usages_permis || '',
 
         notes: property.notes || '',
@@ -1558,7 +1562,27 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       />
                     </Grid>
 
+                    {/* Aire habitable section */}
+                    <Grid item xs={12}>
+                      <Divider sx={{ my: 1 }} />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <DualUnitInput
+                        label="Aire habitable"
+                        metricValue={formData.aire_habitable_m2}
+                        imperialValue={formData.aire_habitable_pi2}
+                        onMetricChange={(value) => handleInputChange('aire_habitable_m2', value)}
+                        onImperialChange={(value) => handleInputChange('aire_habitable_pi2', value)}
+                        metricUnit="m²"
+                        imperialUnit="pi²"
+                        conversionFactor={10.764}
+                      />
+                    </Grid>
+
                     {/* Zonage section */}
+                    <Grid item xs={12}>
+                      <Divider sx={{ my: 1 }} />
+                    </Grid>
                     <Grid item xs={12}>
                       <Typography variant="subtitle2" sx={{ fontWeight: 600, mt: 2, mb: 1 }}>
                         Zonage

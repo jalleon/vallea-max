@@ -1132,6 +1132,17 @@ export function PropertyView({
                   </Grid>
 
                   <Grid item xs={12} md={6}>
+                    <Typography variant="body2" color="text.secondary">Aire habitable</Typography>
+                    <Typography variant="body1" fontWeight={600}>
+                      {property.aire_habitable_m2 ? formatMeasurement(property.aire_habitable_m2, 'area', locale) : 'N/A'}
+                    </Typography>
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <Divider sx={{ my: 1 }} />
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
                     <Typography variant="body2" color="text.secondary">Zonage - Usages permis</Typography>
                     <Typography variant="body1" fontWeight={600}>{property.zoning_usages_permis || 'N/A'}</Typography>
                   </Grid>

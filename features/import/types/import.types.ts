@@ -2,7 +2,7 @@
  * Import Module Type Definitions
  */
 
-export type DocumentType = 'mls_listing' | 'role_foncier' | 'certificat_localisation';
+export type DocumentType = 'mls_listing' | 'role_foncier' | 'role_taxe' | 'zonage' | 'certificat_localisation' | 'general';
 
 export type ImportSource = 'pdf' | 'browser_extension';
 
@@ -35,6 +35,8 @@ export interface ExtractedPropertyData {
   surface?: number; // terrain surface
   privateSurface?: number;
   livingArea?: number;
+  aireHabitable?: number; // Aire d'étages from Rôle foncier (m²)
+  frontage?: number; // Mesure frontale (m)
 
   // Municipal evaluation
   terrainValue?: number;

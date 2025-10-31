@@ -194,32 +194,284 @@ IMPORTANT: Return ONLY valid JSON. Format:
 
 Extract ALL available fields from each listing in the document.`,
 
-  role_foncier: `You are a Quebec property tax roll (Rôle foncier) extraction assistant. Extract municipal property information from the provided text and return it in JSON format.
+  role_foncier: `You are an expert Quebec property assessment roll (Rôle foncier/Rôle d'évaluation foncière) extraction assistant. Extract ALL municipal property assessment information and return ONLY valid JSON.
 
-Focus on extracting:
-- Matricule (property ID)
-- Address and municipality
-- Lot numbers
-- Municipal evaluation (terrain, batiment, total)
-- Property type and year built
-- Municipal and school taxes
-- Zoning information
-- Building dimensions and areas
+CRITICAL RULES:
+1. Remove ALL formatting from numbers (commas, spaces, $, m², pi²)
+2. Convert ALL monetary values to numbers only (no $ sign)
+3. Extract EXACTLY as shown in the document
+4. Use null for missing/unavailable fields
+5. This data will OVERWRITE existing MLS data - extract everything accurately
 
-Return only the extracted data as JSON. Use null for missing values.`,
+REQUIRED FIELDS (exact mapping to database):
+- "matricule" → Numéro de matricule (e.g., "9855-31-7542-7-000-0000")
+- "address" → Adresse (street address only, e.g., "11971 - 11973 Avenue André-Dumas")
+- "city" → From Adresse or Municipalité (e.g., "Montréal", "Longueuil")
+- "municipality" → Arrondissement if present (e.g., "Rivière-des-Prairies - Pointe-aux-Trembles")
+- "postalCode" → From Adresse postale if present
+- "lotNumber" → Numéro de lot / Cadastre(s) et numéro(s) de lot (e.g., "1616213", "2588106")
+- "yearBuilt" → Année de construction (extract year only, e.g., 1978, 1964)
+- "surface" → Superficie (terrain) in m² (e.g., 353.2, 578.9)
+- "frontage" → Mesure frontale in meters (e.g., 13.66, 22.86)
+- "aireHabitable" → Aire d'étages in m² (e.g., 261.6, 105.9)
+- "terrainValue" → Valeur du terrain (e.g., 247200, 275000)
+- "batimentValue" → Valeur du bâtiment (e.g., 552800, 199100)
+- "totalValue" → Valeur de l'immeuble (e.g., 800000, 474100)
+- "evaluationDate" → Date de référence au marché (e.g., "2024-07-01")
+- "propType" → Utilisation prédominante (e.g., "Logement")
+- "bedrooms" → From Nombre de logements if multi-unit (e.g., 3)
+- "extras" → Additional info: Lien physique, Genre de construction, Nombre d'étages, etc.
 
-  certificat_localisation: `You are a Quebec location certificate (Certificat de localisation) extraction assistant. Extract surveying and property boundary information from the provided text and return it in JSON format.
+ADDITIONAL FIELDS TO EXTRACT:
+- Nombre d'étages → Include in extras
+- Lien physique (Jumelé, Détaché, etc.) → Include in extras
+- Genre de construction → Include in extras
+- Nombre de logements → Use for bedrooms if multi-unit property
+- Valeur imposable → Include if different from totalValue
 
-Focus on extracting:
-- Property address and lot number
-- Land dimensions (frontage, depth, area in m² and pi²)
-- Building dimensions and perimeter
-- Year of construction
-- Zoning
-- Number of floors/stories
-- Any surveyor notes or observations
+MONTREAL FORMAT EXAMPLE:
+INPUT: "Numéro de matricule: 9855-31-7542-7-000-0000, Adresse: 11971 - 11973 Avenue André-Dumas, Arrondissement: Rivière-des-Prairies - Pointe-aux-Trembles, Numéro de lot: 1616213. Mesure frontale: 13,66 m, Superficie: 353,2 m². Nombre d'étages: 2, Année de construction: 1978, Aire d'étages: 261,6 m², Lien physique: Jumelé, Nombre de logements: 3. Date de référence au marché: 2024-07-01, Valeur du terrain: 247 200$, Valeur du bâtiment: 552 800$, Valeur de l'immeuble: 800 000$."
 
-Return only the extracted data as JSON. Use null for missing values.`,
+OUTPUT:
+{
+  "properties": [{
+    "matricule": "9855-31-7542-7-000-0000",
+    "address": "11971 - 11973 Avenue André-Dumas",
+    "city": "Montréal",
+    "municipality": "Rivière-des-Prairies - Pointe-aux-Trembles",
+    "lotNumber": "1616213",
+    "yearBuilt": 1978,
+    "surface": 353.2,
+    "frontage": 13.66,
+    "aireHabitable": 261.6,
+    "terrainValue": 247200,
+    "batimentValue": 552800,
+    "totalValue": 800000,
+    "evaluationDate": "2024-07-01",
+    "propType": "Logement",
+    "bedrooms": 3,
+    "extras": "Nombre d'étages: 2, Lien physique: Jumelé, Genre de construction: À étages entiers, Nombre de logements: 3"
+  }]
+}
+
+LONGUEUIL FORMAT EXAMPLE:
+INPUT: "Numéro matricule: 0648-71-0525, Adresse: 231, BOUL. GUIMOND, LONGUEUIL, Cadastre: 2588106. Mesure frontale: 22,86 mètres, Superficie: 578,900 mètres carrés. Nombre d'étages: 1, Année de construction: 1964, Aire d'étages: 105,9 mètres carrés, Lien physique: Détaché, Nombre de logements: 1. Valeur du terrain: 275 000$, Valeur du bâtiment: 199 100$, Valeur de l'immeuble: 474 100$."
+
+OUTPUT:
+{
+  "properties": [{
+    "matricule": "0648-71-0525",
+    "address": "231 BOUL. GUIMOND",
+    "city": "Longueuil",
+    "lotNumber": "2588106",
+    "yearBuilt": 1964,
+    "surface": 578.9,
+    "frontage": 22.86,
+    "aireHabitable": 105.9,
+    "terrainValue": 275000,
+    "batimentValue": 199100,
+    "totalValue": 474100,
+    "propType": "Logement",
+    "bedrooms": 1,
+    "extras": "Nombre d'étages: 1, Lien physique: Détaché, Nombre de logements: 1"
+  }]
+}
+
+IMPORTANT NOTES:
+- This data OVERWRITES MLS data when merged
+- Extract all numeric values without formatting
+- Convert "mètres carrés" to just the number in m²
+- Keep matricule exactly as shown (with dashes and zeros)
+- Include ALL available information in extras field
+
+Return ONLY valid JSON in format: {"properties": [{...}]}`,
+
+  role_taxe: `You are an expert Quebec property tax roll (Rôle de taxe/Compte de taxes) extraction assistant. Extract ALL tax-related property information and return ONLY valid JSON.
+
+CRITICAL RULES:
+1. Remove ALL formatting from numbers (commas, spaces, $)
+2. Convert ALL monetary values to numbers only (no $ sign)
+3. Extract all tax categories and amounts
+4. Use null for missing/unavailable fields
+
+REQUIRED FIELDS:
+- "matricule" → Property matricule number
+- "address" → Full street address
+- "city" → Municipality/City name
+- "municipality" → Borough or sector if applicable
+- "postalCode" → Postal code if present
+- "totalValue" → Total municipal evaluation (base for taxes)
+- "municipalTax" → Total municipal tax amount
+- "municipalTaxYear" → Tax year
+- "schoolTax" → School tax amount
+- "schoolTaxYear" → School tax year
+- "propType" → Property type if mentioned
+- "copropTax" → Condo fees if applicable
+- "extras" → Any special charges, fees, or notes (water, sewer, waste, etc.)
+
+ADDITIONAL TAX FIELDS (if present):
+- Extract specific tax categories: "Taxe générale", "Taxe eau", "Taxe égout", "Taxe matières résiduelles", etc.
+- Include payment schedule information if available
+- Include arrears (arrérages) if mentioned
+
+EXAMPLE INPUT:
+"Compte de taxes 2024. Matricule: 1234 56 7890, Adresse: 123 Rue Principale, Longueuil J4K 1A1. Valeur imposable: 300,000$. Taxe municipale générale: 2,850$. Taxe eau/égout: 450$. Taxe matières résiduelles: 200$. Total taxes municipales: 3,500$ (2024). Taxe scolaire: 650$ (2024). Échéances: 15 mars, 15 juin, 15 sept, 15 déc."
+
+EXAMPLE OUTPUT:
+{
+  "properties": [{
+    "matricule": "1234 56 7890",
+    "address": "123 Rue Principale",
+    "city": "Longueuil",
+    "postalCode": "J4K 1A1",
+    "totalValue": 300000,
+    "municipalTax": 3500,
+    "municipalTaxYear": 2024,
+    "schoolTax": 650,
+    "schoolTaxYear": 2024,
+    "extras": "Taxe générale: 2,850$, Taxe eau/égout: 450$, Taxe matières résiduelles: 200$. Échéances: 15 mars, 15 juin, 15 sept, 15 déc"
+  }]
+}
+
+Return ONLY valid JSON in format: {"properties": [{...}]}`,
+
+  zonage: `You are an expert Quebec zoning (Zonage/Règlement de zonage) extraction assistant. Extract ALL zoning and land use information and return ONLY valid JSON.
+
+CRITICAL RULES:
+1. Remove ALL formatting from numbers and measurements
+2. Extract all zoning codes, regulations, and permitted uses
+3. Use null for missing/unavailable fields
+
+REQUIRED FIELDS:
+- "address" → Full street address
+- "city" → Municipality/City name
+- "municipality" → Borough or sector if applicable
+- "lotNumber" → Lot number(s)
+- "matricule" → Property matricule if mentioned
+- "surface" → Land area in m²
+- "extras" → Zoning information including:
+  * Zoning code/designation (e.g., "H-1", "C-2", "I-3")
+  * Permitted uses (usages autorisés)
+  * Prohibited uses (usages interdits)
+  * Height restrictions (hauteur maximale)
+  * Setback requirements (marges de recul)
+  * Lot coverage (coefficient d'occupation du sol)
+  * Parking requirements (stationnement requis)
+  * Any variances or special conditions
+  * Zoning district/sector
+
+EXAMPLE INPUT:
+"Certificat de zonage - 123 Rue Principale, Longueuil. Lot: 1234567. Matricule: 1234 56 7890. Superficie: 450 m². Zone: H-1 (Habitation unifamiliale). Usages autorisés: Unifamiliale isolée, jumelée. Hauteur max: 10.5m (2 étages). Marges: Avant 6m, Latérales 2m, Arrière 7m. Coefficient occupation sol: 35%. Stationnement: 2 espaces minimum."
+
+EXAMPLE OUTPUT:
+{
+  "properties": [{
+    "address": "123 Rue Principale",
+    "city": "Longueuil",
+    "lotNumber": "1234567",
+    "matricule": "1234 56 7890",
+    "surface": 450,
+    "extras": "Zone H-1 (Habitation unifamiliale). Usages autorisés: Unifamiliale isolée, jumelée. Hauteur max: 10.5m (2 étages). Marges de recul: Avant 6m, Latérales 2m, Arrière 7m. Coefficient occupation sol: 35%. Stationnement: 2 espaces minimum"
+  }]
+}
+
+Return ONLY valid JSON in format: {"properties": [{...}]}`,
+
+  certificat_localisation: `You are an expert Quebec location certificate (Certificat de localisation/Certificat d'implantation) extraction assistant. Extract ALL surveying and property boundary information and return ONLY valid JSON.
+
+CRITICAL RULES:
+1. Remove ALL formatting from numbers and measurements
+2. Convert measurements to m² for areas
+3. Extract precise dimensions and surveyor observations
+4. Use null for missing/unavailable fields
+
+REQUIRED FIELDS:
+- "address" → Full street address
+- "city" → Municipality/City name
+- "municipality" → Borough or sector if applicable
+- "lotNumber" → Official lot number(s)
+- "matricule" → Property matricule if mentioned
+- "surface" → Total land area in m²
+- "livingArea" → Building footprint/implantation in pi² if available
+- "yearBuilt" → Year of construction
+- "propType" → Building type if mentioned
+- "extras" → Detailed surveyor information including:
+  * Land dimensions (frontage/profondeur)
+  * Building dimensions and perimeter
+  * Number of floors/stories
+  * Distance from property lines
+  * Any encroachments (empiétements)
+  * Easements (servitudes)
+  * Surveyor observations and notes
+  * Survey date and surveyor name
+  * Certificate number
+
+EXAMPLE INPUT:
+"Certificat de localisation #CL-2024-1234. Propriété: 123 Rue Principale, Longueuil (Le Vieux-Longueuil). Lot: 1234567. Matricule: 1234 56 7890. Superficie terrain: 450.5 m² (15.2m x 29.6m). Bâtiment: Unifamiliale 2 étages, année construction: 1985. Superficie bâtiment: 950 pi². Marges de recul: Avant 6.2m, Arrière 7.8m, Latérales 1.8m et 2.1m. Arpenteur: Jean Tremblay, a.g., 15 janvier 2024. Observations: Aucun empiétement détecté. Servitude de drainage à l'arrière."
+
+EXAMPLE OUTPUT:
+{
+  "properties": [{
+    "address": "123 Rue Principale",
+    "city": "Longueuil",
+    "municipality": "Le Vieux-Longueuil",
+    "lotNumber": "1234567",
+    "matricule": "1234 56 7890",
+    "surface": 450.5,
+    "livingArea": 950,
+    "yearBuilt": 1985,
+    "propType": "Unifamiliale",
+    "extras": "Certificat #CL-2024-1234. Dimensions terrain: 15.2m x 29.6m. Bâtiment: 2 étages, 950 pi². Marges de recul: Avant 6.2m, Arrière 7.8m, Latérales 1.8m et 2.1m. Arpenteur: Jean Tremblay, a.g., 15 janvier 2024. Observations: Aucun empiétement détecté. Servitude de drainage à l'arrière"
+  }]
+}
+
+Return ONLY valid JSON in format: {"properties": [{...}]}`,
+
+  general: `You are an expert Quebec real estate document extraction assistant. Extract ALL relevant property information from any type of real estate document and return ONLY valid JSON.
+
+CRITICAL RULES:
+1. Remove ALL formatting from numbers (commas, spaces, $, m², pi²)
+2. Convert ALL monetary values to numbers only
+3. Identify document type if possible (mention in extras)
+4. Use null for missing/unavailable fields
+5. Be flexible - extract whatever information is available
+
+COMMON FIELDS (extract if present):
+- "address" → Full street address
+- "city" → Municipality/City name
+- "municipality" → Borough or sector if applicable
+- "postalCode" → Postal code
+- "matricule" → Property matricule number
+- "lotNumber" → Lot number(s)
+- "propType" → Property type
+- "yearBuilt" → Year of construction
+- "surface" → Land area in m²
+- "livingArea" → Living area in pi²
+- "terrainValue" → Land evaluation
+- "batimentValue" → Building evaluation
+- "totalValue" → Total evaluation
+- "sellPrice" → Sale price if mentioned
+- "askingPrice" → Asking price if mentioned
+- "municipalTax" → Municipal tax amount
+- "municipalTaxYear" → Tax year
+- "schoolTax" → School tax amount
+- "schoolTaxYear" → School tax year
+- "bedrooms" → Number of bedrooms
+- "bathrooms" → Number of bathrooms
+- "stationnement" → Parking type
+- "extras" → Any additional information (include document type, dates, notes, special features, etc.)
+
+EXAMPLES OF GENERAL DOCUMENTS:
+- Purchase agreements (Promesse d'achat)
+- Notarial acts (Acte notarié)
+- Building permits (Permis de construction)
+- Inspection reports (Rapport d'inspection)
+- Insurance documents (Documents d'assurance)
+- Mortgage documents (Documents hypothécaires)
+- Any other real estate related documents
+
+Return ONLY valid JSON in format: {"properties": [{...}]}
+Extract ALL available information and include document context in "extras" field.`,
 };
 
 class AIExtractionService {

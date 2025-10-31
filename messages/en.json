@@ -908,7 +908,10 @@
         "title": "Document type",
         "mls_listing": "MLS/Matrix Listing",
         "role_foncier": "Property Assessment Roll",
-        "certificat_localisation": "Location Certificate"
+        "role_taxe": "Tax Roll",
+        "zonage": "Zoning",
+        "certificat_localisation": "Location Certificate",
+        "general": "General"
       },
       "processing": {
         "title": "Analyzing document...",
