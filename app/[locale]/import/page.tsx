@@ -22,6 +22,8 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  Chip,
+  IconButton,
 } from '@mui/material';
 import {
   CloudUpload,
@@ -47,7 +49,7 @@ function ImportPageContent() {
 
   const [activeStep, setActiveStep] = useState(0);
   const [documentType, setDocumentType] = useState<DocumentType | null>(null);
-  const [selectedProvider, setSelectedProvider] = useState<'deepseek' | 'openai' | 'anthropic' | 'auto'>('auto');
+  // Always use auto mode - provider priority is managed in Settings
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
   const [session, setSession] = useState<ImportSession | null>(null);
@@ -64,6 +66,30 @@ function ImportPageContent() {
     t('steps.review'),
     t('steps.confirmation'),
   ];
+
+  // Get active provider based on priority
+  const getActiveProvider = () => {
+    const providerPriority = preferences?.providerPriority || ['deepseek', 'openai', 'anthropic'];
+    return providerPriority.find(p => preferences?.aiApiKeys?.[p]) || 'deepseek';
+  };
+
+  const getProviderDisplayName = (provider: string) => {
+    const names: Record<string, string> = {
+      deepseek: 'DeepSeek',
+      openai: 'OpenAI',
+      anthropic: 'Anthropic'
+    };
+    return names[provider] || provider;
+  };
+
+  const getProviderModel = (provider: string) => {
+    const models: Record<string, string> = {
+      deepseek: preferences?.aiModels?.deepseek || 'deepseek-chat',
+      openai: preferences?.aiModels?.openai || 'gpt-4o-mini',
+      anthropic: preferences?.aiModels?.anthropic || 'claude-3-5-haiku-20241022'
+    };
+    return models[provider] || '';
+  };
 
   // Handle PDF file selection
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,19 +116,12 @@ function ImportPageContent() {
   const handleProcessPDF = async () => {
     if (!selectedFile || !documentType) return;
 
-    // Determine which provider to use
-    let provider: 'deepseek' | 'openai' | 'anthropic';
+    // Determine which provider to use based on user priority
+    const providerPriority = preferences?.providerPriority || ['deepseek', 'openai', 'anthropic'];
 
-    if (selectedProvider === 'auto') {
-      // Auto mode: use provider priority order from user preferences
-      const providerPriority = preferences?.providerPriority || ['deepseek', 'openai', 'anthropic'];
-
-      // Find first provider with an API key
-      const availableProvider = providerPriority.find(p => preferences?.aiApiKeys?.[p]);
-      provider = availableProvider || 'deepseek'; // Fallback to deepseek if none configured
-    } else {
-      provider = selectedProvider;
-    }
+    // Find first provider with an API key
+    const availableProvider = providerPriority.find(p => preferences?.aiApiKeys?.[p]);
+    const provider = availableProvider || 'deepseek'; // Fallback to deepseek if none configured
 
     // Check if the selected provider has an API key
     const apiKey = preferences?.aiApiKeys?.[provider];
@@ -352,65 +371,47 @@ function ImportPageContent() {
         </CardContent>
       </Card>
 
-      {/* AI Provider Selection */}
+      {/* AI Provider Info */}
       <Card sx={{ borderRadius: '16px', mb: 3 }}>
         <CardContent>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, mr: 1 }}>
-              AI Provider
-            </Typography>
-            <AutoAwesome fontSize="small" color="primary" />
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <AutoAwesome color="primary" />
+              <Box>
+                <Typography variant="subtitle2" color="text.secondary" sx={{ fontSize: '12px' }}>
+                  {t('upload.aiProvider.label')}
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    {getProviderDisplayName(getActiveProvider())}
+                  </Typography>
+                  <Chip
+                    label={getProviderModel(getActiveProvider()).split('-').pop()?.toUpperCase() || 'CHAT'}
+                    size="small"
+                    color="primary"
+                    sx={{ height: 20, fontSize: '11px', fontWeight: 600 }}
+                  />
+                  {getActiveProvider() === 'deepseek' && (
+                    <Chip
+                      label="BEST"
+                      size="small"
+                      color="success"
+                      sx={{ height: 20, fontSize: '11px', fontWeight: 600 }}
+                    />
+                  )}
+                </Box>
+              </Box>
+            </Box>
+            <IconButton
+              size="small"
+              onClick={() => window.location.href = '#settings'}
+              sx={{ color: 'text.secondary' }}
+            >
+              <SettingsIcon fontSize="small" />
+            </IconButton>
           </Box>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6} md={3}>
-              <Button
-                variant={selectedProvider === 'auto' ? 'contained' : 'outlined'}
-                fullWidth
-                onClick={() => setSelectedProvider('auto')}
-                sx={{ borderRadius: '12px', textTransform: 'none', py: 1.5 }}
-              >
-                Auto (Fastest)
-              </Button>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Button
-                variant={selectedProvider === 'deepseek' ? 'contained' : 'outlined'}
-                fullWidth
-                onClick={() => setSelectedProvider('deepseek')}
-                disabled={!preferences?.aiApiKeys?.deepseek}
-                sx={{ borderRadius: '12px', textTransform: 'none', py: 1.5 }}
-              >
-                DeepSeek
-              </Button>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Button
-                variant={selectedProvider === 'openai' ? 'contained' : 'outlined'}
-                fullWidth
-                onClick={() => setSelectedProvider('openai')}
-                disabled={!preferences?.aiApiKeys?.openai}
-                sx={{ borderRadius: '12px', textTransform: 'none', py: 1.5 }}
-              >
-                OpenAI
-              </Button>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Button
-                variant={selectedProvider === 'anthropic' ? 'contained' : 'outlined'}
-                fullWidth
-                onClick={() => setSelectedProvider('anthropic')}
-                disabled={!preferences?.aiApiKeys?.anthropic}
-                sx={{ borderRadius: '12px', textTransform: 'none', py: 1.5 }}
-              >
-                Anthropic
-              </Button>
-            </Grid>
-          </Grid>
           <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: 'block' }}>
-            {selectedProvider === 'auto'
-              ? 'Will use the fastest available AI based on your configured keys (DeepSeek → OpenAI → Anthropic)'
-              : `Using ${selectedProvider.charAt(0).toUpperCase() + selectedProvider.slice(1)} AI for extraction`
-            }
+            {t('upload.aiProvider.using', { priority: '1st' })}
           </Typography>
         </CardContent>
       </Card>

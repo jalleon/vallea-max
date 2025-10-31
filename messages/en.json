@@ -862,6 +862,10 @@
       "processing": {
         "title": "Analyzing document...",
         "description": "Extracting text and structured data"
+      },
+      "aiProvider": {
+        "label": "AI Provider",
+        "using": "Using your {priority} priority provider. Change priority in Settings → AI API Keys."
       }
     },
 

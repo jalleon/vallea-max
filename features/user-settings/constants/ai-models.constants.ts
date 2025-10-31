@@ -24,6 +24,7 @@ export interface AIModelInfo {
   };
   contextWindow: string;
   recommended?: boolean;
+  best?: boolean; // Best model for MLS extraction
 }
 
 export const API_KEY_LINKS = {
@@ -61,6 +62,7 @@ export const AI_MODELS: Record<string, AIModelInfo> = {
     },
     contextWindow: '64K tokens',
     recommended: true,
+    best: true,
   },
   'deepseek-reasoner': {
     id: 'deepseek-reasoner',

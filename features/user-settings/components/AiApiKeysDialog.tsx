@@ -239,15 +239,25 @@ export default function AiApiKeysDialog({ open, onClose }: AiApiKeysDialogProps)
                     <MenuItem key={modelId} value={modelId}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
                         {modelInfo.name}
-                        {modelInfo.recommended && (
-                          <Chip
-                            label={t('recommended')}
-                            size="small"
-                            color="primary"
-                            icon={<Star />}
-                            sx={{ ml: 'auto', height: 20 }}
-                          />
-                        )}
+                        <Box sx={{ ml: 'auto', display: 'flex', gap: 0.5 }}>
+                          {modelInfo.best && (
+                            <Chip
+                              label="BEST"
+                              size="small"
+                              color="success"
+                              sx={{ height: 20, fontSize: '10px', fontWeight: 600 }}
+                            />
+                          )}
+                          {modelInfo.recommended && (
+                            <Chip
+                              label={t('recommended')}
+                              size="small"
+                              color="primary"
+                              icon={<Star />}
+                              sx={{ height: 20 }}
+                            />
+                          )}
+                        </Box>
                       </Box>
                     </MenuItem>
                   );

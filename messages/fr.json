@@ -984,6 +984,10 @@
       "processing": {
         "title": "Analyse du document en cours...",
         "description": "Extraction des données textuelles et structurées"
+      },
+      "aiProvider": {
+        "label": "Fournisseur IA",
+        "using": "Utilisation de votre fournisseur de {priority} priorité. Modifiez la priorité dans Paramètres → Clés API IA."
       }
     },
 
