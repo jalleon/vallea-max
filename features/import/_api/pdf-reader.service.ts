@@ -2,41 +2,60 @@
  * PDF reading and text extraction service
  */
 
-const PDFExtract = require('pdf.js-extract').PDFExtract;
+const PDFParser = require('pdf2json');
 
 class PdfReaderService {
   /**
-   * Extract text content from PDF buffer using pdf.js-extract
+   * Extract text content from PDF buffer using pdf2json
    */
   async extractText(buffer: Buffer): Promise<string> {
-    try {
-      const pdfExtract = new PDFExtract();
-      const options = {}; // Can add options if needed
+    return new Promise((resolve, reject) => {
+      const pdfParser = new PDFParser();
 
-      const data = await pdfExtract.extractBuffer(buffer, options);
+      pdfParser.on('pdfParser_dataError', (errData: any) => {
+        console.error('PDF extraction error:', errData.parserError);
+        reject(new Error('Failed to extract text from PDF'));
+      });
 
-      // Extract text from all pages
-      let fullText = '';
-      for (const page of data.pages) {
-        for (const item of page.content) {
-          if (item.str) {
-            fullText += item.str + ' ';
+      pdfParser.on('pdfParser_dataReady', (pdfData: any) => {
+        try {
+          // Extract text from all pages
+          let fullText = '';
+
+          if (pdfData.Pages) {
+            for (const page of pdfData.Pages) {
+              if (page.Texts) {
+                for (const text of page.Texts) {
+                  if (text.R) {
+                    for (const run of text.R) {
+                      if (run.T) {
+                        // Decode URI component (pdf2json encodes text)
+                        fullText += decodeURIComponent(run.T) + ' ';
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
+
+          fullText = fullText.trim();
+
+          // Detailed logging
+          console.log(`[PDF Debug] Pages: ${pdfData.Pages?.length || 0}`);
+          console.log(`[PDF Debug] Text length: ${fullText.length}`);
+          console.log(`[PDF Debug] First 200 chars: "${fullText.substring(0, 200)}"`);
+
+          resolve(fullText);
+        } catch (error) {
+          console.error('PDF parsing error:', error);
+          reject(new Error('Failed to parse PDF data'));
         }
-      }
+      });
 
-      fullText = fullText.trim();
-
-      // Detailed logging
-      console.log(`[PDF Debug] Pages: ${data.pages.length}`);
-      console.log(`[PDF Debug] Text length: ${fullText.length}`);
-      console.log(`[PDF Debug] First 200 chars: "${fullText.substring(0, 200)}"`);
-
-      return fullText;
-    } catch (error) {
-      console.error('PDF extraction error:', error);
-      throw new Error('Failed to extract text from PDF');
-    }
+      // Parse the buffer
+      pdfParser.parseBuffer(buffer);
+    });
   }
 
   /**
