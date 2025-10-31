@@ -63,6 +63,7 @@ export default function AiApiKeysDialog({ open, onClose }: AiApiKeysDialogProps)
   const [infoDialog, setInfoDialog] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [providerPriority, setProviderPriority] = useState<('deepseek' | 'openai' | 'anthropic')[]>(['deepseek', 'openai', 'anthropic']);
 
   useEffect(() => {
     if (preferences?.aiApiKeys) {
@@ -74,6 +75,9 @@ export default function AiApiKeysDialog({ open, onClose }: AiApiKeysDialogProps)
       setDeepseekModel(preferences.aiModels.deepseek || DEFAULT_MODELS.deepseek);
       setOpenaiModel(preferences.aiModels.openai || DEFAULT_MODELS.openai);
       setAnthropicModel(preferences.aiModels.anthropic || DEFAULT_MODELS.anthropic);
+    }
+    if (preferences?.providerPriority) {
+      setProviderPriority(preferences.providerPriority);
     }
   }, [preferences]);
 
@@ -93,7 +97,8 @@ export default function AiApiKeysDialog({ open, onClose }: AiApiKeysDialogProps)
           deepseek: deepseekModel,
           openai: openaiModel,
           anthropic: anthropicModel,
-        }
+        },
+        providerPriority
       );
 
       setSaving(false);
@@ -119,6 +124,26 @@ export default function AiApiKeysDialog({ open, onClose }: AiApiKeysDialogProps)
     setShowKeys((prev) => ({ ...prev, [provider]: !prev[provider] }));
   };
 
+  const setPrimaryProvider = (provider: 'deepseek' | 'openai' | 'anthropic') => {
+    const otherProviders = providerPriority.filter(p => p !== provider);
+    setProviderPriority([provider, ...otherProviders]);
+  };
+
+  const getPriorityLabel = (provider: 'deepseek' | 'openai' | 'anthropic'): string => {
+    const index = providerPriority.indexOf(provider);
+    if (index === 0) return t('priority1');
+    if (index === 1) return t('priority2');
+    if (index === 2) return t('priority3');
+    return '';
+  };
+
+  const getPriorityColor = (provider: 'deepseek' | 'openai' | 'anthropic'): 'primary' | 'default' | 'secondary' => {
+    const index = providerPriority.indexOf(provider);
+    if (index === 0) return 'primary';
+    if (index === 1) return 'default';
+    return 'secondary';
+  };
+
   const renderProviderSection = (
     provider: 'deepseek' | 'openai' | 'anthropic',
     label: string,
@@ -133,20 +158,45 @@ export default function AiApiKeysDialog({ open, onClose }: AiApiKeysDialogProps)
           <Typography variant="subtitle2" fontWeight={600}>
             {label}
           </Typography>
+          <Chip
+            label={getPriorityLabel(provider)}
+            color={getPriorityColor(provider)}
+            size="small"
+            sx={{ height: 20 }}
+          />
+          {providerPriority[0] !== provider && apiKey && (
+            <Tooltip title={t('priorityHint')}>
+              <Button
+                size="small"
+                variant="outlined"
+                onClick={() => setPrimaryProvider(provider)}
+                sx={{
+                  ml: 1,
+                  textTransform: 'none',
+                  minWidth: 'auto',
+                  fontSize: '11px',
+                  py: 0.25,
+                  px: 1,
+                  height: 22
+                }}
+              >
+                {t('setPrimary')}
+              </Button>
+            </Tooltip>
+          )}
           <Button
             size="small"
             variant="text"
             href={API_KEY_LINKS[provider]}
             target="_blank"
             rel="noopener noreferrer"
-            sx={{ ml: 1, textTransform: 'none', minWidth: 'auto' }}
+            sx={{ ml: 'auto', textTransform: 'none', minWidth: 'auto' }}
           >
             {t('getApiKey')}
           </Button>
           <IconButton
             size="small"
             onClick={() => setInfoDialog(model)}
-            sx={{ ml: 'auto' }}
           >
             <Info fontSize="small" color="primary" />
           </IconButton>

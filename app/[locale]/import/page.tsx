@@ -94,12 +94,12 @@ function ImportPageContent() {
     let provider: 'deepseek' | 'openai' | 'anthropic';
 
     if (selectedProvider === 'auto') {
-      // Auto mode: prioritize DeepSeek > OpenAI > Anthropic
-      provider = preferences?.aiApiKeys?.deepseek
-        ? 'deepseek'
-        : preferences?.aiApiKeys?.openai
-        ? 'openai'
-        : 'anthropic';
+      // Auto mode: use provider priority order from user preferences
+      const providerPriority = preferences?.providerPriority || ['deepseek', 'openai', 'anthropic'];
+
+      // Find first provider with an API key
+      const availableProvider = providerPriority.find(p => preferences?.aiApiKeys?.[p]);
+      provider = availableProvider || 'deepseek'; // Fallback to deepseek if none configured
     } else {
       provider = selectedProvider;
     }

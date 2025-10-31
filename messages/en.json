@@ -231,7 +231,14 @@
       "per1000PDFs": "For 1,000 PDFs",
       "tokensFor1000": "Tokens for 1,000",
       "active": "Active",
-      "fallback": "Fallback"
+      "fallback": "Fallback",
+      "priority": "Priority",
+      "setPrimary": "Set as Primary",
+      "primary": "Primary",
+      "priorityHint": "Click to set as primary provider",
+      "priority1": "1st Choice",
+      "priority2": "2nd Choice",
+      "priority3": "3rd Choice"
     }
   },
 

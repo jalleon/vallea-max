@@ -19,6 +19,7 @@ export interface UserPreferences {
     openai: string;
     anthropic: string;
   };
+  providerPriority: ('deepseek' | 'openai' | 'anthropic')[];
 }
 
 export interface UserProfile {
@@ -55,9 +56,9 @@ export const settingsService = {
       return null;
     }
 
-    // Ensure aiApiKeys and aiModels exist in preferences
+    // Ensure aiApiKeys, aiModels, and providerPriority exist in preferences
     const profile = data as UserProfile;
-    if (!profile.preferences.aiApiKeys || !profile.preferences.aiModels) {
+    if (!profile.preferences.aiApiKeys || !profile.preferences.aiModels || !profile.preferences.providerPriority) {
       profile.preferences = {
         ...profile.preferences,
         aiApiKeys: profile.preferences.aiApiKeys || {
@@ -70,6 +71,7 @@ export const settingsService = {
           openai: 'gpt-4o-mini',
           anthropic: 'claude-3-5-haiku-20241022',
         },
+        providerPriority: profile.preferences.providerPriority || ['deepseek', 'openai', 'anthropic'],
       };
     }
 
@@ -119,11 +121,12 @@ export const settingsService = {
   },
 
   /**
-   * Update AI API keys and models
+   * Update AI API keys, models, and provider priority
    */
   async updateAiApiKeys(
     apiKeys: Partial<UserPreferences['aiApiKeys']>,
-    models?: Partial<UserPreferences['aiModels']>
+    models?: Partial<UserPreferences['aiModels']>,
+    providerPriority?: UserPreferences['providerPriority']
   ): Promise<boolean> {
     try {
       console.log('updateAiApiKeys called with:', { apiKeys, models });
@@ -171,7 +174,7 @@ export const settingsService = {
         anthropic: 'claude-3-5-haiku-20241022',
       };
 
-      // Merge AI API keys and models
+      // Merge AI API keys, models, and provider priority
       const updatedPreferences = {
         ...currentPreferences,
         aiApiKeys: {
@@ -182,6 +185,7 @@ export const settingsService = {
           ...(currentPreferences.aiModels || defaultAiModels),
           ...(models || {}),
         },
+        providerPriority: providerPriority || currentPreferences.providerPriority || ['deepseek', 'openai', 'anthropic'],
       };
 
       console.log('Updated preferences to save:', updatedPreferences);

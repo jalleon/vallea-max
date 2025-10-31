@@ -7,7 +7,7 @@ interface SettingsContextType {
   preferences: UserPreferences | null;
   loading: boolean;
   updatePreferences: (preferences: Partial<UserPreferences>) => Promise<boolean>;
-  updateAiApiKeys: (apiKeys: Partial<UserPreferences['aiApiKeys']>, models?: Partial<UserPreferences['aiModels']>) => Promise<boolean>;
+  updateAiApiKeys: (apiKeys: Partial<UserPreferences['aiApiKeys']>, models?: Partial<UserPreferences['aiModels']>, providerPriority?: UserPreferences['providerPriority']) => Promise<boolean>;
   refreshPreferences: () => Promise<void>;
 }
 
@@ -40,9 +40,10 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
   const updateAiApiKeys = async (
     apiKeys: Partial<UserPreferences['aiApiKeys']>,
-    models?: Partial<UserPreferences['aiModels']>
+    models?: Partial<UserPreferences['aiModels']>,
+    providerPriority?: UserPreferences['providerPriority']
   ): Promise<boolean> => {
-    const success = await settingsService.updateAiApiKeys(apiKeys, models);
+    const success = await settingsService.updateAiApiKeys(apiKeys, models, providerPriority);
     if (success) {
       await loadPreferences();
     }
