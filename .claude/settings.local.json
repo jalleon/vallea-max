@@ -26,7 +26,8 @@
       "Bash(if [ -d .next ])",
       "Bash(then rm -rf .next)",
       "Bash(else echo \".next folder not found\")",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npm uninstall:*)"
     ],
     "deny": [],
     "ask": []
