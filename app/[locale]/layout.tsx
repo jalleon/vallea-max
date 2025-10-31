@@ -6,6 +6,7 @@ import { getMessages } from 'next-intl/server'
 import { locales } from '@/i18n'
 import { ValleaThemeProvider } from '@/components/providers/ThemeProvider'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { SettingsProvider } from '@/contexts/SettingsContext'
 import '../globals.css'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
@@ -46,7 +47,9 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <ValleaThemeProvider>
             <AuthProvider>
-              {children}
+              <SettingsProvider>
+                {children}
+              </SettingsProvider>
             </AuthProvider>
           </ValleaThemeProvider>
         </NextIntlClientProvider>

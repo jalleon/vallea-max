@@ -13,7 +13,13 @@ class ImportService {
    * Process PDF file via API route (server-side processing)
    * Supports multi-property PDFs
    */
-  async processPDF(file: File, documentType: DocumentType): Promise<ImportSession> {
+  async processPDF(
+    file: File,
+    documentType: DocumentType,
+    apiKey: string,
+    provider: 'deepseek' | 'openai' | 'anthropic' = 'deepseek',
+    model?: string
+  ): Promise<ImportSession> {
     const session: ImportSession = {
       id: crypto.randomUUID(),
       documentType,
@@ -30,6 +36,11 @@ class ImportService {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('documentType', documentType);
+      formData.append('apiKey', apiKey);
+      formData.append('provider', provider);
+      if (model) {
+        formData.append('model', model);
+      }
 
       const response = await fetch('/api/import/process-pdf', {
         method: 'POST',

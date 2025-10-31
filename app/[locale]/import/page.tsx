@@ -28,6 +28,8 @@ import {
   Language,
   PictureAsPdf,
   CheckCircle,
+  Settings as SettingsIcon,
+  AutoAwesome,
 } from '@mui/icons-material';
 import { MaterialDashboardLayout } from '@/components/layout/MaterialDashboardLayout';
 import { DocumentType, ImportSession } from '@/features/import/types/import.types';
@@ -35,14 +37,17 @@ import { importService } from '@/features/import/_api/import.service';
 import { DOCUMENT_TYPES, MAX_FILE_SIZE } from '@/features/import/constants/import.constants';
 import { propertiesSupabaseService } from '@/features/library/_api/properties-supabase.service';
 import { Property } from '@/features/library/types/property.types';
+import { useSettings } from '@/contexts/SettingsContext';
 
 function ImportPageContent() {
   const t = useTranslations('import');
   const tCommon = useTranslations('common');
   const router = useRouter();
+  const { preferences } = useSettings();
 
   const [activeStep, setActiveStep] = useState(0);
   const [documentType, setDocumentType] = useState<DocumentType | null>(null);
+  const [selectedProvider, setSelectedProvider] = useState<'deepseek' | 'openai' | 'anthropic' | 'auto'>('auto');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
   const [session, setSession] = useState<ImportSession | null>(null);
@@ -85,11 +90,36 @@ function ImportPageContent() {
   const handleProcessPDF = async () => {
     if (!selectedFile || !documentType) return;
 
+    // Determine which provider to use
+    let provider: 'deepseek' | 'openai' | 'anthropic';
+
+    if (selectedProvider === 'auto') {
+      // Auto mode: prioritize DeepSeek > OpenAI > Anthropic
+      provider = preferences?.aiApiKeys?.deepseek
+        ? 'deepseek'
+        : preferences?.aiApiKeys?.openai
+        ? 'openai'
+        : 'anthropic';
+    } else {
+      provider = selectedProvider;
+    }
+
+    // Check if the selected provider has an API key
+    const apiKey = preferences?.aiApiKeys?.[provider];
+
+    if (!apiKey) {
+      setError(`Please configure your ${provider.toUpperCase()} API key in Settings (top right menu) before importing.`);
+      return;
+    }
+
+    // Get the selected model for the provider
+    const model = preferences?.aiModels?.[provider];
+
     setProcessing(true);
     setError(null);
 
     try {
-      const result = await importService.processPDF(selectedFile, documentType);
+      const result = await importService.processPDF(selectedFile, documentType, apiKey, provider, model);
 
       // Check for duplicates in all extracted properties
       if (result.properties && result.properties.length > 0) {
@@ -319,6 +349,69 @@ function ImportPageContent() {
               </Grid>
             ))}
           </Grid>
+        </CardContent>
+      </Card>
+
+      {/* AI Provider Selection */}
+      <Card sx={{ borderRadius: '16px', mb: 3 }}>
+        <CardContent>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, mr: 1 }}>
+              AI Provider
+            </Typography>
+            <AutoAwesome fontSize="small" color="primary" />
+          </Box>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6} md={3}>
+              <Button
+                variant={selectedProvider === 'auto' ? 'contained' : 'outlined'}
+                fullWidth
+                onClick={() => setSelectedProvider('auto')}
+                sx={{ borderRadius: '12px', textTransform: 'none', py: 1.5 }}
+              >
+                Auto (Fastest)
+              </Button>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Button
+                variant={selectedProvider === 'deepseek' ? 'contained' : 'outlined'}
+                fullWidth
+                onClick={() => setSelectedProvider('deepseek')}
+                disabled={!preferences?.aiApiKeys?.deepseek}
+                sx={{ borderRadius: '12px', textTransform: 'none', py: 1.5 }}
+              >
+                DeepSeek
+              </Button>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Button
+                variant={selectedProvider === 'openai' ? 'contained' : 'outlined'}
+                fullWidth
+                onClick={() => setSelectedProvider('openai')}
+                disabled={!preferences?.aiApiKeys?.openai}
+                sx={{ borderRadius: '12px', textTransform: 'none', py: 1.5 }}
+              >
+                OpenAI
+              </Button>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Button
+                variant={selectedProvider === 'anthropic' ? 'contained' : 'outlined'}
+                fullWidth
+                onClick={() => setSelectedProvider('anthropic')}
+                disabled={!preferences?.aiApiKeys?.anthropic}
+                sx={{ borderRadius: '12px', textTransform: 'none', py: 1.5 }}
+              >
+                Anthropic
+              </Button>
+            </Grid>
+          </Grid>
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: 'block' }}>
+            {selectedProvider === 'auto'
+              ? 'Will use the fastest available AI based on your configured keys (DeepSeek → OpenAI → Anthropic)'
+              : `Using ${selectedProvider.charAt(0).toUpperCase() + selectedProvider.slice(1)} AI for extraction`
+            }
+          </Typography>
         </CardContent>
       </Card>
 

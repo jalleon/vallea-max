@@ -223,29 +223,48 @@ Return only the extracted data as JSON. Use null for missing values.`,
 };
 
 class AIExtractionService {
-  private client: OpenAI;
-
-  constructor() {
-    // Initialize DeepSeek API client
-    this.client = new OpenAI({
-      apiKey: process.env.DEEPSEEK_API_KEY || '',
-      baseURL: 'https://api.deepseek.com',
-    });
-  }
-
   /**
    * Extract property data from text using AI
    * Returns array of extracted properties (supports multi-listing PDFs)
    */
   async extractFromText(
     text: string,
-    documentType: DocumentType
+    documentType: DocumentType,
+    apiKey: string,
+    provider: 'deepseek' | 'openai' | 'anthropic' = 'deepseek',
+    model?: string
   ): Promise<ExtractedPropertyData[]> {
     try {
+      if (!apiKey) {
+        throw new Error('API key is required. Please configure your AI API key in Settings.');
+      }
+
+      // Initialize client with user's API key
+      const baseURLs = {
+        deepseek: 'https://api.deepseek.com',
+        openai: 'https://api.openai.com/v1',
+        anthropic: 'https://api.anthropic.com',
+      };
+
+      // Default models if not specified
+      const defaultModels = {
+        deepseek: 'deepseek-chat',
+        openai: 'gpt-4o-mini',
+        anthropic: 'claude-3-5-haiku-20241022',
+      };
+
+      const client = new OpenAI({
+        apiKey,
+        baseURL: baseURLs[provider],
+      });
+
       const systemPrompt = SYSTEM_PROMPTS[documentType];
 
-      const response = await this.client.chat.completions.create({
-        model: 'deepseek-chat',
+      // Use provided model or fall back to default
+      const selectedModel = model || defaultModels[provider];
+
+      const response = await client.chat.completions.create({
+        model: selectedModel,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: text },

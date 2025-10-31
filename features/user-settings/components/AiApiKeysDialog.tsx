@@ -1,0 +1,383 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  Box,
+  Typography,
+  Alert,
+  InputAdornment,
+  IconButton,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Chip,
+  Tooltip,
+  Paper,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
+} from '@mui/material';
+import {
+  Visibility,
+  VisibilityOff,
+  Key,
+  Info,
+  Star,
+} from '@mui/icons-material';
+import { useTranslations } from 'next-intl';
+import { useSettings } from '@/contexts/SettingsContext';
+import { AI_MODELS, AI_MODELS_BY_PROVIDER, DEFAULT_MODELS, API_KEY_LINKS } from '../constants/ai-models.constants';
+
+interface AiApiKeysDialogProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+export default function AiApiKeysDialog({ open, onClose }: AiApiKeysDialogProps) {
+  const t = useTranslations('settings.aiApiKeys');
+  const tCommon = useTranslations('common');
+  const { preferences, updateAiApiKeys } = useSettings();
+
+  const [deepseekKey, setDeepseekKey] = useState('');
+  const [openaiKey, setOpenaiKey] = useState('');
+  const [anthropicKey, setAnthropicKey] = useState('');
+
+  const [deepseekModel, setDeepseekModel] = useState(DEFAULT_MODELS.deepseek);
+  const [openaiModel, setOpenaiModel] = useState(DEFAULT_MODELS.openai);
+  const [anthropicModel, setAnthropicModel] = useState(DEFAULT_MODELS.anthropic);
+
+  const [showKeys, setShowKeys] = useState({
+    deepseek: false,
+    openai: false,
+    anthropic: false,
+  });
+
+  const [infoDialog, setInfoDialog] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  useEffect(() => {
+    if (preferences?.aiApiKeys) {
+      setDeepseekKey(preferences.aiApiKeys.deepseek || '');
+      setOpenaiKey(preferences.aiApiKeys.openai || '');
+      setAnthropicKey(preferences.aiApiKeys.anthropic || '');
+    }
+    if (preferences?.aiModels) {
+      setDeepseekModel(preferences.aiModels.deepseek || DEFAULT_MODELS.deepseek);
+      setOpenaiModel(preferences.aiModels.openai || DEFAULT_MODELS.openai);
+      setAnthropicModel(preferences.aiModels.anthropic || DEFAULT_MODELS.anthropic);
+    }
+  }, [preferences]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    setAlert(null);
+
+    try {
+      console.log('Attempting to save AI API keys...');
+      const success = await updateAiApiKeys(
+        {
+          deepseek: deepseekKey || null,
+          openai: openaiKey || null,
+          anthropic: anthropicKey || null,
+        },
+        {
+          deepseek: deepseekModel,
+          openai: openaiModel,
+          anthropic: anthropicModel,
+        }
+      );
+
+      setSaving(false);
+
+      if (success) {
+        console.log('AI API keys saved successfully');
+        setAlert({ type: 'success', message: t('saved') });
+        setTimeout(() => {
+          onClose();
+        }, 1500);
+      } else {
+        console.error('Failed to save AI API keys - service returned false');
+        setAlert({ type: 'error', message: t('error') });
+      }
+    } catch (error) {
+      console.error('Error saving AI API keys:', error);
+      setSaving(false);
+      setAlert({ type: 'error', message: `${t('error')}: ${error instanceof Error ? error.message : 'Unknown error'}` });
+    }
+  };
+
+  const toggleShowKey = (provider: 'deepseek' | 'openai' | 'anthropic') => {
+    setShowKeys((prev) => ({ ...prev, [provider]: !prev[provider] }));
+  };
+
+  const renderProviderSection = (
+    provider: 'deepseek' | 'openai' | 'anthropic',
+    label: string,
+    apiKey: string,
+    setApiKey: (value: string) => void,
+    model: string,
+    setModel: (value: string) => void
+  ) => {
+    return (
+      <Box sx={{ mb: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+          <Typography variant="subtitle2" fontWeight={600}>
+            {label}
+          </Typography>
+          <Button
+            size="small"
+            variant="text"
+            href={API_KEY_LINKS[provider]}
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{ ml: 1, textTransform: 'none', minWidth: 'auto' }}
+          >
+            {t('getApiKey')}
+          </Button>
+          <IconButton
+            size="small"
+            onClick={() => setInfoDialog(model)}
+            sx={{ ml: 'auto' }}
+          >
+            <Info fontSize="small" color="primary" />
+          </IconButton>
+        </Box>
+
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <TextField
+              label={t('placeholder')}
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              type={showKeys[provider] ? 'text' : 'password'}
+              placeholder={t('placeholder')}
+              size="small"
+              fullWidth
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => toggleShowKey(provider)}
+                      edge="end"
+                      size="small"
+                    >
+                      {showKeys[provider] ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <FormControl size="small" fullWidth>
+              <InputLabel>{t('model')}</InputLabel>
+              <Select
+                value={model}
+                onChange={(e) => setModel(e.target.value)}
+                label={t('model')}
+              >
+                {AI_MODELS_BY_PROVIDER[provider].map((modelId) => {
+                  const modelInfo = AI_MODELS[modelId];
+                  return (
+                    <MenuItem key={modelId} value={modelId}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+                        {modelInfo.name}
+                        {modelInfo.recommended && (
+                          <Chip
+                            label={t('recommended')}
+                            size="small"
+                            color="primary"
+                            icon={<Star />}
+                            sx={{ ml: 'auto', height: 20 }}
+                          />
+                        )}
+                      </Box>
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </FormControl>
+          </Box>
+      </Box>
+    );
+  };
+
+  const renderModelInfoDialog = () => {
+    if (!infoDialog) return null;
+    const modelInfo = AI_MODELS[infoDialog];
+    if (!modelInfo) return null;
+
+    return (
+      <Dialog
+        open={Boolean(infoDialog)}
+        onClose={() => setInfoDialog(null)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Info color="primary" />
+            {modelInfo.name}
+            {modelInfo.recommended && (
+              <Chip
+                label={t('recommended')}
+                size="small"
+                color="primary"
+                icon={<Star />}
+              />
+            )}
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              {modelInfo.description}
+            </Typography>
+
+            <Paper variant="outlined" sx={{ p: 2 }}>
+              <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                {t('capabilities')}
+              </Typography>
+              <List dense>
+                {modelInfo.capabilities.map((capability, index) => (
+                  <ListItem key={index} sx={{ py: 0.5, px: 0 }}>
+                    <ListItemText
+                      primary={`• ${capability}`}
+                      primaryTypographyProps={{ variant: 'body2' }}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            </Paper>
+
+            <Paper variant="outlined" sx={{ p: 2, bgcolor: 'rgba(76, 175, 80, 0.08)' }}>
+              <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                {t('pricing')}
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="h6" color="success.main" fontWeight={700}>
+                    {t('costPerPDF')}:
+                  </Typography>
+                  <Typography variant="h6" color="success.main" fontWeight={700}>
+                    {modelInfo.costPerPDF}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    {t('avgTokens')}:
+                  </Typography>
+                  <Typography variant="body2" fontWeight={600}>
+                    {modelInfo.tokensPerPDF.total.toLocaleString()} tokens
+                  </Typography>
+                </Box>
+                <Divider sx={{ my: 0.5 }} />
+                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    {t('inputPrice')}:
+                  </Typography>
+                  <Typography variant="body2">
+                    {modelInfo.pricing.input} {t('perMillionTokens')}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    {t('outputPrice')}:
+                  </Typography>
+                  <Typography variant="body2">
+                    {modelInfo.pricing.output} {t('perMillionTokens')}
+                  </Typography>
+                </Box>
+                <Divider sx={{ my: 0.5 }} />
+                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    {t('contextWindow')}:
+                  </Typography>
+                  <Typography variant="body2" fontWeight={600}>
+                    {modelInfo.contextWindow}
+                  </Typography>
+                </Box>
+              </Box>
+            </Paper>
+
+            <Paper variant="outlined" sx={{ p: 2, bgcolor: 'rgba(33, 150, 243, 0.08)' }}>
+              <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                {t('bulkPricing')}
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="body1" color="primary.main" fontWeight={600}>
+                    {t('per1000PDFs')}:
+                  </Typography>
+                  <Typography variant="body1" color="primary.main" fontWeight={600}>
+                    {modelInfo.bulkPricing.per1000PDFs}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    {t('tokensFor1000')}:
+                  </Typography>
+                  <Typography variant="body2" fontWeight={600}>
+                    {modelInfo.bulkPricing.tokensFor1000}
+                  </Typography>
+                </Box>
+              </Box>
+            </Paper>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setInfoDialog(null)}>{tCommon('close')}</Button>
+        </DialogActions>
+      </Dialog>
+    );
+  };
+
+  return (
+    <>
+      <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+        <DialogTitle>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Key color="primary" />
+            {t('title')}
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            {t('description')}
+          </Typography>
+
+          {alert && (
+            <Alert severity={alert.type} sx={{ mb: 2 }}>
+              {alert.message}
+            </Alert>
+          )}
+
+          {renderProviderSection('deepseek', t('deepseek'), deepseekKey, setDeepseekKey, deepseekModel, setDeepseekModel)}
+          {renderProviderSection('openai', t('openai'), openaiKey, setOpenaiKey, openaiModel, setOpenaiModel)}
+          {renderProviderSection('anthropic', t('anthropic'), anthropicKey, setAnthropicKey, anthropicModel, setAnthropicModel)}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={onClose} disabled={saving}>
+            {tCommon('cancel')}
+          </Button>
+          <Button
+            onClick={handleSave}
+            variant="contained"
+            disabled={saving}
+          >
+            {saving ? tCommon('loading') : tCommon('save')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {renderModelInfoDialog()}
+    </>
+  );
+}

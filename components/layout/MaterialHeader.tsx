@@ -21,11 +21,13 @@ import {
   Logout,
   Person,
   Language,
-  ChevronRight
+  ChevronRight,
+  Key
 } from '@mui/icons-material'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter, usePathname } from 'next/navigation'
 import { useTranslation } from '@/hooks/useTranslation'
+import AiApiKeysDialog from '@/features/user-settings/components/AiApiKeysDialog'
 
 interface MaterialHeaderProps {
   onMenuClick: () => void
@@ -40,6 +42,7 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
   const { t, locale } = useTranslation('common')
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null)
+  const [apiKeysDialogOpen, setApiKeysDialogOpen] = useState(false)
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
@@ -78,6 +81,12 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
 
     const newPath = segments.join('/').replace('//', '/')
     router.push(newPath)
+    handleSettingsClose()
+    handleMenuClose()
+  }
+
+  const handleOpenApiKeysDialog = () => {
+    setApiKeysDialogOpen(true)
     handleSettingsClose()
     handleMenuClose()
   }
@@ -192,9 +201,20 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
             >
               <ListItemText inset>English</ListItemText>
             </MenuItem>
+            <Divider />
+            <MenuItem onClick={handleOpenApiKeysDialog}>
+              <ListItemIcon>
+                <Key fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary="Clés API IA / AI API Keys" />
+            </MenuItem>
           </Menu>
         </Box>
       </Toolbar>
+      <AiApiKeysDialog
+        open={apiKeysDialogOpen}
+        onClose={() => setApiKeysDialogOpen(false)}
+      />
     </AppBar>
   )
 }

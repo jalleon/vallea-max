@@ -13,6 +13,9 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const documentType = formData.get('documentType') as DocumentType;
+    const apiKey = formData.get('apiKey') as string;
+    const provider = (formData.get('provider') as 'deepseek' | 'openai' | 'anthropic') || 'deepseek';
+    const model = formData.get('model') as string | undefined;
 
     if (!file) {
       return NextResponse.json(
@@ -28,6 +31,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: 'No API key provided. Please configure your AI API key in Settings.' },
+        { status: 400 }
+      );
+    }
+
     // Extract text from PDF
     const pdfText = await pdfReaderService.extractTextFromFile(file);
 
@@ -39,7 +49,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Use AI to extract structured data (now returns array of properties)
-    const extractedPropertiesArray = await aiExtractionService.extractFromText(pdfText, documentType);
+    const extractedPropertiesArray = await aiExtractionService.extractFromText(
+      pdfText,
+      documentType,
+      apiKey,
+      provider,
+      model
+    );
 
     // Process each property
     const properties = await Promise.all(
