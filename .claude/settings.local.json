@@ -19,7 +19,8 @@
       "Bash(if [ -f .env.local ])",
       "Bash(then echo \"EXISTS\")",
       "Bash(else echo \"NOT_FOUND\")",
-      "Bash(fi)"
+      "Bash(fi)",
+      "Bash(git merge-base:*)"
     ],
     "deny": [],
     "ask": []

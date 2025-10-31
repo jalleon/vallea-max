@@ -32,7 +32,8 @@ CRITICAL RULES:
 7. STATIONNEMENT: Extract from "Stat. (total)" field:
    - Priority order: Garage > Abri d'auto > Allée
    - Set "stationnement" to highest priority type found
-   - Extract number in parenthesis and add to "parkingExtras" (e.g., "Garage (2)" → parkingExtras: "Garage: 2")
+   - Extract number in parenthesis and add to "parkingExtras" which goes to "Améliorations hors-sol" field
+   - Example: "Garage (2)" → parkingExtras: "Garage: 2"
    - If multiple types: "Allée (3), Garage (1)" → stationnement: "Garage", parkingExtras: "Garage: 1, Allée: 3"
 8. MULTI-UNIT PROPERTIES (Duplex/Triplex/Quadriplex/Apartment):
    - Extract "Numéro log." values in order → "unitNumbers" as array (e.g., ["1", "2", "3"])
@@ -82,7 +83,7 @@ FIELD MAPPING GUIDE:
 - "Genre de propriété": "plain-pied" → genrePropriete ("Plain-pied")
 - "Type de bâtiment": "Isolé"/"Jumelé"/"En rangée"/"En rangée sur coin" → typeBatiment
 - "Stat. (total)": Garage/Abri d'auto/Allée → stationnement (priority: Garage > Abri d'auto > Allée)
-- "Stat. (total)" numbers in parenthesis → parkingExtras (e.g., "Garage: 2, Allée: 3")
+- "Stat. (total)" numbers in parenthesis → parkingExtras goes to "Améliorations hors-sol" (e.g., "Garage: 2, Allée: 3")
 - "Inclusions" box text → extras
 - "Piscine" → pool (true if mentioned)
 

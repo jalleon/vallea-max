@@ -509,6 +509,18 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
     }))
   }, [floorAreas])
 
+  // Auto-calculate chronological age when construction year changes
+  useEffect(() => {
+    if (formData.annee_construction && !formData.chrono_age) {
+      const currentYear = new Date().getFullYear()
+      const chronoAge = currentYear - formData.annee_construction
+      setFormData(prev => ({
+        ...prev,
+        chrono_age: chronoAge
+      }))
+    }
+  }, [formData.annee_construction])
+
   const handleSave = async () => {
     try {
       // Validate required fields

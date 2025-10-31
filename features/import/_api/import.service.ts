@@ -97,6 +97,17 @@ class ImportService {
       mapped.unit_rents = units;
     }
 
+    // Handle parking extras - append to ameliorations_hors_sol (don't overwrite)
+    if (extracted.parkingExtras) {
+      const existing = mapped.ameliorations_hors_sol || '';
+      if (existing) {
+        // Append with separator if there's existing content
+        mapped.ameliorations_hors_sol = `${existing}, ${extracted.parkingExtras}`;
+      } else {
+        mapped.ameliorations_hors_sol = extracted.parkingExtras;
+      }
+    }
+
     // Set source
     mapped.source = 'import';
 

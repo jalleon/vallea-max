@@ -638,47 +638,46 @@ export function PropertyView({
                           </Typography>
                         </Grid>
                       )}
+                      {/* MLS# field - always visible for all property types */}
+                      <Grid item xs={12} md={2}>
+                        <Typography variant="body2" color="text.secondary">#MLS</Typography>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 0.5,
+                            cursor: property.numero_mls ? 'pointer' : 'default',
+                            '&:hover': property.numero_mls ? {
+                              bgcolor: 'action.hover',
+                              borderRadius: 1,
+                              px: 0.5,
+                              ml: -0.5
+                            } : {}
+                          }}
+                          onClick={() => {
+                            if (property.numero_mls) {
+                              navigator.clipboard.writeText(property.numero_mls)
+                            }
+                          }}
+                          title={property.numero_mls ? "Click to copy" : undefined}
+                        >
+                          <Typography
+                            variant="body1"
+                            fontFamily="monospace"
+                            fontWeight={700}
+                          >
+                            {property.numero_mls || 'N/A'}
+                          </Typography>
+                          {property.numero_mls && <ContentCopy sx={{ fontSize: 16, color: 'action.active' }} />}
+                        </Box>
+                      </Grid>
                       {property.type_propriete === 'Condo' && (
-                        <>
-                          <Grid item xs={12} md={2}>
-                            <Typography variant="body2" color="text.secondary">#MLS</Typography>
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 0.5,
-                                cursor: 'pointer',
-                                '&:hover': {
-                                  bgcolor: 'action.hover',
-                                  borderRadius: 1,
-                                  px: 0.5,
-                                  ml: -0.5
-                                }
-                              }}
-                              onClick={() => {
-                                if (property.numero_mls) {
-                                  navigator.clipboard.writeText(property.numero_mls)
-                                }
-                              }}
-                              title="Click to copy"
-                            >
-                              <Typography
-                                variant="body1"
-                                fontFamily="monospace"
-                                fontWeight={700}
-                              >
-                                {property.numero_mls || 'N/A'}
-                              </Typography>
-                              {property.numero_mls && <ContentCopy sx={{ fontSize: 16, color: 'action.active' }} />}
-                            </Box>
-                          </Grid>
-                          <Grid item xs={12} md={1.5}>
-                            <Typography variant="body2" color="text.secondary">Frais de condo</Typography>
-                            <Typography variant="body1" fontWeight={600}>
-                              {property.frais_condo ? formatCurrency(property.frais_condo) : 'N/A'}
-                            </Typography>
-                          </Grid>
-                        </>
+                        <Grid item xs={12} md={1.5}>
+                          <Typography variant="body2" color="text.secondary">Frais de condo</Typography>
+                          <Typography variant="body1" fontWeight={600}>
+                            {property.frais_condo ? formatCurrency(property.frais_condo) : 'N/A'}
+                          </Typography>
+                        </Grid>
                       )}
                     </>
                   )}
