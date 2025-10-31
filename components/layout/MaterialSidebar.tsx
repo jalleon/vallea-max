@@ -29,7 +29,8 @@ import {
   Analytics,
   Search,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  FileUpload
 } from '@mui/icons-material'
 import { usePathname, useRouter } from 'next/navigation'
 
@@ -47,6 +48,13 @@ const regularMenuItems = [
     icon: LibraryBooks,
     path: '/library',
     description: 'Gestion des propriétés'
+  },
+  {
+    id: 'import',
+    label: 'Importer',
+    icon: FileUpload,
+    path: '/import',
+    description: 'Import PDF et données'
   },
   {
     id: 'evaluations',

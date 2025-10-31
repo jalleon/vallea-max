@@ -82,6 +82,24 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
     return isNaN(parsed) ? undefined : parsed
   }
 
+  // Excel-style formula evaluator
+  const evaluateFormula = (input: string): number | undefined => {
+    if (!input || !input.toString().startsWith('=')) return undefined
+
+    try {
+      const formula = input.substring(1).trim()
+      // Security: Only allow numbers, basic operators, parentheses, and decimal points
+      if (!/^[\d+\-*/().\s]+$/.test(formula)) {
+        return undefined
+      }
+      // Evaluate the expression
+      const result = Function(`'use strict'; return (${formula})`)()
+      return isNaN(result) ? undefined : parseFloat(result)
+    } catch (error) {
+      return undefined
+    }
+  }
+
   // Helper function to format Quebec lot number: # ### ###
   const formatLotNumber = (value: string): string => {
     if (formData.province !== 'QC') return value
@@ -171,9 +189,17 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
     area_m2: 0,
     area_ft2: 0
   })
+  const [newFloorRawInputs, setNewFloorRawInputs] = useState({ area_m2: '', area_ft2: '' })
   const [inspectionConfirmOpen, setInspectionConfirmOpen] = useState(false)
   const [unitRents, setUnitRents] = useState<UnitRent[]>([])
   const [validationError, setValidationError] = useState<string>('')
+
+  // Store raw input text for formula-enabled fields
+  const [rawInputs, setRawInputs] = useState<Record<string, string>>({})
+
+  const updateRawInput = (field: string, value: string) => {
+    setRawInputs(prev => ({ ...prev, [field]: value }))
+  }
 
   // Helper to get number of units based on property type
   const getUnitCount = (type?: PropertyType): number => {
@@ -425,6 +451,8 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
         area_m2: 0,
         area_ft2: 0
       })
+      // Clear raw inputs
+      setNewFloorRawInputs({ area_m2: '', area_ft2: '' })
     }
   }
 
@@ -808,59 +836,59 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
 
                     {/* Conditional fields for Sujet status */}
                     {formData.status === 'Sujet' && (
+                      <Grid item xs={12} md={3}>
+                        <FormControl fullWidth size="small">
+                          <InputLabel>Type d'évaluation</InputLabel>
+                          <Select
+                            value={formData.type_evaluation || ''}
+                            onChange={(e) => handleInputChange('type_evaluation', e.target.value as EvaluationType)}
+                            label="Type d'évaluation"
+                          >
+                            {evaluationTypes.map((type) => (
+                              <MenuItem key={type} value={type}>{type}</MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    )}
+
+                    {/* Occupancy fields for Sujet and Vendu statuses, excluding multi-unit properties */}
+                    {(formData.status === 'Sujet' || formData.status === 'Vendu') &&
+                     !(formData.type_propriete === 'Duplex' || formData.type_propriete === 'Triplex' || formData.type_propriete === 'Quadriplex+') && (
                       <>
                         <Grid item xs={12} md={3}>
                           <FormControl fullWidth size="small">
-                            <InputLabel>Type d'évaluation</InputLabel>
+                            <InputLabel>Occupancy</InputLabel>
                             <Select
-                              value={formData.type_evaluation || ''}
-                              onChange={(e) => handleInputChange('type_evaluation', e.target.value as EvaluationType)}
-                              label="Type d'évaluation"
+                              value={formData.occupancy || ''}
+                              onChange={(e) => handleInputChange('occupancy', e.target.value as OccupancyType)}
+                              label="Occupancy"
                             >
-                              {evaluationTypes.map((type) => (
+                              {occupancyTypes.map((type) => (
                                 <MenuItem key={type} value={type}>{type}</MenuItem>
                               ))}
                             </Select>
                           </FormControl>
                         </Grid>
-                        {/* Only show Occupancy for non-multi-unit properties */}
-                        {!(formData.type_propriete === 'Duplex' || formData.type_propriete === 'Triplex' || formData.type_propriete === 'Quadriplex+') && (
-                          <>
-                            <Grid item xs={12} md={3}>
-                              <FormControl fullWidth size="small">
-                                <InputLabel>Occupancy</InputLabel>
-                                <Select
-                                  value={formData.occupancy || ''}
-                                  onChange={(e) => handleInputChange('occupancy', e.target.value as OccupancyType)}
-                                  label="Occupancy"
-                                >
-                                  {occupancyTypes.map((type) => (
-                                    <MenuItem key={type} value={type}>{type}</MenuItem>
-                                  ))}
-                                </Select>
-                              </FormControl>
-                            </Grid>
-                            {formData.occupancy === 'Locataire' && (
-                              <Grid item xs={12} md={3}>
-                                <TextField
-                                  fullWidth
-                                  label="Loyer en place"
-                                  type="number"
-                                  value={formData.loyer_en_place || ''}
-                                  onChange={(e) => handleInputChange('loyer_en_place', e.target.value ? parseFloat(e.target.value) : undefined)}
-                                  variant="outlined"
-                                  size="small"
-                                  InputProps={{
-                                    startAdornment: (
-                                      <InputAdornment position="start">
-                                        <AttachMoney sx={{ color: theme.palette.info.main }} />
-                                      </InputAdornment>
-                                    ),
-                                  }}
-                                />
-                              </Grid>
-                            )}
-                          </>
+                        {formData.occupancy === 'Locataire' && (
+                          <Grid item xs={12} md={3}>
+                            <TextField
+                              fullWidth
+                              label="Loyer en place"
+                              type="number"
+                              value={formData.loyer_en_place || ''}
+                              onChange={(e) => handleInputChange('loyer_en_place', e.target.value ? parseFloat(e.target.value) : undefined)}
+                              variant="outlined"
+                              size="small"
+                              InputProps={{
+                                startAdornment: (
+                                  <InputAdornment position="start">
+                                    <AttachMoney sx={{ color: theme.palette.info.main }} />
+                                  </InputAdornment>
+                                ),
+                              }}
+                            />
+                          </Grid>
                         )}
                       </>
                     )}
@@ -1586,36 +1614,58 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       <TextField
                         fullWidth
                         label="Superficie terrain (m²)"
-                        type="number"
-                        value={formData.superficie_terrain_m2 || ''}
+                        type="text"
+                        value={rawInputs.superficie_terrain_m2 ?? (formData.superficie_terrain_m2?.toFixed(2) || '')}
                         onChange={(e) => {
-                          const val = e.target.value ? parseFloat(e.target.value) : undefined
+                          const input = e.target.value
+                          updateRawInput('superficie_terrain_m2', input)
+                          const formulaResult = evaluateFormula(input)
+                          const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
                           handleInputChange('superficie_terrain_m2', val)
-                          if (val) {
-                            handleInputChange('superficie_terrain_pi2', parseFloat((val * 10.764).toFixed(2)))
+                          if (val !== undefined && !isNaN(val)) {
+                            const converted = parseFloat((val * 10.764).toFixed(2))
+                            handleInputChange('superficie_terrain_pi2', converted)
+                            setRawInputs(prev => ({ ...prev, superficie_terrain_pi2: '' }))
                           } else {
                             handleInputChange('superficie_terrain_pi2', undefined)
                           }
                         }}
+                        onBlur={() => {
+                          if (formData.superficie_terrain_m2 !== undefined) {
+                            updateRawInput('superficie_terrain_m2', formData.superficie_terrain_m2.toFixed(2))
+                          }
+                        }}
                         size="small"
+                        placeholder="Ex: 100 ou =25+25+50"
                       />
                     </Grid>
                     <Grid item xs={6}>
                       <TextField
                         fullWidth
                         label="Superficie terrain (pi²)"
-                        type="number"
-                        value={formData.superficie_terrain_pi2 || ''}
+                        type="text"
+                        value={rawInputs.superficie_terrain_pi2 ?? (formData.superficie_terrain_pi2?.toFixed(2) || '')}
                         onChange={(e) => {
-                          const val = e.target.value ? parseFloat(e.target.value) : undefined
+                          const input = e.target.value
+                          updateRawInput('superficie_terrain_pi2', input)
+                          const formulaResult = evaluateFormula(input)
+                          const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
                           handleInputChange('superficie_terrain_pi2', val)
-                          if (val) {
-                            handleInputChange('superficie_terrain_m2', parseFloat((val / 10.764).toFixed(2)))
+                          if (val !== undefined && !isNaN(val)) {
+                            const converted = parseFloat((val / 10.764).toFixed(2))
+                            handleInputChange('superficie_terrain_m2', converted)
+                            setRawInputs(prev => ({ ...prev, superficie_terrain_m2: '' }))
                           } else {
                             handleInputChange('superficie_terrain_m2', undefined)
                           }
                         }}
+                        onBlur={() => {
+                          if (formData.superficie_terrain_pi2 !== undefined) {
+                            updateRawInput('superficie_terrain_pi2', formData.superficie_terrain_pi2.toFixed(2))
+                          }
+                        }}
                         size="small"
+                        placeholder="Ex: 1000 ou =250+250+500"
                       />
                     </Grid>
                   </Grid>
@@ -1626,76 +1676,116 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       <TextField
                         fullWidth
                         label="Frontage (m)"
-                        type="number"
-                        inputProps={{ step: 0.01 }}
-                        value={formData.frontage_m2 || ''}
+                        type="text"
+                        value={rawInputs.frontage_m2 ?? (formData.frontage_m2?.toFixed(2) || '')}
                         onChange={(e) => {
-                          const val = e.target.value ? parseFloat(e.target.value) : undefined
+                          const input = e.target.value
+                          updateRawInput('frontage_m2', input)
+                          const formulaResult = evaluateFormula(input)
+                          const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
                           handleInputChange('frontage_m2', val)
-                          if (val) {
-                            handleInputChange('frontage_pi2', parseFloat((val * 3.28084).toFixed(2)))
+                          if (val !== undefined && !isNaN(val)) {
+                            const converted = parseFloat((val * 3.28084).toFixed(2))
+                            handleInputChange('frontage_pi2', converted)
+                            setRawInputs(prev => ({ ...prev, frontage_pi2: '' }))
                           } else {
                             handleInputChange('frontage_pi2', undefined)
                           }
                         }}
+                        onBlur={() => {
+                          if (formData.frontage_m2 !== undefined) {
+                            updateRawInput('frontage_m2', formData.frontage_m2.toFixed(2))
+                          }
+                        }}
                         size="small"
+                        placeholder="Ex: =10+5"
                       />
                     </Grid>
                     <Grid item xs={3}>
                       <TextField
                         fullWidth
                         label="Frontage (pi)"
-                        type="number"
-                        inputProps={{ step: 0.01 }}
-                        value={formData.frontage_pi2 || ''}
+                        type="text"
+                        value={rawInputs.frontage_pi2 ?? (formData.frontage_pi2?.toFixed(2) || '')}
                         onChange={(e) => {
-                          const val = e.target.value ? parseFloat(e.target.value) : undefined
+                          const input = e.target.value
+                          updateRawInput('frontage_pi2', input)
+                          const formulaResult = evaluateFormula(input)
+                          const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
                           handleInputChange('frontage_pi2', val)
-                          if (val) {
-                            handleInputChange('frontage_m2', parseFloat((val / 3.28084).toFixed(2)))
+                          if (val !== undefined && !isNaN(val)) {
+                            const converted = parseFloat((val / 3.28084).toFixed(2))
+                            handleInputChange('frontage_m2', converted)
+                            setRawInputs(prev => ({ ...prev, frontage_m2: '' }))
                           } else {
                             handleInputChange('frontage_m2', undefined)
                           }
                         }}
+                        onBlur={() => {
+                          if (formData.frontage_pi2 !== undefined) {
+                            updateRawInput('frontage_pi2', formData.frontage_pi2.toFixed(2))
+                          }
+                        }}
                         size="small"
+                        placeholder="Ex: =30+15"
                       />
                     </Grid>
                     <Grid item xs={3}>
                       <TextField
                         fullWidth
                         label="Profondeur (m)"
-                        type="number"
-                        inputProps={{ step: 0.01 }}
-                        value={formData.profondeur_m2 || ''}
+                        type="text"
+                        value={rawInputs.profondeur_m2 ?? (formData.profondeur_m2?.toFixed(2) || '')}
                         onChange={(e) => {
-                          const val = e.target.value ? parseFloat(e.target.value) : undefined
+                          const input = e.target.value
+                          updateRawInput('profondeur_m2', input)
+                          const formulaResult = evaluateFormula(input)
+                          const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
                           handleInputChange('profondeur_m2', val)
-                          if (val) {
-                            handleInputChange('profondeur_pi2', parseFloat((val * 3.28084).toFixed(2)))
+                          if (val !== undefined && !isNaN(val)) {
+                            const converted = parseFloat((val * 3.28084).toFixed(2))
+                            handleInputChange('profondeur_pi2', converted)
+                            setRawInputs(prev => ({ ...prev, profondeur_pi2: '' }))
                           } else {
                             handleInputChange('profondeur_pi2', undefined)
                           }
                         }}
+                        onBlur={() => {
+                          if (formData.profondeur_m2 !== undefined) {
+                            updateRawInput('profondeur_m2', formData.profondeur_m2.toFixed(2))
+                          }
+                        }}
                         size="small"
+                        placeholder="Ex: =20+10"
                       />
                     </Grid>
                     <Grid item xs={3}>
                       <TextField
                         fullWidth
                         label="Profondeur (pi)"
-                        type="number"
-                        inputProps={{ step: 0.01 }}
-                        value={formData.profondeur_pi2 || ''}
+                        type="text"
+                        value={rawInputs.profondeur_pi2 ?? (formData.profondeur_pi2?.toFixed(2) || '')}
                         onChange={(e) => {
-                          const val = e.target.value ? parseFloat(e.target.value) : undefined
+                          const input = e.target.value
+                          updateRawInput('profondeur_pi2', input)
+                          const formulaResult = evaluateFormula(input)
+                          const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
                           handleInputChange('profondeur_pi2', val)
-                          if (val) {
-                            handleInputChange('profondeur_m2', parseFloat((val / 3.28084).toFixed(2)))
+                          if (val !== undefined && !isNaN(val)) {
+                            const converted = parseFloat((val / 3.28084).toFixed(2))
+                            handleInputChange('profondeur_m2', converted)
+                            setRawInputs(prev => ({ ...prev, profondeur_m2: '' }))
                           } else {
                             handleInputChange('profondeur_m2', undefined)
                           }
                         }}
+                        onBlur={() => {
+                          if (formData.profondeur_pi2 !== undefined) {
+                            updateRawInput('profondeur_pi2', formData.profondeur_pi2.toFixed(2))
+                          }
+                        }}
                         size="small"
+                        placeholder="Ex: =60+30"
                       />
                     </Grid>
                   </Grid>
@@ -1706,38 +1796,58 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       <TextField
                         fullWidth
                         label="Périmètre du bâtiment (m)"
-                        type="number"
-                        inputProps={{ step: 0.01 }}
-                        value={formData.perimetre_batiment_m2 || ''}
+                        type="text"
+                        value={rawInputs.perimetre_batiment_m2 ?? (formData.perimetre_batiment_m2?.toFixed(2) || '')}
                         onChange={(e) => {
-                          const val = e.target.value ? parseFloat(e.target.value) : undefined
+                          const input = e.target.value
+                          updateRawInput('perimetre_batiment_m2', input)
+                          const formulaResult = evaluateFormula(input)
+                          const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
                           handleInputChange('perimetre_batiment_m2', val)
-                          if (val) {
-                            handleInputChange('perimetre_batiment_pi2', parseFloat((val * 3.28084).toFixed(2)))
+                          if (val !== undefined && !isNaN(val)) {
+                            const converted = parseFloat((val * 3.28084).toFixed(2))
+                            handleInputChange('perimetre_batiment_pi2', converted)
+                            setRawInputs(prev => ({ ...prev, perimetre_batiment_pi2: '' }))
                           } else {
                             handleInputChange('perimetre_batiment_pi2', undefined)
                           }
                         }}
+                        onBlur={() => {
+                          if (formData.perimetre_batiment_m2 !== undefined) {
+                            updateRawInput('perimetre_batiment_m2', formData.perimetre_batiment_m2.toFixed(2))
+                          }
+                        }}
                         size="small"
+                        placeholder="Ex: =10+15+10+15"
                       />
                     </Grid>
                     <Grid item xs={6}>
                       <TextField
                         fullWidth
                         label="Périmètre du bâtiment (pi)"
-                        type="number"
-                        inputProps={{ step: 0.01 }}
-                        value={formData.perimetre_batiment_pi2 || ''}
+                        type="text"
+                        value={rawInputs.perimetre_batiment_pi2 ?? (formData.perimetre_batiment_pi2?.toFixed(2) || '')}
                         onChange={(e) => {
-                          const val = e.target.value ? parseFloat(e.target.value) : undefined
+                          const input = e.target.value
+                          updateRawInput('perimetre_batiment_pi2', input)
+                          const formulaResult = evaluateFormula(input)
+                          const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
                           handleInputChange('perimetre_batiment_pi2', val)
-                          if (val) {
-                            handleInputChange('perimetre_batiment_m2', parseFloat((val / 3.28084).toFixed(2)))
+                          if (val !== undefined && !isNaN(val)) {
+                            const converted = parseFloat((val / 3.28084).toFixed(2))
+                            handleInputChange('perimetre_batiment_m2', converted)
+                            setRawInputs(prev => ({ ...prev, perimetre_batiment_m2: '' }))
                           } else {
                             handleInputChange('perimetre_batiment_m2', undefined)
                           }
                         }}
+                        onBlur={() => {
+                          if (formData.perimetre_batiment_pi2 !== undefined) {
+                            updateRawInput('perimetre_batiment_pi2', formData.perimetre_batiment_pi2.toFixed(2))
+                          }
+                        }}
                         size="small"
+                        placeholder="Ex: =30+45+30+45"
                       />
                     </Grid>
                   </Grid>
@@ -1782,11 +1892,23 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         <TextField
                           fullWidth
                           label="Superficie (m²)"
-                          type="number"
-                          value={newFloor.area_m2 || ''}
-                          onChange={(e) => handleNewFloorAreaChange('area_m2', parseFloat(e.target.value) || 0)}
+                          type="text"
+                          value={newFloorRawInputs.area_m2 || (newFloor.area_m2 ? newFloor.area_m2.toFixed(2) : '')}
+                          onChange={(e) => {
+                            const input = e.target.value
+                            setNewFloorRawInputs(prev => ({ ...prev, area_m2: input }))
+                            const formulaResult = evaluateFormula(input)
+                            const val = formulaResult !== undefined ? formulaResult : (parseFloat(input) || 0)
+                            handleNewFloorAreaChange('area_m2', val)
+                          }}
+                          onBlur={() => {
+                            if (newFloor.area_m2) {
+                              setNewFloorRawInputs(prev => ({ ...prev, area_m2: newFloor.area_m2.toFixed(2) }))
+                            }
+                          }}
                           variant="outlined"
                           size="small"
+                          placeholder="Ex: =10*8"
                           InputProps={{
                             startAdornment: (
                               <InputAdornment position="start">
@@ -1800,11 +1922,23 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         <TextField
                           fullWidth
                           label="Superficie (pi²)"
-                          type="number"
-                          value={newFloor.area_ft2 || ''}
-                          onChange={(e) => handleNewFloorAreaChange('area_ft2', parseFloat(e.target.value) || 0)}
+                          type="text"
+                          value={newFloorRawInputs.area_ft2 || (newFloor.area_ft2 ? newFloor.area_ft2.toFixed(2) : '')}
+                          onChange={(e) => {
+                            const input = e.target.value
+                            setNewFloorRawInputs(prev => ({ ...prev, area_ft2: input }))
+                            const formulaResult = evaluateFormula(input)
+                            const val = formulaResult !== undefined ? formulaResult : (parseFloat(input) || 0)
+                            handleNewFloorAreaChange('area_ft2', val)
+                          }}
+                          onBlur={() => {
+                            if (newFloor.area_ft2) {
+                              setNewFloorRawInputs(prev => ({ ...prev, area_ft2: newFloor.area_ft2.toFixed(2) }))
+                            }
+                          }}
                           variant="outlined"
                           size="small"
+                          placeholder="Ex: =30*25"
                           InputProps={{
                             startAdornment: (
                               <InputAdornment position="start">

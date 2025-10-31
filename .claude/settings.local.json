@@ -15,7 +15,11 @@
       "Bash(git cherry-pick:*)",
       "Bash(git pull:*)",
       "Bash(git branch:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(if [ -f .env.local ])",
+      "Bash(then echo \"EXISTS\")",
+      "Bash(else echo \"NOT_FOUND\")",
+      "Bash(fi)"
     ],
     "deny": [],
     "ask": []

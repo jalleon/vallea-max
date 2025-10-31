@@ -191,7 +191,7 @@ export function PropertyView({
       case 'Vendu':
         return 'success'
       case 'Actif':
-        return 'primary'
+        return 'warning'
       case 'Retiré':
         return 'default'
       case 'Conditionnel':
@@ -318,10 +318,13 @@ export function PropertyView({
                 sx={{
                   bgcolor: getStatusColor(property.status) === 'success' ? theme.palette.success.main :
                            getStatusColor(property.status) === 'error' ? theme.palette.error.main :
-                           getStatusColor(property.status) === 'warning' ? theme.palette.warning.main :
+                           getStatusColor(property.status) === 'warning' ? '#FFC107' :
                            theme.palette.info.main,
                   color: 'white',
-                  fontWeight: 600
+                  fontWeight: 600,
+                  fontSize: '1rem',
+                  height: '36px',
+                  px: 2
                 }}
               />
             )}
@@ -460,11 +463,11 @@ export function PropertyView({
                     <Typography variant="body2" color="text.secondary">Arrondissement</Typography>
                     <Typography variant="body1" fontWeight={600}>{property.municipalite || 'N/A'}</Typography>
                   </Grid>
-                  <Grid item xs={12} md={1.5}>
+                  <Grid item xs={12} md={1.75}>
                     <Typography variant="body2" color="text.secondary">Code postal</Typography>
                     <Typography variant="body1" fontWeight={600}>{property.code_postal || 'N/A'}</Typography>
                   </Grid>
-                  <Grid item xs={12} md={1}>
+                  <Grid item xs={12} md={0.75}>
                     <Typography variant="body2" color="text.secondary">Province</Typography>
                     <Typography variant="body1" fontWeight={600}>{property.province || 'N/A'}</Typography>
                   </Grid>
@@ -501,7 +504,7 @@ export function PropertyView({
                         <Typography variant="body2" color="text.secondary">Type d'évaluation</Typography>
                         <Typography variant="body1" fontWeight={600} sx={{ whiteSpace: 'nowrap' }}>{property.type_evaluation || 'N/A'}</Typography>
                       </Grid>
-                      <Grid item xs={12} md={2}>
+                      <Grid item xs={12} md={1.75}>
                         <Typography variant="body2" color="text.secondary">Année construction</Typography>
                         <Chip
                           label={property.annee_construction || 'N/A'}
@@ -513,7 +516,7 @@ export function PropertyView({
                           }}
                         />
                       </Grid>
-                      <Grid item xs={12} md={1.5}>
+                      <Grid item xs={12} md={1.75}>
                         <Typography variant="body2" color="text.secondary">Zonage</Typography>
                         <Typography variant="body1" fontWeight={600}>{property.zonage || 'N/A'}</Typography>
                       </Grid>
@@ -530,7 +533,7 @@ export function PropertyView({
                         />
                       </Grid>
 
-                      {/* Line 3: 7 columns */}
+                      {/* Line 3: 12 columns total to match line 2 */}
                       <Grid item xs={12} md={1.5}>
                         <Typography variant="body2" color="text.secondary">Type de propriété</Typography>
                         <Typography variant="body1" fontWeight={600} sx={{ whiteSpace: 'nowrap' }}>{property.type_propriete || 'N/A'}</Typography>
@@ -587,7 +590,7 @@ export function PropertyView({
                           }}
                         />
                       </Grid>
-                      <Grid item xs={12} md={1.5}>
+                      <Grid item xs={12} md={1.75}>
                         <Typography variant="body2" color="text.secondary">Année construction</Typography>
                         <Chip
                           label={property.annee_construction || 'N/A'}
@@ -604,18 +607,40 @@ export function PropertyView({
                         <Typography variant="body1" fontWeight={600}>{property.zonage || 'N/A'}</Typography>
                       </Grid>
 
-                      {/* Line 3: 7 columns */}
-                      <Grid item xs={12} md={1.5}>
+                      {/* Line 3: 12 columns total to match line 2 */}
+                      {(property.status === 'Vendu' || property.status === 'Actif') && !(property.type_propriete === 'Duplex' || property.type_propriete === 'Triplex' || property.type_propriete === 'Quadriplex+') && (
+                        <Grid item xs={12} md={1.5}>
+                          <Typography variant="body2" color="text.secondary">Occupancy</Typography>
+                          <Chip
+                            label={property.occupancy || 'N/A'}
+                            size="small"
+                            sx={{
+                              bgcolor: property.occupancy === 'Locataire' ? '#4CAF50' : '#1976D2',
+                              color: 'white',
+                              fontWeight: 600
+                            }}
+                          />
+                        </Grid>
+                      )}
+                      <Grid item xs={12} md={2}>
                         <Typography variant="body2" color="text.secondary">Type de propriété</Typography>
                         <Typography variant="body1" fontWeight={600} sx={{ whiteSpace: 'nowrap' }}>{property.type_propriete || 'N/A'}</Typography>
                       </Grid>
-                      <Grid item xs={12} md={2}>
+                      <Grid item xs={12} md={1.5}>
                         <Typography variant="body2" color="text.secondary">Genre de propriété</Typography>
                         <Typography variant="body1" fontWeight={600}>{property.genre_propriete || 'N/A'}</Typography>
                       </Grid>
+                      {(property.status === 'Vendu' || property.status === 'Actif') && property.occupancy === 'Locataire' && (
+                        <Grid item xs={12} md={2}>
+                          <Typography variant="body2" color="text.secondary">Loyer en place</Typography>
+                          <Typography variant="body1" fontWeight={600}>
+                            {property.loyer_en_place ? formatCurrency(property.loyer_en_place) : 'N/A'}
+                          </Typography>
+                        </Grid>
+                      )}
                       {property.type_propriete === 'Condo' && (
                         <>
-                          <Grid item xs={12} md={1.5}>
+                          <Grid item xs={12} md={2}>
                             <Typography variant="body2" color="text.secondary">#MLS</Typography>
                             <Box
                               sx={{
@@ -647,7 +672,7 @@ export function PropertyView({
                               {property.numero_mls && <ContentCopy sx={{ fontSize: 16, color: 'action.active' }} />}
                             </Box>
                           </Grid>
-                          <Grid item xs={12} md={2}>
+                          <Grid item xs={12} md={1.5}>
                             <Typography variant="body2" color="text.secondary">Frais de condo</Typography>
                             <Typography variant="body1" fontWeight={600}>
                               {property.frais_condo ? formatCurrency(property.frais_condo) : 'N/A'}
@@ -770,7 +795,22 @@ export function PropertyView({
                           </TableRow>
                         </TableHead>
                         <TableBody>
-                          {property.floor_areas.map((floor) => (
+                          {[...property.floor_areas]
+                            .sort((a, b) => {
+                              // Define floor order
+                              const floorOrder: { [key: string]: number } = {
+                                'Sous-sol': 0,
+                                'Rez-de-chaussée': 1,
+                                '2e étage': 2,
+                                '3e étage': 3,
+                                'Comble': 4,
+                                'Mezzanine': 5
+                              }
+                              const orderA = floorOrder[a.floor] ?? 99
+                              const orderB = floorOrder[b.floor] ?? 99
+                              return orderA - orderB
+                            })
+                            .map((floor) => (
                             <TableRow key={floor.id}>
                               <TableCell>{floor.floor}</TableCell>
                               <TableCell>{floor.area_m2.toFixed(2)}</TableCell>
@@ -779,8 +819,11 @@ export function PropertyView({
                                 <Chip
                                   label={floor.type}
                                   size="small"
-                                  color={floor.type === 'hors-sol' ? 'primary' : 'default'}
-                                  variant="outlined"
+                                  sx={{
+                                    bgcolor: floor.type === 'hors-sol' ? '#4CAF50' : '#424242',
+                                    color: 'white',
+                                    fontWeight: 600
+                                  }}
                                 />
                               </TableCell>
                             </TableRow>
@@ -789,8 +832,8 @@ export function PropertyView({
                       </Table>
                     </TableContainer>
                     <Box mt={2} sx={{ p: 2, bgcolor: 'rgba(33, 150, 243, 0.08)', borderRadius: 1, border: '1px solid rgba(33, 150, 243, 0.2)' }}>
-                      <Typography variant="subtitle1" fontWeight={700} sx={{ color: '#1976D2', mb: 1 }}>
-                        Total superficie habitable (hors-sol): {totals.hors_sol.toFixed(2)} m² / <span style={{ color: '#4CAF50' }}>{(totals.hors_sol * 10.764).toFixed(0)} pi²</span>
+                      <Typography variant="subtitle1" sx={{ color: '#1976D2', mb: 1, fontWeight: 900, fontSize: '1.1rem' }}>
+                        Total superficie habitable (hors-sol): {totals.hors_sol.toFixed(2)} m² / <span style={{ color: '#4CAF50', fontWeight: 900 }}>{(totals.hors_sol * 10.764).toFixed(0)} pi²</span>
                       </Typography>
                       {totals.sous_sol > 0 && (
                         <Typography variant="subtitle1" fontWeight={700} sx={{ color: '#1976D2' }}>

@@ -19,7 +19,8 @@ import {
   Tune,
   CloudUpload,
   Description,
-  Settings
+  Settings,
+  FileUpload
 } from '@mui/icons-material'
 import Link from 'next/link'
 
@@ -45,6 +46,11 @@ const navigation: NavItem[] = [
     title: 'Bibliothèque',
     href: '/library',
     icon: <Home />,
+  },
+  {
+    title: 'Importer',
+    href: '/import',
+    icon: <FileUpload />,
   },
   {
     title: 'Évaluations',

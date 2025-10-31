@@ -78,6 +78,7 @@
   "navigation": {
     "dashboard": "Tableau de bord",
     "library": "Bibliothèque",
+    "import": "Importer",
     "inspection": "Inspections",
     "evaluations": "Évaluations",
     "adjustments": "Ajustements",
@@ -897,6 +898,114 @@
     },
     "footer": {
       "rights": "Tous droits réservés."
+    }
+  },
+
+  "import": {
+    "title": "Assistant d'importation",
+    "subtitle": "Importez des propriétés depuis des PDF ou des sites d'annonces",
+
+    "steps": {
+      "source": "Choisir la source",
+      "upload": "Téléverser le document",
+      "review": "Réviser les données",
+      "confirmation": "Confirmation"
+    },
+
+    "source": {
+      "title": "Choisir la source d'importation",
+      "pdf": {
+        "title": "Importer depuis PDF",
+        "description": "Téléversez des documents PDF et extrayez automatiquement les informations.",
+        "button": "Choisir un PDF"
+      },
+      "browser": {
+        "title": "Importer depuis MLS/Centris",
+        "description": "Utilisez l'extension de navigateur pour extraire les données directement depuis les sites d'annonces immobilières.",
+        "button": "Activer l'extension",
+        "requirement": "Nécessite l'extension Valea Browser Helper"
+      }
+    },
+
+    "upload": {
+      "title": "Téléverser et analyser le document",
+      "dropzone": {
+        "title": "Glissez-déposez votre PDF ici",
+        "subtitle": "ou cliquez pour parcourir vos fichiers",
+        "button": "Choisir un fichier"
+      },
+      "documentType": {
+        "title": "Type de document",
+        "mls_listing": "Fiche MLS/Matrix",
+        "role_foncier": "Rôle foncier",
+        "certificat_localisation": "Certificat de localisation"
+      },
+      "processing": {
+        "title": "Analyse du document en cours...",
+        "description": "Extraction des données textuelles et structurées"
+      }
+    },
+
+    "review": {
+      "title": "Réviser et ajuster les données extraites",
+      "titleMultiple": "{count} propriétés trouvées",
+      "subtitle": "Vérifiez les informations extraites et corrigez si nécessaire",
+      "subtitleMultiple": "Choisissez l'action à effectuer pour chaque propriété",
+      "confidence": "confiance",
+      "unknownAddress": "Adresse inconnue",
+      "duplicateFound": "Doublon détecté: {address}",
+      "fieldsExtracted": "{count} champs extraits automatiquement",
+      "sections": {
+        "general": "Informations générales",
+        "dimensions": "Dimensions et superficies",
+        "municipal": "Données municipales",
+        "market": "Informations de marché"
+      },
+      "fieldsNotFound": {
+        "title": "Champs non trouvés ({count})",
+        "description": "Vous pourrez compléter ces informations manuellement après la création"
+      },
+      "actions": {
+        "cancel": "Annuler l'importation",
+        "create": "Créer la propriété",
+        "merge": "Fusionner",
+        "createDuplicate": "Créer doublon",
+        "skip": "Ignorer",
+        "willCreate": "Sera créée",
+        "importAll": "Importer ({count})"
+      }
+    },
+
+    "duplicate": {
+      "title": "Adresse déjà existante",
+      "message": "Une propriété avec l'adresse '{address}' existe déjà dans votre bibliothèque.",
+      "existingProperty": "Propriété existante",
+      "salePrice": "Prix de vente",
+      "actions": {
+        "merge": "Fusionner les données",
+        "createDuplicate": "Créer un doublon"
+      }
+    },
+
+    "success": {
+      "title": "Propriété créée avec succès!",
+      "summary": "Résumé de l'importation",
+      "fieldsImported": "Champs importés:",
+      "avgConfidence": "Confiance moyenne:",
+      "fieldsRemaining": "{count} champs restent à compléter manuellement",
+      "actions": {
+        "importAnother": "Importer un autre",
+        "completeFields": "Compléter les champs",
+        "viewProperty": "Voir la propriété"
+      }
+    },
+
+    "errors": {
+      "fileTooBig": "Le fichier est trop volumineux (max 10MB)",
+      "invalidType": "Type de fichier non supporté",
+      "extractionFailed": "Échec de l'extraction des données",
+      "noText": "Aucun texte trouvé dans le document",
+      "aiError": "Erreur lors de l'analyse IA"
     }
   }
 }
