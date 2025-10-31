@@ -11,6 +11,12 @@ class PdfReaderService {
   async extractText(buffer: Buffer): Promise<string> {
     try {
       const data = await pdfParse(buffer);
+
+      // Detailed logging
+      console.log(`[PDF Debug] Pages: ${data.numpages}, Info:`, data.info);
+      console.log(`[PDF Debug] Text length: ${data.text?.length || 0}`);
+      console.log(`[PDF Debug] First 200 chars: "${data.text?.substring(0, 200)}"`);
+
       return data.text;
     } catch (error) {
       console.error('PDF extraction error:', error);
