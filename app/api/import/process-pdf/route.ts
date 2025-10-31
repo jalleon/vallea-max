@@ -41,9 +41,12 @@ export async function POST(request: NextRequest) {
     // Extract text from PDF
     const pdfText = await pdfReaderService.extractTextFromFile(file);
 
-    if (!pdfText || pdfText.length < 50) {
+    console.log(`[PDF Processing] Extracted ${pdfText?.length || 0} characters from ${file.name}`);
+
+    if (!pdfText || pdfText.length < 10) {
+      console.error(`[PDF Processing] Insufficient text: "${pdfText?.substring(0, 100)}"`);
       return NextResponse.json(
-        { error: 'Insufficient text extracted from PDF' },
+        { error: `Insufficient text extracted from PDF (${pdfText?.length || 0} characters). The PDF may be scanned/image-based. Please ensure the PDF contains selectable text.` },
         { status: 400 }
       );
     }
