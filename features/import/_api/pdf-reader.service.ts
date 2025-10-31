@@ -2,34 +2,20 @@
  * PDF reading and text extraction service
  */
 
-import { PdfReader } from 'pdfreader';
+import pdf from 'pdf-parse';
 
 class PdfReaderService {
   /**
-   * Extract text content from PDF buffer
+   * Extract text content from PDF buffer using pdf-parse
    */
   async extractText(buffer: Buffer): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new PdfReader();
-      let textContent = '';
-
-      reader.parseBuffer(buffer, (err, item) => {
-        if (err) {
-          return reject(err);
-        }
-
-        if (!item) {
-          // End of file
-          resolve(textContent.trim());
-          return;
-        }
-
-        // Accumulate text
-        if (item.text) {
-          textContent += item.text + ' ';
-        }
-      });
-    });
+    try {
+      const data = await pdf(buffer);
+      return data.text;
+    } catch (error) {
+      console.error('PDF extraction error:', error);
+      throw new Error('Failed to extract text from PDF');
+    }
   }
 
   /**
