@@ -2,7 +2,7 @@
  * PDF reading and text extraction service
  */
 
-import pdf from 'pdf-parse';
+const pdfParse = require('pdf-parse');
 
 class PdfReaderService {
   /**
@@ -10,7 +10,7 @@ class PdfReaderService {
    */
   async extractText(buffer: Buffer): Promise<string> {
     try {
-      const data = await pdf(buffer);
+      const data = await pdfParse(buffer);
       return data.text;
     } catch (error) {
       console.error('PDF extraction error:', error);
