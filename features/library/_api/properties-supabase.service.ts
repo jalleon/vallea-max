@@ -180,6 +180,11 @@ class PropertiesSupabaseService {
     return this.transformToProperty(data)
   }
 
+  // Alias for getProperty - for consistency with other services
+  async getById(id: string): Promise<Property> {
+    return this.getProperty(id)
+  }
+
   async createProperty(input: PropertyCreateInput): Promise<Property> {
     // Separate floor_areas from main property data
     const { floor_areas, ...propertyData } = input
