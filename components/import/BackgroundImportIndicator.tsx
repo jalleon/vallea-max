@@ -23,13 +23,13 @@ export function BackgroundImportIndicator() {
 
   const isComplete = state.processedFiles === state.totalFiles && state.totalFiles > 0;
 
-  // Auto-close after 5 seconds when import is complete
+  // Auto-close after 20 seconds when import is complete
   // Use clearProgressOnly to preserve pending session for step 3
   useEffect(() => {
     if (isComplete) {
       const timer = setTimeout(() => {
         clearProgressOnly();
-      }, 5000);
+      }, 20000);
 
       return () => clearTimeout(timer);
     }
