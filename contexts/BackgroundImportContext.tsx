@@ -155,12 +155,12 @@ export function BackgroundImportProvider({ children }: { children: React.ReactNo
               }));
             } else {
               // No duplicate - create new property
-              const createdSession = await importService.createPropertyFromImport(session);
-              if (createdSession.propertyId) {
-                targetPropertyId = createdSession.propertyId;
+              const propertyId = await importService.createPropertyFromImport(session);
+              if (propertyId) {
+                targetPropertyId = propertyId;
                 setState(prev => ({
                   ...prev,
-                  targetPropertyId,
+                  targetPropertyId: propertyId,
                 }));
               }
             }

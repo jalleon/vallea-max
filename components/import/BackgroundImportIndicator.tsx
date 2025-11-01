@@ -23,11 +23,20 @@ export function BackgroundImportIndicator() {
   const isComplete = state.processedFiles === state.totalFiles && state.totalFiles > 0;
 
   const handleClick = () => {
+    console.log('Click handler called:', {
+      targetPropertyId: state.targetPropertyId,
+      isComplete,
+      isProcessing: state.isProcessing
+    });
+
     if (state.targetPropertyId && isComplete) {
       // Navigate to library page (property detail page doesn't exist yet)
       // TODO: When property detail page is created, navigate to /{locale}/library/{propertyId}
+      console.log('Navigating to library...');
       router.push(`/${locale}/library`);
       clearState();
+    } else {
+      console.log('Click ignored - conditions not met');
     }
   };
 
