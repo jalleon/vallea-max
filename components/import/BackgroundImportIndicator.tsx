@@ -100,6 +100,21 @@ export function BackgroundImportIndicator() {
             bgcolor: 'rgba(255, 255, 255, 0.3)',
             '& .MuiLinearProgress-bar': {
               bgcolor: 'white',
+              // Add shimmer animation while processing
+              ...(state.isProcessing && {
+                backgroundImage: 'linear-gradient(90deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0.8) 100%)',
+                backgroundSize: '200% 100%',
+                animation: 'shimmer 1.5s infinite',
+              }),
+            },
+            // Define shimmer animation
+            '@keyframes shimmer': {
+              '0%': {
+                backgroundPosition: '-200% 0',
+              },
+              '100%': {
+                backgroundPosition: '200% 0',
+              },
             },
           }}
         />
