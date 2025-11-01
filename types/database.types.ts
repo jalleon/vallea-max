@@ -263,28 +263,55 @@ export type Database = {
       }
       properties: {
         Row: {
+          additional_lots: Json | null
           adresse: string
+          aire_habitable_m2: number | null
+          aire_habitable_pi2: number | null
           ameliorations_hors_sol: string | null
           annee_construction: number | null
+          chrono_age: number | null
           code_postal: string | null
           created_at: string | null
           created_by: string | null
           date_vente: string | null
           date_vente_precedente: string | null
           dimension_garage: string | null
+          eff_age: number | null
+          eval_municipale_annee: string | null
+          eval_municipale_batiment: number | null
+          eval_municipale_terrain: number | null
+          eval_municipale_total: number | null
+          extras: string | null
+          field_sources: Json | null
+          frais_condo: number | null
           frontage_m2: number | null
           frontage_pi2: number | null
           genre_propriete: string | null
           id: string
+          inspection_batiment: Json | null
+          inspection_categories_completed: string[] | null
+          inspection_completion: number | null
+          inspection_date: string | null
+          inspection_divers: Json | null
+          inspection_exterieur: Json | null
+          inspection_garage: Json | null
+          inspection_mecanique: Json | null
+          inspection_pieces: Json | null
+          inspection_status: string | null
           is_shared: boolean | null
           is_template: boolean | null
           jours_sur_marche: number | null
+          localisation: string | null
+          lot_number: string | null
+          loyer_en_place: number | null
+          matricule: string | null
           media_references: Json | null
           municipalite: string | null
           nombre_chambres: number | null
           nombre_pieces: number | null
           notes: string | null
           numero_mls: string | null
+          occupancy: string | null
           organization_id: string | null
           perimetre_batiment_m2: number | null
           perimetre_batiment_pi2: number | null
@@ -296,7 +323,7 @@ export type Database = {
           province: string | null
           salle_bain: number | null
           salle_eau: number | null
-          search_vector: unknown | null
+          search_vector: unknown
           source: string | null
           stationnement: string | null
           status: string | null
@@ -304,70 +331,73 @@ export type Database = {
           superficie_habitable_pi2: number | null
           superficie_terrain_m2: number | null
           superficie_terrain_pi2: number | null
-          toiture: string | null
-          type_propriete: string | null
-          type_sous_sol: string | null
-          updated_at: string | null
-          ville: string | null
-          zonage: string | null
-          inspection_status: string | null
-          inspection_date: string | null
-          inspection_completion: number | null
-          inspection_pieces: Json | null
-          inspection_batiment: Json | null
-          inspection_garage: Json | null
-          inspection_mecanique: Json | null
-          inspection_exterieur: Json | null
-          inspection_divers: Json | null
-          inspection_categories_completed: string[] | null
-          frais_condo: number | null
-          loyer_en_place: number | null
-          unit_rents: Json | null
-          type_evaluation: string | null
-          occupancy: string | null
-          localisation: string | null
-          type_copropriete: string | null
-          type_batiment: string | null
-          chrono_age: number | null
-          eff_age: number | null
-          type_garage: string | null
-          extras: string | null
-          lot_number: string | null
-          additional_lots: Json | null
-          matricule: string | null
-          eval_municipale_annee: string | null
-          eval_municipale_terrain: number | null
-          eval_municipale_batiment: number | null
-          eval_municipale_total: number | null
           taxes_municipales_annee: number | null
           taxes_municipales_montant: number | null
           taxes_scolaires_annee: number | null
           taxes_scolaires_montant: number | null
+          toiture: string | null
+          type_batiment: string | null
+          type_copropriete: string | null
+          type_evaluation: string | null
+          type_garage: string | null
+          type_propriete: string | null
+          type_sous_sol: string | null
+          unit_rents: Json | null
+          updated_at: string | null
+          ville: string | null
+          zonage: string | null
           zoning_usages_permis: string | null
         }
         Insert: {
+          additional_lots?: Json | null
           adresse: string
+          aire_habitable_m2?: number | null
+          aire_habitable_pi2?: number | null
           ameliorations_hors_sol?: string | null
           annee_construction?: number | null
+          chrono_age?: number | null
           code_postal?: string | null
           created_at?: string | null
           created_by?: string | null
           date_vente?: string | null
           date_vente_precedente?: string | null
           dimension_garage?: string | null
+          eff_age?: number | null
+          eval_municipale_annee?: string | null
+          eval_municipale_batiment?: number | null
+          eval_municipale_terrain?: number | null
+          eval_municipale_total?: number | null
+          extras?: string | null
+          field_sources?: Json | null
+          frais_condo?: number | null
           frontage_m2?: number | null
           frontage_pi2?: number | null
           genre_propriete?: string | null
           id?: string
+          inspection_batiment?: Json | null
+          inspection_categories_completed?: string[] | null
+          inspection_completion?: number | null
+          inspection_date?: string | null
+          inspection_divers?: Json | null
+          inspection_exterieur?: Json | null
+          inspection_garage?: Json | null
+          inspection_mecanique?: Json | null
+          inspection_pieces?: Json | null
+          inspection_status?: string | null
           is_shared?: boolean | null
           is_template?: boolean | null
           jours_sur_marche?: number | null
+          localisation?: string | null
+          lot_number?: string | null
+          loyer_en_place?: number | null
+          matricule?: string | null
           media_references?: Json | null
           municipalite?: string | null
           nombre_chambres?: number | null
           nombre_pieces?: number | null
           notes?: string | null
           numero_mls?: string | null
+          occupancy?: string | null
           organization_id?: string | null
           perimetre_batiment_m2?: number | null
           perimetre_batiment_pi2?: number | null
@@ -379,7 +409,7 @@ export type Database = {
           province?: string | null
           salle_bain?: number | null
           salle_eau?: number | null
-          search_vector?: unknown | null
+          search_vector?: unknown
           source?: string | null
           stationnement?: string | null
           status?: string | null
@@ -387,70 +417,73 @@ export type Database = {
           superficie_habitable_pi2?: number | null
           superficie_terrain_m2?: number | null
           superficie_terrain_pi2?: number | null
-          toiture?: string | null
-          type_propriete?: string | null
-          type_sous_sol?: string | null
-          updated_at?: string | null
-          ville?: string | null
-          zonage?: string | null
-          inspection_status?: string | null
-          inspection_date?: string | null
-          inspection_completion?: number | null
-          inspection_pieces?: Json | null
-          inspection_batiment?: Json | null
-          inspection_garage?: Json | null
-          inspection_mecanique?: Json | null
-          inspection_exterieur?: Json | null
-          inspection_divers?: Json | null
-          inspection_categories_completed?: string[] | null
-          frais_condo?: number | null
-          loyer_en_place?: number | null
-          unit_rents?: Json | null
-          type_evaluation?: string | null
-          occupancy?: string | null
-          localisation?: string | null
-          type_copropriete?: string | null
-          type_batiment?: string | null
-          chrono_age?: number | null
-          eff_age?: number | null
-          type_garage?: string | null
-          extras?: string | null
-          lot_number?: string | null
-          additional_lots?: Json | null
-          matricule?: string | null
-          eval_municipale_annee?: number | null
-          eval_municipale_terrain?: number | null
-          eval_municipale_batiment?: number | null
-          eval_municipale_total?: number | null
           taxes_municipales_annee?: number | null
           taxes_municipales_montant?: number | null
           taxes_scolaires_annee?: number | null
           taxes_scolaires_montant?: number | null
+          toiture?: string | null
+          type_batiment?: string | null
+          type_copropriete?: string | null
+          type_evaluation?: string | null
+          type_garage?: string | null
+          type_propriete?: string | null
+          type_sous_sol?: string | null
+          unit_rents?: Json | null
+          updated_at?: string | null
+          ville?: string | null
+          zonage?: string | null
           zoning_usages_permis?: string | null
         }
         Update: {
+          additional_lots?: Json | null
           adresse?: string
+          aire_habitable_m2?: number | null
+          aire_habitable_pi2?: number | null
           ameliorations_hors_sol?: string | null
           annee_construction?: number | null
+          chrono_age?: number | null
           code_postal?: string | null
           created_at?: string | null
           created_by?: string | null
           date_vente?: string | null
           date_vente_precedente?: string | null
           dimension_garage?: string | null
+          eff_age?: number | null
+          eval_municipale_annee?: string | null
+          eval_municipale_batiment?: number | null
+          eval_municipale_terrain?: number | null
+          eval_municipale_total?: number | null
+          extras?: string | null
+          field_sources?: Json | null
+          frais_condo?: number | null
           frontage_m2?: number | null
           frontage_pi2?: number | null
           genre_propriete?: string | null
           id?: string
+          inspection_batiment?: Json | null
+          inspection_categories_completed?: string[] | null
+          inspection_completion?: number | null
+          inspection_date?: string | null
+          inspection_divers?: Json | null
+          inspection_exterieur?: Json | null
+          inspection_garage?: Json | null
+          inspection_mecanique?: Json | null
+          inspection_pieces?: Json | null
+          inspection_status?: string | null
           is_shared?: boolean | null
           is_template?: boolean | null
           jours_sur_marche?: number | null
+          localisation?: string | null
+          lot_number?: string | null
+          loyer_en_place?: number | null
+          matricule?: string | null
           media_references?: Json | null
           municipalite?: string | null
           nombre_chambres?: number | null
           nombre_pieces?: number | null
           notes?: string | null
           numero_mls?: string | null
+          occupancy?: string | null
           organization_id?: string | null
           perimetre_batiment_m2?: number | null
           perimetre_batiment_pi2?: number | null
@@ -462,7 +495,7 @@ export type Database = {
           province?: string | null
           salle_bain?: number | null
           salle_eau?: number | null
-          search_vector?: unknown | null
+          search_vector?: unknown
           source?: string | null
           stationnement?: string | null
           status?: string | null
@@ -470,50 +503,64 @@ export type Database = {
           superficie_habitable_pi2?: number | null
           superficie_terrain_m2?: number | null
           superficie_terrain_pi2?: number | null
-          toiture?: string | null
-          type_propriete?: string | null
-          type_sous_sol?: string | null
-          updated_at?: string | null
-          ville?: string | null
-          zonage?: string | null
-          inspection_status?: string | null
-          inspection_date?: string | null
-          inspection_completion?: number | null
-          inspection_pieces?: Json | null
-          inspection_batiment?: Json | null
-          inspection_garage?: Json | null
-          inspection_mecanique?: Json | null
-          inspection_exterieur?: Json | null
-          inspection_divers?: Json | null
-          inspection_categories_completed?: string[] | null
-          frais_condo?: number | null
-          loyer_en_place?: number | null
-          unit_rents?: Json | null
-          type_evaluation?: string | null
-          occupancy?: string | null
-          localisation?: string | null
-          type_copropriete?: string | null
-          type_batiment?: string | null
-          chrono_age?: number | null
-          eff_age?: number | null
-          type_garage?: string | null
-          extras?: string | null
-          lot_number?: string | null
-          additional_lots?: Json | null
-          matricule?: string | null
-          eval_municipale_annee?: number | null
-          eval_municipale_terrain?: number | null
-          eval_municipale_batiment?: number | null
-          eval_municipale_total?: number | null
           taxes_municipales_annee?: number | null
           taxes_municipales_montant?: number | null
           taxes_scolaires_annee?: number | null
           taxes_scolaires_montant?: number | null
+          toiture?: string | null
+          type_batiment?: string | null
+          type_copropriete?: string | null
+          type_evaluation?: string | null
+          type_garage?: string | null
+          type_propriete?: string | null
+          type_sous_sol?: string | null
+          unit_rents?: Json | null
+          updated_at?: string | null
+          ville?: string | null
+          zonage?: string | null
           zoning_usages_permis?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "properties_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          created_at: string | null
+          email: string
+          full_name: string | null
+          id: string
+          organization_id: string | null
+          preferences: Json | null
+          role: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          full_name?: string | null
+          id: string
+          organization_id?: string | null
+          preferences?: Json | null
+          role?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          full_name?: string | null
+          id?: string
+          organization_id?: string | null
+          preferences?: Json | null
+          role?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "users_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
