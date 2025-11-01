@@ -405,7 +405,13 @@ function ImportPageContent() {
       </Typography>
 
       {/* Document Type Selection */}
-      <Card sx={{ borderRadius: '16px', mb: 3 }}>
+      <Card sx={{
+        borderRadius: '16px',
+        mb: 3,
+        background: 'linear-gradient(135deg, rgba(147, 197, 253, 0.15) 0%, rgba(196, 181, 253, 0.15) 100%)',
+        border: '1px solid',
+        borderColor: 'rgba(147, 197, 253, 0.3)',
+      }}>
         <CardContent>
           <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
             {t('upload.documentType.title')}

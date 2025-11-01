@@ -42,6 +42,7 @@ import { DOCUMENT_TYPES } from '@/features/import/constants/import.constants';
 import { propertiesSupabaseService } from '@/features/library/_api/properties-supabase.service';
 import { Property } from '@/features/library/types/property.types';
 import { useSettings } from '@/contexts/SettingsContext';
+import { useBackgroundImport } from '@/contexts/BackgroundImportContext';
 import AiApiKeysDialog from '@/features/user-settings/components/AiApiKeysDialog';
 
 interface BatchFile {
@@ -56,18 +57,15 @@ function BatchImportPageContent() {
   const locale = useLocale();
   const router = useRouter();
   const { preferences } = useSettings();
+  const { state: importState, startBatchImport } = useBackgroundImport();
 
   const [selectedFiles, setSelectedFiles] = useState<BatchFile[]>([]);
-  const [processing, setProcessing] = useState(false);
-  const [currentFileIndex, setCurrentFileIndex] = useState<number | null>(null);
-  const [completedFiles, setCompletedFiles] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [mergeMode, setMergeMode] = useState<'new' | 'existing'>('new');
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [allProperties, setAllProperties] = useState<Property[]>([]);
   const [loadingProperties, setLoadingProperties] = useState(false);
   const [showAiApiKeysDialog, setShowAiApiKeysDialog] = useState(false);
-  const [mergedPropertyId, setMergedPropertyId] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -123,15 +121,23 @@ function BatchImportPageContent() {
     setError(null);
 
     // Auto-assign document types based on default order
-    const batchFiles: BatchFile[] = files.map((file, index) => ({
+    // Start index from current number of selected files to continue the pattern
+    const startIndex = selectedFiles.length;
+    const newBatchFiles: BatchFile[] = files.map((file, index) => ({
       file,
-      documentType: DEFAULT_TYPE_ORDER[index % DEFAULT_TYPE_ORDER.length],
+      documentType: DEFAULT_TYPE_ORDER[(startIndex + index) % DEFAULT_TYPE_ORDER.length],
     }));
 
-    setSelectedFiles(batchFiles);
+    // Append new files to existing selection
+    setSelectedFiles(prev => [...prev, ...newBatchFiles]);
 
-    // Load properties for merge selection
-    await loadProperties();
+    // Load properties for merge selection (only if not already loaded)
+    if (allProperties.length === 0) {
+      await loadProperties();
+    }
+
+    // Clear the input so the same file can be selected again if needed
+    event.target.value = '';
   };
 
   // Remove a file from the batch
@@ -146,7 +152,7 @@ function BatchImportPageContent() {
     );
   };
 
-  // Process all files sequentially
+  // Process all files sequentially in background
   const handleProcessBatch = async () => {
     if (selectedFiles.length === 0) return;
     if (mergeMode === 'existing' && !selectedProperty) {
@@ -167,56 +173,26 @@ function BatchImportPageContent() {
 
     const model = preferences?.aiModels?.[provider];
 
-    setProcessing(true);
     setError(null);
-    setCompletedFiles([]);
 
-    let targetPropertyId = selectedProperty?.id || null;
-
-    try {
-      // Process files sequentially
-      for (let i = 0; i < selectedFiles.length; i++) {
-        setCurrentFileIndex(i);
-        const { file, documentType } = selectedFiles[i];
-
-        // Extract data from PDF
-        const session: ImportSession = await importService.processPDF(
-          file,
-          documentType,
-          apiKey,
-          provider,
-          model
-        );
-
-        // If first file and creating new property, create it
-        if (i === 0 && mergeMode === 'new') {
-          const createdSession = await importService.createPropertyFromImport(session);
-          if (createdSession.propertyId) {
-            targetPropertyId = createdSession.propertyId;
-            setMergedPropertyId(targetPropertyId);
-          }
-        } else if (targetPropertyId) {
-          // Merge subsequent files into the target property
-          await importService.mergePropertyData(targetPropertyId, session);
-        }
-
-        setCompletedFiles(prev => [...prev, file.name]);
-      }
-
-      // Success - redirect to the property
-      setTimeout(() => {
-        if (targetPropertyId) {
-          router.push(`/library/${targetPropertyId}`);
-        } else {
-          router.push('/library');
-        }
-      }, 2000);
-    } catch (err) {
-      setError(locale === 'fr' ? 'Échec du traitement par lots' : 'Batch processing failed');
-      console.error('Batch import error:', err);
-      setProcessing(false);
-      setCurrentFileIndex(null);
+    // Request notification permission
+    if ('Notification' in window && Notification.permission === 'default') {
+      await Notification.requestPermission();
     }
+
+    // Start background import
+    await startBatchImport(
+      selectedFiles,
+      mergeMode,
+      selectedProperty?.id || null,
+      apiKey,
+      provider,
+      model,
+      locale
+    );
+
+    // Navigate to library immediately - import continues in background
+    router.push(`/${locale}/library`);
   };
 
   // Render file upload area
@@ -275,8 +251,8 @@ function BatchImportPageContent() {
               mb: 2,
               borderRadius: '12px',
               border: '1px solid',
-              borderColor: completedFiles.includes(item.file.name) ? 'success.main' : 'divider',
-              bgcolor: currentFileIndex === index ? 'action.hover' : 'background.paper',
+              borderColor: importState.completedFiles.includes(item.file.name) ? 'success.main' : 'divider',
+              bgcolor: importState.currentFileIndex === index ? 'action.hover' : 'background.paper',
             }}
           >
             <CardContent sx={{ py: 2 }}>
@@ -296,7 +272,7 @@ function BatchImportPageContent() {
                     value={item.documentType}
                     onChange={(e) => handleDocumentTypeChange(index, e.target.value as DocumentType)}
                     label={locale === 'fr' ? 'Type' : 'Type'}
-                    disabled={processing}
+                    disabled={importState.isProcessing}
                     sx={{ borderRadius: '8px' }}
                   >
                     {(Object.keys(DOCUMENT_TYPES) as DocumentType[]).map((type) => (
@@ -306,15 +282,15 @@ function BatchImportPageContent() {
                     ))}
                   </Select>
                 </FormControl>
-                {completedFiles.includes(item.file.name) ? (
+                {importState.completedFiles.includes(item.file.name) ? (
                   <CheckCircle sx={{ color: 'success.main' }} />
-                ) : currentFileIndex === index ? (
+                ) : importState.currentFileIndex === index ? (
                   <CircularProgress size={24} />
                 ) : (
                   <IconButton
                     size="small"
                     onClick={() => handleRemoveFile(index)}
-                    disabled={processing}
+                    disabled={importState.isProcessing}
                     sx={{ color: 'error.main' }}
                   >
                     <Delete />
@@ -343,13 +319,13 @@ function BatchImportPageContent() {
             value="new"
             control={<Radio />}
             label={t('propertySelection.createNew')}
-            disabled={processing}
+            disabled={importState.isProcessing}
           />
           <FormControlLabel
             value="existing"
             control={<Radio />}
             label={t('propertySelection.mergeExisting')}
-            disabled={processing}
+            disabled={importState.isProcessing}
           />
         </RadioGroup>
 
@@ -359,7 +335,7 @@ function BatchImportPageContent() {
             getOptionLabel={(option) => `${option.adresse}${option.ville ? ` - ${option.ville}` : ''}`}
             value={selectedProperty}
             onChange={(_, newValue) => setSelectedProperty(newValue)}
-            disabled={processing}
+            disabled={importState.isProcessing}
             loading={loadingProperties}
             sx={{ mt: 2 }}
             renderInput={(params) => (
@@ -390,22 +366,22 @@ function BatchImportPageContent() {
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
         {t('processing.current', {
-          current: (currentFileIndex || 0) + 1,
+          current: (importState.currentFileIndex || 0) + 1,
           total: selectedFiles.length,
         })}
       </Typography>
-      {currentFileIndex !== null && (
+      {importState.currentFileIndex !== null && (
         <Typography variant="body2" sx={{ mb: 3 }}>
-          {selectedFiles[currentFileIndex]?.file.name}
+          {selectedFiles[importState.currentFileIndex]?.file.name}
         </Typography>
       )}
       <LinearProgress
         variant="determinate"
-        value={(completedFiles.length / selectedFiles.length) * 100}
+        value={(importState.completedFiles.length / selectedFiles.length) * 100}
         sx={{ borderRadius: '4px', height: 8, mb: 3 }}
       />
       <Typography variant="caption" color="text.secondary">
-        {completedFiles.length} / {selectedFiles.length} {t('processing.completed')}
+        {importState.completedFiles.length} / {selectedFiles.length} {t('processing.completed')}
       </Typography>
     </Box>
   );
@@ -437,7 +413,7 @@ function BatchImportPageContent() {
     </Box>
   );
 
-  const isCompleted = completedFiles.length === selectedFiles.length && selectedFiles.length > 0;
+  const isCompleted = importState.completedFiles.length === selectedFiles.length && selectedFiles.length > 0;
 
   return (
     <Box sx={{ maxWidth: 1200, mx: 'auto', p: 3 }}>
@@ -445,7 +421,7 @@ function BatchImportPageContent() {
         <Button
           startIcon={<ArrowBack />}
           onClick={() => router.push('/import?step=1')}
-          disabled={processing}
+          disabled={importState.isProcessing}
           sx={{ borderRadius: '12px', textTransform: 'none' }}
         >
           {tCommon('back')}
@@ -503,9 +479,9 @@ function BatchImportPageContent() {
 
       <Card sx={{ borderRadius: '16px', mb: 3 }}>
         <CardContent sx={{ p: 3 }}>
-          {isCompleted ? (
+          {isCompleted && !importState.isProcessing ? (
             renderSuccessView()
-          ) : processing ? (
+          ) : importState.isProcessing ? (
             renderProcessingView()
           ) : (
             <>

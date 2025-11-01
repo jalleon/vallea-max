@@ -28,6 +28,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useRouter, usePathname } from 'next/navigation'
 import { useTranslation } from '@/hooks/useTranslation'
 import AiApiKeysDialog from '@/features/user-settings/components/AiApiKeysDialog'
+import { BackgroundImportIndicator } from '@/components/import/BackgroundImportIndicator'
 
 interface MaterialHeaderProps {
   onMenuClick: () => void
@@ -113,7 +114,7 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
     >
       <Toolbar sx={{ justifyContent: 'space-between', px: 3 }}>
         {/* Left side */}
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -123,6 +124,7 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
           >
             <MenuIcon />
           </IconButton>
+          <BackgroundImportIndicator />
         </Box>
 
         {/* Right side */}
