@@ -156,6 +156,9 @@ class ImportService {
     const fieldSources: Record<string, string> = existingFieldSources || {};
 
     // Protected document types - these sources take precedence over MLS data
+    // This protects ALL fields from these sources, including:
+    // - role_foncier: eval values, evaluation date (eval_municipale_annee), matricule, lot, etc.
+    // - role_taxe: tax amounts, tax years (taxes_municipales_annee), etc.
     const protectedSources = ['role_foncier', 'role_taxe'];
     const isMLS = documentType === 'mls_listing';
 
