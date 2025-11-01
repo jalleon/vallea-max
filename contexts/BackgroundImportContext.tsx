@@ -47,6 +47,7 @@ interface BackgroundImportContextType {
   clearPendingSession: () => void;
   cancelImport: () => void;
   clearState: () => void;
+  clearProgressOnly: () => void;
 }
 
 const BackgroundImportContext = createContext<BackgroundImportContextType | undefined>(undefined);
@@ -304,6 +305,23 @@ export function BackgroundImportProvider({ children }: { children: React.ReactNo
     setState(initialState);
   }, []);
 
+  const clearProgressOnly = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      isProcessing: false,
+      totalFiles: 0,
+      processedFiles: 0,
+      currentFileIndex: null,
+      currentFileName: null,
+      completedFiles: [],
+      error: null,
+      targetPropertyId: null,
+      duplicateDetected: false,
+      duplicateAddress: null,
+      // Keep pendingSession and pendingStep intact
+    }));
+  }, []);
+
   return (
     <BackgroundImportContext.Provider
       value={{
@@ -314,6 +332,7 @@ export function BackgroundImportProvider({ children }: { children: React.ReactNo
         clearPendingSession,
         cancelImport,
         clearState,
+        clearProgressOnly,
       }}
     >
       {children}

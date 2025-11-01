@@ -1,14 +1,14 @@
 'use client';
 
-import { Box, LinearProgress, Typography, IconButton, Chip, Alert } from '@mui/material';
-import { Close, CloudUpload, CheckCircle, MergeType } from '@mui/icons-material';
+import { Box, LinearProgress, Typography, Alert } from '@mui/material';
+import { CloudUpload, CheckCircle, MergeType } from '@mui/icons-material';
 import { useBackgroundImport } from '@/contexts/BackgroundImportContext';
 import { useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 export function BackgroundImportIndicator() {
-  const { state, cancelImport, clearState } = useBackgroundImport();
+  const { state, cancelImport, clearState, clearProgressOnly } = useBackgroundImport();
   const locale = useLocale();
   const router = useRouter();
 
@@ -24,15 +24,16 @@ export function BackgroundImportIndicator() {
   const isComplete = state.processedFiles === state.totalFiles && state.totalFiles > 0;
 
   // Auto-close after 5 seconds when import is complete
+  // Use clearProgressOnly to preserve pending session for step 3
   useEffect(() => {
     if (isComplete) {
       const timer = setTimeout(() => {
-        clearState();
+        clearProgressOnly();
       }, 5000);
 
       return () => clearTimeout(timer);
     }
-  }, [isComplete, clearState]);
+  }, [isComplete, clearProgressOnly]);
 
   const handleClick = () => {
     console.log('Click handler called:', {
@@ -127,23 +128,6 @@ export function BackgroundImportIndicator() {
           }}
         />
       </Box>
-
-      <IconButton
-        size="small"
-        onClick={(e) => {
-          e.stopPropagation(); // Prevent click from bubbling to parent Box
-          if (state.isProcessing) {
-            if (confirm(locale === 'fr' ? 'Annuler l\'import en cours?' : 'Cancel ongoing import?')) {
-              cancelImport();
-            }
-          } else {
-            clearState();
-          }
-        }}
-        sx={{ color: 'white', p: 0.5, flexShrink: 0 }}
-      >
-        <Close sx={{ fontSize: 18 }} />
-      </IconButton>
     </Box>
 
       {/* Duplicate detection notification - positioned to the right */}
