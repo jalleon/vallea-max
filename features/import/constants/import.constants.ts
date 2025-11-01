@@ -69,6 +69,10 @@ export const FIELD_MAPPINGS: Record<string, string> = {
   evaluationDate: 'eval_municipale_annee',
   matricule: 'matricule',
 
+  // Zoning
+  zonage: 'zonage',
+  zoningUsagesPermis: 'zoning_usages_permis',
+
   // Taxes
   copropTax: 'frais_condo',
   schoolTax: 'taxes_scolaires_montant',

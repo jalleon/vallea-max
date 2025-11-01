@@ -335,42 +335,60 @@ EXAMPLE OUTPUT 2:
 
 Return ONLY valid JSON in format: {"properties": [{...}]}`,
 
-  zonage: `You are an expert Quebec zoning (Zonage/Règlement de zonage) extraction assistant. Extract ALL zoning and land use information and return ONLY valid JSON.
+  zonage: `You are an expert Quebec zoning (Zonage/Règlement de zonage) extraction assistant. Extract ONLY zone number and permitted residential uses. Return ONLY valid JSON.
 
 CRITICAL RULES:
-1. Remove ALL formatting from numbers and measurements
-2. Extract all zoning codes, regulations, and permitted uses
+1. This document has NO address - it will be merged with an existing property
+2. Extract ONLY the two fields specified below
 3. Use null for missing/unavailable fields
 4. DO NOT populate the "extras" field - leave it as null
-5. For arrondissement/municipality: REMOVE "Arrondissement de" prefix - only include the name
 
-MONTREAL EVALUATION DATE RULE:
-- If city is "Montréal" or "Montreal":
-  - Current evaluation period: 2024-07-01 to 2027-06-30
-  - Set "evaluationDate" = "2024-07-01" for Montreal properties
-  - Next period starts July 1, 2027 (changes every 3 years)
+REQUIRED FIELDS (ONLY THESE TWO):
+- "zonage" → Zone number from one of these locations:
+  * "Numéro de zone" (number at end of same line in table)
+  * "No zone" (zone number in table)
+  * "Zone" (at top right of document)
 
-REQUIRED FIELDS:
-- "address" → Full street address
-- "city" → Municipality/City name
-- "municipality" → Arrondissement WITHOUT "Arrondissement de" prefix
-- "lotNumber" → Lot number(s)
-- "matricule" → Property matricule if mentioned
-- "surface" → Land area in m²
-- "evaluationDate" → For Montreal: "2024-07-01", Others: extract if present
+- "zoningUsagesPermis" → Permitted residential uses from table:
+  * Look for "classes d'usages" where an "x" appears under "Habitation" section
+  * OR look for "classe" where a checkmark (✓) appears on the same line
+  * Combine all permitted uses into a single comma-separated string
+
 - "extras" → ALWAYS set to null (do not populate this field)
 
-EXAMPLE INPUT:
-"Certificat de zonage - 123 Rue Principale, Longueuil. Lot: 1234567. Matricule: 1234 56 7890. Superficie: 450 m². Zone: H-1 (Habitation unifamiliale). Usages autorisés: Unifamiliale isolée, jumelée. Hauteur max: 10.5m (2 étages). Marges: Avant 6m, Latérales 2m, Arrière 7m. Coefficient occupation sol: 35%. Stationnement: 2 espaces minimum."
+IGNORE ALL OTHER DATA - Do not extract address, lot number, matricule, surface, city, etc.
 
-EXAMPLE OUTPUT:
+EXAMPLE INPUT 1 (Table format with "x" marks):
+"Numéro de zone: H-5
+Tableau des usages:
+Section | Classe d'usages | Habitation
+Habitation | Unifamiliale isolée | x
+Habitation | Unifamiliale jumelée | x
+Habitation | Duplex | x
+Commerce | Dépanneur |"
+
+EXAMPLE OUTPUT 1:
 {
   "properties": [{
-    "address": "123 Rue Principale",
-    "city": "Longueuil",
-    "lotNumber": "1234567",
-    "matricule": "1234 56 7890",
-    "surface": 450,
+    "zonage": "H-5",
+    "zoningUsagesPermis": "Unifamiliale isolée, Unifamiliale jumelée, Duplex",
+    "extras": null
+  }]
+}
+
+EXAMPLE INPUT 2 (Zone at top right with checkmarks):
+"Zone: RU-3
+Classes autorisées:
+Classe | Autorisé
+Habitation unifamiliale | ✓
+Habitation bifamiliale | ✓
+Commerce de détail |"
+
+EXAMPLE OUTPUT 2:
+{
+  "properties": [{
+    "zonage": "RU-3",
+    "zoningUsagesPermis": "Habitation unifamiliale, Habitation bifamiliale",
     "extras": null
   }]
 }

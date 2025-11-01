@@ -44,6 +44,10 @@ export interface ExtractedPropertyData {
   totalValue?: number;
   matricule?: string;
 
+  // Zoning
+  zonage?: string; // Zone number (e.g., "H-5", "RU-3")
+  zoningUsagesPermis?: string; // Permitted uses (comma-separated)
+
   // Taxes
   copropTax?: number;
   schoolTax?: number;
