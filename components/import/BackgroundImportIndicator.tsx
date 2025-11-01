@@ -5,6 +5,7 @@ import { Close, CloudUpload, CheckCircle, MergeType } from '@mui/icons-material'
 import { useBackgroundImport } from '@/contexts/BackgroundImportContext';
 import { useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export function BackgroundImportIndicator() {
   const { state, cancelImport, clearState } = useBackgroundImport();
@@ -21,6 +22,17 @@ export function BackgroundImportIndicator() {
     : 0;
 
   const isComplete = state.processedFiles === state.totalFiles && state.totalFiles > 0;
+
+  // Auto-close after 5 seconds when import is complete
+  useEffect(() => {
+    if (isComplete) {
+      const timer = setTimeout(() => {
+        clearState();
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isComplete, clearState]);
 
   const handleClick = () => {
     console.log('Click handler called:', {
