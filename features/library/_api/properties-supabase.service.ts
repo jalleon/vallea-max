@@ -93,6 +93,8 @@ class PropertiesSupabaseService {
       taxes_municipales_montant: data.taxes_municipales_montant || undefined,
       taxes_scolaires_annee: data.taxes_scolaires_annee || undefined,
       taxes_scolaires_montant: data.taxes_scolaires_montant || undefined,
+      aire_habitable_m2: data.aire_habitable_m2 || undefined,
+      aire_habitable_pi2: data.aire_habitable_pi2 || undefined,
       zoning_usages_permis: data.zoning_usages_permis || undefined,
 
       // Inspection fields

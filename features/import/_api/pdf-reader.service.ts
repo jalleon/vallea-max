@@ -1,55 +1,35 @@
 /**
- * PDF reading and text extraction service using pdfjs-dist
+ * PDF reading and text extraction service
  */
 
-import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
-
-// Disable worker for Node.js environment
-pdfjsLib.GlobalWorkerOptions.workerSrc = '';
+import { PdfReader } from 'pdfreader';
 
 class PdfReaderService {
   /**
-   * Extract text content from PDF buffer using pdfjs-dist
+   * Extract text content from PDF buffer
    */
   async extractText(buffer: Buffer): Promise<string> {
-    try {
-      // Load PDF document
-      const loadingTask = pdfjsLib.getDocument({
-        data: new Uint8Array(buffer),
-        useSystemFonts: true,
-        standardFontDataUrl: undefined,
+    return new Promise((resolve, reject) => {
+      const reader = new PdfReader();
+      let textContent = '';
+
+      reader.parseBuffer(buffer, (err, item) => {
+        if (err) {
+          return reject(err);
+        }
+
+        if (!item) {
+          // End of file
+          resolve(textContent.trim());
+          return;
+        }
+
+        // Accumulate text
+        if (item.text) {
+          textContent += item.text + ' ';
+        }
       });
-
-      const pdfDocument = await loadingTask.promise;
-
-      let fullText = '';
-      const numPages = pdfDocument.numPages;
-
-      console.log(`[PDF Debug] Total pages: ${numPages}`);
-
-      // Extract text from all pages
-      for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-        const page = await pdfDocument.getPage(pageNum);
-        const textContent = await page.getTextContent();
-
-        // Combine all text items
-        const pageText = textContent.items
-          .map((item: any) => item.str)
-          .join(' ');
-
-        fullText += pageText + ' ';
-      }
-
-      fullText = fullText.trim();
-
-      console.log(`[PDF Debug] Total characters extracted: ${fullText.length}`);
-      console.log(`[PDF Debug] First 300 chars: "${fullText.substring(0, 300)}"`);
-
-      return fullText;
-    } catch (error) {
-      console.error('PDF extraction error:', error);
-      throw new Error('Failed to extract text from PDF');
-    }
+    });
   }
 
   /**

@@ -1572,7 +1572,14 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label="Aire habitable (m²)"
                         type="number"
                         value={formData.aire_habitable_m2 || ''}
-                        onChange={(e) => handleInputChange('aire_habitable_m2', e.target.value ? parseFloat(e.target.value) : undefined)}
+                        onChange={(e) => {
+                          const value = e.target.value ? parseFloat(e.target.value) : undefined
+                          setFormData(prev => ({
+                            ...prev,
+                            aire_habitable_m2: value,
+                            aire_habitable_pi2: value ? Math.round(convertArea(value, 'm2', 'ft2') * 100) / 100 : undefined
+                          }))
+                        }}
                         variant="outlined"
                         size="small"
                       />
@@ -1583,7 +1590,14 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label="Aire habitable (pi²)"
                         type="number"
                         value={formData.aire_habitable_pi2 || ''}
-                        onChange={(e) => handleInputChange('aire_habitable_pi2', e.target.value ? parseFloat(e.target.value) : undefined)}
+                        onChange={(e) => {
+                          const value = e.target.value ? parseFloat(e.target.value) : undefined
+                          setFormData(prev => ({
+                            ...prev,
+                            aire_habitable_pi2: value,
+                            aire_habitable_m2: value ? Math.round(convertArea(value, 'ft2', 'm2') * 100) / 100 : undefined
+                          }))
+                        }}
                         variant="outlined"
                         size="small"
                       />
