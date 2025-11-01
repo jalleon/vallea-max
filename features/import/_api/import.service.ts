@@ -306,8 +306,14 @@ class ImportService {
     }
 
     // Fetch existing property to get field_sources
-    const existingProperty = await propertiesSupabaseService.getById(propertyId);
-    const existingFieldSources = existingProperty.field_sources || {};
+    let existingFieldSources = {};
+    try {
+      const existingProperty = await propertiesSupabaseService.getById(propertyId);
+      existingFieldSources = existingProperty.field_sources || {};
+    } catch (error) {
+      console.warn('Could not fetch existing property field_sources:', error);
+      // Continue with empty field_sources if fetch fails
+    }
 
     const propertyData = this.mapToPropertyInput(
       session.extractedData,
@@ -347,9 +353,15 @@ class ImportService {
 
       let existingFieldSources = {};
       if (isMerge && duplicateProperty) {
-        // Fetch existing property to get field_sources
-        const existingProperty = await propertiesSupabaseService.getById(duplicateProperty.id);
-        existingFieldSources = existingProperty.field_sources || {};
+        try {
+          // Fetch existing property to get field_sources
+          const existingProperty = await propertiesSupabaseService.getById(duplicateProperty.id);
+          existingFieldSources = existingProperty.field_sources || {};
+        } catch (error) {
+          console.warn('Could not fetch existing property field_sources:', error);
+          // Continue with empty field_sources if fetch fails
+          existingFieldSources = {};
+        }
       }
 
       const propertyData = this.mapToPropertyInput(
