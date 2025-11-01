@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
 import { DocumentType, ImportSession } from '@/features/import/types/import.types';
 import { importService } from '@/features/import/_api/import.service';
+import { propertiesSupabaseService } from '@/features/library/_api/properties-supabase.service';
 
 interface BatchFile {
   file: File;
@@ -133,15 +134,35 @@ export function BackgroundImportProvider({ children }: { children: React.ReactNo
             model
           );
 
-          // If first file and creating new property, create it
+          // If first file and creating new property, check for duplicates first
           if (i === 0 && mergeMode === 'new') {
-            const createdSession = await importService.createPropertyFromImport(session);
-            if (createdSession.propertyId) {
-              targetPropertyId = createdSession.propertyId;
+            // Check if property already exists by address
+            let existingProperty = null;
+            if (session.extractedData?.address) {
+              existingProperty = await propertiesSupabaseService.findByAddress(
+                session.extractedData.address
+              );
+            }
+
+            if (existingProperty) {
+              // Duplicate found - merge into existing property instead of creating new
+              console.log('Duplicate property found, merging instead of creating:', existingProperty.adresse);
+              targetPropertyId = existingProperty.id;
+              await importService.mergePropertyData(targetPropertyId, session);
               setState(prev => ({
                 ...prev,
                 targetPropertyId,
               }));
+            } else {
+              // No duplicate - create new property
+              const createdSession = await importService.createPropertyFromImport(session);
+              if (createdSession.propertyId) {
+                targetPropertyId = createdSession.propertyId;
+                setState(prev => ({
+                  ...prev,
+                  targetPropertyId,
+                }));
+              }
             }
           } else if (targetPropertyId) {
             // Merge subsequent files into the target property
