@@ -22,7 +22,7 @@ export function BackgroundImportIndicator() {
 
   const isComplete = state.processedFiles === state.totalFiles && state.totalFiles > 0;
 
-  const handleDoubleClick = () => {
+  const handleClick = () => {
     if (state.targetPropertyId && isComplete) {
       // Navigate to library page (property detail page doesn't exist yet)
       // TODO: When property detail page is created, navigate to /{locale}/library/{propertyId}
@@ -33,7 +33,7 @@ export function BackgroundImportIndicator() {
 
   return (
     <Box
-      onDoubleClick={handleDoubleClick}
+      onClick={handleClick}
       sx={{
         display: 'flex',
         alignItems: 'center',
@@ -71,7 +71,7 @@ export function BackgroundImportIndicator() {
             }}
           >
             {isComplete
-              ? (locale === 'fr' ? 'Import terminé!' : 'Import Complete!')
+              ? (locale === 'fr' ? 'Import terminé! Cliquez pour voir' : 'Import Complete! Click to view')
               : (locale === 'fr' ? 'Import en cours...' : 'Importing...')}
           </Typography>
           <Typography
@@ -107,7 +107,8 @@ export function BackgroundImportIndicator() {
 
       <IconButton
         size="small"
-        onClick={() => {
+        onClick={(e) => {
+          e.stopPropagation(); // Prevent click from bubbling to parent Box
           if (state.isProcessing) {
             if (confirm(locale === 'fr' ? 'Annuler l\'import en cours?' : 'Cancel ongoing import?')) {
               cancelImport();
