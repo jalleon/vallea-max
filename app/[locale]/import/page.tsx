@@ -50,6 +50,7 @@ import { propertiesSupabaseService } from '@/features/library/_api/properties-su
 import { Property } from '@/features/library/types/property.types';
 import { useSettings } from '@/contexts/SettingsContext';
 import AiApiKeysDialog from '@/features/user-settings/components/AiApiKeysDialog';
+import { useBackgroundImport } from '@/contexts/BackgroundImportContext';
 
 function ImportPageContent() {
   const t = useTranslations('import');
@@ -57,6 +58,7 @@ function ImportPageContent() {
   const locale = useLocale();
   const router = useRouter();
   const { preferences } = useSettings();
+  const { startSingleImport, savePendingSession, clearPendingSession, state: importState } = useBackgroundImport();
 
   const [activeStep, setActiveStep] = useState(0);
   const [documentType, setDocumentType] = useState<DocumentType | null>(null);
@@ -142,6 +144,14 @@ function ImportPageContent() {
     loadProperties();
   }, []);
 
+  // Restore pending session if user navigated away and came back
+  useEffect(() => {
+    if (importState.pendingSession && importState.pendingStep !== null) {
+      setSession(importState.pendingSession);
+      setActiveStep(importState.pendingStep);
+    }
+  }, [importState.pendingSession, importState.pendingStep]);
+
   // Handle PDF file selection
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -196,9 +206,13 @@ function ImportPageContent() {
 
     try {
       // Process either text input or PDF file
-      const result = useTextInput
-        ? await importService.processText(pastedText, documentType, apiKey, provider, model)
-        : await importService.processPDF(selectedFile!, documentType, apiKey, provider, model);
+      let result: ImportSession;
+      if (useTextInput) {
+        result = await importService.processText(pastedText, documentType, apiKey, provider, model);
+      } else {
+        // Use background import for PDF files to show progress in header
+        result = await startSingleImport(selectedFile!, documentType, apiKey, provider, model);
+      }
 
       // Check for duplicates in all extracted properties
       if (result.properties && result.properties.length > 0) {
@@ -229,6 +243,9 @@ function ImportPageContent() {
       // If any duplicates found, show them in review step (user will decide for each)
       // Otherwise just proceed to review
       setActiveStep(2);
+
+      // Save session to context so user can navigate away and come back
+      savePendingSession(result, 2);
     } catch (err) {
       setError(t('errors.extractionFailed'));
       console.error('Import error:', err);
@@ -258,6 +275,9 @@ function ImportPageContent() {
       }
 
       setActiveStep(3); // Move to success step
+
+      // Clear pending session since import is complete
+      clearPendingSession();
 
       // Redirect to library list after a short delay
       setTimeout(() => {

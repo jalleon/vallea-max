@@ -21,6 +21,8 @@ interface BackgroundImportState {
   targetPropertyId: string | null;
   duplicateDetected: boolean;
   duplicateAddress: string | null;
+  pendingSession: ImportSession | null;
+  pendingStep: number | null;
 }
 
 interface BackgroundImportContextType {
@@ -34,6 +36,15 @@ interface BackgroundImportContextType {
     model: string | undefined,
     locale: string
   ) => Promise<void>;
+  startSingleImport: (
+    file: File,
+    documentType: DocumentType,
+    apiKey: string,
+    provider: string,
+    model: string | undefined
+  ) => Promise<ImportSession>;
+  savePendingSession: (session: ImportSession, step: number) => void;
+  clearPendingSession: () => void;
   cancelImport: () => void;
   clearState: () => void;
 }
@@ -51,6 +62,8 @@ const initialState: BackgroundImportState = {
   targetPropertyId: null,
   duplicateDetected: false,
   duplicateAddress: null,
+  pendingSession: null,
+  pendingStep: null,
 };
 
 export function BackgroundImportProvider({ children }: { children: React.ReactNode }) {
@@ -214,6 +227,75 @@ export function BackgroundImportProvider({ children }: { children: React.ReactNo
     [state.isProcessing] // Include state.isProcessing in dependencies
   );
 
+  const startSingleImport = useCallback(
+    async (
+      file: File,
+      documentType: DocumentType,
+      apiKey: string,
+      provider: string,
+      model: string | undefined
+    ): Promise<ImportSession> => {
+      // Prevent starting a new import if one is already running
+      if (state.isProcessing) {
+        throw new Error('An import is already in progress. Please wait for it to finish or cancel it.');
+      }
+
+      cancelRef.current = false;
+
+      setState({
+        isProcessing: true,
+        totalFiles: 1,
+        processedFiles: 0,
+        currentFileIndex: 0,
+        currentFileName: file.name,
+        completedFiles: [],
+        error: null,
+        targetPropertyId: null,
+        duplicateDetected: false,
+        duplicateAddress: null,
+      });
+
+      try {
+        // Process the PDF file
+        const result = await importService.processPDF(file, documentType, apiKey, provider, model);
+
+        // Mark as complete
+        setState(prev => ({
+          ...prev,
+          processedFiles: 1,
+          completedFiles: [file.name],
+          isProcessing: false,
+        }));
+
+        return result;
+      } catch (error) {
+        setState(prev => ({
+          ...prev,
+          isProcessing: false,
+          error: error instanceof Error ? error.message : 'Import failed',
+        }));
+        throw error;
+      }
+    },
+    [state.isProcessing]
+  );
+
+  const savePendingSession = useCallback((session: ImportSession, step: number) => {
+    setState(prev => ({
+      ...prev,
+      pendingSession: session,
+      pendingStep: step,
+    }));
+  }, []);
+
+  const clearPendingSession = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      pendingSession: null,
+      pendingStep: null,
+    }));
+  }, []);
+
   const cancelImport = useCallback(() => {
     cancelRef.current = true;
   }, []);
@@ -227,6 +309,9 @@ export function BackgroundImportProvider({ children }: { children: React.ReactNo
       value={{
         state,
         startBatchImport,
+        startSingleImport,
+        savePendingSession,
+        clearPendingSession,
         cancelImport,
         clearState,
       }}
