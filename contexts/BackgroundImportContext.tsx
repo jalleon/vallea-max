@@ -101,6 +101,10 @@ export function BackgroundImportProvider({ children }: { children: React.ReactNo
         completedFiles: [],
         error: null,
         targetPropertyId: selectedPropertyId,
+        duplicateDetected: false,
+        duplicateAddress: null,
+        pendingSession: null,
+        pendingStep: null,
       });
 
       let targetPropertyId = selectedPropertyId;
@@ -254,6 +258,8 @@ export function BackgroundImportProvider({ children }: { children: React.ReactNo
         targetPropertyId: null,
         duplicateDetected: false,
         duplicateAddress: null,
+        pendingSession: null,
+        pendingStep: null,
       });
 
       try {
