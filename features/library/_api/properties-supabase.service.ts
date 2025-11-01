@@ -108,6 +108,10 @@ class PropertiesSupabaseService {
       inspection_exterieur: data.inspection_exterieur as any,
       inspection_divers: data.inspection_divers as any,
       inspection_categories_completed: data.inspection_categories_completed as any,
+
+      // Field source tracking
+      field_sources: data.field_sources as any,
+
       created_at: new Date(data.created_at!),
       updated_at: new Date(data.updated_at!),
       media_references: mediaFiles,

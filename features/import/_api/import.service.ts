@@ -144,13 +144,20 @@ class ImportService {
    * @param extracted - Extracted property data
    * @param documentType - Type of document (determines which fields to protect)
    * @param isMerge - True if merging into existing property (protects certain fields)
+   * @param existingFieldSources - Existing field sources from database (for merge protection)
    */
   mapToPropertyInput(
     extracted: ExtractedPropertyData,
     documentType?: DocumentType,
-    isMerge: boolean = false
+    isMerge: boolean = false,
+    existingFieldSources?: Record<string, string>
   ): Partial<PropertyCreateInput> {
     const mapped: any = {};
+    const fieldSources: Record<string, string> = existingFieldSources || {};
+
+    // Protected document types - these sources take precedence over MLS data
+    const protectedSources = ['role_foncier', 'role_taxe'];
+    const isMLS = documentType === 'mls_listing';
 
     // Protected fields that should NEVER be overwritten during merge
     const protectedFieldsForMerge = [
@@ -185,6 +192,13 @@ class ImportService {
         return;
       }
 
+      // CRITICAL: Protect municipal data from MLS overwrites
+      // If this field already came from role_foncier or role_taxe, and we're importing MLS data, skip it
+      if (isMerge && isMLS && fieldSources[dbField] && protectedSources.includes(fieldSources[dbField])) {
+        console.log(`Protecting field ${dbField} (source: ${fieldSources[dbField]}) from MLS overwrite`);
+        return;
+      }
+
       // Protect address fields during merge UNLESS it's role_foncier (which has official standardized address)
       if (shouldProtectAddress && addressFields.includes(dbField)) {
         return;
@@ -199,6 +213,11 @@ class ImportService {
 
       // Only add if value exists
       mapped[dbField] = value;
+
+      // Track the source of this field
+      if (documentType) {
+        fieldSources[dbField] = documentType;
+      }
     });
 
     // Handle special conversions
@@ -206,14 +225,31 @@ class ImportService {
     const shouldProcessAddress = !isMerge || documentType === 'role_foncier';
 
     if (shouldProcessAddress && extracted.address) {
-      mapped.adresse = extracted.address;
+      // Check if protected by municipal source when merging with MLS
+      const shouldProtectFromMLS = isMerge && isMLS && fieldSources['adresse'] && protectedSources.includes(fieldSources['adresse']);
+
+      if (!shouldProtectFromMLS) {
+        mapped.adresse = extracted.address;
+        if (documentType) fieldSources['adresse'] = documentType;
+      }
     }
 
     // Parse address components if full address is provided but components aren't
     if (shouldProcessAddress && extracted.address && !extracted.city) {
       const addressParts = this.parseAddress(extracted.address);
-      if (addressParts.city) mapped.ville = addressParts.city;
-      if (addressParts.postalCode) mapped.code_postal = addressParts.postalCode;
+
+      // Check protection for each address component when merging with MLS
+      const villeProtected = isMerge && isMLS && fieldSources['ville'] && protectedSources.includes(fieldSources['ville']);
+      const postalProtected = isMerge && isMLS && fieldSources['code_postal'] && protectedSources.includes(fieldSources['code_postal']);
+
+      if (addressParts.city && !villeProtected) {
+        mapped.ville = addressParts.city;
+        if (documentType) fieldSources['ville'] = documentType;
+      }
+      if (addressParts.postalCode && !postalProtected) {
+        mapped.code_postal = addressParts.postalCode;
+        if (documentType) fieldSources['code_postal'] = documentType;
+      }
     }
 
     // Handle multi-unit data (unit_rents field expects JSONB array)
@@ -223,12 +259,16 @@ class ImportService {
         rent: extracted.unitRents?.[index] || 0
       }));
       mapped.unit_rents = units;
+      if (documentType) fieldSources['unit_rents'] = documentType;
     }
 
     // Set source only for new properties
     if (!isMerge) {
       mapped.source = 'import';
     }
+
+    // Include updated field sources in the mapped data
+    mapped.field_sources = fieldSources;
 
     return mapped;
   }
@@ -262,7 +302,16 @@ class ImportService {
       throw new Error('No extracted data in session');
     }
 
-    const propertyData = this.mapToPropertyInput(session.extractedData, session.documentType, true);
+    // Fetch existing property to get field_sources
+    const existingProperty = await propertiesSupabaseService.getById(propertyId);
+    const existingFieldSources = existingProperty.field_sources || {};
+
+    const propertyData = this.mapToPropertyInput(
+      session.extractedData,
+      session.documentType,
+      true,
+      existingFieldSources
+    );
 
     // Update existing property with new data (only non-null values)
     await propertiesSupabaseService.update(propertyId, propertyData as Partial<PropertyCreateInput>);
@@ -292,7 +341,20 @@ class ImportService {
       }
 
       const isMerge = action === 'merge' && duplicateProperty;
-      const propertyData = this.mapToPropertyInput(extractedData, session.documentType, isMerge);
+
+      let existingFieldSources = {};
+      if (isMerge && duplicateProperty) {
+        // Fetch existing property to get field_sources
+        const existingProperty = await propertiesSupabaseService.getById(duplicateProperty.id);
+        existingFieldSources = existingProperty.field_sources || {};
+      }
+
+      const propertyData = this.mapToPropertyInput(
+        extractedData,
+        session.documentType,
+        isMerge,
+        existingFieldSources
+      );
 
       if (isMerge) {
         // Merge with existing property - only update non-null fields, protect certain fields

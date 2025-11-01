@@ -155,6 +155,11 @@ export interface Property {
   inspection_divers?: Record<string, any>
   inspection_categories_completed?: InspectionCategory[]
 
+  // Field-level source tracking
+  // Tracks which document type provided each field (e.g., {"eval_municipale_total": "role_foncier", "prix_vente": "mls_listing"})
+  // Used to protect official municipal data from being overwritten by MLS imports
+  field_sources?: Record<string, string>
+
   created_at: Date
   updated_at: Date
 }
