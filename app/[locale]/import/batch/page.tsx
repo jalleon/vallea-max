@@ -20,11 +20,14 @@ import {
   InputLabel,
   IconButton,
   Chip,
-  Autocomplete,
   TextField,
   Radio,
   RadioGroup,
   FormControlLabel,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import {
   ArrowBack,
@@ -66,6 +69,8 @@ function BatchImportPageContent() {
   const [allProperties, setAllProperties] = useState<Property[]>([]);
   const [loadingProperties, setLoadingProperties] = useState(false);
   const [showAiApiKeysDialog, setShowAiApiKeysDialog] = useState(false);
+  const [propertyDialogOpen, setPropertyDialogOpen] = useState(false);
+  const [propertySearchText, setPropertySearchText] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -335,23 +340,17 @@ function BatchImportPageContent() {
         </RadioGroup>
 
         {mergeMode === 'existing' && (
-          <Autocomplete
-            options={allProperties}
-            getOptionLabel={(option) => `${option.adresse}${option.ville ? ` - ${option.ville}` : ''}`}
-            value={selectedProperty}
-            onChange={(_, newValue) => setSelectedProperty(newValue)}
+          <Button
+            fullWidth
+            variant="outlined"
+            onClick={() => setPropertyDialogOpen(true)}
             disabled={importState.isProcessing}
-            loading={loadingProperties}
-            sx={{ mt: 2 }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label={t('propertySelection.searchPlaceholder')}
-                size="small"
-                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
-              />
-            )}
-          />
+            sx={{ mt: 2, borderRadius: '8px', textTransform: 'none', justifyContent: 'flex-start', py: 1.5 }}
+          >
+            {selectedProperty
+              ? `${locale === 'fr' ? 'Fusionner avec: ' : 'Merge with: '}${selectedProperty.adresse}`
+              : t('propertySelection.searchPlaceholder')}
+          </Button>
         )}
 
         <Alert severity="info" sx={{ mt: 2, borderRadius: '8px' }}>
@@ -523,6 +522,114 @@ function BatchImportPageContent() {
           )}
         </CardContent>
       </Card>
+
+      {/* Property Selector Dialog */}
+      <Dialog
+        open={propertyDialogOpen}
+        onClose={() => {
+          setPropertyDialogOpen(false);
+          setPropertySearchText('');
+        }}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          {locale === 'fr' ? 'Sélectionner une propriété' : 'Select Property'}
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ mb: 2, mt: 1 }}>
+            <TextField
+              fullWidth
+              size="small"
+              placeholder={locale === 'fr' ? 'Rechercher par adresse...' : 'Search by address...'}
+              value={propertySearchText}
+              onChange={(e) => setPropertySearchText(e.target.value)}
+              sx={{ borderRadius: '8px' }}
+            />
+          </Box>
+          <Box sx={{ maxHeight: 400, overflowY: 'auto' }}>
+            {loadingProperties ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                <CircularProgress />
+              </Box>
+            ) : (
+              <>
+                {/* Option to not merge */}
+                <Card
+                  sx={{
+                    mb: 1,
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    border: '2px solid',
+                    borderColor: !selectedProperty ? 'primary.main' : 'divider',
+                    '&:hover': { bgcolor: 'action.hover' }
+                  }}
+                  onClick={() => {
+                    setSelectedProperty(null);
+                    setPropertyDialogOpen(false);
+                    setPropertySearchText('');
+                  }}
+                >
+                  <CardContent sx={{ py: 1.5 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {locale === 'fr' ? 'Aucune - Créer nouvelle propriété' : 'None - Create new property'}
+                    </Typography>
+                  </CardContent>
+                </Card>
+
+                {/* List of existing properties */}
+                {allProperties
+                  .filter(prop =>
+                    !propertySearchText ||
+                    prop.adresse?.toLowerCase().includes(propertySearchText.toLowerCase()) ||
+                    prop.ville?.toLowerCase().includes(propertySearchText.toLowerCase())
+                  )
+                  .sort((a, b) => (a.adresse || '').localeCompare(b.adresse || ''))
+                  .map((prop) => (
+                    <Card
+                      key={prop.id}
+                      sx={{
+                        mb: 1,
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        border: '2px solid',
+                        borderColor: selectedProperty?.id === prop.id ? 'primary.main' : 'divider',
+                        '&:hover': { bgcolor: 'action.hover' }
+                      }}
+                      onClick={() => {
+                        setSelectedProperty(prop);
+                        setPropertyDialogOpen(false);
+                        setPropertySearchText('');
+                      }}
+                    >
+                      <CardContent sx={{ py: 1.5 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {prop.adresse}
+                        </Typography>
+                        {prop.ville && (
+                          <Typography variant="caption" color="text.secondary">
+                            {prop.ville}{prop.municipalite && ` - ${prop.municipalite}`}
+                          </Typography>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+              </>
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setPropertyDialogOpen(false);
+              setPropertySearchText('');
+            }}
+            sx={{ borderRadius: '8px', textTransform: 'none' }}
+          >
+            {locale === 'fr' ? 'Annuler' : 'Cancel'}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <AiApiKeysDialog
         open={showAiApiKeysDialog}
