@@ -7,6 +7,7 @@ import { PropertyCreateInput } from '@/features/library/types/property.types';
 import { propertiesSupabaseService } from '@/features/library/_api/properties-supabase.service';
 import { ExtractedPropertyData, DocumentType, ImportSession } from '../types/import.types';
 import { FIELD_MAPPINGS } from '../constants/import.constants';
+import { formatLotNumber } from '@/lib/utils/formatting';
 
 class ImportService {
   /**
@@ -215,7 +216,12 @@ class ImportService {
       }
 
       // Only add if value exists
-      mapped[dbField] = value;
+      // Format lot_number to Quebec standard: # ### ###
+      if (dbField === 'lot_number' && typeof value === 'string') {
+        mapped[dbField] = formatLotNumber(value);
+      } else {
+        mapped[dbField] = value;
+      }
 
       // Track the source of this field
       if (documentType) {

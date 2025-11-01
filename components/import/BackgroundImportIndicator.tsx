@@ -4,10 +4,12 @@ import { Box, LinearProgress, Typography, IconButton, Chip } from '@mui/material
 import { Close, CloudUpload, CheckCircle } from '@mui/icons-material';
 import { useBackgroundImport } from '@/contexts/BackgroundImportContext';
 import { useLocale } from 'next-intl';
+import { useRouter } from 'next/navigation';
 
 export function BackgroundImportIndicator() {
   const { state, cancelImport, clearState } = useBackgroundImport();
   const locale = useLocale();
+  const router = useRouter();
 
   // Don't show if not processing
   if (!state.isProcessing && state.processedFiles === 0) {
@@ -20,8 +22,18 @@ export function BackgroundImportIndicator() {
 
   const isComplete = state.processedFiles === state.totalFiles && state.totalFiles > 0;
 
+  const handleDoubleClick = () => {
+    if (state.targetPropertyId && isComplete) {
+      // Navigate to library page (property detail page doesn't exist yet)
+      // TODO: When property detail page is created, navigate to /{locale}/library/{propertyId}
+      router.push(`/${locale}/library`);
+      clearState();
+    }
+  };
+
   return (
     <Box
+      onDoubleClick={handleDoubleClick}
       sx={{
         display: 'flex',
         alignItems: 'center',
@@ -34,6 +46,11 @@ export function BackgroundImportIndicator() {
           : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         color: 'white',
         maxWidth: { xs: '200px', sm: '300px', md: '400px' },
+        cursor: isComplete && state.targetPropertyId ? 'pointer' : 'default',
+        transition: 'transform 0.2s',
+        '&:hover': isComplete && state.targetPropertyId ? {
+          transform: 'scale(1.02)',
+        } : {},
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>

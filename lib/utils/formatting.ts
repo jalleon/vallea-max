@@ -109,3 +109,23 @@ export const parseNumber = (text: string | null | undefined): number | undefined
 
   return isNaN(parsed) ? undefined : parsed
 }
+
+/**
+ * Formats a Quebec lot number to the standard format: # ### ###
+ * @param lotNumber - The lot number string (may contain spaces, hyphens, etc.)
+ * @returns Formatted lot number as "# ### ###" or original value if not 7 digits
+ */
+export const formatLotNumber = (lotNumber: string | null | undefined): string => {
+  if (!lotNumber) return ''
+
+  // Remove all non-digit characters
+  const digits = lotNumber.replace(/\D/g, '')
+
+  // Only format if we have exactly 7 digits
+  if (digits.length === 7) {
+    return `${digits[0]} ${digits.slice(1, 4)} ${digits.slice(4, 7)}`
+  }
+
+  // Return digits as-is if not 7 characters (keep original behavior for other lengths)
+  return digits || lotNumber
+}
