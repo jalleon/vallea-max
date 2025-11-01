@@ -1,7 +1,7 @@
 'use client';
 
-import { Box, LinearProgress, Typography, IconButton, Chip } from '@mui/material';
-import { Close, CloudUpload, CheckCircle } from '@mui/icons-material';
+import { Box, LinearProgress, Typography, IconButton, Chip, Alert } from '@mui/material';
+import { Close, CloudUpload, CheckCircle, MergeType } from '@mui/icons-material';
 import { useBackgroundImport } from '@/contexts/BackgroundImportContext';
 import { useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
@@ -41,27 +41,50 @@ export function BackgroundImportIndicator() {
   };
 
   return (
-    <Box
-      onClick={handleClick}
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 2,
-        px: 2,
-        py: 0.5,
-        borderRadius: '24px',
-        background: isComplete
-          ? 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)'
-          : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        color: 'white',
-        maxWidth: { xs: '200px', sm: '300px', md: '400px' },
-        cursor: isComplete && state.targetPropertyId ? 'pointer' : 'default',
-        transition: 'transform 0.2s',
-        '&:hover': isComplete && state.targetPropertyId ? {
-          transform: 'scale(1.02)',
-        } : {},
-      }}
-    >
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      {/* Duplicate detection notification */}
+      {state.duplicateDetected && state.duplicateAddress && (
+        <Alert
+          severity="info"
+          icon={<MergeType />}
+          onClose={() => {
+            // Clear duplicate notification
+            clearState();
+          }}
+          sx={{
+            borderRadius: '12px',
+            fontSize: '0.85rem',
+            maxWidth: { xs: '250px', sm: '350px', md: '450px' },
+          }}
+        >
+          {locale === 'fr'
+            ? `Propriété existante détectée (${state.duplicateAddress}). Données fusionnées.`
+            : `Existing property detected (${state.duplicateAddress}). Data merged.`}
+        </Alert>
+      )}
+
+      {/* Progress indicator */}
+      <Box
+        onClick={handleClick}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 2,
+          px: 2,
+          py: 0.5,
+          borderRadius: '24px',
+          background: isComplete
+            ? 'linear-gradient(135deg, #FFD700 0%, #4CAF50 100%)'
+            : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white',
+          maxWidth: { xs: '200px', sm: '300px', md: '400px' },
+          cursor: isComplete && state.targetPropertyId ? 'pointer' : 'default',
+          transition: 'transform 0.2s',
+          '&:hover': isComplete && state.targetPropertyId ? {
+            transform: 'scale(1.02)',
+          } : {},
+        }}
+      >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
         {isComplete ? (
           <CheckCircle sx={{ fontSize: 20, flexShrink: 0 }} />
@@ -80,7 +103,7 @@ export function BackgroundImportIndicator() {
             }}
           >
             {isComplete
-              ? (locale === 'fr' ? 'Import terminé! Cliquez pour voir' : 'Import Complete! Click to view')
+              ? (locale === 'fr' ? 'Import terminé' : 'Import Complete')
               : (locale === 'fr' ? 'Import en cours...' : 'Importing...')}
           </Typography>
           <Typography
@@ -145,6 +168,7 @@ export function BackgroundImportIndicator() {
       >
         <Close sx={{ fontSize: 18 }} />
       </IconButton>
+    </Box>
     </Box>
   );
 }

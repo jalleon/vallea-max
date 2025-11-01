@@ -19,6 +19,8 @@ interface BackgroundImportState {
   completedFiles: string[];
   error: string | null;
   targetPropertyId: string | null;
+  duplicateDetected: boolean;
+  duplicateAddress: string | null;
 }
 
 interface BackgroundImportContextType {
@@ -47,6 +49,8 @@ const initialState: BackgroundImportState = {
   completedFiles: [],
   error: null,
   targetPropertyId: null,
+  duplicateDetected: false,
+  duplicateAddress: null,
 };
 
 export function BackgroundImportProvider({ children }: { children: React.ReactNode }) {
@@ -152,6 +156,8 @@ export function BackgroundImportProvider({ children }: { children: React.ReactNo
               setState(prev => ({
                 ...prev,
                 targetPropertyId,
+                duplicateDetected: true,
+                duplicateAddress: existingProperty.adresse || null,
               }));
             } else {
               // No duplicate - create new property
