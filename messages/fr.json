@@ -1106,6 +1106,37 @@
       "extractionFailed": "Échec de l'extraction des données",
       "noText": "Aucun texte trouvé dans le document",
       "aiError": "Erreur lors de l'analyse IA"
+    },
+
+    "batch": {
+      "title": "Import de documents multiples",
+      "subtitle": "Téléversez plusieurs PDFs et assignez les types de documents",
+      "dropzone": {
+        "title": "Glissez-déposez plusieurs PDFs ici",
+        "subtitle": "ou cliquez pour sélectionner plusieurs fichiers",
+        "button": "Sélectionner plusieurs fichiers"
+      },
+      "fileList": {
+        "title": "Fichiers sélectionnés ({count})"
+      },
+      "propertySelection": {
+        "title": "Fusionner dans",
+        "createNew": "Créer une nouvelle propriété",
+        "mergeExisting": "Fusionner dans une propriété existante",
+        "searchPlaceholder": "Rechercher une propriété...",
+        "info": "Tous les documents seront fusionnés dans UNE seule propriété"
+      },
+      "processing": {
+        "title": "Traitement des documents en cours...",
+        "current": "Document {current} sur {total}",
+        "completed": "documents traités"
+      },
+      "success": {
+        "title": "Tous les documents ont été importés avec succès!"
+      },
+      "actions": {
+        "startBatch": "Démarrer l'import groupé"
+      }
     }
   }
 }

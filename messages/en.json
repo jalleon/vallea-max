@@ -984,6 +984,37 @@
       "extractionFailed": "Failed to extract data",
       "noText": "No text found in document",
       "aiError": "AI analysis error"
+    },
+
+    "batch": {
+      "title": "Multiple Documents Import",
+      "subtitle": "Upload multiple PDFs and assign document types",
+      "dropzone": {
+        "title": "Drag and drop multiple PDFs here",
+        "subtitle": "or click to select multiple files",
+        "button": "Select Multiple Files"
+      },
+      "fileList": {
+        "title": "Selected Files ({count})"
+      },
+      "propertySelection": {
+        "title": "Merge into",
+        "createNew": "Create a new property",
+        "mergeExisting": "Merge into existing property",
+        "searchPlaceholder": "Search property...",
+        "info": "All documents will be merged into ONE property"
+      },
+      "processing": {
+        "title": "Processing documents...",
+        "current": "Document {current} of {total}",
+        "completed": "documents processed"
+      },
+      "success": {
+        "title": "All documents imported successfully!"
+      },
+      "actions": {
+        "startBatch": "Start Batch Import"
+      }
     }
   }
 }

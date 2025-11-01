@@ -83,6 +83,20 @@ function ImportPageContent() {
     t('steps.confirmation'),
   ];
 
+  // Check URL parameters on mount to set initial step (e.g., from batch import back button)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const stepParam = params.get('step');
+      if (stepParam) {
+        const step = parseInt(stepParam, 10);
+        if (step >= 0 && step < steps.length) {
+          setActiveStep(step);
+        }
+      }
+    }
+  }, []);
+
   // Get active provider based on priority
   const getActiveProvider = () => {
     const providerPriority = preferences?.providerPriority || ['deepseek', 'openai', 'anthropic'];
@@ -458,6 +472,10 @@ function ImportPageContent() {
           value={useTextInput ? 'text' : 'pdf'}
           exclusive
           onChange={(e, value) => {
+            if (value === 'batch') {
+              router.push('/import/batch');
+              return;
+            }
             if (value !== null) {
               setUseTextInput(value === 'text');
               setError(null);
@@ -470,6 +488,27 @@ function ImportPageContent() {
           <ToggleButton value="pdf" sx={{ px: 3, py: 1, textTransform: 'none', borderRadius: '12px 0 0 12px' }}>
             <PictureAsPdf sx={{ mr: 1, fontSize: 20 }} />
             PDF Upload
+          </ToggleButton>
+          <ToggleButton
+            value="batch"
+            sx={{
+              px: 3,
+              py: 1,
+              textTransform: 'none',
+              borderRadius: '0',
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              fontWeight: 600,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #5568d3 0%, #66408a 100%)',
+              },
+              '& .MuiSvgIcon-root': {
+                color: 'white',
+              }
+            }}
+          >
+            <CloudUpload sx={{ mr: 1, fontSize: 20 }} />
+            {locale === 'fr' ? 'Multi PDF' : 'Multi PDF'}
           </ToggleButton>
           <ToggleButton value="text" sx={{ px: 3, py: 1, textTransform: 'none', borderRadius: '0 12px 12px 0' }}>
             <TextFields sx={{ mr: 1, fontSize: 20 }} />
