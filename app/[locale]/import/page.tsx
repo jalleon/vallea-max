@@ -861,7 +861,7 @@ function ImportPageContent() {
         </DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ mb: 2 }}>
-            {t('duplicate.message', { address: duplicateProperty?.adresse })}
+            {t('duplicate.message', { address: duplicateProperty?.adresse || '' })}
           </DialogContentText>
           {duplicateProperty && (
             <Paper sx={{ p: 2, bgcolor: 'action.hover', borderRadius: '12px' }}>
