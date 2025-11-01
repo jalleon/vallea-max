@@ -42,27 +42,6 @@ export function BackgroundImportIndicator() {
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-      {/* Duplicate detection notification */}
-      {state.duplicateDetected && state.duplicateAddress && (
-        <Alert
-          severity="info"
-          icon={<MergeType />}
-          onClose={() => {
-            // Clear duplicate notification
-            clearState();
-          }}
-          sx={{
-            borderRadius: '12px',
-            fontSize: '0.85rem',
-            maxWidth: { xs: '250px', sm: '350px', md: '450px' },
-          }}
-        >
-          {locale === 'fr'
-            ? `Propriété existante détectée (${state.duplicateAddress}). Données fusionnées.`
-            : `Existing property detected (${state.duplicateAddress}). Data merged.`}
-        </Alert>
-      )}
-
       {/* Progress indicator */}
       <Box
         onClick={handleClick}
@@ -74,7 +53,7 @@ export function BackgroundImportIndicator() {
           py: 0.5,
           borderRadius: '24px',
           background: isComplete
-            ? 'linear-gradient(135deg, #FFD700 0%, #4CAF50 100%)'
+            ? 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)'
             : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           color: 'white',
           maxWidth: { xs: '200px', sm: '300px', md: '400px' },
@@ -169,6 +148,27 @@ export function BackgroundImportIndicator() {
         <Close sx={{ fontSize: 18 }} />
       </IconButton>
     </Box>
+
+      {/* Duplicate detection notification - positioned to the right */}
+      {state.duplicateDetected && state.duplicateAddress && (
+        <Alert
+          severity="info"
+          icon={<MergeType />}
+          onClose={() => {
+            // Clear duplicate notification
+            clearState();
+          }}
+          sx={{
+            borderRadius: '12px',
+            fontSize: '0.85rem',
+            maxWidth: { xs: '250px', sm: '350px', md: '450px' },
+          }}
+        >
+          {locale === 'fr'
+            ? `Propriété existante détectée (${state.duplicateAddress}). Données fusionnées.`
+            : `Existing property detected (${state.duplicateAddress}). Data merged.`}
+        </Alert>
+      )}
     </Box>
   );
 }

@@ -383,7 +383,26 @@ function BatchImportPageContent() {
       <LinearProgress
         variant="determinate"
         value={(importState.completedFiles.length / selectedFiles.length) * 100}
-        sx={{ borderRadius: '4px', height: 8, mb: 3 }}
+        sx={{
+          borderRadius: '4px',
+          height: 8,
+          mb: 3,
+          bgcolor: 'rgba(25,118,210,0.15)',
+          '& .MuiLinearProgress-bar': {
+            // Add shimmer animation while processing
+            background: 'linear-gradient(90deg, rgba(25,118,210,0.6) 0%, rgba(66,165,245,1) 50%, rgba(25,118,210,0.6) 100%)',
+            backgroundSize: '200% 100%',
+            animation: 'shimmer 1.5s infinite',
+          },
+          '@keyframes shimmer': {
+            '0%': {
+              backgroundPosition: '-200% 0',
+            },
+            '100%': {
+              backgroundPosition: '200% 0',
+            },
+          },
+        }}
       />
       <Typography variant="caption" color="text.secondary">
         {importState.completedFiles.length} / {selectedFiles.length} {t('processing.completed')}
