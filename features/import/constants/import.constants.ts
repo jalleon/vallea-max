@@ -59,6 +59,7 @@ export const FIELD_MAPPINGS: Record<string, string> = {
   surface: 'superficie_terrain_m2',
   privateSurface: 'superficie_terrain_m2',
   livingArea: 'superficie_habitable_pi2',
+  aireHabitable: 'aire_habitable_m2',
   frontage: 'frontage_m2',
 
   // Municipal evaluation
