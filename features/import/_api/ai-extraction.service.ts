@@ -202,12 +202,21 @@ CRITICAL RULES:
 3. Extract EXACTLY as shown in the document
 4. Use null for missing/unavailable fields
 5. This data will OVERWRITE existing MLS data - extract everything accurately
+6. DO NOT populate the "extras" field - leave it as null
+7. For arrondissement: REMOVE "Arrondissement de" prefix - only include the name (e.g., "Rivière-des-Prairies - Pointe-aux-Trembles" NOT "Arrondissement de Rivière-des-Prairies - Pointe-aux-Trembles")
+
+MONTREAL EVALUATION DATE RULE:
+- If city is "Montréal" or "Montreal":
+  - Current evaluation period: 2024-07-01 to 2027-06-30
+  - If document shows dates between 2024-2027 → use "2024-07-01"
+  - Next period starts July 1, 2027 (changes every 3 years)
+  - Set "evaluationDate" = "2024-07-01" for Montreal properties
 
 REQUIRED FIELDS (exact mapping to database):
 - "matricule" → Numéro de matricule (e.g., "9855-31-7542-7-000-0000")
 - "address" → Adresse (street address only, e.g., "11971 - 11973 Avenue André-Dumas")
 - "city" → From Adresse or Municipalité (e.g., "Montréal", "Longueuil")
-- "municipality" → Arrondissement if present (e.g., "Rivière-des-Prairies - Pointe-aux-Trembles")
+- "municipality" → Arrondissement WITHOUT "Arrondissement de" prefix (e.g., "Rivière-des-Prairies - Pointe-aux-Trembles")
 - "postalCode" → From Adresse postale if present
 - "lotNumber" → Numéro de lot / Cadastre(s) et numéro(s) de lot (e.g., "1616213", "2588106")
 - "yearBuilt" → Année de construction (extract year only, e.g., 1978, 1964)
@@ -217,20 +226,13 @@ REQUIRED FIELDS (exact mapping to database):
 - "terrainValue" → Valeur du terrain (e.g., 247200, 275000)
 - "batimentValue" → Valeur du bâtiment (e.g., 552800, 199100)
 - "totalValue" → Valeur de l'immeuble (e.g., 800000, 474100)
-- "evaluationDate" → Date de référence au marché (e.g., "2024-07-01")
+- "evaluationDate" → For Montreal: "2024-07-01", Others: Date de référence au marché
 - "propType" → Utilisation prédominante (e.g., "Logement")
 - "bedrooms" → From Nombre de logements if multi-unit (e.g., 3)
-- "extras" → Additional info: Lien physique, Genre de construction, Nombre d'étages, etc.
-
-ADDITIONAL FIELDS TO EXTRACT:
-- Nombre d'étages → Include in extras
-- Lien physique (Jumelé, Détaché, etc.) → Include in extras
-- Genre de construction → Include in extras
-- Nombre de logements → Use for bedrooms if multi-unit property
-- Valeur imposable → Include if different from totalValue
+- "extras" → ALWAYS set to null (do not populate this field)
 
 MONTREAL FORMAT EXAMPLE:
-INPUT: "Numéro de matricule: 9855-31-7542-7-000-0000, Adresse: 11971 - 11973 Avenue André-Dumas, Arrondissement: Rivière-des-Prairies - Pointe-aux-Trembles, Numéro de lot: 1616213. Mesure frontale: 13,66 m, Superficie: 353,2 m². Nombre d'étages: 2, Année de construction: 1978, Aire d'étages: 261,6 m², Lien physique: Jumelé, Nombre de logements: 3. Date de référence au marché: 2024-07-01, Valeur du terrain: 247 200$, Valeur du bâtiment: 552 800$, Valeur de l'immeuble: 800 000$."
+INPUT: "Numéro de matricule: 9855-31-7542-7-000-0000, Adresse: 11971 - 11973 Avenue André-Dumas, Arrondissement de Rivière-des-Prairies - Pointe-aux-Trembles, Numéro de lot: 1616213. Mesure frontale: 13,66 m, Superficie: 353,2 m². Nombre d'étages: 2, Année de construction: 1978, Aire d'étages: 261,6 m², Lien physique: Jumelé, Nombre de logements: 3. Données municipales en vigueur du 2024-07-01 au 2027-06-30. Valeur du terrain: 247 200$, Valeur du bâtiment: 552 800$, Valeur de l'immeuble: 800 000$."
 
 OUTPUT:
 {
@@ -250,7 +252,7 @@ OUTPUT:
     "evaluationDate": "2024-07-01",
     "propType": "Logement",
     "bedrooms": 3,
-    "extras": "Nombre d'étages: 2, Lien physique: Jumelé, Genre de construction: À étages entiers, Nombre de logements: 3"
+    "extras": null
   }]
 }
 
@@ -273,7 +275,7 @@ OUTPUT:
     "totalValue": 474100,
     "propType": "Logement",
     "bedrooms": 1,
-    "extras": "Nombre d'étages: 1, Lien physique: Détaché, Nombre de logements: 1"
+    "extras": null
   }]
 }
 
@@ -282,54 +284,52 @@ IMPORTANT NOTES:
 - Extract all numeric values without formatting
 - Convert "mètres carrés" to just the number in m²
 - Keep matricule exactly as shown (with dashes and zeros)
-- Include ALL available information in extras field
+- DO NOT populate extras field - always set to null
+- For Montreal: evaluationDate = "2024-07-01" (valid until July 1, 2027)
+- For arrondissement: Remove "Arrondissement de" prefix
 
 Return ONLY valid JSON in format: {"properties": [{...}]}`,
 
-  role_taxe: `You are an expert Quebec property tax roll (Rôle de taxe/Compte de taxes) extraction assistant. Extract ALL tax-related property information and return ONLY valid JSON.
+  role_taxe: `You are an expert Quebec property tax roll (Rôle de taxe/Compte de taxes) extraction assistant. Extract ONLY the address, total tax amount, and year. Return ONLY valid JSON.
 
 CRITICAL RULES:
 1. Remove ALL formatting from numbers (commas, spaces, $)
 2. Convert ALL monetary values to numbers only (no $ sign)
-3. Extract all tax categories and amounts
+3. Extract ONLY the three fields specified below
 4. Use null for missing/unavailable fields
+5. DO NOT populate the "extras" field - leave it as null
 
-REQUIRED FIELDS:
-- "matricule" → Property matricule number
-- "address" → Full street address
-- "city" → Municipality/City name
-- "municipality" → Borough or sector if applicable
-- "postalCode" → Postal code if present
-- "totalValue" → Total municipal evaluation (base for taxes)
-- "municipalTax" → Total municipal tax amount
-- "municipalTaxYear" → Tax year
-- "schoolTax" → School tax amount
-- "schoolTaxYear" → School tax year
-- "propType" → Property type if mentioned
-- "copropTax" → Condo fees if applicable
-- "extras" → Any special charges, fees, or notes (water, sewer, waste, etc.)
+REQUIRED FIELDS (ONLY THESE THREE):
+- "address" → Full street address from "Emplacement de la propriété" or similar section
+- "municipalTax" → Total tax amount from "Total taxes foncières annuelles :" or "Total du compte"
+- "municipalTaxYear" → Tax year from "Compte de taxes municipales YYYY" or "Taxes foncières annuelles en YYYY"
+- "extras" → ALWAYS set to null (do not populate this field)
 
-ADDITIONAL TAX FIELDS (if present):
-- Extract specific tax categories: "Taxe générale", "Taxe eau", "Taxe égout", "Taxe matières résiduelles", etc.
-- Include payment schedule information if available
-- Include arrears (arrérages) if mentioned
+IGNORE ALL OTHER DATA - Do not extract matricule, city, postal code, evaluation, school tax, or any other fields.
 
-EXAMPLE INPUT:
-"Compte de taxes 2024. Matricule: 1234 56 7890, Adresse: 123 Rue Principale, Longueuil J4K 1A1. Valeur imposable: 300,000$. Taxe municipale générale: 2,850$. Taxe eau/égout: 450$. Taxe matières résiduelles: 200$. Total taxes municipales: 3,500$ (2024). Taxe scolaire: 650$ (2024). Échéances: 15 mars, 15 juin, 15 sept, 15 déc."
+EXAMPLE INPUT 1:
+"Compte de taxes municipales 2025. Emplacement de la propriété: 123 Rue Saint-Denis, Montréal H2X 1K1. Matricule: 1234-56-7890. Valeur imposable: 450,000$. Taxes municipales générales: 3,200.00$. Eau/Égout: 650.50$. Déneigement: 125.25$. Matières résiduelles: 168.90$. Total du compte: 4,144.65$."
 
-EXAMPLE OUTPUT:
+EXAMPLE OUTPUT 1:
 {
   "properties": [{
-    "matricule": "1234 56 7890",
-    "address": "123 Rue Principale",
-    "city": "Longueuil",
-    "postalCode": "J4K 1A1",
-    "totalValue": 300000,
-    "municipalTax": 3500,
+    "address": "123 Rue Saint-Denis",
+    "municipalTax": 4144.65,
+    "municipalTaxYear": 2025,
+    "extras": null
+  }]
+}
+
+EXAMPLE INPUT 2:
+"Taxes foncières annuelles en 2024. Adresse: 456 Avenue du Parc, Montréal H2V 4E7. Valeur: 380,000$. Général: 2,850$. Services: 1,194.37$. Total taxes foncières annuelles : 5,044.37$"
+
+EXAMPLE OUTPUT 2:
+{
+  "properties": [{
+    "address": "456 Avenue du Parc",
+    "municipalTax": 5044.37,
     "municipalTaxYear": 2024,
-    "schoolTax": 650,
-    "schoolTaxYear": 2024,
-    "extras": "Taxe générale: 2,850$, Taxe eau/égout: 450$, Taxe matières résiduelles: 200$. Échéances: 15 mars, 15 juin, 15 sept, 15 déc"
+    "extras": null
   }]
 }
 
@@ -341,24 +341,24 @@ CRITICAL RULES:
 1. Remove ALL formatting from numbers and measurements
 2. Extract all zoning codes, regulations, and permitted uses
 3. Use null for missing/unavailable fields
+4. DO NOT populate the "extras" field - leave it as null
+5. For arrondissement/municipality: REMOVE "Arrondissement de" prefix - only include the name
+
+MONTREAL EVALUATION DATE RULE:
+- If city is "Montréal" or "Montreal":
+  - Current evaluation period: 2024-07-01 to 2027-06-30
+  - Set "evaluationDate" = "2024-07-01" for Montreal properties
+  - Next period starts July 1, 2027 (changes every 3 years)
 
 REQUIRED FIELDS:
 - "address" → Full street address
 - "city" → Municipality/City name
-- "municipality" → Borough or sector if applicable
+- "municipality" → Arrondissement WITHOUT "Arrondissement de" prefix
 - "lotNumber" → Lot number(s)
 - "matricule" → Property matricule if mentioned
 - "surface" → Land area in m²
-- "extras" → Zoning information including:
-  * Zoning code/designation (e.g., "H-1", "C-2", "I-3")
-  * Permitted uses (usages autorisés)
-  * Prohibited uses (usages interdits)
-  * Height restrictions (hauteur maximale)
-  * Setback requirements (marges de recul)
-  * Lot coverage (coefficient d'occupation du sol)
-  * Parking requirements (stationnement requis)
-  * Any variances or special conditions
-  * Zoning district/sector
+- "evaluationDate" → For Montreal: "2024-07-01", Others: extract if present
+- "extras" → ALWAYS set to null (do not populate this field)
 
 EXAMPLE INPUT:
 "Certificat de zonage - 123 Rue Principale, Longueuil. Lot: 1234567. Matricule: 1234 56 7890. Superficie: 450 m². Zone: H-1 (Habitation unifamiliale). Usages autorisés: Unifamiliale isolée, jumelée. Hauteur max: 10.5m (2 étages). Marges: Avant 6m, Latérales 2m, Arrière 7m. Coefficient occupation sol: 35%. Stationnement: 2 espaces minimum."
@@ -371,7 +371,7 @@ EXAMPLE OUTPUT:
     "lotNumber": "1234567",
     "matricule": "1234 56 7890",
     "surface": 450,
-    "extras": "Zone H-1 (Habitation unifamiliale). Usages autorisés: Unifamiliale isolée, jumelée. Hauteur max: 10.5m (2 étages). Marges de recul: Avant 6m, Latérales 2m, Arrière 7m. Coefficient occupation sol: 35%. Stationnement: 2 espaces minimum"
+    "extras": null
   }]
 }
 
@@ -384,27 +384,27 @@ CRITICAL RULES:
 2. Convert measurements to m² for areas
 3. Extract precise dimensions and surveyor observations
 4. Use null for missing/unavailable fields
+5. DO NOT populate the "extras" field - leave it as null
+6. For arrondissement/municipality: REMOVE "Arrondissement de" prefix - only include the name
+
+MONTREAL EVALUATION DATE RULE:
+- If city is "Montréal" or "Montreal":
+  - Current evaluation period: 2024-07-01 to 2027-06-30
+  - Set "evaluationDate" = "2024-07-01" for Montreal properties
+  - Next period starts July 1, 2027 (changes every 3 years)
 
 REQUIRED FIELDS:
 - "address" → Full street address
 - "city" → Municipality/City name
-- "municipality" → Borough or sector if applicable
+- "municipality" → Arrondissement WITHOUT "Arrondissement de" prefix
 - "lotNumber" → Official lot number(s)
 - "matricule" → Property matricule if mentioned
 - "surface" → Total land area in m²
 - "livingArea" → Building footprint/implantation in pi² if available
 - "yearBuilt" → Year of construction
 - "propType" → Building type if mentioned
-- "extras" → Detailed surveyor information including:
-  * Land dimensions (frontage/profondeur)
-  * Building dimensions and perimeter
-  * Number of floors/stories
-  * Distance from property lines
-  * Any encroachments (empiétements)
-  * Easements (servitudes)
-  * Surveyor observations and notes
-  * Survey date and surveyor name
-  * Certificate number
+- "evaluationDate" → For Montreal: "2024-07-01", Others: extract if present
+- "extras" → ALWAYS set to null (do not populate this field)
 
 EXAMPLE INPUT:
 "Certificat de localisation #CL-2024-1234. Propriété: 123 Rue Principale, Longueuil (Le Vieux-Longueuil). Lot: 1234567. Matricule: 1234 56 7890. Superficie terrain: 450.5 m² (15.2m x 29.6m). Bâtiment: Unifamiliale 2 étages, année construction: 1985. Superficie bâtiment: 950 pi². Marges de recul: Avant 6.2m, Arrière 7.8m, Latérales 1.8m et 2.1m. Arpenteur: Jean Tremblay, a.g., 15 janvier 2024. Observations: Aucun empiétement détecté. Servitude de drainage à l'arrière."
@@ -421,7 +421,7 @@ EXAMPLE OUTPUT:
     "livingArea": 950,
     "yearBuilt": 1985,
     "propType": "Unifamiliale",
-    "extras": "Certificat #CL-2024-1234. Dimensions terrain: 15.2m x 29.6m. Bâtiment: 2 étages, 950 pi². Marges de recul: Avant 6.2m, Arrière 7.8m, Latérales 1.8m et 2.1m. Arpenteur: Jean Tremblay, a.g., 15 janvier 2024. Observations: Aucun empiétement détecté. Servitude de drainage à l'arrière"
+    "extras": null
   }]
 }
 

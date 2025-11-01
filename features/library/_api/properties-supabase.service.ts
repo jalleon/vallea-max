@@ -142,6 +142,21 @@ class PropertiesSupabaseService {
     }
   }
 
+  // Get all properties (no pagination) - useful for dropdowns/selectors
+  async getAll(): Promise<Property[]> {
+    const { data, error } = await supabase
+      .from('properties')
+      .select('*, floor_areas(*)')
+      .order('adresse', { ascending: true })
+
+    if (error) {
+      console.error('Error fetching all properties:', error)
+      throw error
+    }
+
+    return (data || []).map(item => this.transformToProperty(item))
+  }
+
   async getProperty(id: string): Promise<Property> {
     const { data, error } = await supabase
       .from('properties')

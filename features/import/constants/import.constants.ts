@@ -66,6 +66,7 @@ export const FIELD_MAPPINGS: Record<string, string> = {
   terrainValue: 'eval_municipale_terrain',
   batimentValue: 'eval_municipale_batiment',
   totalValue: 'eval_municipale_total',
+  evaluationDate: 'eval_municipale_annee',
   matricule: 'matricule',
 
   // Taxes

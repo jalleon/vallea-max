@@ -10,6 +10,71 @@ import { FIELD_MAPPINGS } from '../constants/import.constants';
 
 class ImportService {
   /**
+   * Process text directly (no PDF extraction)
+   * Use this when user manually copies text from a PDF that can't be auto-extracted
+   */
+  async processText(
+    text: string,
+    documentType: DocumentType,
+    apiKey: string,
+    provider: 'deepseek' | 'openai' | 'anthropic' = 'deepseek',
+    model?: string
+  ): Promise<ImportSession> {
+    const session: ImportSession = {
+      id: crypto.randomUUID(),
+      documentType,
+      source: 'pdf',
+      status: 'processing',
+      fileName: 'pasted-text.txt',
+      fileSize: text.length,
+      properties: [],
+      createdAt: new Date(),
+    };
+
+    try {
+      // Call API route for text processing
+      const response = await fetch('/api/import/process-text', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text,
+          documentType,
+          apiKey,
+          provider,
+          model,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to process text');
+      }
+
+      const result = await response.json();
+
+      // Update session with results
+      session.properties = result.properties || [];
+      session.totalProperties = result.totalProperties || session.properties.length;
+      session.status = 'review';
+
+      // Legacy support for single property
+      if (session.properties.length > 0) {
+        session.extractedData = session.properties[0].extractedData;
+        session.averageConfidence = session.properties[0].averageConfidence;
+        session.fieldsExtracted = session.properties[0].fieldsExtracted;
+      }
+
+      return session;
+    } catch (error) {
+      session.status = 'failed';
+      session.errors = [error instanceof Error ? error.message : 'Unknown error'];
+      throw error;
+    }
+  }
+
+  /**
    * Process PDF file via API route (server-side processing)
    * Supports multi-property PDFs
    */
@@ -76,24 +141,76 @@ class ImportService {
 
   /**
    * Map extracted data to Property model format
+   * @param extracted - Extracted property data
+   * @param documentType - Type of document (determines which fields to protect)
+   * @param isMerge - True if merging into existing property (protects certain fields)
    */
-  mapToPropertyInput(extracted: ExtractedPropertyData): Partial<PropertyCreateInput> {
+  mapToPropertyInput(
+    extracted: ExtractedPropertyData,
+    documentType?: DocumentType,
+    isMerge: boolean = false
+  ): Partial<PropertyCreateInput> {
     const mapped: any = {};
+
+    // Protected fields that should NEVER be overwritten during merge
+    const protectedFieldsForMerge = [
+      'source',
+      'created_at',
+      'updated_at',
+      'organization_id',
+      'created_by',
+    ];
+
+    // Address fields - protected EXCEPT for role_foncier which has standardized official addresses
+    const addressFields = ['adresse', 'ville', 'code_postal'];
+    const shouldProtectAddress = isMerge && documentType !== 'role_foncier';
+
+    // Fields that are protected for non-MLS documents
+    const protectedFieldsForNonMLS = [
+      'status',           // Don't change status unless it's MLS
+      'type_propriete',   // Don't change property type
+      'type_evaluation',  // Don't change evaluation type
+    ];
 
     Object.entries(extracted).forEach(([extractedKey, value]) => {
       const dbField = FIELD_MAPPINGS[extractedKey];
-      if (dbField && value !== null && value !== undefined) {
-        mapped[dbField] = value;
+
+      // Skip if no mapping or value is null/undefined
+      if (!dbField || value === null || value === undefined) {
+        return;
       }
+
+      // Skip protected fields during merge
+      if (isMerge && protectedFieldsForMerge.includes(dbField)) {
+        return;
+      }
+
+      // Protect address fields during merge UNLESS it's role_foncier (which has official standardized address)
+      if (shouldProtectAddress && addressFields.includes(dbField)) {
+        return;
+      }
+
+      // Skip status/type fields for non-MLS documents during merge
+      if (isMerge && documentType && documentType !== 'mls_listing') {
+        if (protectedFieldsForNonMLS.includes(dbField)) {
+          return;
+        }
+      }
+
+      // Only add if value exists
+      mapped[dbField] = value;
     });
 
     // Handle special conversions
-    if (extracted.address) {
+    // For new properties OR role_foncier merges (which have official addresses)
+    const shouldProcessAddress = !isMerge || documentType === 'role_foncier';
+
+    if (shouldProcessAddress && extracted.address) {
       mapped.adresse = extracted.address;
     }
 
     // Parse address components if full address is provided but components aren't
-    if (extracted.address && !extracted.city) {
+    if (shouldProcessAddress && extracted.address && !extracted.city) {
       const addressParts = this.parseAddress(extracted.address);
       if (addressParts.city) mapped.ville = addressParts.city;
       if (addressParts.postalCode) mapped.code_postal = addressParts.postalCode;
@@ -108,8 +225,10 @@ class ImportService {
       mapped.unit_rents = units;
     }
 
-    // Set source
-    mapped.source = 'import';
+    // Set source only for new properties
+    if (!isMerge) {
+      mapped.source = 'import';
+    }
 
     return mapped;
   }
@@ -122,7 +241,7 @@ class ImportService {
       throw new Error('No extracted data in session');
     }
 
-    const propertyData = this.mapToPropertyInput(session.extractedData);
+    const propertyData = this.mapToPropertyInput(session.extractedData, session.documentType, false);
 
     // Create property using existing service
     const property = await propertiesSupabaseService.create(propertyData as PropertyCreateInput);
@@ -143,7 +262,7 @@ class ImportService {
       throw new Error('No extracted data in session');
     }
 
-    const propertyData = this.mapToPropertyInput(session.extractedData);
+    const propertyData = this.mapToPropertyInput(session.extractedData, session.documentType, true);
 
     // Update existing property with new data (only non-null values)
     await propertiesSupabaseService.update(propertyId, propertyData as Partial<PropertyCreateInput>);
@@ -172,10 +291,11 @@ class ImportService {
         continue; // User chose to skip this property
       }
 
-      const propertyData = this.mapToPropertyInput(extractedData);
+      const isMerge = action === 'merge' && duplicateProperty;
+      const propertyData = this.mapToPropertyInput(extractedData, session.documentType, isMerge);
 
-      if (action === 'merge' && duplicateProperty) {
-        // Merge with existing property
+      if (isMerge) {
+        // Merge with existing property - only update non-null fields, protect certain fields
         await propertiesSupabaseService.update(duplicateProperty.id, propertyData as Partial<PropertyCreateInput>);
         propertyIds.push(duplicateProperty.id);
       } else {

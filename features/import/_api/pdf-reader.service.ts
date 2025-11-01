@@ -1,5 +1,9 @@
 /**
  * PDF reading and text extraction service
+ *
+ * Note: Some PDFs (especially those with complex font encoding like Montreal Rôle foncier)
+ * cannot be extracted using JavaScript libraries, even though text can be manually copied.
+ * This is a known limitation of PDF text extraction.
  */
 
 import { PdfReader } from 'pdfreader';

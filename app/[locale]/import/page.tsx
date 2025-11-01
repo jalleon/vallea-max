@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import {
@@ -24,6 +24,14 @@ import {
   DialogActions,
   Chip,
   IconButton,
+  TextField,
+  ToggleButtonGroup,
+  ToggleButton,
+  Autocomplete,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import {
   CloudUpload,
@@ -32,6 +40,7 @@ import {
   CheckCircle,
   Settings as SettingsIcon,
   AutoAwesome,
+  TextFields,
 } from '@mui/icons-material';
 import { MaterialDashboardLayout } from '@/components/layout/MaterialDashboardLayout';
 import { DocumentType, ImportSession } from '@/features/import/types/import.types';
@@ -53,6 +62,8 @@ function ImportPageContent() {
   const [documentType, setDocumentType] = useState<DocumentType | null>(null);
   // Always use auto mode - provider priority is managed in Settings
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [useTextInput, setUseTextInput] = useState(false); // Toggle between PDF and text input
+  const [pastedText, setPastedText] = useState(''); // Store pasted text
   const [processing, setProcessing] = useState(false);
   const [session, setSession] = useState<ImportSession | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -60,6 +71,8 @@ function ImportPageContent() {
   const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
   const [mergeAction, setMergeAction] = useState<'merge' | 'duplicate' | null>(null);
   const [showAiApiKeysDialog, setShowAiApiKeysDialog] = useState(false);
+  const [allProperties, setAllProperties] = useState<Property[]>([]);
+  const [loadingProperties, setLoadingProperties] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -98,6 +111,23 @@ function ImportPageContent() {
     return locale === 'fr' ? '1ère' : '1st';
   };
 
+  // Load all properties for merge selection
+  useEffect(() => {
+    const loadProperties = async () => {
+      setLoadingProperties(true);
+      try {
+        const props = await propertiesSupabaseService.getAll();
+        setAllProperties(props);
+      } catch (error) {
+        console.error('Failed to load properties:', error);
+      } finally {
+        setLoadingProperties(false);
+      }
+    };
+
+    loadProperties();
+  }, []);
+
   // Handle PDF file selection
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -119,9 +149,15 @@ function ImportPageContent() {
     setSelectedFile(file);
   };
 
-  // Process the PDF
-  const handleProcessPDF = async () => {
-    if (!selectedFile || !documentType) return;
+  // Process the PDF or text input
+  const handleProcess = async () => {
+    // Validate inputs
+    if (!documentType) return;
+    if (!useTextInput && !selectedFile) return;
+    if (useTextInput && !pastedText.trim()) {
+      setError(t('errors.noTextProvided'));
+      return;
+    }
 
     // Determine which provider to use based on user priority
     const providerPriority = preferences?.providerPriority || ['deepseek', 'openai', 'anthropic'];
@@ -145,7 +181,10 @@ function ImportPageContent() {
     setError(null);
 
     try {
-      const result = await importService.processPDF(selectedFile, documentType, apiKey, provider, model);
+      // Process either text input or PDF file
+      const result = useTextInput
+        ? await importService.processText(pastedText, documentType, apiKey, provider, model)
+        : await importService.processPDF(selectedFile!, documentType, apiKey, provider, model);
 
       // Check for duplicates in all extracted properties
       if (result.properties && result.properties.length > 0) {
@@ -413,43 +452,106 @@ function ImportPageContent() {
         </IconButton>
       </Box>
 
-      {/* Upload Zone */}
-      <Paper
-        onClick={() => fileInputRef.current?.click()}
-        sx={{
-          border: '2px dashed',
-          borderColor: selectedFile ? 'success.main' : 'primary.main',
-          borderRadius: '16px',
-          p: 4,
-          textAlign: 'center',
-          mb: 3,
-          cursor: 'pointer',
-          '&:hover': {
-            bgcolor: 'action.hover',
-          },
-        }}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="application/pdf"
-          onChange={handleFileSelect}
-          style={{ display: 'none' }}
-        />
+      {/* Input Mode Toggle */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+        <ToggleButtonGroup
+          value={useTextInput ? 'text' : 'pdf'}
+          exclusive
+          onChange={(e, value) => {
+            if (value !== null) {
+              setUseTextInput(value === 'text');
+              setError(null);
+              setSelectedFile(null);
+              setPastedText('');
+            }
+          }}
+          sx={{ borderRadius: '12px' }}
+        >
+          <ToggleButton value="pdf" sx={{ px: 3, py: 1, textTransform: 'none', borderRadius: '12px 0 0 12px' }}>
+            <PictureAsPdf sx={{ mr: 1, fontSize: 20 }} />
+            PDF Upload
+          </ToggleButton>
+          <ToggleButton value="text" sx={{ px: 3, py: 1, textTransform: 'none', borderRadius: '0 12px 12px 0' }}>
+            <TextFields sx={{ mr: 1, fontSize: 20 }} />
+            Paste Text
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
 
-        <CloudUpload sx={{ fontSize: 64, color: selectedFile ? 'success.main' : 'primary.main', mb: 2 }} />
-        <Typography variant="h6" sx={{ mb: 1 }}>
-          {selectedFile ? selectedFile.name : t('upload.dropzone.title')}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          {t('upload.dropzone.subtitle')}
-        </Typography>
-        {!selectedFile && (
-          <Button variant="contained" sx={{ borderRadius: '12px', textTransform: 'none' }}>
-            {t('upload.dropzone.button')}
-          </Button>
-        )}
-      </Paper>
+      {/* Conditional rendering: PDF Upload or Text Input */}
+      {!useTextInput ? (
+        <Paper
+          onClick={() => fileInputRef.current?.click()}
+          sx={{
+            border: '2px dashed',
+            borderColor: selectedFile ? 'success.main' : 'primary.main',
+            borderRadius: '16px',
+            p: 4,
+            textAlign: 'center',
+            mb: 3,
+            cursor: 'pointer',
+            '&:hover': {
+              bgcolor: 'action.hover',
+            },
+          }}
+        >
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/pdf"
+            onChange={handleFileSelect}
+            style={{ display: 'none' }}
+          />
+
+          <CloudUpload sx={{ fontSize: 64, color: selectedFile ? 'success.main' : 'primary.main', mb: 2 }} />
+          <Typography variant="h6" sx={{ mb: 1 }}>
+            {selectedFile ? selectedFile.name : t('upload.dropzone.title')}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            {t('upload.dropzone.subtitle')}
+          </Typography>
+          {!selectedFile && (
+            <Button variant="contained" sx={{ borderRadius: '12px', textTransform: 'none' }}>
+              {t('upload.dropzone.button')}
+            </Button>
+          )}
+        </Paper>
+      ) : (
+        <Card sx={{ borderRadius: '16px', mb: 3 }}>
+          <CardContent>
+            <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
+              {locale === 'fr' ? 'Coller le texte du document' : 'Paste document text'}
+            </Typography>
+            <Alert severity="info" sx={{ borderRadius: '8px', mb: 2 }}>
+              <Typography variant="body2">
+                {locale === 'fr'
+                  ? 'Conseil : Ouvrez le PDF, sélectionnez tout le texte (Ctrl+A), copiez-le (Ctrl+C) et collez-le ici (Ctrl+V).'
+                  : 'Tip: Open the PDF, select all text (Ctrl+A), copy it (Ctrl+C), and paste it here (Ctrl+V).'}
+              </Typography>
+            </Alert>
+            <TextField
+              multiline
+              rows={12}
+              fullWidth
+              placeholder={locale === 'fr'
+                ? 'Collez ici le texte copié du PDF...'
+                : 'Paste copied text from PDF here...'}
+              value={pastedText}
+              onChange={(e) => setPastedText(e.target.value)}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '12px',
+                  fontFamily: 'monospace',
+                  fontSize: '13px',
+                },
+              }}
+            />
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+              {pastedText.length} {locale === 'fr' ? 'caractères' : 'characters'}
+            </Typography>
+          </CardContent>
+        </Card>
+      )}
 
       {error && (
         <Alert severity="error" sx={{ borderRadius: '12px', mb: 2 }}>
@@ -468,8 +570,8 @@ function ImportPageContent() {
         </Button>
         <Button
           variant="contained"
-          onClick={handleProcessPDF}
-          disabled={!selectedFile || !documentType || processing}
+          onClick={handleProcess}
+          disabled={!documentType || processing || (!useTextInput && !selectedFile) || (useTextInput && !pastedText.trim())}
           sx={{ borderRadius: '12px', textTransform: 'none' }}
         >
           {processing ? <CircularProgress size={24} /> : tCommon('next')}
@@ -486,6 +588,25 @@ function ImportPageContent() {
     updatedProperties[index] = {
       ...updatedProperties[index],
       action,
+    };
+
+    setSession({
+      ...session,
+      properties: updatedProperties,
+    });
+  };
+
+  // Handle manual property selection for merge
+  const handleManualPropertySelect = (index: number, propertyId: string | null) => {
+    if (!session || !session.properties) return;
+
+    const updatedProperties = [...session.properties];
+    const selectedProperty = propertyId ? allProperties.find(p => p.id === propertyId) : null;
+
+    updatedProperties[index] = {
+      ...updatedProperties[index],
+      duplicateProperty: selectedProperty,
+      action: selectedProperty ? 'merge' : 'create',
     };
 
     setSession({
@@ -556,6 +677,26 @@ function ImportPageContent() {
                     </Typography>
                   </Alert>
                 )}
+
+                {/* Property selector for manual merge */}
+                <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+                  <InputLabel>{locale === 'fr' ? 'Fusionner avec propriété existante' : 'Merge with existing property'}</InputLabel>
+                  <Select
+                    value={property.duplicateProperty?.id || ''}
+                    onChange={(e) => handleManualPropertySelect(index, e.target.value || null)}
+                    label={locale === 'fr' ? 'Fusionner avec propriété existante' : 'Merge with existing property'}
+                    sx={{ borderRadius: '8px' }}
+                  >
+                    <MenuItem value="">
+                      <em>{locale === 'fr' ? 'Aucune - Créer nouvelle' : 'None - Create new'}</em>
+                    </MenuItem>
+                    {allProperties.map((prop) => (
+                      <MenuItem key={prop.id} value={prop.id}>
+                        {prop.adresse} {prop.ville && `- ${prop.ville}`}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
 
                 <Box sx={{ display: 'flex', gap: 1 }}>
                   {property.duplicateProperty ? (
