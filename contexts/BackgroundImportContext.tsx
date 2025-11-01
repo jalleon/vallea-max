@@ -32,7 +32,7 @@ interface BackgroundImportContextType {
     mergeMode: 'new' | 'existing',
     selectedPropertyId: string | null,
     apiKey: string,
-    provider: string,
+    provider: 'deepseek' | 'openai' | 'anthropic',
     model: string | undefined,
     locale: string
   ) => Promise<void>;
@@ -40,7 +40,7 @@ interface BackgroundImportContextType {
     file: File,
     documentType: DocumentType,
     apiKey: string,
-    provider: string,
+    provider: 'deepseek' | 'openai' | 'anthropic',
     model: string | undefined
   ) => Promise<ImportSession>;
   savePendingSession: (session: ImportSession, step: number) => void;
@@ -77,7 +77,7 @@ export function BackgroundImportProvider({ children }: { children: React.ReactNo
       mergeMode: 'new' | 'existing',
       selectedPropertyId: string | null,
       apiKey: string,
-      provider: string,
+      provider: 'deepseek' | 'openai' | 'anthropic',
       model: string | undefined,
       locale: string
     ) => {
@@ -237,7 +237,7 @@ export function BackgroundImportProvider({ children }: { children: React.ReactNo
       file: File,
       documentType: DocumentType,
       apiKey: string,
-      provider: string,
+      provider: 'deepseek' | 'openai' | 'anthropic',
       model: string | undefined
     ): Promise<ImportSession> => {
       // Prevent starting a new import if one is already running
