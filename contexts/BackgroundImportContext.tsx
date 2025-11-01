@@ -62,6 +62,15 @@ export function BackgroundImportProvider({ children }: { children: React.ReactNo
       model: string | undefined,
       locale: string
     ) => {
+      // Prevent starting a new import if one is already running
+      if (state.isProcessing) {
+        console.warn('Cannot start new import: another import is already in progress');
+        throw new Error(locale === 'fr'
+          ? 'Un import est déjà en cours. Veuillez attendre qu\'il se termine ou l\'annuler.'
+          : 'An import is already in progress. Please wait for it to finish or cancel it.'
+        );
+      }
+
       cancelRef.current = false;
 
       setState({
@@ -175,7 +184,7 @@ export function BackgroundImportProvider({ children }: { children: React.ReactNo
         }));
       }
     },
-    []
+    [state.isProcessing] // Include state.isProcessing in dependencies
   );
 
   const cancelImport = useCallback(() => {

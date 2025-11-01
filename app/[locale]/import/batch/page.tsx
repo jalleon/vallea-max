@@ -180,19 +180,24 @@ function BatchImportPageContent() {
       await Notification.requestPermission();
     }
 
-    // Start background import
-    await startBatchImport(
-      selectedFiles,
-      mergeMode,
-      selectedProperty?.id || null,
-      apiKey,
-      provider,
-      model,
-      locale
-    );
+    try {
+      // Start background import
+      await startBatchImport(
+        selectedFiles,
+        mergeMode,
+        selectedProperty?.id || null,
+        apiKey,
+        provider,
+        model,
+        locale
+      );
 
-    // Navigate to library immediately - import continues in background
-    router.push(`/${locale}/library`);
+      // Navigate to library immediately - import continues in background
+      router.push(`/${locale}/library`);
+    } catch (err) {
+      // Show error if import couldn't start (e.g., another import is running)
+      setError(err instanceof Error ? err.message : 'Failed to start import');
+    }
   };
 
   // Render file upload area
