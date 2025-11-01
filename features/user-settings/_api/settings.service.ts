@@ -57,7 +57,7 @@ export const settingsService = {
     }
 
     // Ensure aiApiKeys, aiModels, and providerPriority exist in preferences
-    const profile = data as UserProfile;
+    const profile = data as unknown as UserProfile;
     if (!profile.preferences.aiApiKeys || !profile.preferences.aiModels || !profile.preferences.providerPriority) {
       profile.preferences = {
         ...profile.preferences,
