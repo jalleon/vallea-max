@@ -94,6 +94,8 @@ class PropertiesSupabaseService {
       taxes_scolaires_annee: data.taxes_scolaires_annee || undefined,
       taxes_scolaires_montant: data.taxes_scolaires_montant || undefined,
       zoning_usages_permis: data.zoning_usages_permis || undefined,
+      aire_habitable_m2: data.aire_habitable_m2 || undefined,
+      aire_habitable_pi2: data.aire_habitable_pi2 || undefined,
 
       // Inspection fields
       inspection_status: data.inspection_status as any,
@@ -106,6 +108,10 @@ class PropertiesSupabaseService {
       inspection_exterieur: data.inspection_exterieur as any,
       inspection_divers: data.inspection_divers as any,
       inspection_categories_completed: data.inspection_categories_completed as any,
+
+      // Field source tracking
+      field_sources: data.field_sources as any,
+
       created_at: new Date(data.created_at!),
       updated_at: new Date(data.updated_at!),
       media_references: mediaFiles,
@@ -140,6 +146,21 @@ class PropertiesSupabaseService {
     }
   }
 
+  // Get all properties (no pagination) - useful for dropdowns/selectors
+  async getAll(): Promise<Property[]> {
+    const { data, error } = await supabase
+      .from('properties')
+      .select('*, floor_areas(*)')
+      .order('adresse', { ascending: true })
+
+    if (error) {
+      console.error('Error fetching all properties:', error)
+      throw error
+    }
+
+    return (data || []).map(item => this.transformToProperty(item))
+  }
+
   async getProperty(id: string): Promise<Property> {
     const { data, error } = await supabase
       .from('properties')
@@ -157,6 +178,11 @@ class PropertiesSupabaseService {
     }
 
     return this.transformToProperty(data)
+  }
+
+  // Alias for getProperty - for consistency with other services
+  async getById(id: string): Promise<Property> {
+    return this.getProperty(id)
   }
 
   async createProperty(input: PropertyCreateInput): Promise<Property> {

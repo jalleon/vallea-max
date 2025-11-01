@@ -20,7 +20,21 @@
       "Bash(then echo \"EXISTS\")",
       "Bash(else echo \"NOT_FOUND\")",
       "Bash(fi)",
-      "Bash(git merge-base:*)"
+      "Bash(git merge-base:*)",
+      "Bash(timeout /t 3)",
+      "Bash(sed:*)",
+      "Bash(cat:*)",
+      "Bash(if [ -d .next ])",
+      "Bash(then rm -rf .next)",
+      "Bash(else echo \".next folder not found\")",
+      "Bash(npx tsc:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(if [ -d node_modules/.cache ])",
+      "Bash(then rm -rf node_modules/.cache)",
+      "Bash(else echo \"cache not found\")",
+      "Bash(else echo \".next not found\")",
+      "Bash(npx supabase migration new:*)",
+      "Bash(npx supabase:*)"
     ],
     "deny": [],
     "ask": []

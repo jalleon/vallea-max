@@ -15,7 +15,7 @@ CREATE TABLE users (
   full_name TEXT,
   organization_id UUID REFERENCES organizations(id),
   role TEXT CHECK (role IN ('admin', 'appraiser', 'viewer')) DEFAULT 'appraiser',
-  preferences JSONB DEFAULT '{"language": "fr", "currency": "CAD", "theme": "light"}',
+  preferences JSONB DEFAULT '{"language": "fr", "currency": "CAD", "theme": "light", "aiApiKeys": {"deepseek": null, "openai": null, "anthropic": null}, "aiModels": {"deepseek": "deepseek-chat", "openai": "gpt-4o-mini", "anthropic": "claude-3-5-haiku-20241022"}}',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

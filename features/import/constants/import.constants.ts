@@ -13,9 +13,21 @@ export const DOCUMENT_TYPES: Record<DocumentType, { label: string; labelEn: stri
     label: 'Rôle foncier',
     labelEn: 'Property Assessment Roll',
   },
+  role_taxe: {
+    label: 'Rôle de taxe',
+    labelEn: 'Tax Roll',
+  },
+  zonage: {
+    label: 'Zonage',
+    labelEn: 'Zoning',
+  },
   certificat_localisation: {
     label: 'Certificat de localisation',
     labelEn: 'Location Certificate',
+  },
+  general: {
+    label: 'Général',
+    labelEn: 'General',
   },
 };
 
@@ -47,12 +59,19 @@ export const FIELD_MAPPINGS: Record<string, string> = {
   surface: 'superficie_terrain_m2',
   privateSurface: 'superficie_terrain_m2',
   livingArea: 'superficie_habitable_pi2',
+  aireHabitable: 'aire_habitable_m2',
+  frontage: 'frontage_m2',
 
   // Municipal evaluation
   terrainValue: 'eval_municipale_terrain',
   batimentValue: 'eval_municipale_batiment',
   totalValue: 'eval_municipale_total',
+  evaluationDate: 'eval_municipale_annee',
   matricule: 'matricule',
+
+  // Zoning
+  zonage: 'zonage',
+  zoningUsagesPermis: 'zoning_usages_permis',
 
   // Taxes
   copropTax: 'frais_condo',

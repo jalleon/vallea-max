@@ -127,6 +127,8 @@ export interface Property {
   taxes_scolaires_annee?: number
   taxes_scolaires_montant?: number
   zoning_usages_permis?: string
+  aire_habitable_m2?: number
+  aire_habitable_pi2?: number
 
   // Historical
   date_vente_precedente?: string
@@ -152,6 +154,11 @@ export interface Property {
   inspection_exterieur?: Record<string, any>
   inspection_divers?: Record<string, any>
   inspection_categories_completed?: InspectionCategory[]
+
+  // Field-level source tracking
+  // Tracks which document type provided each field (e.g., {"eval_municipale_total": "role_foncier", "prix_vente": "mls_listing"})
+  // Used to protect official municipal data from being overwritten by MLS imports
+  field_sources?: Record<string, string>
 
   created_at: Date
   updated_at: Date
@@ -250,6 +257,8 @@ export interface PropertyCreateInput {
   taxes_scolaires_annee?: number
   taxes_scolaires_montant?: number
   zoning_usages_permis?: string
+  aire_habitable_m2?: number
+  aire_habitable_pi2?: number
 
   source?: string
   notes?: string

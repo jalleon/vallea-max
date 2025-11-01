@@ -36,6 +36,9 @@
       "title": "Page non trouvée",
       "description": "La page que vous recherchez n'existe pas.",
       "goHome": "Retour au tableau de bord"
+    },
+    "menu": {
+      "aiApiKeys": "Clés API IA"
     }
   },
 
@@ -198,7 +201,96 @@
     "notifications": "Notifications",
     "account": "Compte",
     "security": "Sécurité",
-    "preferences": "Préférences"
+    "preferences": "Préférences",
+    "aiApiKeys": {
+      "title": "Clés API IA",
+      "description": "Configurez vos clés API pour l'extraction IA de documents PDF",
+      "deepseek": "DeepSeek API",
+      "openai": "OpenAI API",
+      "anthropic": "Anthropic API",
+      "placeholder": "Entrez votre clé API",
+      "saved": "Clés API enregistrées avec succès",
+      "error": "Erreur lors de l'enregistrement des clés API",
+      "notConfigured": "Non configurée",
+      "configured": "Configurée",
+      "model": "Modèle",
+      "selectModel": "Sélectionner un modèle",
+      "modelInfo": "Informations sur le modèle",
+      "capabilities": "Capacités",
+      "pricing": "Tarification",
+      "contextWindow": "Fenêtre de contexte",
+      "inputPrice": "Entrée",
+      "outputPrice": "Sortie",
+      "perMillionTokens": "par million de tokens",
+      "recommended": "Recommandé",
+      "costPerPDF": "Coût par PDF",
+      "getApiKey": "Obtenir une clé API",
+      "tokensPerPDF": "Tokens par PDF",
+      "avgTokens": "Tokens moyens",
+      "inputTokens": "Tokens d'entrée",
+      "outputTokens": "Tokens de sortie",
+      "totalTokens": "Total de tokens",
+      "bulkPricing": "Tarif en Volume",
+      "per1000PDFs": "Pour 1000 PDFs",
+      "tokensFor1000": "Tokens pour 1000",
+      "active": "Actif",
+      "fallback": "Secours",
+      "priority": "Priorité",
+      "setPrimary": "Définir comme Principal",
+      "primary": "Principal",
+      "priorityHint": "Cliquer pour définir comme fournisseur principal",
+      "priority1": "1er Choix",
+      "priority2": "2e Choix",
+      "priority3": "3e Choix",
+      "best": "Meilleur",
+      "models": {
+        "deepseek-chat": {
+          "description": "Modèle économique excellent pour l'extraction de données structurées",
+          "capabilities": {
+            "json": "Extraction JSON",
+            "multiLanguage": "Support multilingue",
+            "fast": "Traitement rapide",
+            "bestPrice": "Meilleur rapport qualité-prix"
+          }
+        },
+        "deepseek-reasoner": {
+          "description": "Modèle de raisonnement avancé pour l'analyse de documents complexes",
+          "capabilities": {
+            "deepReasoning": "Raisonnement approfondi",
+            "complexExtraction": "Extraction complexe",
+            "highAccuracy": "Haute précision",
+            "difficultPdfs": "Meilleur pour les PDFs difficiles"
+          }
+        },
+        "gpt-4o-mini": {
+          "description": "Modèle compact abordable et intelligent pour les tâches quotidiennes",
+          "capabilities": {
+            "fastResponses": "Réponses rapides",
+            "goodAccuracy": "Bonne précision",
+            "balanced": "Performance équilibrée",
+            "costEffective": "Économique"
+          }
+        },
+        "claude-3-5-haiku-20241022": {
+          "description": "Modèle rapide et économique pour les tâches simples",
+          "capabilities": {
+            "veryFast": "Très rapide",
+            "simplePdfs": "Bon pour les PDFs simples",
+            "costEffective": "Économique",
+            "quickResponses": "Réponses rapides"
+          }
+        },
+        "claude-3-5-sonnet-20241022": {
+          "description": "Modèle équilibré avec d'excellentes performances",
+          "capabilities": {
+            "excellentAccuracy": "Excellente précision",
+            "strongReasoning": "Raisonnement solide",
+            "complexPdfs": "Idéal pour les PDFs complexes",
+            "bestQuality": "Meilleure qualité globale"
+          }
+        }
+      }
+    }
   },
 
   "inspection": {
@@ -938,11 +1030,19 @@
         "title": "Type de document",
         "mls_listing": "Fiche MLS/Matrix",
         "role_foncier": "Rôle foncier",
-        "certificat_localisation": "Certificat de localisation"
+        "role_taxe": "Rôle de taxe",
+        "zonage": "Zonage",
+        "certificat_localisation": "Certificat de localisation",
+        "general": "Général"
       },
       "processing": {
         "title": "Analyse du document en cours...",
         "description": "Extraction des données textuelles et structurées"
+      },
+      "aiProvider": {
+        "label": "Fournisseur IA",
+        "using": "Utilisation de votre fournisseur de {priority} priorité. Modifiez la priorité dans Paramètres → Clés API IA.",
+        "priority": "Fournisseur de {priority} priorité. Modifiez dans Paramètres → Clés API IA."
       }
     },
 
@@ -1006,6 +1106,37 @@
       "extractionFailed": "Échec de l'extraction des données",
       "noText": "Aucun texte trouvé dans le document",
       "aiError": "Erreur lors de l'analyse IA"
+    },
+
+    "batch": {
+      "title": "Import de documents multiples",
+      "subtitle": "Téléversez plusieurs PDFs et assignez les types de documents",
+      "dropzone": {
+        "title": "Glissez-déposez plusieurs PDFs ici",
+        "subtitle": "ou cliquez pour sélectionner plusieurs fichiers",
+        "button": "Sélectionner plusieurs fichiers"
+      },
+      "fileList": {
+        "title": "Fichiers sélectionnés ({count})"
+      },
+      "propertySelection": {
+        "title": "Fusionner dans",
+        "createNew": "Créer une nouvelle propriété",
+        "mergeExisting": "Fusionner dans une propriété existante",
+        "searchPlaceholder": "Rechercher une propriété...",
+        "info": "Tous les documents seront fusionnés dans UNE seule propriété"
+      },
+      "processing": {
+        "title": "Traitement des documents en cours...",
+        "current": "Document {current} sur {total}",
+        "completed": "documents traités"
+      },
+      "success": {
+        "title": "Tous les documents ont été importés avec succès!"
+      },
+      "actions": {
+        "startBatch": "Démarrer l'import groupé"
+      }
     }
   }
 }

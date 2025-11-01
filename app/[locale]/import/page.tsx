@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { useTranslations } from 'next-intl';
+import { useState, useRef, useEffect } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import {
   Box,
@@ -22,12 +22,25 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  Chip,
+  IconButton,
+  TextField,
+  ToggleButtonGroup,
+  ToggleButton,
+  Autocomplete,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import {
   CloudUpload,
   Language,
   PictureAsPdf,
   CheckCircle,
+  Settings as SettingsIcon,
+  AutoAwesome,
+  TextFields,
 } from '@mui/icons-material';
 import { MaterialDashboardLayout } from '@/components/layout/MaterialDashboardLayout';
 import { DocumentType, ImportSession } from '@/features/import/types/import.types';
@@ -35,21 +48,36 @@ import { importService } from '@/features/import/_api/import.service';
 import { DOCUMENT_TYPES, MAX_FILE_SIZE } from '@/features/import/constants/import.constants';
 import { propertiesSupabaseService } from '@/features/library/_api/properties-supabase.service';
 import { Property } from '@/features/library/types/property.types';
+import { useSettings } from '@/contexts/SettingsContext';
+import AiApiKeysDialog from '@/features/user-settings/components/AiApiKeysDialog';
+import { useBackgroundImport } from '@/contexts/BackgroundImportContext';
 
 function ImportPageContent() {
   const t = useTranslations('import');
   const tCommon = useTranslations('common');
+  const locale = useLocale();
   const router = useRouter();
+  const { preferences } = useSettings();
+  const { startSingleImport, savePendingSession, clearPendingSession, state: importState } = useBackgroundImport();
 
   const [activeStep, setActiveStep] = useState(0);
   const [documentType, setDocumentType] = useState<DocumentType | null>(null);
+  // Always use auto mode - provider priority is managed in Settings
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [useTextInput, setUseTextInput] = useState(false); // Toggle between PDF and text input
+  const [pastedText, setPastedText] = useState(''); // Store pasted text
   const [processing, setProcessing] = useState(false);
   const [session, setSession] = useState<ImportSession | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [duplicateProperty, setDuplicateProperty] = useState<Property | null>(null);
   const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
   const [mergeAction, setMergeAction] = useState<'merge' | 'duplicate' | null>(null);
+  const [showAiApiKeysDialog, setShowAiApiKeysDialog] = useState(false);
+  const [allProperties, setAllProperties] = useState<Property[]>([]);
+  const [loadingProperties, setLoadingProperties] = useState(false);
+  const [propertyDialogOpen, setPropertyDialogOpen] = useState(false);
+  const [currentPropertyIndex, setCurrentPropertyIndex] = useState<number | null>(null);
+  const [propertySearchText, setPropertySearchText] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -59,6 +87,73 @@ function ImportPageContent() {
     t('steps.review'),
     t('steps.confirmation'),
   ];
+
+  // Check URL parameters on mount to set initial step (e.g., from batch import back button)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const stepParam = params.get('step');
+      if (stepParam) {
+        const step = parseInt(stepParam, 10);
+        if (step >= 0 && step < steps.length) {
+          setActiveStep(step);
+        }
+      }
+    }
+  }, []);
+
+  // Get active provider based on priority
+  const getActiveProvider = () => {
+    const providerPriority = preferences?.providerPriority || ['deepseek', 'openai', 'anthropic'];
+    return providerPriority.find(p => preferences?.aiApiKeys?.[p]) || 'deepseek';
+  };
+
+  const getProviderDisplayName = (provider: string) => {
+    const names: Record<string, string> = {
+      deepseek: 'DeepSeek',
+      openai: 'OpenAI',
+      anthropic: 'Anthropic'
+    };
+    return names[provider] || provider;
+  };
+
+  const getProviderModel = (provider: string) => {
+    const models: Record<string, string> = {
+      deepseek: preferences?.aiModels?.deepseek || 'deepseek-chat',
+      openai: preferences?.aiModels?.openai || 'gpt-4o-mini',
+      anthropic: preferences?.aiModels?.anthropic || 'claude-3-5-haiku-20241022'
+    };
+    return models[provider] || '';
+  };
+
+  const getPriorityText = () => {
+    return locale === 'fr' ? '1ère' : '1st';
+  };
+
+  // Load all properties for merge selection
+  useEffect(() => {
+    const loadProperties = async () => {
+      setLoadingProperties(true);
+      try {
+        const props = await propertiesSupabaseService.getAll();
+        setAllProperties(props);
+      } catch (error) {
+        console.error('Failed to load properties:', error);
+      } finally {
+        setLoadingProperties(false);
+      }
+    };
+
+    loadProperties();
+  }, []);
+
+  // Restore pending session if user navigated away and came back
+  useEffect(() => {
+    if (importState.pendingSession && importState.pendingStep !== null) {
+      setSession(importState.pendingSession);
+      setActiveStep(importState.pendingStep);
+    }
+  }, [importState.pendingSession, importState.pendingStep]);
 
   // Handle PDF file selection
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,15 +176,46 @@ function ImportPageContent() {
     setSelectedFile(file);
   };
 
-  // Process the PDF
-  const handleProcessPDF = async () => {
-    if (!selectedFile || !documentType) return;
+  // Process the PDF or text input
+  const handleProcess = async () => {
+    // Validate inputs
+    if (!documentType) return;
+    if (!useTextInput && !selectedFile) return;
+    if (useTextInput && !pastedText.trim()) {
+      setError(t('errors.noTextProvided'));
+      return;
+    }
+
+    // Determine which provider to use based on user priority
+    const providerPriority = preferences?.providerPriority || ['deepseek', 'openai', 'anthropic'];
+
+    // Find first provider with an API key
+    const availableProvider = providerPriority.find(p => preferences?.aiApiKeys?.[p]);
+    const provider = availableProvider || 'deepseek'; // Fallback to deepseek if none configured
+
+    // Check if the selected provider has an API key
+    const apiKey = preferences?.aiApiKeys?.[provider];
+
+    if (!apiKey) {
+      setError(`Please configure your ${provider.toUpperCase()} API key in Settings (top right menu) before importing.`);
+      return;
+    }
+
+    // Get the selected model for the provider
+    const model = preferences?.aiModels?.[provider];
 
     setProcessing(true);
     setError(null);
 
     try {
-      const result = await importService.processPDF(selectedFile, documentType);
+      // Process either text input or PDF file
+      let result: ImportSession;
+      if (useTextInput) {
+        result = await importService.processText(pastedText, documentType, apiKey, provider, model);
+      } else {
+        // Use background import for PDF files to show progress in header
+        result = await startSingleImport(selectedFile!, documentType, apiKey, provider, model);
+      }
 
       // Check for duplicates in all extracted properties
       if (result.properties && result.properties.length > 0) {
@@ -102,7 +228,7 @@ function ImportPageContent() {
               return {
                 ...propertyExtraction,
                 duplicateProperty: existingProperty || undefined,
-                action: existingProperty ? undefined : ('create' as const),
+                action: 'create' as const, // Always default to 'create', user can choose to merge
               };
             }
             return {
@@ -120,6 +246,9 @@ function ImportPageContent() {
       // If any duplicates found, show them in review step (user will decide for each)
       // Otherwise just proceed to review
       setActiveStep(2);
+
+      // Save session to context so user can navigate away and come back
+      savePendingSession(result, 2);
     } catch (err) {
       setError(t('errors.extractionFailed'));
       console.error('Import error:', err);
@@ -149,6 +278,9 @@ function ImportPageContent() {
       }
 
       setActiveStep(3); // Move to success step
+
+      // Clear pending session since import is complete
+      clearPendingSession();
 
       // Redirect to library list after a short delay
       setTimeout(() => {
@@ -296,7 +428,13 @@ function ImportPageContent() {
       </Typography>
 
       {/* Document Type Selection */}
-      <Card sx={{ borderRadius: '16px', mb: 3 }}>
+      <Card sx={{
+        borderRadius: '16px',
+        mb: 3,
+        background: 'linear-gradient(135deg, rgba(147, 197, 253, 0.15) 0%, rgba(196, 181, 253, 0.15) 100%)',
+        border: '1px solid',
+        borderColor: 'rgba(147, 197, 253, 0.3)',
+      }}>
         <CardContent>
           <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
             {t('upload.documentType.title')}
@@ -322,43 +460,166 @@ function ImportPageContent() {
         </CardContent>
       </Card>
 
-      {/* Upload Zone */}
-      <Paper
-        onClick={() => fileInputRef.current?.click()}
+      {/* AI Provider Info - Compact */}
+      <Box
         sx={{
-          border: '2px dashed',
-          borderColor: selectedFile ? 'success.main' : 'primary.main',
-          borderRadius: '16px',
-          p: 4,
-          textAlign: 'center',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
           mb: 3,
-          cursor: 'pointer',
-          '&:hover': {
-            bgcolor: 'action.hover',
-          },
+          py: 1,
+          px: 2,
+          borderRadius: '8px',
+          bgcolor: 'action.hover'
         }}
       >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="application/pdf"
-          onChange={handleFileSelect}
-          style={{ display: 'none' }}
+        <AutoAwesome sx={{ fontSize: '18px', color: 'primary.main' }} />
+        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          {getProviderDisplayName(getActiveProvider())}
+        </Typography>
+        <Chip
+          label={getProviderModel(getActiveProvider()).split('-').pop()?.toUpperCase() || 'CHAT'}
+          size="small"
+          color="primary"
+          sx={{ height: 18, fontSize: '10px', fontWeight: 600 }}
         />
+        <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+          {t('upload.aiProvider.priority', { priority: getPriorityText() })}
+        </Typography>
+        <IconButton
+          size="small"
+          onClick={() => setShowAiApiKeysDialog(true)}
+          sx={{ color: 'text.secondary', ml: 'auto' }}
+        >
+          <SettingsIcon sx={{ fontSize: '18px' }} />
+        </IconButton>
+      </Box>
 
-        <CloudUpload sx={{ fontSize: 64, color: selectedFile ? 'success.main' : 'primary.main', mb: 2 }} />
-        <Typography variant="h6" sx={{ mb: 1 }}>
-          {selectedFile ? selectedFile.name : t('upload.dropzone.title')}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          {t('upload.dropzone.subtitle')}
-        </Typography>
-        {!selectedFile && (
-          <Button variant="contained" sx={{ borderRadius: '12px', textTransform: 'none' }}>
-            {t('upload.dropzone.button')}
-          </Button>
-        )}
-      </Paper>
+      {/* Input Mode Toggle */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+        <ToggleButtonGroup
+          value={useTextInput ? 'text' : 'pdf'}
+          exclusive
+          onChange={(e, value) => {
+            if (value === 'batch') {
+              router.push('/import/batch');
+              return;
+            }
+            if (value !== null) {
+              setUseTextInput(value === 'text');
+              setError(null);
+              setSelectedFile(null);
+              setPastedText('');
+            }
+          }}
+          sx={{ borderRadius: '12px' }}
+        >
+          <ToggleButton value="pdf" sx={{ px: 3, py: 1, textTransform: 'none', borderRadius: '12px 0 0 12px' }}>
+            <PictureAsPdf sx={{ mr: 1, fontSize: 20 }} />
+            PDF Upload
+          </ToggleButton>
+          <ToggleButton
+            value="batch"
+            sx={{
+              px: 3,
+              py: 1,
+              textTransform: 'none',
+              borderRadius: '0',
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              fontWeight: 600,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #5568d3 0%, #66408a 100%)',
+              },
+              '& .MuiSvgIcon-root': {
+                color: 'white',
+              }
+            }}
+          >
+            <CloudUpload sx={{ mr: 1, fontSize: 20 }} />
+            {locale === 'fr' ? 'Multi PDF' : 'Multi PDF'}
+          </ToggleButton>
+          <ToggleButton value="text" sx={{ px: 3, py: 1, textTransform: 'none', borderRadius: '0 12px 12px 0' }}>
+            <TextFields sx={{ mr: 1, fontSize: 20 }} />
+            Paste Text
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
+
+      {/* Conditional rendering: PDF Upload or Text Input */}
+      {!useTextInput ? (
+        <Paper
+          onClick={() => fileInputRef.current?.click()}
+          sx={{
+            border: '2px dashed',
+            borderColor: selectedFile ? 'success.main' : 'primary.main',
+            borderRadius: '16px',
+            p: 4,
+            textAlign: 'center',
+            mb: 3,
+            cursor: 'pointer',
+            '&:hover': {
+              bgcolor: 'action.hover',
+            },
+          }}
+        >
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/pdf"
+            onChange={handleFileSelect}
+            style={{ display: 'none' }}
+          />
+
+          <CloudUpload sx={{ fontSize: 64, color: selectedFile ? 'success.main' : 'primary.main', mb: 2 }} />
+          <Typography variant="h6" sx={{ mb: 1 }}>
+            {selectedFile ? selectedFile.name : t('upload.dropzone.title')}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            {t('upload.dropzone.subtitle')}
+          </Typography>
+          {!selectedFile && (
+            <Button variant="contained" sx={{ borderRadius: '12px', textTransform: 'none' }}>
+              {t('upload.dropzone.button')}
+            </Button>
+          )}
+        </Paper>
+      ) : (
+        <Card sx={{ borderRadius: '16px', mb: 3 }}>
+          <CardContent>
+            <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
+              {locale === 'fr' ? 'Coller le texte du document' : 'Paste document text'}
+            </Typography>
+            <Alert severity="info" sx={{ borderRadius: '8px', mb: 2 }}>
+              <Typography variant="body2">
+                {locale === 'fr'
+                  ? 'Conseil : Ouvrez le PDF, sélectionnez tout le texte (Ctrl+A), copiez-le (Ctrl+C) et collez-le ici (Ctrl+V).'
+                  : 'Tip: Open the PDF, select all text (Ctrl+A), copy it (Ctrl+C), and paste it here (Ctrl+V).'}
+              </Typography>
+            </Alert>
+            <TextField
+              multiline
+              rows={12}
+              fullWidth
+              placeholder={locale === 'fr'
+                ? 'Collez ici le texte copié du PDF...'
+                : 'Paste copied text from PDF here...'}
+              value={pastedText}
+              onChange={(e) => setPastedText(e.target.value)}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '12px',
+                  fontFamily: 'monospace',
+                  fontSize: '13px',
+                },
+              }}
+            />
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+              {pastedText.length} {locale === 'fr' ? 'caractères' : 'characters'}
+            </Typography>
+          </CardContent>
+        </Card>
+      )}
 
       {error && (
         <Alert severity="error" sx={{ borderRadius: '12px', mb: 2 }}>
@@ -377,8 +638,8 @@ function ImportPageContent() {
         </Button>
         <Button
           variant="contained"
-          onClick={handleProcessPDF}
-          disabled={!selectedFile || !documentType || processing}
+          onClick={handleProcess}
+          disabled={!documentType || processing || (!useTextInput && !selectedFile) || (useTextInput && !pastedText.trim())}
           sx={{ borderRadius: '12px', textTransform: 'none' }}
         >
           {processing ? <CircularProgress size={24} /> : tCommon('next')}
@@ -395,6 +656,25 @@ function ImportPageContent() {
     updatedProperties[index] = {
       ...updatedProperties[index],
       action,
+    };
+
+    setSession({
+      ...session,
+      properties: updatedProperties,
+    });
+  };
+
+  // Handle manual property selection for merge
+  const handleManualPropertySelect = (index: number, propertyId: string | null) => {
+    if (!session || !session.properties) return;
+
+    const updatedProperties = [...session.properties];
+    const selectedProperty = propertyId ? allProperties.find(p => p.id === propertyId) : null;
+
+    updatedProperties[index] = {
+      ...updatedProperties[index],
+      duplicateProperty: selectedProperty,
+      action: selectedProperty ? 'merge' : 'create',
     };
 
     setSession({
@@ -466,45 +746,51 @@ function ImportPageContent() {
                   </Alert>
                 )}
 
+                {/* Property selector for manual merge */}
+                <Box sx={{ mb: 2 }}>
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    size="small"
+                    onClick={() => {
+                      setCurrentPropertyIndex(index);
+                      setPropertyDialogOpen(true);
+                    }}
+                    sx={{ borderRadius: '8px', textTransform: 'none', justifyContent: 'flex-start', py: 1 }}
+                  >
+                    {property.duplicateProperty
+                      ? `${locale === 'fr' ? 'Fusionner avec: ' : 'Merge with: '}${property.duplicateProperty.adresse}`
+                      : (locale === 'fr' ? 'Sélectionner une propriété à fusionner...' : 'Select property to merge...')}
+                  </Button>
+                </Box>
+
                 <Box sx={{ display: 'flex', gap: 1 }}>
-                  {property.duplicateProperty ? (
-                    <>
-                      <Button
-                        size="small"
-                        variant={property.action === 'merge' ? 'contained' : 'outlined'}
-                        onClick={() => handlePropertyAction(index, 'merge')}
-                        sx={{ borderRadius: '8px', textTransform: 'none', flex: 1 }}
-                      >
-                        {t('review.actions.merge')}
-                      </Button>
-                      <Button
-                        size="small"
-                        variant={property.action === 'create' ? 'contained' : 'outlined'}
-                        onClick={() => handlePropertyAction(index, 'create')}
-                        sx={{ borderRadius: '8px', textTransform: 'none', flex: 1 }}
-                      >
-                        {t('review.actions.createDuplicate')}
-                      </Button>
-                      <Button
-                        size="small"
-                        variant={property.action === 'skip' ? 'contained' : 'outlined'}
-                        color="error"
-                        onClick={() => handlePropertyAction(index, 'skip')}
-                        sx={{ borderRadius: '8px', textTransform: 'none' }}
-                      >
-                        {t('review.actions.skip')}
-                      </Button>
-                    </>
-                  ) : (
-                    <Button
-                      size="small"
-                      variant="contained"
-                      disabled
-                      sx={{ borderRadius: '8px', textTransform: 'none' }}
-                    >
-                      {t('review.actions.willCreate')}
-                    </Button>
-                  )}
+                  <Button
+                    size="small"
+                    variant={property.action === 'create' ? 'contained' : 'outlined'}
+                    onClick={() => handlePropertyAction(index, 'create')}
+                    sx={{ borderRadius: '8px', textTransform: 'none', flex: 1 }}
+                  >
+                    {property.duplicateProperty ? t('review.actions.createDuplicate') : t('review.actions.create')}
+                  </Button>
+                  <Button
+                    size="small"
+                    variant={property.action === 'merge' ? 'contained' : 'outlined'}
+                    onClick={() => handlePropertyAction(index, 'merge')}
+                    disabled={!property.duplicateProperty}
+                    sx={{ borderRadius: '8px', textTransform: 'none', flex: 1 }}
+                  >
+                    {t('review.actions.merge')}
+                  </Button>
+                  <Button
+                    size="small"
+                    variant={property.action === 'skip' ? 'contained' : 'outlined'}
+                    color="error"
+                    onClick={() => handlePropertyAction(index, 'skip')}
+                    sx={{ borderRadius: '8px', textTransform: 'none' }}
+                  >
+                    {t('review.actions.skip')}
+                  </Button>
                 </Box>
               </CardContent>
             </Card>
@@ -629,7 +915,7 @@ function ImportPageContent() {
         </DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ mb: 2 }}>
-            {t('duplicate.message', { address: duplicateProperty?.adresse })}
+            {t('duplicate.message', { address: duplicateProperty?.adresse || '' })}
           </DialogContentText>
           {duplicateProperty && (
             <Paper sx={{ p: 2, bgcolor: 'action.hover', borderRadius: '12px' }}>
@@ -676,6 +962,124 @@ function ImportPageContent() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Property Selector Dialog */}
+      <Dialog
+        open={propertyDialogOpen}
+        onClose={() => {
+          setPropertyDialogOpen(false);
+          setPropertySearchText('');
+        }}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          {locale === 'fr' ? 'Sélectionner une propriété' : 'Select Property'}
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ mb: 2, mt: 1 }}>
+            <TextField
+              fullWidth
+              size="small"
+              placeholder={locale === 'fr' ? 'Rechercher par adresse...' : 'Search by address...'}
+              value={propertySearchText}
+              onChange={(e) => setPropertySearchText(e.target.value)}
+              sx={{ borderRadius: '8px' }}
+            />
+          </Box>
+          <Box sx={{ maxHeight: 400, overflowY: 'auto' }}>
+            {loadingProperties ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                <CircularProgress />
+              </Box>
+            ) : (
+              <>
+                {/* Option to not merge */}
+                <Card
+                  sx={{
+                    mb: 1,
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    border: '2px solid',
+                    borderColor: currentPropertyIndex !== null && !session?.properties?.[currentPropertyIndex]?.duplicateProperty ? 'primary.main' : 'divider',
+                    '&:hover': { bgcolor: 'action.hover' }
+                  }}
+                  onClick={() => {
+                    if (currentPropertyIndex !== null && session) {
+                      handleManualPropertySelect(currentPropertyIndex, null);
+                    }
+                    setPropertyDialogOpen(false);
+                    setPropertySearchText('');
+                  }}
+                >
+                  <CardContent sx={{ py: 1.5 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {locale === 'fr' ? 'Aucune - Créer nouvelle propriété' : 'None - Create new property'}
+                    </Typography>
+                  </CardContent>
+                </Card>
+
+                {/* List of existing properties */}
+                {allProperties
+                  .filter(prop =>
+                    !propertySearchText ||
+                    prop.adresse?.toLowerCase().includes(propertySearchText.toLowerCase()) ||
+                    prop.ville?.toLowerCase().includes(propertySearchText.toLowerCase())
+                  )
+                  .sort((a, b) => (a.adresse || '').localeCompare(b.adresse || ''))
+                  .map((prop) => (
+                    <Card
+                      key={prop.id}
+                      sx={{
+                        mb: 1,
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        border: '2px solid',
+                        borderColor: currentPropertyIndex !== null && session?.properties?.[currentPropertyIndex]?.duplicateProperty?.id === prop.id ? 'primary.main' : 'divider',
+                        '&:hover': { bgcolor: 'action.hover' }
+                      }}
+                      onClick={() => {
+                        if (currentPropertyIndex !== null) {
+                          handleManualPropertySelect(currentPropertyIndex, prop.id);
+                        }
+                        setPropertyDialogOpen(false);
+                        setPropertySearchText('');
+                      }}
+                    >
+                      <CardContent sx={{ py: 1.5 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {prop.adresse}
+                        </Typography>
+                        {prop.ville && (
+                          <Typography variant="caption" color="text.secondary">
+                            {prop.ville}{prop.municipalite && ` - ${prop.municipalite}`}
+                          </Typography>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+              </>
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setPropertyDialogOpen(false);
+              setPropertySearchText('');
+            }}
+            sx={{ borderRadius: '8px', textTransform: 'none' }}
+          >
+            {locale === 'fr' ? 'Annuler' : 'Cancel'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* AI API Keys Dialog */}
+      <AiApiKeysDialog
+        open={showAiApiKeysDialog}
+        onClose={() => setShowAiApiKeysDialog(false)}
+      />
     </Box>
   );
 }

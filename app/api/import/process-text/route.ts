@@ -1,25 +1,20 @@
 /**
- * API Route for server-side PDF processing
- * This runs on the server where Node.js fs module is available
+ * API Route for text-only processing (no PDF extraction needed)
+ * Use this when user manually copies text from a PDF that can't be auto-extracted
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { pdfReaderService } from '@/features/import/_api/pdf-reader.service';
 import { aiExtractionService } from '@/features/import/_api/ai-extraction.service';
 import { DocumentType } from '@/features/import/types/import.types';
 
 export async function POST(request: NextRequest) {
   try {
-    const formData = await request.formData();
-    const file = formData.get('file') as File;
-    const documentType = formData.get('documentType') as DocumentType;
-    const apiKey = formData.get('apiKey') as string;
-    const provider = (formData.get('provider') as 'deepseek' | 'openai' | 'anthropic') || 'deepseek';
-    const model = formData.get('model') as string | undefined;
+    const body = await request.json();
+    const { text, documentType, apiKey, provider, model } = body;
 
-    if (!file) {
+    if (!text || typeof text !== 'string') {
       return NextResponse.json(
-        { error: 'No file provided' },
+        { error: 'No text provided' },
         { status: 400 }
       );
     }
@@ -38,25 +33,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Extract text from PDF
-    const pdfText = await pdfReaderService.extractTextFromFile(file);
+    console.log(`[Text Processing] Processing ${text.length} characters of type ${documentType}`);
 
-    console.log(`[PDF Processing] Extracted ${pdfText?.length || 0} characters from ${file.name}`);
-
-    if (!pdfText || pdfText.length < 10) {
-      console.error(`[PDF Processing] Insufficient text: "${pdfText?.substring(0, 100)}"`);
+    if (text.length < 10) {
       return NextResponse.json(
-        { error: `Insufficient text extracted from PDF (${pdfText?.length || 0} characters). The PDF may be scanned/image-based. Please ensure the PDF contains selectable text.` },
+        { error: `Insufficient text provided (${text.length} characters). Please paste more content.` },
         { status: 400 }
       );
     }
 
-    // Use AI to extract structured data (now returns array of properties)
+    // Use AI to extract structured data (returns array of properties)
     const extractedPropertiesArray = await aiExtractionService.extractFromText(
-      pdfText,
-      documentType,
+      text,
+      documentType as DocumentType,
       apiKey,
-      provider,
+      provider || 'deepseek',
       model
     );
 
@@ -89,7 +80,7 @@ export async function POST(request: NextRequest) {
       totalProperties: properties.length,
     });
   } catch (error) {
-    console.error('PDF processing error:', error);
+    console.error('Text processing error:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
