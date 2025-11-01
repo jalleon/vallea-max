@@ -75,6 +75,9 @@ function ImportPageContent() {
   const [showAiApiKeysDialog, setShowAiApiKeysDialog] = useState(false);
   const [allProperties, setAllProperties] = useState<Property[]>([]);
   const [loadingProperties, setLoadingProperties] = useState(false);
+  const [propertyDialogOpen, setPropertyDialogOpen] = useState(false);
+  const [currentPropertyIndex, setCurrentPropertyIndex] = useState<number | null>(null);
+  const [propertySearchText, setPropertySearchText] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -225,7 +228,7 @@ function ImportPageContent() {
               return {
                 ...propertyExtraction,
                 duplicateProperty: existingProperty || undefined,
-                action: existingProperty ? undefined : ('create' as const),
+                action: 'create' as const, // Always default to 'create', user can choose to merge
               };
             }
             return {
@@ -744,64 +747,50 @@ function ImportPageContent() {
                 )}
 
                 {/* Property selector for manual merge */}
-                <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-                  <InputLabel>{locale === 'fr' ? 'Fusionner avec propriété existante' : 'Merge with existing property'}</InputLabel>
-                  <Select
-                    value={property.duplicateProperty?.id || ''}
-                    onChange={(e) => handleManualPropertySelect(index, e.target.value || null)}
-                    label={locale === 'fr' ? 'Fusionner avec propriété existante' : 'Merge with existing property'}
-                    sx={{ borderRadius: '8px' }}
+                <Box sx={{ mb: 2 }}>
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    size="small"
+                    onClick={() => {
+                      setCurrentPropertyIndex(index);
+                      setPropertyDialogOpen(true);
+                    }}
+                    sx={{ borderRadius: '8px', textTransform: 'none', justifyContent: 'flex-start', py: 1 }}
                   >
-                    <MenuItem value="">
-                      <em>{locale === 'fr' ? 'Aucune - Créer nouvelle' : 'None - Create new'}</em>
-                    </MenuItem>
-                    {allProperties.map((prop) => (
-                      <MenuItem key={prop.id} value={prop.id}>
-                        {prop.adresse} {prop.ville && `- ${prop.ville}`}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                    {property.duplicateProperty
+                      ? `${locale === 'fr' ? 'Fusionner avec: ' : 'Merge with: '}${property.duplicateProperty.adresse}`
+                      : (locale === 'fr' ? 'Sélectionner une propriété à fusionner...' : 'Select property to merge...')}
+                  </Button>
+                </Box>
 
                 <Box sx={{ display: 'flex', gap: 1 }}>
-                  {property.duplicateProperty ? (
-                    <>
-                      <Button
-                        size="small"
-                        variant={property.action === 'merge' ? 'contained' : 'outlined'}
-                        onClick={() => handlePropertyAction(index, 'merge')}
-                        sx={{ borderRadius: '8px', textTransform: 'none', flex: 1 }}
-                      >
-                        {t('review.actions.merge')}
-                      </Button>
-                      <Button
-                        size="small"
-                        variant={property.action === 'create' ? 'contained' : 'outlined'}
-                        onClick={() => handlePropertyAction(index, 'create')}
-                        sx={{ borderRadius: '8px', textTransform: 'none', flex: 1 }}
-                      >
-                        {t('review.actions.createDuplicate')}
-                      </Button>
-                      <Button
-                        size="small"
-                        variant={property.action === 'skip' ? 'contained' : 'outlined'}
-                        color="error"
-                        onClick={() => handlePropertyAction(index, 'skip')}
-                        sx={{ borderRadius: '8px', textTransform: 'none' }}
-                      >
-                        {t('review.actions.skip')}
-                      </Button>
-                    </>
-                  ) : (
-                    <Button
-                      size="small"
-                      variant="contained"
-                      disabled
-                      sx={{ borderRadius: '8px', textTransform: 'none' }}
-                    >
-                      {t('review.actions.willCreate')}
-                    </Button>
-                  )}
+                  <Button
+                    size="small"
+                    variant={property.action === 'create' ? 'contained' : 'outlined'}
+                    onClick={() => handlePropertyAction(index, 'create')}
+                    sx={{ borderRadius: '8px', textTransform: 'none', flex: 1 }}
+                  >
+                    {property.duplicateProperty ? t('review.actions.createDuplicate') : t('review.actions.create')}
+                  </Button>
+                  <Button
+                    size="small"
+                    variant={property.action === 'merge' ? 'contained' : 'outlined'}
+                    onClick={() => handlePropertyAction(index, 'merge')}
+                    disabled={!property.duplicateProperty}
+                    sx={{ borderRadius: '8px', textTransform: 'none', flex: 1 }}
+                  >
+                    {t('review.actions.merge')}
+                  </Button>
+                  <Button
+                    size="small"
+                    variant={property.action === 'skip' ? 'contained' : 'outlined'}
+                    color="error"
+                    onClick={() => handlePropertyAction(index, 'skip')}
+                    sx={{ borderRadius: '8px', textTransform: 'none' }}
+                  >
+                    {t('review.actions.skip')}
+                  </Button>
                 </Box>
               </CardContent>
             </Card>
@@ -970,6 +959,118 @@ function ImportPageContent() {
             sx={{ borderRadius: '12px', textTransform: 'none' }}
           >
             {t('duplicate.actions.merge')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Property Selector Dialog */}
+      <Dialog
+        open={propertyDialogOpen}
+        onClose={() => {
+          setPropertyDialogOpen(false);
+          setPropertySearchText('');
+        }}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          {locale === 'fr' ? 'Sélectionner une propriété' : 'Select Property'}
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ mb: 2, mt: 1 }}>
+            <TextField
+              fullWidth
+              size="small"
+              placeholder={locale === 'fr' ? 'Rechercher par adresse...' : 'Search by address...'}
+              value={propertySearchText}
+              onChange={(e) => setPropertySearchText(e.target.value)}
+              sx={{ borderRadius: '8px' }}
+            />
+          </Box>
+          <Box sx={{ maxHeight: 400, overflowY: 'auto' }}>
+            {loadingProperties ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                <CircularProgress />
+              </Box>
+            ) : (
+              <>
+                {/* Option to not merge */}
+                <Card
+                  sx={{
+                    mb: 1,
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    border: '2px solid',
+                    borderColor: currentPropertyIndex !== null && !session?.properties?.[currentPropertyIndex]?.duplicateProperty ? 'primary.main' : 'divider',
+                    '&:hover': { bgcolor: 'action.hover' }
+                  }}
+                  onClick={() => {
+                    if (currentPropertyIndex !== null && session) {
+                      handleManualPropertySelect(currentPropertyIndex, null);
+                    }
+                    setPropertyDialogOpen(false);
+                    setPropertySearchText('');
+                  }}
+                >
+                  <CardContent sx={{ py: 1.5 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {locale === 'fr' ? 'Aucune - Créer nouvelle propriété' : 'None - Create new property'}
+                    </Typography>
+                  </CardContent>
+                </Card>
+
+                {/* List of existing properties */}
+                {allProperties
+                  .filter(prop =>
+                    !propertySearchText ||
+                    prop.adresse?.toLowerCase().includes(propertySearchText.toLowerCase()) ||
+                    prop.ville?.toLowerCase().includes(propertySearchText.toLowerCase())
+                  )
+                  .sort((a, b) => (a.adresse || '').localeCompare(b.adresse || ''))
+                  .map((prop) => (
+                    <Card
+                      key={prop.id}
+                      sx={{
+                        mb: 1,
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        border: '2px solid',
+                        borderColor: currentPropertyIndex !== null && session?.properties?.[currentPropertyIndex]?.duplicateProperty?.id === prop.id ? 'primary.main' : 'divider',
+                        '&:hover': { bgcolor: 'action.hover' }
+                      }}
+                      onClick={() => {
+                        if (currentPropertyIndex !== null) {
+                          handleManualPropertySelect(currentPropertyIndex, prop.id);
+                        }
+                        setPropertyDialogOpen(false);
+                        setPropertySearchText('');
+                      }}
+                    >
+                      <CardContent sx={{ py: 1.5 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {prop.adresse}
+                        </Typography>
+                        {prop.ville && (
+                          <Typography variant="caption" color="text.secondary">
+                            {prop.ville}{prop.municipalite && ` - ${prop.municipalite}`}
+                          </Typography>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+              </>
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setPropertyDialogOpen(false);
+              setPropertySearchText('');
+            }}
+            sx={{ borderRadius: '8px', textTransform: 'none' }}
+          >
+            {locale === 'fr' ? 'Annuler' : 'Cancel'}
           </Button>
         </DialogActions>
       </Dialog>
