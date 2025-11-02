@@ -9,22 +9,55 @@ import { aiExtractionService } from '@/features/import/_api/ai-extraction.servic
 import { DocumentType } from '@/features/import/types/import.types';
 import { adminApiKeysService } from '@/features/admin/_api/admin-api-keys.service';
 import { usageTrackingService } from '@/features/admin/_api/usage-tracking.service';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
 
   try {
-    // Get authenticated user
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    // Get auth token from request header
+    const authHeader = request.headers.get('authorization');
 
-    if (authError || !user) {
+    if (!authHeader) {
+      console.error('[PDF Processing] No authorization header');
       return NextResponse.json(
         { error: 'Unauthorized. Please log in.' },
         { status: 401 }
       );
     }
+
+    // Create Supabase client with the auth token
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        global: {
+          headers: {
+            Authorization: authHeader
+          }
+        }
+      }
+    );
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    console.log('[PDF Processing] Auth check:', {
+      hasUser: !!user,
+      userId: user?.id,
+      authError: authError?.message
+    });
+
+    if (authError || !user) {
+      console.error('[PDF Processing] Authentication failed:', authError);
+      return NextResponse.json(
+        { error: 'Unauthorized. Please log in.' },
+        { status: 401 }
+      );
+    }
+
+    console.log('[PDF Processing] ========================================');
+    console.log('[PDF Processing] User authenticated:', user.id);
+    console.log('[PDF Processing] User email:', user.email);
 
     const formData = await request.formData();
     const file = formData.get('file') as File;
@@ -32,6 +65,8 @@ export async function POST(request: NextRequest) {
     let apiKey = formData.get('apiKey') as string;
     let provider = (formData.get('provider') as 'deepseek' | 'openai' | 'anthropic') || 'deepseek';
     let model = formData.get('model') as string | undefined;
+
+    console.log('[PDF Processing] File:', file.name, 'Size:', file.size, 'bytes');
 
     if (!file) {
       return NextResponse.json(
@@ -47,21 +82,54 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Calculate credits needed based on file size
-    const fileSizeBytes = file.size;
-    const creditsNeeded = usageTrackingService.calculateCreditsNeeded(fileSizeBytes);
+    // Check if user has enabled their own API keys
+    const { data: userData } = await supabase
+      .from('users')
+      .select('can_use_own_api_keys')
+      .eq('id', user.id)
+      .single();
 
-    // Check if user has enough credits
-    const hasCredits = await usageTrackingService.hasEnoughCredits(user.id, creditsNeeded);
+    const canUseOwnKeys = userData?.can_use_own_api_keys || false;
 
-    if (!hasCredits) {
+    // If user wants to use their own keys, they MUST provide an API key
+    if (canUseOwnKeys && !apiKey) {
       return NextResponse.json(
-        { error: 'Insufficient scan credits. Please upgrade your plan or contact support.' },
-        { status: 402 } // Payment Required
+        { error: 'Please configure your API keys in Settings. You have enabled personal API keys but none are configured.' },
+        { status: 400 }
       );
     }
 
-    // If no API key provided, use master API key (Valea's keys)
+    // Calculate credits (only needed if using master keys)
+    const fileSizeBytes = file.size;
+    const creditsNeeded = canUseOwnKeys ? 0 : usageTrackingService.calculateCreditsNeeded(fileSizeBytes);
+
+    // Only check/consume credits if using master key system
+    if (!canUseOwnKeys) {
+      console.log('[PDF Processing] Checking credits for user:', user.id, 'Credits needed:', creditsNeeded);
+
+      // Check if user has enough credits (pass supabase client)
+      const hasCredits = await usageTrackingService.hasEnoughCredits(user.id, creditsNeeded, supabase);
+
+      console.log('[PDF Processing] Has enough credits:', hasCredits);
+
+      if (!hasCredits) {
+        // Get user credits for debugging
+        const userCredits = await usageTrackingService.getUserCredits(user.id, supabase);
+        console.error('[PDF Processing] Insufficient credits:', {
+          userId: user.id,
+          quota: userCredits?.scan_credits_quota,
+          used: userCredits?.scan_credits_used,
+          creditsNeeded
+        });
+
+        return NextResponse.json(
+          { error: 'Insufficient scan credits. Please upgrade your plan or contact support.' },
+          { status: 402 } // Payment Required
+        );
+      }
+    }
+
+    // If no API key provided (and user is NOT using own keys), use master API key
     if (!apiKey) {
       console.log('[PDF Processing] No user API key provided, using master API key');
       const masterKey = await adminApiKeysService.getDefaultApiKey();
@@ -77,6 +145,8 @@ export async function POST(request: NextRequest) {
       provider = masterKey.provider;
       model = masterKey.model;
       console.log(`[PDF Processing] Using master key: ${provider}`);
+    } else {
+      console.log(`[PDF Processing] Using user's personal API key: ${provider}`);
     }
 
     // Extract text from PDF
@@ -125,15 +195,17 @@ export async function POST(request: NextRequest) {
       })
     );
 
-    // Consume credits (atomic operation)
-    const creditsConsumed = await usageTrackingService.consumeCredits(user.id, creditsNeeded);
+    // Consume credits only if using master key system
+    if (!canUseOwnKeys && creditsNeeded > 0) {
+      const creditsConsumed = await usageTrackingService.consumeCredits(user.id, creditsNeeded, supabase);
 
-    if (!creditsConsumed) {
-      console.error('[PDF Processing] Failed to consume credits');
-      // Still return success but log the error
+      if (!creditsConsumed) {
+        console.error('[PDF Processing] Failed to consume credits');
+        // Still return success but log the error
+      }
     }
 
-    // Track usage for billing
+    // Track usage for billing (always track, but 0 credits for personal keys)
     const processingTime = Date.now() - startTime;
     await usageTrackingService.trackUsage({
       user_id: user.id,
@@ -151,7 +223,7 @@ export async function POST(request: NextRequest) {
       success: true,
       error_message: null,
       processing_time_ms: processingTime,
-    });
+    }, supabase);
 
     console.log(`[PDF Processing] Success! Credits used: ${creditsNeeded}, Processing time: ${processingTime}ms`);
 
@@ -165,32 +237,46 @@ export async function POST(request: NextRequest) {
 
     // Track failed usage (don't consume credits on failure)
     try {
-      const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const authHeader = request.headers.get('authorization');
+      if (authHeader) {
+        const errorSupabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          {
+            global: {
+              headers: {
+                Authorization: authHeader
+              }
+            }
+          }
+        );
 
-      if (user) {
-        const processingTime = Date.now() - startTime;
-        const formData = await request.formData();
-        const file = formData.get('file') as File;
-        const documentType = formData.get('documentType') as DocumentType;
+        const { data: { user } } = await errorSupabase.auth.getUser();
 
-        await usageTrackingService.trackUsage({
-          user_id: user.id,
-          organization_id: user.user_metadata?.organization_id || null,
-          operation_type: 'pdf_scan',
-          document_type: documentType,
-          file_size_bytes: file?.size || 0,
-          page_count: null,
-          credits_used: 0, // No credits consumed on failure
-          provider_used: null,
-          model_used: null,
-          tokens_input: null,
-          tokens_output: null,
-          cost_estimate: null,
-          success: false,
-          error_message: error instanceof Error ? error.message : 'Unknown error',
-          processing_time_ms: processingTime,
-        });
+        if (user) {
+          const processingTime = Date.now() - startTime;
+          const formData = await request.formData();
+          const file = formData.get('file') as File;
+          const documentType = formData.get('documentType') as DocumentType;
+
+          await usageTrackingService.trackUsage({
+            user_id: user.id,
+            organization_id: user.user_metadata?.organization_id || null,
+            operation_type: 'pdf_scan',
+            document_type: documentType,
+            file_size_bytes: file?.size || 0,
+            page_count: null,
+            credits_used: 0, // No credits consumed on failure
+            provider_used: null,
+            model_used: null,
+            tokens_input: null,
+            tokens_output: null,
+            cost_estimate: null,
+            success: false,
+            error_message: error instanceof Error ? error.message : 'Unknown error',
+            processing_time_ms: processingTime,
+          }, errorSupabase);
+        }
       }
     } catch (trackingError) {
       console.error('Failed to track error:', trackingError);

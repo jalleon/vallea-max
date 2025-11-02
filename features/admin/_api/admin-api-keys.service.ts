@@ -4,7 +4,8 @@
  * Uses service role to bypass RLS
  */
 
-import { createClient } from '@/lib/supabase/server';
+import { createServerClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 
 export interface AdminApiKey {
   id: string;
@@ -20,10 +21,23 @@ export interface AdminApiKey {
 
 class AdminApiKeysService {
   /**
+   * Create a service role client that can bypass RLS
+   * Use this in API routes where createServerClient doesn't work
+   */
+  private getServiceClient() {
+    // Use service role key to bypass RLS
+    return createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+  }
+
+  /**
    * Get active API key for a provider (highest priority first)
    */
   async getActiveKeyForProvider(provider: 'deepseek' | 'openai' | 'anthropic'): Promise<AdminApiKey | null> {
-    const supabase = await createClient();
+    // Use service client to bypass RLS
+    const supabase = this.getServiceClient();
 
     const { data, error } = await supabase
       .from('admin_api_keys')
@@ -46,7 +60,7 @@ class AdminApiKeysService {
    * Get all active API keys (ordered by priority)
    */
   async getAllActiveKeys(): Promise<AdminApiKey[]> {
-    const supabase = await createClient();
+    const supabase = this.getServiceClient();
 
     const { data, error } = await supabase
       .from('admin_api_keys')
@@ -89,7 +103,7 @@ class AdminApiKeysService {
    * (Admin-only operation - requires service role)
    */
   async upsertKey(key: Omit<AdminApiKey, 'id' | 'created_at' | 'updated_at'>): Promise<boolean> {
-    const supabase = await createClient();
+    const supabase = this.getServiceClient();
 
     const { error } = await supabase
       .from('admin_api_keys')
@@ -110,7 +124,7 @@ class AdminApiKeysService {
    * Deactivate an API key
    */
   async deactivateKey(id: string): Promise<boolean> {
-    const supabase = await createClient();
+    const supabase = this.getServiceClient();
 
     const { error } = await supabase
       .from('admin_api_keys')

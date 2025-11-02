@@ -51,6 +51,8 @@ import { Property } from '@/features/library/types/property.types';
 import { useSettings } from '@/contexts/SettingsContext';
 import AiApiKeysDialog from '@/features/user-settings/components/AiApiKeysDialog';
 import { useBackgroundImport } from '@/contexts/BackgroundImportContext';
+import { CreditBalanceIndicator } from '@/components/import/CreditBalanceIndicator';
+import { settingsService } from '@/features/user-settings/_api/settings.service';
 
 function ImportPageContent() {
   const t = useTranslations('import');
@@ -59,6 +61,8 @@ function ImportPageContent() {
   const router = useRouter();
   const { preferences } = useSettings();
   const { startSingleImport, savePendingSession, clearPendingSession, state: importState } = useBackgroundImport();
+
+  const [useOwnApiKeys, setUseOwnApiKeys] = useState(false);
 
   const [activeStep, setActiveStep] = useState(0);
   const [documentType, setDocumentType] = useState<DocumentType | null>(null);
@@ -130,6 +134,15 @@ function ImportPageContent() {
     return locale === 'fr' ? '1ère' : '1st';
   };
 
+  // Check if user has enabled personal API keys
+  useEffect(() => {
+    const checkApiKeyMode = async () => {
+      const canUse = await settingsService.canUseOwnApiKeys();
+      setUseOwnApiKeys(canUse);
+    };
+    checkApiKeyMode();
+  }, []);
+
   // Load all properties for merge selection
   useEffect(() => {
     const loadProperties = async () => {
@@ -186,23 +199,16 @@ function ImportPageContent() {
       return;
     }
 
-    // Determine which provider to use based on user priority
+    // Master API key system: use Valea's keys by default
+    // Only require personal API key if user has explicitly enabled personal keys
     const providerPriority = preferences?.providerPriority || ['deepseek', 'openai', 'anthropic'];
+    const provider = providerPriority[0] || 'deepseek'; // Use first priority provider
 
-    // Find first provider with an API key
-    const availableProvider = providerPriority.find(p => preferences?.aiApiKeys?.[p]);
-    const provider = availableProvider || 'deepseek'; // Fallback to deepseek if none configured
-
-    // Check if the selected provider has an API key
-    const apiKey = preferences?.aiApiKeys?.[provider];
-
-    if (!apiKey) {
-      setError(`Please configure your ${provider.toUpperCase()} API key in Settings (top right menu) before importing.`);
-      return;
-    }
-
-    // Get the selected model for the provider
+    // Check if user has enabled personal API keys
+    const apiKey = preferences?.aiApiKeys?.[provider] || '';
     const model = preferences?.aiModels?.[provider];
+
+    // Note: Empty apiKey is OK - server will use master keys if user hasn't enabled personal keys
 
     setProcessing(true);
     setError(null);
@@ -249,6 +255,9 @@ function ImportPageContent() {
 
       // Save session to context so user can navigate away and come back
       savePendingSession(result, 2);
+
+      // Notify credit indicator to refresh
+      window.dispatchEvent(new CustomEvent('credits-updated'));
     } catch (err) {
       setError(t('errors.extractionFailed'));
       console.error('Import error:', err);
@@ -460,40 +469,45 @@ function ImportPageContent() {
         </CardContent>
       </Card>
 
-      {/* AI Provider Info - Compact */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-          mb: 3,
-          py: 1,
-          px: 2,
-          borderRadius: '8px',
-          bgcolor: 'action.hover'
-        }}
-      >
-        <AutoAwesome sx={{ fontSize: '18px', color: 'primary.main' }} />
-        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-          {getProviderDisplayName(getActiveProvider())}
-        </Typography>
-        <Chip
-          label={getProviderModel(getActiveProvider()).split('-').pop()?.toUpperCase() || 'CHAT'}
-          size="small"
-          color="primary"
-          sx={{ height: 18, fontSize: '10px', fontWeight: 600 }}
-        />
-        <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-          {t('upload.aiProvider.priority', { priority: getPriorityText() })}
-        </Typography>
-        <IconButton
-          size="small"
-          onClick={() => setShowAiApiKeysDialog(true)}
-          sx={{ color: 'text.secondary', ml: 'auto' }}
+      {/* Credit Balance Indicator */}
+      <CreditBalanceIndicator />
+
+      {/* AI Provider Info - Only show when using personal API keys */}
+      {useOwnApiKeys && (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            mb: 3,
+            py: 1,
+            px: 2,
+            borderRadius: '8px',
+            bgcolor: 'action.hover'
+          }}
         >
-          <SettingsIcon sx={{ fontSize: '18px' }} />
-        </IconButton>
-      </Box>
+          <AutoAwesome sx={{ fontSize: '18px', color: 'primary.main' }} />
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            {getProviderDisplayName(getActiveProvider())}
+          </Typography>
+          <Chip
+            label={getProviderModel(getActiveProvider()).split('-').pop()?.toUpperCase() || 'CHAT'}
+            size="small"
+            color="primary"
+            sx={{ height: 18, fontSize: '10px', fontWeight: 600 }}
+          />
+          <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+            {t('upload.aiProvider.priority', { priority: getPriorityText() })}
+          </Typography>
+          <IconButton
+            size="small"
+            onClick={() => setShowAiApiKeysDialog(true)}
+            sx={{ color: 'text.secondary', ml: 'auto' }}
+          >
+            <SettingsIcon sx={{ fontSize: '18px' }} />
+          </IconButton>
+        </Box>
+      )}
 
       {/* Input Mode Toggle */}
       <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
@@ -709,13 +723,13 @@ function ImportPageContent() {
         )}
 
         {/* List of properties */}
-        <Box sx={{ mb: 3, maxHeight: 400, overflowY: 'auto' }}>
+        <Box sx={{ mb: 3, maxHeight: 600, overflowY: 'auto' }}>
           {properties.map((property, index) => (
             <Card key={index} sx={{ mb: 2, borderRadius: '12px', border: '1px solid', borderColor: 'divider' }}>
               <CardContent>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                   <Box sx={{ flex: 1 }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5, color: 'primary.main' }}>
                       {property.extractedData.address || t('review.unknownAddress')}
                     </Typography>
                     {property.extractedData.city && (
@@ -725,7 +739,7 @@ function ImportPageContent() {
                       </Typography>
                     )}
                     {property.extractedData.sellPrice && (
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="body2" sx={{ color: 'success.main', fontWeight: 600 }}>
                         ${property.extractedData.sellPrice.toLocaleString()}
                       </Typography>
                     )}
@@ -1046,8 +1060,8 @@ function ImportPageContent() {
                         setPropertySearchText('');
                       }}
                     >
-                      <CardContent sx={{ py: 1.5 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      <CardContent sx={{ py: 1, px: 2 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: 'primary.main' }}>
                           {prop.adresse}
                         </Typography>
                         {prop.ville && (

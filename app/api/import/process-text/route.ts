@@ -8,14 +8,14 @@ import { aiExtractionService } from '@/features/import/_api/ai-extraction.servic
 import { DocumentType } from '@/features/import/types/import.types';
 import { adminApiKeysService } from '@/features/admin/_api/admin-api-keys.service';
 import { usageTrackingService } from '@/features/admin/_api/usage-tracking.service';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from "@supabase/supabase-js";
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
 
   try {
     // Get authenticated user
-    const supabase = await createClient();
+    const supabase = createRouteClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
@@ -43,20 +43,40 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Text extracts count as 1 credit (small size)
-    const creditsNeeded = 1;
+    // Check if user has enabled their own API keys
+    const { data: userData } = await supabase
+      .from('users')
+      .select('can_use_own_api_keys')
+      .eq('id', user.id)
+      .single();
 
-    // Check if user has enough credits
-    const hasCredits = await usageTrackingService.hasEnoughCredits(user.id, creditsNeeded);
+    const canUseOwnKeys = userData?.can_use_own_api_keys || false;
 
-    if (!hasCredits) {
+    // If user wants to use their own keys, they MUST provide an API key
+    if (canUseOwnKeys && !apiKey) {
       return NextResponse.json(
-        { error: 'Insufficient scan credits. Please upgrade your plan or contact support.' },
-        { status: 402 }
+        { error: 'Please configure your API keys in Settings. You have enabled personal API keys but none are configured.' },
+        { status: 400 }
       );
     }
 
-    // If no API key provided, use master API key
+    // Text extracts count as 1 credit (only if using master keys)
+    const creditsNeeded = canUseOwnKeys ? 0 : 1;
+
+    // Only check/consume credits if using master key system
+    if (!canUseOwnKeys) {
+      // Check if user has enough credits
+      const hasCredits = await usageTrackingService.hasEnoughCredits(user.id, creditsNeeded);
+
+      if (!hasCredits) {
+        return NextResponse.json(
+          { error: 'Insufficient scan credits. Please upgrade your plan or contact support.' },
+          { status: 402 }
+        );
+      }
+    }
+
+    // If no API key provided (and user is NOT using own keys), use master API key
     if (!apiKey) {
       console.log('[Text Processing] No user API key provided, using master API key');
       const masterKey = await adminApiKeysService.getDefaultApiKey();
@@ -72,6 +92,8 @@ export async function POST(request: NextRequest) {
       provider = masterKey.provider;
       model = masterKey.model;
       console.log(`[Text Processing] Using master key: ${provider}`);
+    } else {
+      console.log(`[Text Processing] Using user's personal API key: ${provider}`);
     }
 
     console.log(`[Text Processing] Processing ${text.length} characters of type ${documentType}`);
@@ -116,14 +138,16 @@ export async function POST(request: NextRequest) {
       })
     );
 
-    // Consume credits
-    const creditsConsumed = await usageTrackingService.consumeCredits(user.id, creditsNeeded);
+    // Consume credits only if using master key system
+    if (!canUseOwnKeys && creditsNeeded > 0) {
+      const creditsConsumed = await usageTrackingService.consumeCredits(user.id, creditsNeeded);
 
-    if (!creditsConsumed) {
-      console.error('[Text Processing] Failed to consume credits');
+      if (!creditsConsumed) {
+        console.error('[Text Processing] Failed to consume credits');
+      }
     }
 
-    // Track usage
+    // Track usage (always track, but 0 credits for personal keys)
     const processingTime = Date.now() - startTime;
     await usageTrackingService.trackUsage({
       user_id: user.id,
@@ -155,7 +179,7 @@ export async function POST(request: NextRequest) {
 
     // Track failed usage
     try {
-      const supabase = await createClient();
+      const supabase = createRouteClient();
       const { data: { user } } = await supabase.auth.getUser();
 
       if (user) {

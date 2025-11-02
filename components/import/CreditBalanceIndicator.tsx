@@ -18,6 +18,17 @@ export function CreditBalanceIndicator() {
 
   useEffect(() => {
     loadCredits();
+
+    // Listen for credit updates (after imports complete)
+    const handleCreditUpdate = () => {
+      loadCredits();
+    };
+
+    window.addEventListener('credits-updated', handleCreditUpdate);
+
+    return () => {
+      window.removeEventListener('credits-updated', handleCreditUpdate);
+    };
   }, []);
 
   const loadCredits = async () => {
@@ -28,9 +39,9 @@ export function CreditBalanceIndicator() {
       if (!user) return;
 
       const { data, error } = await supabase
-        .from('user_profiles')
+        .from('users')
         .select('scan_credits_quota, scan_credits_used, scan_credits_reset_at')
-        .eq('user_id', user.id)
+        .eq('id', user.id)
         .single();
 
       if (error || !data) {

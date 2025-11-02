@@ -77,16 +77,16 @@ CREATE POLICY "Service role can manage all usage"
   WITH CHECK (true);
 
 -- =====================================================
--- 3. UPDATE USER PROFILES FOR CREDIT SYSTEM
+-- 3. UPDATE USERS TABLE FOR CREDIT SYSTEM
 -- =====================================================
-ALTER TABLE public.user_profiles
+ALTER TABLE public.users
   ADD COLUMN IF NOT EXISTS can_use_own_api_keys BOOLEAN DEFAULT false,
   ADD COLUMN IF NOT EXISTS scan_credits_quota INTEGER DEFAULT 20,
   ADD COLUMN IF NOT EXISTS scan_credits_used INTEGER DEFAULT 0,
   ADD COLUMN IF NOT EXISTS scan_credits_reset_at TIMESTAMPTZ DEFAULT (now() + INTERVAL '1 month'),
   ADD COLUMN IF NOT EXISTS api_key_secret_enabled BOOLEAN DEFAULT false;
 
-CREATE INDEX IF NOT EXISTS idx_user_profiles_credits ON public.user_profiles(scan_credits_used, scan_credits_quota);
+CREATE INDEX IF NOT EXISTS idx_users_credits ON public.users(scan_credits_used, scan_credits_quota);
 
 -- =====================================================
 -- 4. FUNCTION TO RESET MONTHLY CREDITS
@@ -97,7 +97,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
-  UPDATE public.user_profiles
+  UPDATE public.users
   SET
     scan_credits_used = 0,
     scan_credits_reset_at = now() + INTERVAL '1 month'
@@ -122,13 +122,13 @@ DECLARE
 BEGIN
   SELECT scan_credits_used, scan_credits_quota
   INTO v_current_used, v_quota
-  FROM public.user_profiles
-  WHERE user_id = p_user_id;
+  FROM public.users
+  WHERE id = p_user_id;
 
   IF v_quota IS NULL OR (v_current_used + p_credits_needed) <= v_quota THEN
-    UPDATE public.user_profiles
+    UPDATE public.users
     SET scan_credits_used = scan_credits_used + p_credits_needed
-    WHERE user_id = p_user_id;
+    WHERE id = p_user_id;
 
     RETURN true;
   ELSE
@@ -142,5 +142,5 @@ $$;
 -- =====================================================
 INSERT INTO public.admin_api_keys (provider, api_key, model, is_active, priority, notes)
 VALUES
-  ('deepseek', 'YOUR_DEEPSEEK_API_KEY_HERE', 'deepseek-chat', true, 100, 'Primary DeepSeek key')
+  ('deepseek', 'sk-cbb5f7b26914440b992e68b0f61f5b48', 'deepseek-chat', true, 100, 'Primary DeepSeek key')
 ON CONFLICT DO NOTHING;

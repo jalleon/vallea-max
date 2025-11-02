@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import {
@@ -47,6 +47,8 @@ import { Property } from '@/features/library/types/property.types';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useBackgroundImport } from '@/contexts/BackgroundImportContext';
 import AiApiKeysDialog from '@/features/user-settings/components/AiApiKeysDialog';
+import { CreditBalanceIndicator } from '@/components/import/CreditBalanceIndicator';
+import { settingsService } from '@/features/user-settings/_api/settings.service';
 
 interface BatchFile {
   file: File;
@@ -62,6 +64,7 @@ function BatchImportPageContent() {
   const { preferences } = useSettings();
   const { state: importState, startBatchImport } = useBackgroundImport();
 
+  const [useOwnApiKeys, setUseOwnApiKeys] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<BatchFile[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [mergeMode, setMergeMode] = useState<'new' | 'existing'>('new');
@@ -104,6 +107,15 @@ function BatchImportPageContent() {
   const getPriorityText = () => {
     return locale === 'fr' ? '1ère' : '1st';
   };
+
+  // Check if user has enabled personal API keys
+  useEffect(() => {
+    const checkApiKeyMode = async () => {
+      const canUse = await settingsService.canUseOwnApiKeys();
+      setUseOwnApiKeys(canUse);
+    };
+    checkApiKeyMode();
+  }, []);
 
   // Load all properties for merge selection
   const loadProperties = async () => {
@@ -165,18 +177,14 @@ function BatchImportPageContent() {
       return;
     }
 
-    // Check for API key
+    // Master API key system: use Valea's keys by default
+    // Only require personal API key if user has explicitly enabled personal keys
     const providerPriority = preferences?.providerPriority || ['deepseek', 'openai', 'anthropic'];
-    const availableProvider = providerPriority.find(p => preferences?.aiApiKeys?.[p]);
-    const provider = availableProvider || 'deepseek';
-    const apiKey = preferences?.aiApiKeys?.[provider];
-
-    if (!apiKey) {
-      setError(`Please configure your ${provider.toUpperCase()} API key in Settings (top right menu) before importing.`);
-      return;
-    }
-
+    const provider = providerPriority[0] || 'deepseek'; // Use first priority provider
+    const apiKey = preferences?.aiApiKeys?.[provider] || '';
     const model = preferences?.aiModels?.[provider];
+
+    // Note: Empty apiKey is OK - server will use master keys if user hasn't enabled personal keys
 
     setError(null);
 
@@ -445,40 +453,45 @@ function BatchImportPageContent() {
         </Box>
       </Box>
 
-      {/* AI Provider Info */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-          mb: 3,
-          py: 1,
-          px: 2,
-          borderRadius: '8px',
-          bgcolor: 'action.hover'
-        }}
-      >
-        <AutoAwesome sx={{ fontSize: '18px', color: 'primary.main' }} />
-        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-          {getProviderDisplayName(getActiveProvider())}
-        </Typography>
-        <Chip
-          label={getProviderModel(getActiveProvider()).split('-').pop()?.toUpperCase() || 'CHAT'}
-          size="small"
-          color="primary"
-          sx={{ height: 18, fontSize: '10px', fontWeight: 600 }}
-        />
-        <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-          {tImport('upload.aiProvider.priority', { priority: getPriorityText() })}
-        </Typography>
-        <IconButton
-          size="small"
-          onClick={() => setShowAiApiKeysDialog(true)}
-          sx={{ color: 'text.secondary', ml: 'auto' }}
+      {/* Credit Balance Indicator */}
+      <CreditBalanceIndicator />
+
+      {/* AI Provider Info - Only show when using personal API keys */}
+      {useOwnApiKeys && (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            mb: 3,
+            py: 1,
+            px: 2,
+            borderRadius: '8px',
+            bgcolor: 'action.hover'
+          }}
         >
-          <SettingsIcon sx={{ fontSize: '18px' }} />
-        </IconButton>
-      </Box>
+          <AutoAwesome sx={{ fontSize: '18px', color: 'primary.main' }} />
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            {getProviderDisplayName(getActiveProvider())}
+          </Typography>
+          <Chip
+            label={getProviderModel(getActiveProvider()).split('-').pop()?.toUpperCase() || 'CHAT'}
+            size="small"
+            color="primary"
+            sx={{ height: 18, fontSize: '10px', fontWeight: 600 }}
+          />
+          <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+            {tImport('upload.aiProvider.priority', { priority: getPriorityText() })}
+          </Typography>
+          <IconButton
+            size="small"
+            onClick={() => setShowAiApiKeysDialog(true)}
+            sx={{ color: 'text.secondary', ml: 'auto' }}
+          >
+            <SettingsIcon sx={{ fontSize: '18px' }} />
+          </IconButton>
+        </Box>
+      )}
 
       {error && (
         <Alert severity="error" sx={{ borderRadius: '12px', mb: 3 }}>

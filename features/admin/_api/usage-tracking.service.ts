@@ -3,7 +3,7 @@
  * Tracks PDF scans and manages user credits for billing
  */
 
-import { createClient } from '@/lib/supabase/server';
+import { createServerClient } from '@/lib/supabase/server';
 
 export interface UsageRecord {
   id: string;
@@ -55,13 +55,13 @@ class UsageTrackingService {
   /**
    * Get user's credit balance
    */
-  async getUserCredits(userId: string): Promise<UserCredits | null> {
-    const supabase = await createClient();
+  async getUserCredits(userId: string, supabaseClient?: any): Promise<UserCredits | null> {
+    const supabase = supabaseClient || createServerClient();
 
     const { data, error } = await supabase
-      .from('user_profiles')
+      .from('users')
       .select('scan_credits_quota, scan_credits_used, scan_credits_reset_at, can_use_own_api_keys')
-      .eq('user_id', userId)
+      .eq('id', userId)
       .single();
 
     if (error || !data) {
@@ -75,13 +75,24 @@ class UsageTrackingService {
   /**
    * Check if user has enough credits
    */
-  async hasEnoughCredits(userId: string, creditsNeeded: number): Promise<boolean> {
-    const credits = await this.getUserCredits(userId);
+  async hasEnoughCredits(userId: string, creditsNeeded: number, supabaseClient?: any): Promise<boolean> {
+    const credits = await this.getUserCredits(userId, supabaseClient);
 
-    if (!credits) return false;
+    if (!credits) {
+      console.error('No credits data returned for user:', userId);
+      return false;
+    }
 
     // Unlimited quota
     if (credits.scan_credits_quota === null) return true;
+
+    console.log('Credits check:', {
+      userId,
+      quota: credits.scan_credits_quota,
+      used: credits.scan_credits_used,
+      needed: creditsNeeded,
+      hasEnough: (credits.scan_credits_used + creditsNeeded) <= credits.scan_credits_quota
+    });
 
     // Check if user has enough credits
     return (credits.scan_credits_used + creditsNeeded) <= credits.scan_credits_quota;
@@ -90,8 +101,8 @@ class UsageTrackingService {
   /**
    * Consume credits (atomic operation via database function)
    */
-  async consumeCredits(userId: string, creditsNeeded: number): Promise<boolean> {
-    const supabase = await createClient();
+  async consumeCredits(userId: string, creditsNeeded: number, supabaseClient?: any): Promise<boolean> {
+    const supabase = supabaseClient || createServerClient();
 
     const { data, error } = await supabase.rpc('consume_scan_credits', {
       p_user_id: userId,
@@ -109,8 +120,8 @@ class UsageTrackingService {
   /**
    * Track a PDF scan operation
    */
-  async trackUsage(record: Omit<UsageRecord, 'id' | 'created_at'>): Promise<boolean> {
-    const supabase = await createClient();
+  async trackUsage(record: Omit<UsageRecord, 'id' | 'created_at'>, supabaseClient?: any): Promise<boolean> {
+    const supabase = supabaseClient || createServerClient();
 
     const { error } = await supabase
       .from('usage_tracking')
@@ -135,7 +146,7 @@ class UsageTrackingService {
     totalCredits: number;
     byDocumentType: Record<string, number>;
   }> {
-    const supabase = await createClient();
+    const supabase = createServerClient();
 
     let query = supabase
       .from('usage_tracking')
@@ -180,7 +191,7 @@ class UsageTrackingService {
    * Get all usage for billing (admin only)
    */
   async getAllUsage(startDate?: Date, endDate?: Date): Promise<UsageRecord[]> {
-    const supabase = await createClient();
+    const supabase = createServerClient();
 
     let query = supabase
       .from('usage_tracking')

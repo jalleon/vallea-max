@@ -32,10 +32,14 @@ import {
   Info,
   Star,
   EmojiEvents,
+  ToggleOn,
+  ToggleOff,
 } from '@mui/icons-material';
+import { Switch, FormControlLabel } from '@mui/material';
 import { useTranslations } from 'next-intl';
 import { useSettings } from '@/contexts/SettingsContext';
 import { AI_MODELS, AI_MODELS_BY_PROVIDER, DEFAULT_MODELS, API_KEY_LINKS } from '../constants/ai-models.constants';
+import { settingsService } from '../_api/settings.service';
 
 interface AiApiKeysDialogProps {
   open: boolean;
@@ -71,6 +75,7 @@ export default function AiApiKeysDialog({ open, onClose }: AiApiKeysDialogProps)
   const [saving, setSaving] = useState(false);
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [providerPriority, setProviderPriority] = useState<('deepseek' | 'openai' | 'anthropic')[]>(['deepseek', 'openai', 'anthropic']);
+  const [useOwnApiKeys, setUseOwnApiKeys] = useState(false);
 
   useEffect(() => {
     if (preferences?.aiApiKeys) {
@@ -88,12 +93,21 @@ export default function AiApiKeysDialog({ open, onClose }: AiApiKeysDialogProps)
     }
   }, [preferences]);
 
+  // Load can_use_own_api_keys state when dialog opens
+  useEffect(() => {
+    if (open && secretCodeUnlocked) {
+      settingsService.canUseOwnApiKeys().then(setUseOwnApiKeys);
+    }
+  }, [open, secretCodeUnlocked]);
+
   const handleSave = async () => {
     setSaving(true);
     setAlert(null);
 
     try {
       console.log('Attempting to save AI API keys...');
+
+      // Save API keys and models
       const success = await updateAiApiKeys(
         {
           deepseek: deepseekKey || null,
@@ -108,10 +122,13 @@ export default function AiApiKeysDialog({ open, onClose }: AiApiKeysDialogProps)
         providerPriority
       );
 
+      // Save toggle state
+      const toggleSuccess = await settingsService.toggleOwnApiKeys(useOwnApiKeys);
+
       setSaving(false);
 
-      if (success) {
-        console.log('AI API keys saved successfully');
+      if (success && toggleSuccess) {
+        console.log('AI API keys and toggle saved successfully');
         setAlert({ type: 'success', message: t('saved') });
         setTimeout(() => {
           onClose();
@@ -493,6 +510,41 @@ export default function AiApiKeysDialog({ open, onClose }: AiApiKeysDialogProps)
                   {alert.message}
                 </Alert>
               )}
+
+              {/* Toggle to enable/disable personal API keys */}
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  mb: 3,
+                  border: '2px solid',
+                  borderColor: useOwnApiKeys ? 'primary.main' : 'divider',
+                  borderRadius: '12px',
+                  bgcolor: useOwnApiKeys ? 'primary.50' : 'background.paper',
+                }}
+              >
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={useOwnApiKeys}
+                      onChange={(e) => setUseOwnApiKeys(e.target.checked)}
+                      color="primary"
+                    />
+                  }
+                  label={
+                    <Box>
+                      <Typography variant="subtitle2" fontWeight={600}>
+                        Use my own API keys
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {useOwnApiKeys
+                          ? 'Your personal API keys will be used (no credits consumed)'
+                          : 'Valea master API keys will be used (credits consumed)'}
+                      </Typography>
+                    </Box>
+                  }
+                />
+              </Paper>
 
               {renderProviderSection('deepseek', t('deepseek'), deepseekKey, setDeepseekKey, deepseekModel, setDeepseekModel)}
               {renderProviderSection('openai', t('openai'), openaiKey, setOpenaiKey, openaiModel, setOpenaiModel)}

@@ -209,6 +209,11 @@ export function BackgroundImportProvider({ children }: { children: React.ReactNo
           currentFileName: null,
         }));
 
+        // Notify credit indicator to refresh
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('credits-updated'));
+        }
+
         // Show browser notification if supported
         if ('Notification' in window && Notification.permission === 'granted') {
           new Notification('Import Completed', {
@@ -273,6 +278,11 @@ export function BackgroundImportProvider({ children }: { children: React.ReactNo
           completedFiles: [file.name],
           isProcessing: false,
         }));
+
+        // Notify credit indicator to refresh
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('credits-updated'));
+        }
 
         return result;
       } catch (error) {
