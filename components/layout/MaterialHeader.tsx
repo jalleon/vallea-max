@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   AppBar,
   Toolbar,
@@ -44,6 +44,7 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null)
   const [apiKeysDialogOpen, setApiKeysDialogOpen] = useState(false)
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false) // Hidden by default
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
@@ -91,6 +92,19 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
     handleSettingsClose()
     handleMenuClose()
   }
+
+  // Secret keyboard shortcut to show settings menu: Ctrl+Shift+S
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.shiftKey && event.key === 'S') {
+        event.preventDefault()
+        setShowSettingsMenu(prev => !prev)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   // Get user initials for avatar
   const userInitials = user?.user_metadata?.full_name
@@ -160,13 +174,15 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
               </ListItemIcon>
               <ListItemText>Mon profil</ListItemText>
             </MenuItem>
-            <MenuItem onClick={handleSettingsOpen}>
-              <ListItemIcon>
-                <Settings fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>Paramètres</ListItemText>
-              <ChevronRight fontSize="small" />
-            </MenuItem>
+            {showSettingsMenu && (
+              <MenuItem onClick={handleSettingsOpen}>
+                <ListItemIcon>
+                  <Settings fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Paramètres</ListItemText>
+                <ChevronRight fontSize="small" />
+              </MenuItem>
+            )}
             <Divider />
             <MenuItem onClick={handleLogout}>
               <ListItemIcon>

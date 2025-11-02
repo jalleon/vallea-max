@@ -47,6 +47,12 @@ export default function AiApiKeysDialog({ open, onClose }: AiApiKeysDialogProps)
   const tCommon = useTranslations('common');
   const { preferences, updateAiApiKeys } = useSettings();
 
+  // Secret code protection
+  const [secretCodeUnlocked, setSecretCodeUnlocked] = useState(false);
+  const [secretCodeInput, setSecretCodeInput] = useState('');
+  const [secretCodeError, setSecretCodeError] = useState(false);
+  const SECRET_CODE = process.env.NEXT_PUBLIC_API_KEY_SECRET || 'valea2025'; // Default secret
+
   const [deepseekKey, setDeepseekKey] = useState('');
   const [openaiKey, setOpenaiKey] = useState('');
   const [anthropicKey, setAnthropicKey] = useState('');
@@ -118,6 +124,16 @@ export default function AiApiKeysDialog({ open, onClose }: AiApiKeysDialogProps)
       console.error('Error saving AI API keys:', error);
       setSaving(false);
       setAlert({ type: 'error', message: `${t('error')}: ${error instanceof Error ? error.message : 'Unknown error'}` });
+    }
+  };
+
+  const handleSecretCodeSubmit = () => {
+    if (secretCodeInput === SECRET_CODE) {
+      setSecretCodeUnlocked(true);
+      setSecretCodeError(false);
+      setSecretCodeInput('');
+    } else {
+      setSecretCodeError(true);
     }
   };
 
@@ -427,31 +443,76 @@ export default function AiApiKeysDialog({ open, onClose }: AiApiKeysDialogProps)
           </Box>
         </DialogTitle>
         <DialogContent>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            {t('description')}
-          </Typography>
+          {!secretCodeUnlocked ? (
+            // Show secret code prompt
+            <Box sx={{ py: 4, textAlign: 'center' }}>
+              <Key sx={{ fontSize: 64, color: 'primary.main', mb: 2 }} />
+              <Typography variant="h6" sx={{ mb: 2 }}>
+                Advanced API Configuration
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                This feature is for advanced users only. Enter the secret code to configure your own API keys.
+              </Typography>
 
-          {alert && (
-            <Alert severity={alert.type} sx={{ mb: 2 }}>
-              {alert.message}
-            </Alert>
+              <TextField
+                fullWidth
+                type="password"
+                label="Secret Code"
+                value={secretCodeInput}
+                onChange={(e) => {
+                  setSecretCodeInput(e.target.value);
+                  setSecretCodeError(false);
+                }}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSecretCodeSubmit();
+                  }
+                }}
+                error={secretCodeError}
+                helperText={secretCodeError ? 'Incorrect secret code' : ''}
+                sx={{ maxWidth: 400, mx: 'auto' }}
+              />
+
+              <Button
+                variant="contained"
+                onClick={handleSecretCodeSubmit}
+                sx={{ mt: 2, borderRadius: '12px', textTransform: 'none' }}
+              >
+                Unlock
+              </Button>
+            </Box>
+          ) : (
+            // Show API key configuration
+            <>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                {t('description')}
+              </Typography>
+
+              {alert && (
+                <Alert severity={alert.type} sx={{ mb: 2 }}>
+                  {alert.message}
+                </Alert>
+              )}
+
+              {renderProviderSection('deepseek', t('deepseek'), deepseekKey, setDeepseekKey, deepseekModel, setDeepseekModel)}
+              {renderProviderSection('openai', t('openai'), openaiKey, setOpenaiKey, openaiModel, setOpenaiModel)}
+              {renderProviderSection('anthropic', t('anthropic'), anthropicKey, setAnthropicKey, anthropicModel, setAnthropicModel)}
+            </>
           )}
-
-          {renderProviderSection('deepseek', t('deepseek'), deepseekKey, setDeepseekKey, deepseekModel, setDeepseekModel)}
-          {renderProviderSection('openai', t('openai'), openaiKey, setOpenaiKey, openaiModel, setOpenaiModel)}
-          {renderProviderSection('anthropic', t('anthropic'), anthropicKey, setAnthropicKey, anthropicModel, setAnthropicModel)}
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={onClose} disabled={saving}>
             {tCommon('cancel')}
           </Button>
-          <Button
-            onClick={handleSave}
-            variant="contained"
-            disabled={saving}
-          >
-            {saving ? tCommon('loading') : tCommon('save')}
-          </Button>
+          {secretCodeUnlocked && (
+            <Button
+              onClick={handleSave}
+              variant="contained"
+              disabled={saving}
+            >
+              {saving ? tCommon('loading') : tCommon('save')}
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
 
