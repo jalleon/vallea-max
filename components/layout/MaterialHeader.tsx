@@ -45,6 +45,7 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
   const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null)
   const [apiKeysDialogOpen, setApiKeysDialogOpen] = useState(false)
   const [showSettingsMenu, setShowSettingsMenu] = useState(false) // Hidden by default
+  const [languageExpanded, setLanguageExpanded] = useState(false) // Language submenu collapsed by default
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
@@ -198,25 +199,35 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
             transformOrigin={{ horizontal: 'left', vertical: 'top' }}
             anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
           >
-            <MenuItem disabled>
+            <MenuItem onClick={() => setLanguageExpanded(!languageExpanded)}>
               <ListItemIcon>
                 <Language fontSize="small" />
               </ListItemIcon>
               <ListItemText primary="Langue / Language" />
+              <ChevronRight
+                fontSize="small"
+                sx={{
+                  transform: languageExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.2s'
+                }}
+              />
             </MenuItem>
-            <Divider />
-            <MenuItem
-              onClick={() => handleLanguageChange('fr')}
-              selected={locale === 'fr'}
-            >
-              <ListItemText inset>Français</ListItemText>
-            </MenuItem>
-            <MenuItem
-              onClick={() => handleLanguageChange('en')}
-              selected={locale === 'en'}
-            >
-              <ListItemText inset>English</ListItemText>
-            </MenuItem>
+            {languageExpanded && (
+              <>
+                <MenuItem
+                  onClick={() => handleLanguageChange('fr')}
+                  selected={locale === 'fr'}
+                >
+                  <ListItemText inset>Français</ListItemText>
+                </MenuItem>
+                <MenuItem
+                  onClick={() => handleLanguageChange('en')}
+                  selected={locale === 'en'}
+                >
+                  <ListItemText inset>English</ListItemText>
+                </MenuItem>
+              </>
+            )}
             {showSettingsMenu && (
               <>
                 <Divider />
