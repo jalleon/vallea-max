@@ -174,15 +174,13 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
               </ListItemIcon>
               <ListItemText>Mon profil</ListItemText>
             </MenuItem>
-            {showSettingsMenu && (
-              <MenuItem onClick={handleSettingsOpen}>
-                <ListItemIcon>
-                  <Settings fontSize="small" />
-                </ListItemIcon>
-                <ListItemText>Paramètres</ListItemText>
-                <ChevronRight fontSize="small" />
-              </MenuItem>
-            )}
+            <MenuItem onClick={handleSettingsOpen}>
+              <ListItemIcon>
+                <Settings fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Paramètres</ListItemText>
+              <ChevronRight fontSize="small" />
+            </MenuItem>
             <Divider />
             <MenuItem onClick={handleLogout}>
               <ListItemIcon>
@@ -219,13 +217,17 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
             >
               <ListItemText inset>English</ListItemText>
             </MenuItem>
-            <Divider />
-            <MenuItem onClick={handleOpenApiKeysDialog}>
-              <ListItemIcon>
-                <Key fontSize="small" />
-              </ListItemIcon>
-              <ListItemText primary={t('menu.aiApiKeys')} />
-            </MenuItem>
+            {showSettingsMenu && (
+              <>
+                <Divider />
+                <MenuItem onClick={handleOpenApiKeysDialog}>
+                  <ListItemIcon>
+                    <Key fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText primary={t('menu.aiApiKeys')} />
+                </MenuItem>
+              </>
+            )}
           </Menu>
         </Box>
       </Toolbar>
