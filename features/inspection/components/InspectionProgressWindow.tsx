@@ -872,12 +872,12 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
                 <Card
                   sx={{
                     borderRadius: '16px',
-                    cursor: 'pointer',
                     position: 'relative',
                     overflow: 'visible',
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    border: `2px solid ${isExpanded ? category.color : 'transparent'}`,
-                    boxShadow: isExpanded ? `0 8px 24px ${category.color}40` : 1,
+                    border: `2px solid ${isExpanded ? category.color : isCompleted ? category.color : 'transparent'}`,
+                    bgcolor: isCompleted ? `${category.color}15` : 'white',
+                    boxShadow: isExpanded ? `0 8px 24px ${category.color}40` : isCompleted ? `0 4px 12px ${category.color}25` : 1,
                     '&:hover': {
                       transform: 'translateY(-4px)',
                       boxShadow: `0 12px 32px ${category.color}30`
@@ -894,10 +894,7 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
                     }}
                   />
 
-                  <CardContent
-                    sx={{ p: 2 }}
-                    onClick={() => toggleCategory(category.id)}
-                  >
+                  <CardContent sx={{ p: 2, pb: 1 }}>
                     {/* Icon box + Completion badge */}
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
                       <Box
@@ -936,6 +933,46 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
                     <Typography variant="caption" color="text.secondary">
                       {category.weight > 0 ? `${category.weight * 100}% du total` : 'Optionnel'}
                     </Typography>
+
+                    {/* Action Buttons */}
+                    <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
+                      <Button
+                        variant="contained"
+                        size="small"
+                        fullWidth
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          router.push(`/${locale}/inspection/${property.id}/${category.id}`)
+                        }}
+                        sx={{
+                          bgcolor: category.color,
+                          '&:hover': { bgcolor: category.color, filter: 'brightness(0.9)' },
+                          borderRadius: '8px',
+                          textTransform: 'none',
+                          fontWeight: 600,
+                          py: 1
+                        }}
+                      >
+                        {isCompleted ? 'Modifier' : 'Commencer'}
+                      </Button>
+                      {renderCategoryDetails(category.id) && (
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toggleCategory(category.id)
+                          }}
+                          sx={{
+                            color: category.color,
+                            bgcolor: `${category.color}15`,
+                            '&:hover': { bgcolor: `${category.color}25` },
+                            borderRadius: '8px'
+                          }}
+                        >
+                          {isExpanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                        </IconButton>
+                      )}
+                    </Box>
                   </CardContent>
                 </Card>
 
