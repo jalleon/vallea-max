@@ -55,6 +55,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { propertiesSupabaseService } from '@/features/library/_api/properties-supabase.service'
 import { Property } from '@/features/library/types/property.types'
 import { MaterialDashboardLayout } from '@/components/layout/MaterialDashboardLayout'
+import { InspectionFloatingNav } from '@/features/inspection/components/InspectionFloatingNav'
 
 const getServicesItems = (t: any) => [
   { id: 'aqueduc', label: t('inspection.diversOptions.servicesItems.aqueduc'), icon: WaterDrop },
@@ -363,7 +364,7 @@ export default function DiversPage() {
 
   return (
     <MaterialDashboardLayout>
-      <Box sx={{ maxWidth: 1400, mx: 'auto', p: 3 }}>
+      <Box sx={{ maxWidth: 1400, mx: 'auto', p: 3, pb: { xs: 12, md: 3 } }}>
         {/* Breadcrumbs */}
         <Breadcrumbs separator={<NavigateNext fontSize="small" />} sx={{ mb: 3 }}>
           <Link
@@ -754,6 +755,9 @@ export default function DiversPage() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Floating Navigation */}
+      <InspectionFloatingNav inspectionId={propertyId} currentCategory="divers" />
     </MaterialDashboardLayout>
   )
 }

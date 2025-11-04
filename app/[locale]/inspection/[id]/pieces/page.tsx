@@ -52,6 +52,7 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import { propertiesSupabaseService } from '@/features/library/_api/properties-supabase.service'
 import { Property, InspectionPieces, FloorInspection } from '@/features/library/types/property.types'
 import { MaterialDashboardLayout } from '@/components/layout/MaterialDashboardLayout'
+import { InspectionFloatingNav } from '@/features/inspection/components/InspectionFloatingNav'
 import { FLOOR_OPTIONS, ROOM_CONFIG } from '@/features/inspection/constants/room.constants'
 
 const BASE_ROOM_TYPES = ['cuisine', 'salle_a_manger', 'salon', 'chambre', 'bureau', 'salle_sejour', 'salle_bain', 'salle_eau']
@@ -406,7 +407,7 @@ export default function PiecesPage() {
 
   return (
     <MaterialDashboardLayout>
-      <Box>
+      <Box sx={{ pb: { xs: 12, md: 3 } }}>
         {/* Breadcrumbs */}
         <Breadcrumbs separator={<NavigateNext fontSize="small" />} sx={{ mb: 2 }}>
           <Link
@@ -717,6 +718,9 @@ export default function PiecesPage() {
           </DialogActions>
         </Dialog>
       </Box>
+
+      {/* Floating Navigation */}
+      <InspectionFloatingNav inspectionId={propertyId} currentCategory="pieces" />
     </MaterialDashboardLayout>
   )
 }

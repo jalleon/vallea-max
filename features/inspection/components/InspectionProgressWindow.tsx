@@ -11,7 +11,11 @@ import {
   AccordionDetails,
   Chip,
   IconButton,
-  Collapse
+  Collapse,
+  CircularProgress,
+  Card,
+  CardContent,
+  Grid
 } from '@mui/material'
 import {
   ExpandMore,
@@ -35,6 +39,7 @@ import {
   MeetingRoom
 } from '@mui/icons-material'
 import { useTranslations } from 'next-intl'
+import { useRouter, useParams } from 'next/navigation'
 import { Property } from '@/features/library/types/property.types'
 import { propertiesSupabaseService } from '@/features/library/_api/properties-supabase.service'
 
@@ -90,6 +95,9 @@ const CATEGORIES = [
 
 export function InspectionProgressWindow({ property, onPropertyUpdate }: InspectionProgressWindowProps) {
   const t = useTranslations()
+  const router = useRouter()
+  const params = useParams()
+  const locale = params.locale as string
   const [expandedCategories, setExpandedCategories] = useState<string[]>([])
 
   const toggleCategory = (categoryId: string) => {
@@ -222,6 +230,13 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
 
   const overallProgress = calculateOverallProgress()
   const roomCounts = calculateRoomCounts()
+
+  // Helper to count completed categories
+  const getCompletedCategories = (): number => {
+    return CATEGORIES.filter(cat => isCategoryCompleted(cat.id)).length
+  }
+
+  const completedCount = getCompletedCategories()
 
   const getMaterialIcon = (fieldName: string) => {
     switch (fieldName.toLowerCase()) {
@@ -727,137 +742,256 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
   }
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        border: '1px solid',
-        borderColor: 'divider',
-        mb: 3,
-        overflow: 'hidden'
-      }}
-    >
-      {/* Header */}
-      <Box
-        sx={{
-          p: 2,
-          bgcolor: '#f5f5f5'
-        }}
-      >
-        {/* Title and Progress */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-          <Assessment sx={{ fontSize: 32, color: 'primary.main' }} />
-          <Typography variant="h4" fontWeight={700}>
-            {t('inspection.progress.title')}
-          </Typography>
-          <Typography variant="h4" fontWeight={700} color="primary">
-            {overallProgress}%
-          </Typography>
-        </Box>
+    <Paper elevation={0} sx={{ borderRadius: '16px', overflow: 'hidden', mb: 3, border: '1px solid', borderColor: 'divider' }}>
+      {/* Enhanced Gradient Header */}
+      <Box sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', p: 3, color: 'white' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: { xs: 'wrap', md: 'nowrap' } }}>
+          {/* Large Circular Progress */}
+          <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+            <CircularProgress
+              variant="determinate"
+              value={overallProgress}
+              size={120}
+              thickness={6}
+              sx={{
+                color: 'white',
+                '& .MuiCircularProgress-circle': {
+                  strokeLinecap: 'round'
+                }
+              }}
+            />
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                bottom: 0,
+                right: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <Typography variant="h3" fontWeight={700} color="white">
+                {overallProgress}%
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', fontWeight: 500 }}>
+                Complété
+              </Typography>
+            </Box>
+          </Box>
 
-        {/* Room Counts */}
-        <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Bed sx={{ fontSize: 20, color: '#2196F3' }} />
-            <Typography variant="body2" fontWeight={600}>
-              {roomCounts.bedrooms} {t('inspection.rooms.bedrooms')}
+          {/* Title and Glass-morphism Room Count Chips */}
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="h4" fontWeight={700} gutterBottom>
+              {t('inspection.progress.title')}
             </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Bathtub sx={{ fontSize: 20, color: '#9C27B0' }} />
-            <Typography variant="body2" fontWeight={600}>
-              {roomCounts.bathrooms} {t('inspection.rooms.bathrooms')}
+            <Typography variant="body1" sx={{ opacity: 0.95, mb: 2 }}>
+              {completedCount} / {CATEGORIES.length} catégories complétées
             </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Shower sx={{ fontSize: 20, color: '#FF9800' }} />
-            <Typography variant="body2" fontWeight={600}>
-              {roomCounts.powderRooms} {t('inspection.rooms.powderRooms')}
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <MeetingRoom sx={{ fontSize: 20, color: '#4CAF50' }} />
-            <Typography variant="body2" fontWeight={600}>
-              {roomCounts.totalRooms} {t('inspection.rooms.totalRooms')}
-            </Typography>
+            <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+              {/* Glass-morphism chips with backdrop blur and hover scale */}
+              <Chip
+                icon={<Bed />}
+                label={`${roomCounts.bedrooms} ${t('inspection.rooms.bedrooms')}`}
+                sx={{
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  color: 'white',
+                  backdropFilter: 'blur(10px)',
+                  fontWeight: 600,
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    transform: 'scale(1.05)',
+                    bgcolor: 'rgba(255,255,255,0.3)'
+                  }
+                }}
+              />
+              <Chip
+                icon={<Bathtub />}
+                label={`${roomCounts.bathrooms} ${t('inspection.rooms.bathrooms')}`}
+                sx={{
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  color: 'white',
+                  backdropFilter: 'blur(10px)',
+                  fontWeight: 600,
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    transform: 'scale(1.05)',
+                    bgcolor: 'rgba(255,255,255,0.3)'
+                  }
+                }}
+              />
+              <Chip
+                icon={<Shower />}
+                label={`${roomCounts.powderRooms} ${t('inspection.rooms.powderRooms')}`}
+                sx={{
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  color: 'white',
+                  backdropFilter: 'blur(10px)',
+                  fontWeight: 600,
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    transform: 'scale(1.05)',
+                    bgcolor: 'rgba(255,255,255,0.3)'
+                  }
+                }}
+              />
+              <Chip
+                icon={<MeetingRoom />}
+                label={`${roomCounts.totalRooms} ${t('inspection.rooms.totalRooms')}`}
+                sx={{
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  color: 'white',
+                  backdropFilter: 'blur(10px)',
+                  fontWeight: 600,
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    transform: 'scale(1.05)',
+                    bgcolor: 'rgba(255,255,255,0.3)'
+                  }
+                }}
+              />
+            </Box>
           </Box>
         </Box>
       </Box>
 
-      {/* Progress bar and category pills - always visible */}
-      <Box sx={{ px: 2, pt: 1, pb: 2 }}>
-        <LinearProgress
-          variant="determinate"
-          value={overallProgress}
-          sx={{
-            height: 10,
-            borderRadius: 5,
-            bgcolor: 'grey.200',
-            '& .MuiLinearProgress-bar': {
-              borderRadius: 5,
-              bgcolor: overallProgress < 33 ? 'error.main' : overallProgress < 66 ? 'warning.main' : 'success.main'
-            }
-          }}
-        />
-
-        {/* Category Pills */}
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
+      {/* Premium Category Cards - Grid Layout */}
+      <Box sx={{ p: 2 }}>
+        <Grid container spacing={2}>
           {CATEGORIES.map((category) => {
             const Icon = category.icon
             const isCompleted = isCategoryCompleted(category.id)
             const isExpanded = expandedCategories.includes(category.id)
 
             return (
-              <Chip
-                key={category.id}
-                icon={<Icon sx={{ fontSize: 18 }} />}
-                label={category.name}
-                onClick={() => toggleCategory(category.id)}
-                sx={{
-                  bgcolor: isExpanded ? `${category.color}3a` : 'white',
-                  color: isExpanded || isCompleted ? category.color : 'text.secondary',
-                  border: `1px solid ${category.color}`,
-                  fontWeight: isExpanded || isCompleted ? 600 : 400,
-                  boxShadow: isExpanded ? `0 0 0 2px ${category.color}40` : 'none',
-                  '& .MuiChip-icon': {
-                    color: category.color
-                  },
-                  '&:hover': {
-                    bgcolor: `${category.color}2a`,
-                    borderColor: category.color
-                  }
-                }}
-                deleteIcon={isCompleted ? <CheckCircle sx={{ fontSize: 18 }} /> : undefined}
-                onDelete={isCompleted ? () => {} : undefined}
-              />
+              <Grid item xs={12} sm={6} md={4} key={category.id}>
+                <Card
+                  onClick={() => {
+                    if (isCompleted) {
+                      router.push(`/${locale}/inspection/${property.id}/${category.id}`)
+                    } else {
+                      toggleCategory(category.id)
+                    }
+                  }}
+                  sx={{
+                    borderRadius: '16px',
+                    cursor: 'pointer',
+                    position: 'relative',
+                    overflow: 'visible',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    border: `2px solid ${isExpanded ? category.color : 'transparent'}`,
+                    boxShadow: isExpanded ? `0 8px 24px ${category.color}40` : 1,
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: `0 12px 32px ${category.color}30`
+                    }
+                  }}
+                >
+                  {/* Top Color Bar */}
+                  <Box
+                    sx={{
+                      height: '6px',
+                      background: `linear-gradient(90deg, ${category.color} 0%, ${category.color}80 100%)`
+                    }}
+                  />
+
+                  <CardContent sx={{ p: 2 }}>
+                    {/* Icon box + Completion badge */}
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
+                      <Box
+                        sx={{
+                          width: 56,
+                          height: 56,
+                          borderRadius: '12px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          bgcolor: `${category.color}15`
+                        }}
+                      >
+                        <Icon sx={{ fontSize: 32, color: category.color }} />
+                      </Box>
+                      {isCompleted && (
+                        <Box
+                          sx={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: '50%',
+                            bgcolor: 'success.main',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          <CheckCircle sx={{ fontSize: 20, color: 'white' }} />
+                        </Box>
+                      )}
+                    </Box>
+
+                    <Typography variant="h6" fontWeight={700} sx={{ mb: 0.5 }}>
+                      {category.name}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {category.weight > 0 ? `${category.weight * 100}% du total` : 'Optionnel'}
+                    </Typography>
+
+                    {/* Mini progress bar for incomplete categories */}
+                    {!isCompleted && (
+                      <LinearProgress
+                        variant="determinate"
+                        value={0}
+                        sx={{
+                          mt: 1.5,
+                          height: 4,
+                          borderRadius: 2,
+                          bgcolor: 'grey.200',
+                          '& .MuiLinearProgress-bar': {
+                            bgcolor: category.color
+                          }
+                        }}
+                      />
+                    )}
+                  </CardContent>
+
+                  {/* Expand indicator in bottom right corner */}
+                  {!isCompleted && (
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        bottom: 8,
+                        right: 8,
+                        transition: 'transform 0.2s'
+                      }}
+                    >
+                      <IconButton size="small" sx={{ color: category.color }}>
+                        {isExpanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                      </IconButton>
+                    </Box>
+                  )}
+                </Card>
+
+                {/* Collapsible detail panel */}
+                <Collapse in={isExpanded}>
+                  <Box sx={{ mt: 2 }}>
+                    <Card
+                      sx={{
+                        borderRadius: '16px',
+                        borderLeft: `4px solid ${category.color}`,
+                        bgcolor: `${category.color}08`
+                      }}
+                    >
+                      <CardContent sx={{ p: 2 }}>
+                        {renderCategoryDetails(category.id)}
+                      </CardContent>
+                    </Card>
+                  </Box>
+                </Collapse>
+              </Grid>
             )
           })}
-        </Box>
-      </Box>
-
-      {/* Category details */}
-      <Box sx={{ p: 2, pt: 0 }}>
-        {CATEGORIES.map((category) => {
-          const isExpanded = expandedCategories.includes(category.id)
-
-          if (!isExpanded) return null
-
-          return (
-            <Box
-              key={category.id}
-              sx={{
-                mb: 2,
-                borderLeft: '4px solid',
-                borderColor: category.color,
-                pl: 2,
-                py: 1
-              }}
-            >
-              <Collapse in={isExpanded}>
-                {renderCategoryDetails(category.id)}
-              </Collapse>
-            </Box>
-          )
-        })}
+        </Grid>
       </Box>
     </Paper>
   )
