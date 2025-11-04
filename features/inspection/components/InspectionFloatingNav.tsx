@@ -46,7 +46,14 @@ export function InspectionFloatingNav({ inspectionId, currentCategory }: Inspect
           height: 56,
           bgcolor: '#16a34a', // Green to match inspection theme
           color: 'white',
-          '&:hover': { bgcolor: '#15803d' }
+          boxShadow: 3,
+          '&:hover': { bgcolor: '#15803d', boxShadow: 6 }
+        },
+        '& .MuiSpeedDialAction-fab': {
+          boxShadow: 2,
+          '&:hover': {
+            boxShadow: 4
+          }
         }
       }}
       icon={<SpeedDialIcon icon={<GridView />} />}
@@ -69,7 +76,6 @@ export function InspectionFloatingNav({ inspectionId, currentCategory }: Inspect
               bgcolor: isActive ? category.color : 'white',
               '&:hover': { bgcolor: isActive ? category.color : `${category.color}15` }
             }}
-            tooltipOpen
           />
         )
       })}
