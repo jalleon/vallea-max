@@ -936,23 +936,6 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
                     <Typography variant="caption" color="text.secondary">
                       {category.weight > 0 ? `${category.weight * 100}% du total` : 'Optionnel'}
                     </Typography>
-
-                    {/* Mini progress bar for incomplete categories */}
-                    {!isCompleted && (
-                      <LinearProgress
-                        variant="determinate"
-                        value={0}
-                        sx={{
-                          mt: 1.5,
-                          height: 4,
-                          borderRadius: 2,
-                          bgcolor: 'grey.200',
-                          '& .MuiLinearProgress-bar': {
-                            bgcolor: category.color
-                          }
-                        }}
-                      />
-                    )}
                   </CardContent>
                 </Card>
 
