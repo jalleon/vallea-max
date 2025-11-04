@@ -954,22 +954,6 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
                       />
                     )}
                   </CardContent>
-
-                  {/* Expand indicator in bottom right corner */}
-                  {!isCompleted && (
-                    <Box
-                      sx={{
-                        position: 'absolute',
-                        bottom: 8,
-                        right: 8,
-                        transition: 'transform 0.2s'
-                      }}
-                    >
-                      <IconButton size="small" sx={{ color: category.color }}>
-                        {isExpanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-                      </IconButton>
-                    </Box>
-                  )}
                 </Card>
 
                 {/* Collapsible detail panel */}
