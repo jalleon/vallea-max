@@ -15,6 +15,7 @@ import {
   CircularProgress,
   Card,
   CardContent,
+  CardActionArea,
   Grid,
   Button
 } from '@mui/material'
@@ -26,7 +27,7 @@ import {
   Settings,
   Build,
   Landscape,
-  CheckCircle,
+  Check,
   KeyboardArrowUp,
   KeyboardArrowDown,
   Assessment,
@@ -54,6 +55,7 @@ const CATEGORIES = [
   {
     id: 'pieces',
     name: 'Pièces',
+    description: 'Inspection pièce par pièce',
     icon: Layers,
     color: '#2196F3',
     weight: 0.25
@@ -61,6 +63,7 @@ const CATEGORIES = [
   {
     id: 'batiment',
     name: 'Bâtiment',
+    description: 'Structure et éléments fixes',
     icon: Home,
     color: '#FF9800',
     weight: 0.25
@@ -68,6 +71,7 @@ const CATEGORIES = [
   {
     id: 'garage',
     name: 'Garage',
+    description: 'Garage et stationnement',
     icon: DirectionsCar,
     color: '#4CAF50',
     weight: 0.15
@@ -75,6 +79,7 @@ const CATEGORIES = [
   {
     id: 'mecanique',
     name: 'Mécanique',
+    description: 'Systèmes mécaniques',
     icon: Settings,
     color: '#9C27B0',
     weight: 0.15
@@ -82,6 +87,7 @@ const CATEGORIES = [
   {
     id: 'divers',
     name: 'Divers',
+    description: 'Éléments additionnels (optionnel)',
     icon: Build,
     color: '#607D8B',
     weight: 0.00
@@ -89,6 +95,7 @@ const CATEGORIES = [
   {
     id: 'exterieur',
     name: 'Extérieur',
+    description: 'Aménagements extérieurs',
     icon: Landscape,
     color: '#795548',
     weight: 0.20
@@ -869,7 +876,7 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
             <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
               {/* Glass-morphism chips with backdrop blur and hover scale */}
               <Chip
-                icon={<Bed />}
+                icon={<Bed sx={{ color: '#FCD34D !important' }} />}
                 label={`${roomCounts.bedrooms} ${t('inspection.rooms.bedrooms')}`}
                 sx={{
                   bgcolor: 'rgba(255,255,255,0.2)',
@@ -884,7 +891,7 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
                 }}
               />
               <Chip
-                icon={<Bathtub />}
+                icon={<Bathtub sx={{ color: '#8B5CF6 !important' }} />}
                 label={`${roomCounts.bathrooms} ${t('inspection.rooms.bathrooms')}`}
                 sx={{
                   bgcolor: 'rgba(255,255,255,0.2)',
@@ -899,7 +906,7 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
                 }}
               />
               <Chip
-                icon={<Shower />}
+                icon={<Shower sx={{ color: '#34D399 !important' }} />}
                 label={`${roomCounts.powderRooms} ${t('inspection.rooms.powderRooms')}`}
                 sx={{
                   bgcolor: 'rgba(255,255,255,0.2)',
@@ -914,7 +921,7 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
                 }}
               />
               <Chip
-                icon={<MeetingRoom />}
+                icon={<MeetingRoom sx={{ color: '#F59E0B !important' }} />}
                 label={`${roomCounts.totalRooms} ${t('inspection.rooms.totalRooms')}`}
                 sx={{
                   bgcolor: 'rgba(255,255,255,0.2)',
@@ -933,8 +940,15 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
         </Box>
       </Box>
 
+      {/* Section Title */}
+      <Box sx={{ px: 2, pt: 3, pb: 1 }}>
+        <Typography variant="h5" fontWeight={700} sx={{ color: 'text.primary' }}>
+          Catégories d'inspection
+        </Typography>
+      </Box>
+
       {/* Premium Category Cards - Grid Layout */}
-      <Box sx={{ p: 2 }}>
+      <Box sx={{ px: 2, pb: 2 }}>
         <Grid container spacing={2}>
           {CATEGORIES.map((category) => {
             const Icon = category.icon
@@ -942,7 +956,7 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
             const isExpanded = expandedCategories.includes(category.id)
 
             return (
-              <Grid item xs={12} sm={6} md={4} key={category.id}>
+              <Grid item xs={12} sm={6} key={category.id}>
                 <Card
                   sx={{
                     borderRadius: '16px',
@@ -968,86 +982,70 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
                     }}
                   />
 
-                  <CardContent sx={{ p: 2, pb: 1 }}>
-                    {/* Icon box + Completion badge */}
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
-                      <Box
-                        sx={{
-                          width: 56,
-                          height: 56,
-                          borderRadius: '12px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          bgcolor: `${category.color}15`
-                        }}
-                      >
-                        <Icon sx={{ fontSize: 32, color: category.color }} />
-                      </Box>
+                  <CardActionArea
+                    onClick={() => router.push(`/${locale}/inspection/${property.id}/${category.id}`)}
+                    sx={{
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <CardContent sx={{ p: 2, py: 2, width: '100%', textAlign: 'center', position: 'relative' }}>
+                      {/* Completion badge - positioned top right with category color */}
                       {isCompleted && (
                         <Box
                           sx={{
+                            position: 'absolute',
+                            top: 8,
+                            right: 8,
                             width: 32,
                             height: 32,
                             borderRadius: '50%',
-                            bgcolor: 'success.main',
+                            bgcolor: category.color,
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'center'
+                            justifyContent: 'center',
+                            boxShadow: `0 2px 8px ${category.color}60`
                           }}
                         >
-                          <CheckCircle sx={{ fontSize: 20, color: 'white' }} />
+                          <Check sx={{ fontSize: 20, color: 'white', fontWeight: 'bold' }} />
                         </Box>
                       )}
-                    </Box>
 
-                    <Typography variant="h6" fontWeight={700} sx={{ mb: 0.5 }}>
-                      {category.name}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {category.weight > 0 ? `${category.weight * 100}% du total` : 'Optionnel'}
-                    </Typography>
+                      {/* Large Icon - no background box */}
+                      <Icon sx={{ fontSize: 48, color: category.color, mb: 1 }} />
 
-                    {/* Action Buttons */}
-                    <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
-                      <Button
-                        variant="contained"
+                      <Typography variant="h6" fontWeight={700} sx={{ mb: 0.25, fontSize: '1rem' }}>
+                        {category.name}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: '0.75rem' }}>
+                        {category.description}
+                      </Typography>
+                    </CardContent>
+                  </CardActionArea>
+
+                  {/* Expand/Collapse Arrow */}
+                  {renderCategoryDetails(category.id) && (
+                    <Box sx={{ position: 'absolute', bottom: 8, right: 8, zIndex: 10 }}>
+                      <IconButton
                         size="small"
-                        fullWidth
                         onClick={(e) => {
                           e.stopPropagation()
-                          router.push(`/${locale}/inspection/${property.id}/${category.id}`)
+                          toggleCategory(category.id)
                         }}
                         sx={{
-                          bgcolor: category.color,
-                          '&:hover': { bgcolor: category.color, filter: 'brightness(0.9)' },
-                          borderRadius: '8px',
-                          textTransform: 'none',
-                          fontWeight: 600,
-                          py: 1
+                          color: category.color,
+                          bgcolor: `${category.color}15`,
+                          '&:hover': { bgcolor: `${category.color}25` },
+                          borderRadius: '8px'
                         }}
                       >
-                        {isCompleted ? 'Modifier' : 'Commencer'}
-                      </Button>
-                      {renderCategoryDetails(category.id) && (
-                        <IconButton
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            toggleCategory(category.id)
-                          }}
-                          sx={{
-                            color: category.color,
-                            bgcolor: `${category.color}15`,
-                            '&:hover': { bgcolor: `${category.color}25` },
-                            borderRadius: '8px'
-                          }}
-                        >
-                          {isExpanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-                        </IconButton>
-                      )}
+                        {isExpanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                      </IconButton>
                     </Box>
-                  </CardContent>
+                  )}
                 </Card>
 
                 {/* Collapsible detail panel */}

@@ -53,7 +53,9 @@ import { propertiesSupabaseService } from '@/features/library/_api/properties-su
 import { Property, InspectionPieces, FloorInspection } from '@/features/library/types/property.types'
 import { MaterialDashboardLayout } from '@/components/layout/MaterialDashboardLayout'
 import { InspectionFloatingNav } from '@/features/inspection/components/InspectionFloatingNav'
+import { CategoryHeader } from '@/features/inspection/components/CategoryHeader'
 import { FLOOR_OPTIONS, ROOM_CONFIG } from '@/features/inspection/constants/room.constants'
+import { Layers } from '@mui/icons-material'
 
 const BASE_ROOM_TYPES = ['cuisine', 'salle_a_manger', 'salon', 'chambre', 'bureau', 'salle_sejour', 'salle_bain', 'salle_eau']
 const BASEMENT_ROOM_TYPES = ['salle_familiale', 'salle_sejour', 'chambre', 'bureau', 'buanderie', 'rangement', 'salle_mecanique', 'salle_bain', 'salle_eau']
@@ -196,6 +198,73 @@ export default function PiecesPage() {
   const isRoomCompleted = (floorId: string, roomId: string) => {
     const room = property?.inspection_pieces?.floors?.[floorId]?.rooms?.[roomId]
     return room?.completedAt !== undefined
+  }
+
+  // Calculate room counts using the same logic as InspectionProgressWindow
+  const calculateRoomCounts = () => {
+    if (!property?.inspection_pieces?.floors) {
+      return { bedrooms: 0, bathrooms: 0, powderRooms: 0, totalRooms: 0 }
+    }
+
+    let bedrooms = 0
+    let bathrooms = 0
+    let powderRooms = 0
+    let totalRooms = 0
+
+    // Room types to EXCLUDE from total count
+    const excludedRoomTypes = ['salle_bain', 'salle_eau', 'vestibule', 'solarium']
+
+    // Helper function to check if a room has been filled (has any data besides type)
+    const isRoomFilledWithData = (roomData: any): boolean => {
+      if (!roomData) return false
+
+      // Check if room has any fields filled besides 'type' and 'customValues'
+      const filledFields = Object.entries(roomData).filter(([key, value]) => {
+        if (key === 'type' || key === 'customValues' || key === 'completedAt') return false
+
+        // Check if value is not empty
+        if (Array.isArray(value)) {
+          return value.length > 0
+        }
+        return value !== null && value !== undefined && value !== ''
+      })
+
+      return filledFields.length > 0
+    }
+
+    Object.entries(property.inspection_pieces.floors).forEach(([floorId, floor]) => {
+      // Exclude basement (sous_sol) from bedroom and total room counts
+      const isBasement = floorId === 'sous_sol' || floor.name?.toLowerCase().includes('sous-sol')
+
+      Object.entries(floor.rooms || {}).forEach(([_, roomData]: [string, any]) => {
+        // Only count rooms that have been completed/filled
+        if (!isRoomFilledWithData(roomData)) return
+
+        const roomType = roomData.type
+
+        // Count bedrooms (excluding basement)
+        if (roomType === 'chambre' && !isBasement) {
+          bedrooms++
+        }
+
+        // Count bathrooms (including basement)
+        if (roomType === 'salle_bain') {
+          bathrooms++
+        }
+
+        // Count powder rooms (including basement)
+        if (roomType === 'salle_eau') {
+          powderRooms++
+        }
+
+        // Count total rooms (excluding basement and excluded room types)
+        if (!isBasement && !excludedRoomTypes.includes(roomType)) {
+          totalRooms++
+        }
+      })
+    })
+
+    return { bedrooms, bathrooms, powderRooms, totalRooms }
   }
 
   const handleAddNextFloor = async () => {
@@ -430,46 +499,65 @@ export default function PiecesPage() {
         </Breadcrumbs>
 
         {/* Property Address - Clickable to Google Maps */}
-        <Box sx={{ mb: 3 }}>
-          <Typography
-            variant="h5"
-            component="button"
-            onClick={handleAddressClick}
+        <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <Box>
+            <Typography
+              variant="h5"
+              component="button"
+              onClick={handleAddressClick}
+              sx={{
+                cursor: 'pointer',
+                background: 'none',
+                border: 'none',
+                p: 0,
+                color: 'primary.main',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                '&:hover': {
+                  textDecoration: 'underline'
+                }
+              }}
+            >
+              {property.adresse}, {property.ville}
+              <OpenInNew fontSize="small" />
+            </Typography>
+            {property.province && (
+              <Typography variant="body2" color="text.secondary">
+                {property.province} • {property.type_propriete}
+              </Typography>
+            )}
+          </Box>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => router.push(`/${locale}/library?propertyId=${propertyId}`)}
             sx={{
-              cursor: 'pointer',
-              background: 'none',
-              border: 'none',
-              p: 0,
-              color: 'primary.main',
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              '&:hover': {
-                textDecoration: 'underline'
-              }
+              borderRadius: '8px',
+              textTransform: 'none',
+              fontWeight: 600
             }}
           >
-            {property.adresse}, {property.ville}
-            <OpenInNew fontSize="small" />
-          </Typography>
-          {property.province && (
-            <Typography variant="body2" color="text.secondary">
-              {property.province} • {property.type_propriete}
-            </Typography>
-          )}
+            Voir la fiche
+          </Button>
         </Box>
 
-        {/* Header */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <IconButton onClick={handleBack} sx={{ bgcolor: 'grey.100' }}>
-              <ArrowBack />
-            </IconButton>
-            <Typography variant="h4" fontWeight={700}>
-              {t('inspection.categories.pieces')}
-            </Typography>
-          </Box>
+        {/* Category Header */}
+        <CategoryHeader
+          categoryName={t('inspection.categories.pieces')}
+          categoryColor="#2196F3"
+          categoryIcon={Layers}
+          progress={Math.round(((property.inspection_pieces?.completedRooms || 0) / Math.max(property.inspection_pieces?.totalRooms || 1, 1)) * 100)}
+          subtitle="Inspection pièce par pièce"
+          roomCounts={calculateRoomCounts()}
+        />
+
+        {/* Back Button */}
+        <Box sx={{ mb: 3 }}>
+          <IconButton onClick={handleBack} sx={{ bgcolor: 'grey.100' }}>
+            <ArrowBack />
+          </IconButton>
         </Box>
 
         {/* Floor Selector */}
@@ -609,6 +697,7 @@ export default function PiecesPage() {
                         sx={{
                           border: '2px solid',
                           borderColor: allCompleted ? '#4CAF50' : someCompleted ? '#FFA726' : 'grey.300',
+                          bgcolor: allCompleted ? '#4CAF5015' : someCompleted ? '#FFA72615' : 'white',
                           transition: 'all 0.2s ease',
                           '&:hover': {
                             transform: 'translateY(-4px)',
@@ -619,7 +708,7 @@ export default function PiecesPage() {
                         <CardActionArea onClick={() => handleRoomGroupClick(roomType, instances)} sx={{ p: 2 }}>
                           <CardContent sx={{ p: 0 }}>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                              {RoomIcon && <RoomIcon sx={{ fontSize: 32, color: allCompleted ? '#4CAF50' : 'text.secondary' }} />}
+                              {RoomIcon && <RoomIcon sx={{ fontSize: 32, color: allCompleted ? '#4CAF50' : someCompleted ? '#FFA726' : 'text.secondary' }} />}
                               {allCompleted && (
                                 <CheckCircle sx={{ color: '#4CAF50', fontSize: 24 }} />
                               )}

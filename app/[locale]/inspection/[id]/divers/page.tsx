@@ -27,6 +27,7 @@ import {
   ArrowBack,
   CheckCircle,
   OpenInNew,
+  Build,
   Public,
   Fireplace,
   MiscellaneousServices,
@@ -56,6 +57,7 @@ import { propertiesSupabaseService } from '@/features/library/_api/properties-su
 import { Property } from '@/features/library/types/property.types'
 import { MaterialDashboardLayout } from '@/components/layout/MaterialDashboardLayout'
 import { InspectionFloatingNav } from '@/features/inspection/components/InspectionFloatingNav'
+import { CategoryHeader } from '@/features/inspection/components/CategoryHeader'
 
 const getServicesItems = (t: any) => [
   { id: 'aqueduc', label: t('inspection.diversOptions.servicesItems.aqueduc'), icon: WaterDrop },
@@ -415,16 +417,22 @@ export default function DiversPage() {
           )}
         </Box>
 
-        {/* Header */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <IconButton onClick={() => router.push(`/${locale}/inspection/${propertyId}/categories`)} sx={{ bgcolor: 'grey.100' }}>
-              <ArrowBack />
-            </IconButton>
-            <Typography variant="h4" fontWeight={700}>
-              {t('inspection.divers.title')}
-            </Typography>
-          </Box>
+        {/* Category Header */}
+        <CategoryHeader
+          categoryName={t('inspection.divers.title')}
+          categoryColor="#607D8B"
+          categoryIcon={Build}
+          progress={property?.inspection_divers?.completedAt ? 100 : 0}
+          completedItems={property?.inspection_divers?.completedAt ? 1 : 0}
+          totalItems={1}
+          subtitle="Éléments additionnels (optionnel)"
+        />
+
+        {/* Back Button */}
+        <Box sx={{ mb: 3 }}>
+          <IconButton onClick={() => router.push(`/${locale}/inspection/${propertyId}/categories`)} sx={{ bgcolor: 'grey.100' }}>
+            <ArrowBack />
+          </IconButton>
         </Box>
 
         {!selectedSubcategory ? (

@@ -47,6 +47,7 @@ import { propertiesSupabaseService } from '@/features/library/_api/properties-su
 import { Property } from '@/features/library/types/property.types'
 import { MaterialDashboardLayout } from '@/components/layout/MaterialDashboardLayout'
 import { InspectionFloatingNav } from '@/features/inspection/components/InspectionFloatingNav'
+import { CategoryHeader } from '@/features/inspection/components/CategoryHeader'
 
 const getSubcategories = (t: any) => [
   {
@@ -312,6 +313,17 @@ export default function BatimentPage() {
     return formData[subcategoryId]?.completedAt !== undefined
   }
 
+  const calculateProgress = () => {
+    const SUBCATEGORIES = getSubcategories(t)
+    const completed = SUBCATEGORIES.filter(sub => isSubcategoryCompleted(sub.id)).length
+    return Math.round((completed / SUBCATEGORIES.length) * 100)
+  }
+
+  const getCompletedCount = () => {
+    const SUBCATEGORIES = getSubcategories(t)
+    return SUBCATEGORIES.filter(sub => isSubcategoryCompleted(sub.id)).length
+  }
+
   const handleAddressClick = () => {
     if (property?.adresse && property?.ville) {
       const query = encodeURIComponent(`${property.adresse}, ${property.ville}, ${property.province || 'QC'}`)
@@ -363,51 +375,71 @@ export default function BatimentPage() {
         </Breadcrumbs>
 
         {/* Property Address - Clickable to Google Maps */}
-        <Box sx={{ mb: 3 }}>
-          <Typography
-            variant="h5"
-            component="button"
-            onClick={handleAddressClick}
+        <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <Box>
+            <Typography
+              variant="h5"
+              component="button"
+              onClick={handleAddressClick}
+              sx={{
+                cursor: 'pointer',
+                background: 'none',
+                border: 'none',
+                p: 0,
+                color: 'primary.main',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                '&:hover': {
+                  textDecoration: 'underline'
+                }
+              }}
+            >
+              {property?.adresse}, {property?.ville}
+              <OpenInNew fontSize="small" />
+            </Typography>
+            {property?.province && (
+              <Typography variant="body2" color="text.secondary">
+                {property.province} • {property.type_propriete}
+              </Typography>
+            )}
+          </Box>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => router.push(`/${locale}/library?propertyId=${propertyId}`)}
             sx={{
-              cursor: 'pointer',
-              background: 'none',
-              border: 'none',
-              p: 0,
-              color: 'primary.main',
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              '&:hover': {
-                textDecoration: 'underline'
-              }
+              borderRadius: '8px',
+              textTransform: 'none',
+              fontWeight: 600
             }}
           >
-            {property?.adresse}, {property?.ville}
-            <OpenInNew fontSize="small" />
-          </Typography>
-          {property?.province && (
-            <Typography variant="body2" color="text.secondary">
-              {property.province} • {property.type_propriete}
-            </Typography>
-          )}
+            Voir la fiche
+          </Button>
         </Box>
 
-        {/* Header */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <IconButton onClick={() => router.push(`/${locale}/inspection/${propertyId}/categories`)} sx={{ bgcolor: 'grey.100' }}>
-              <ArrowBack />
-            </IconButton>
-            <Typography variant="h4" fontWeight={700}>
-              {t('inspection.batiment.title')}
-            </Typography>
-          </Box>
+        {/* Category Header */}
+        <CategoryHeader
+          categoryName={t('inspection.batiment.title')}
+          categoryColor="#FF9800"
+          categoryIcon={Home}
+          progress={calculateProgress()}
+          completedItems={getCompletedCount()}
+          totalItems={getSubcategories(t).length}
+          subtitle="Inspection du bâtiment et structures"
+        />
+
+        {/* Back Button */}
+        <Box sx={{ mb: 3 }}>
+          <IconButton onClick={() => router.push(`/${locale}/inspection/${propertyId}/categories`)} sx={{ bgcolor: 'grey.100' }}>
+            <ArrowBack />
+          </IconButton>
         </Box>
 
         {!selectedSubcategory ? (
           <>
-            {/* Subcategory Cards */}
+            {/* Subcategory Cards - Enhanced Premium Style */}
             <Grid container spacing={3}>
               {SUBCATEGORIES.map((subcategory) => {
                 const Icon = subcategory.icon
@@ -418,52 +450,64 @@ export default function BatimentPage() {
                     <Card
                       elevation={0}
                       sx={{
-                        height: '160px',
                         borderRadius: '16px',
-                        border: isCompleted ? '2px solid' : '1px solid',
-                        borderColor: isCompleted ? '#FF9800' : '#e0e0e0',
-                        bgcolor: isCompleted ? '#FF98001a' : 'white',
                         position: 'relative',
-                        transition: 'all 0.3s ease',
+                        overflow: 'hidden',
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        border: `2px solid ${isCompleted ? '#FF9800' : 'transparent'}`,
+                        bgcolor: isCompleted ? '#FF980015' : 'white',
+                        boxShadow: isCompleted ? '0 4px 12px #FF980025' : 1,
                         '&:hover': {
                           transform: 'translateY(-4px)',
-                          boxShadow: 6
+                          boxShadow: '0 12px 32px #FF980030'
                         }
                       }}
                     >
-                      {isCompleted && (
-                        <CheckCircle
-                          sx={{
-                            position: 'absolute',
-                            top: 12,
-                            right: 12,
-                            fontSize: 28,
-                            color: '#FF9800'
-                          }}
-                        />
-                      )}
-                      <CardActionArea
-                        onClick={() => setSelectedSubcategory(subcategory.id)}
+                      {/* Top Color Bar */}
+                      <Box
                         sx={{
-                          height: '100%',
-                          p: 3,
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center'
+                          height: '6px',
+                          background: 'linear-gradient(90deg, #FF9800 0%, #F57C00 100%)',
+                          borderTopLeftRadius: '16px',
+                          borderTopRightRadius: '16px'
                         }}
-                      >
-                        <CardContent sx={{ p: 0, width: '100%', textAlign: 'center' }}>
-                          <Icon sx={{
-                            fontSize: 48,
-                            color: '#FF9800',
-                            mb: 2
-                          }} />
-                          <Typography
-                            variant="h6"
-                            fontWeight="bold"
-                            sx={{ color: isCompleted ? '#FF9800' : 'text.primary' }}
-                          >
+                      />
+
+                      <CardActionArea onClick={() => setSelectedSubcategory(subcategory.id)} sx={{ height: '100%' }}>
+                        <CardContent sx={{ p: 3 }}>
+                          {/* Icon box + Completion badge */}
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                            <Box
+                              sx={{
+                                width: 56,
+                                height: 56,
+                                borderRadius: '12px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                bgcolor: '#FF980015'
+                              }}
+                            >
+                              <Icon sx={{ fontSize: 32, color: '#FF9800' }} />
+                            </Box>
+                            {isCompleted && (
+                              <Box
+                                sx={{
+                                  width: 32,
+                                  height: 32,
+                                  borderRadius: '50%',
+                                  bgcolor: 'success.main',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}
+                              >
+                                <CheckCircle sx={{ fontSize: 20, color: 'white' }} />
+                              </Box>
+                            )}
+                          </Box>
+
+                          <Typography variant="h6" fontWeight={700}>
                             {subcategory.name}
                           </Typography>
                         </CardContent>
