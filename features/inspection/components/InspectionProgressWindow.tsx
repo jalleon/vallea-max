@@ -745,9 +745,48 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
 
   return (
     <Paper elevation={0} sx={{ borderRadius: '16px', overflow: 'hidden', mb: 3, border: '1px solid', borderColor: 'divider' }}>
-      {/* Enhanced Gradient Header */}
-      <Box sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', p: 3, color: 'white' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: { xs: 'wrap', md: 'nowrap' } }}>
+      {/* Enhanced Gradient Header with Mesh Pattern */}
+      <Box
+        sx={{
+          position: 'relative',
+          p: 3,
+          color: 'white',
+          overflow: 'hidden',
+          background: `
+            radial-gradient(at 20% 30%, #667eea 0px, transparent 50%),
+            radial-gradient(at 80% 70%, #764ba2 0px, transparent 50%),
+            radial-gradient(at 50% 50%, #9333ea 0px, transparent 50%),
+            linear-gradient(135deg, #667eea 0%, #764ba2 50%, #a855f7 100%)
+          `,
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: `
+              linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px),
+              linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px)
+            `,
+            backgroundSize: '50px 50px',
+            opacity: 0.4,
+            pointerEvents: 'none'
+          },
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(2px)',
+            pointerEvents: 'none'
+          }
+        }}
+      >
+        <Box sx={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 3, flexWrap: { xs: 'wrap', md: 'nowrap' } }}>
           {/* Large Circular Progress */}
           <Box sx={{ position: 'relative', display: 'inline-flex' }}>
             <CircularProgress
