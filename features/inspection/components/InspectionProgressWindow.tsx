@@ -753,39 +753,44 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
           color: 'white',
           overflow: 'hidden',
           background: `
-            radial-gradient(at 20% 30%, #667eea 0px, transparent 50%),
-            radial-gradient(at 80% 70%, #764ba2 0px, transparent 50%),
-            radial-gradient(at 50% 50%, #9333ea 0px, transparent 50%),
+            radial-gradient(circle at 20% 30%, rgba(102, 126, 234, 0.8) 0%, transparent 50%),
+            radial-gradient(circle at 80% 70%, rgba(118, 75, 162, 0.8) 0%, transparent 50%),
+            radial-gradient(circle at 50% 50%, rgba(147, 51, 234, 0.6) 0%, transparent 50%),
             linear-gradient(135deg, #667eea 0%, #764ba2 50%, #a855f7 100%)
-          `,
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: `
-              linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px),
-              linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px)
-            `,
-            backgroundSize: '50px 50px',
-            opacity: 0.4,
-            pointerEvents: 'none'
-          },
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(255, 255, 255, 0.05)',
-            backdropFilter: 'blur(2px)',
-            pointerEvents: 'none'
-          }
+          `
         }}
       >
+        {/* Geometric Grid Pattern Overlay */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: `
+              linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px),
+              linear-gradient(0deg, rgba(255,255,255,0.05) 1px, transparent 1px)
+            `,
+            backgroundSize: '40px 40px',
+            pointerEvents: 'none',
+            zIndex: 0
+          }}
+        />
+
+        {/* Frosted Glass Overlay */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(255, 255, 255, 0.03)',
+            pointerEvents: 'none',
+            zIndex: 0
+          }}
+        />
         <Box sx={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 3, flexWrap: { xs: 'wrap', md: 'nowrap' } }}>
           {/* Large Circular Progress */}
           <Box sx={{ position: 'relative', display: 'inline-flex' }}>
