@@ -745,22 +745,36 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
 
   return (
     <Paper elevation={0} sx={{ borderRadius: '16px', overflow: 'hidden', mb: 3, border: '1px solid', borderColor: 'divider' }}>
-      {/* Enhanced Gradient Header with Mesh Pattern */}
+      {/* Layered & Depth Header - Waves + Topology + Floating Orbs */}
       <Box
         sx={{
           position: 'relative',
           p: 3,
           color: 'white',
           overflow: 'hidden',
-          background: `
-            radial-gradient(circle at 20% 30%, rgba(102, 126, 234, 0.8) 0%, transparent 50%),
-            radial-gradient(circle at 80% 70%, rgba(118, 75, 162, 0.8) 0%, transparent 50%),
-            radial-gradient(circle at 50% 50%, rgba(147, 51, 234, 0.6) 0%, transparent 50%),
-            linear-gradient(135deg, #667eea 0%, #764ba2 50%, #a855f7 100%)
-          `
+          // Base: Ocean blue gradient
+          background: 'linear-gradient(135deg, #0EA5E9 0%, #2563EB 50%, #1E40AF 100%)'
         }}
       >
-        {/* Geometric Grid Pattern Overlay */}
+        {/* Layer 1: Layered waves - Stacked semi-transparent curves (stronger) */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: `
+              radial-gradient(ellipse 150% 80% at 50% 120%, rgba(14, 165, 233, 0.5) 0%, transparent 50%),
+              radial-gradient(ellipse 140% 70% at 50% 110%, rgba(37, 99, 235, 0.4) 0%, transparent 50%),
+              radial-gradient(ellipse 130% 60% at 50% 100%, rgba(30, 64, 175, 0.35) 0%, transparent 50%)
+            `,
+            pointerEvents: 'none',
+            zIndex: 1
+          }}
+        />
+
+        {/* Layer 2: 3D Topology map - Contour lines suggesting elevation (more visible) */}
         <Box
           sx={{
             position: 'absolute',
@@ -769,16 +783,15 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
             right: 0,
             bottom: 0,
             backgroundImage: `
-              linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px),
-              linear-gradient(0deg, rgba(255,255,255,0.05) 1px, transparent 1px)
+              repeating-radial-gradient(circle at 30% 40%, transparent 0px, transparent 30px, rgba(255,255,255,0.12) 30px, rgba(255,255,255,0.12) 31px),
+              repeating-radial-gradient(circle at 70% 60%, transparent 0px, transparent 40px, rgba(255,255,255,0.15) 40px, rgba(255,255,255,0.15) 41px)
             `,
-            backgroundSize: '40px 40px',
             pointerEvents: 'none',
-            zIndex: 0
+            zIndex: 2
           }}
         />
 
-        {/* Frosted Glass Overlay */}
+        {/* Layer 3: Floating particles/orbs - Soft bokeh-like elements */}
         <Box
           sx={{
             position: 'absolute',
@@ -786,12 +799,18 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'rgba(255, 255, 255, 0.03)',
+            background: `
+              radial-gradient(circle 60px at 15% 25%, rgba(255, 255, 255, 0.15), transparent),
+              radial-gradient(circle 80px at 85% 70%, rgba(255, 255, 255, 0.12), transparent),
+              radial-gradient(circle 50px at 50% 15%, rgba(255, 255, 255, 0.1), transparent),
+              radial-gradient(circle 70px at 75% 85%, rgba(255, 255, 255, 0.08), transparent),
+              radial-gradient(circle 40px at 25% 75%, rgba(255, 255, 255, 0.1), transparent)
+            `,
             pointerEvents: 'none',
-            zIndex: 0
+            zIndex: 3
           }}
         />
-        <Box sx={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 3, flexWrap: { xs: 'wrap', md: 'nowrap' } }}>
+        <Box sx={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', gap: 3, flexWrap: { xs: 'wrap', md: 'nowrap' } }}>
           {/* Large Circular Progress */}
           <Box sx={{ position: 'relative', display: 'inline-flex' }}>
             <CircularProgress
@@ -800,12 +819,23 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
               size={120}
               thickness={6}
               sx={{
-                color: 'white',
+                background: 'rgba(255, 255, 255, 0.2)',
+                borderRadius: '50%',
                 '& .MuiCircularProgress-circle': {
-                  strokeLinecap: 'round'
+                  strokeLinecap: 'round',
+                  stroke: 'url(#progressGradient)'
                 }
               }}
             />
+            <svg width={0} height={0}>
+              <defs>
+                <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#FCD34D" />
+                  <stop offset="50%" stopColor="#F59E0B" />
+                  <stop offset="100%" stopColor="#EF4444" />
+                </linearGradient>
+              </defs>
+            </svg>
             <Box
               sx={{
                 position: 'absolute',
@@ -830,10 +860,10 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
 
           {/* Title and Glass-morphism Room Count Chips */}
           <Box sx={{ flex: 1 }}>
-            <Typography variant="h4" fontWeight={700} gutterBottom>
+            <Typography variant="h4" fontWeight={800} gutterBottom sx={{ color: '#FCD34D' }}>
               {t('inspection.progress.title')}
             </Typography>
-            <Typography variant="body1" sx={{ opacity: 0.95, mb: 2 }}>
+            <Typography variant="body1" sx={{ color: 'white', mb: 2 }}>
               {completedCount} / {CATEGORIES.length} catégories complétées
             </Typography>
             <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
