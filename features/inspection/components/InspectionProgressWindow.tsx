@@ -873,7 +873,7 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
                   sx={{
                     borderRadius: '16px',
                     position: 'relative',
-                    overflow: 'visible',
+                    overflow: 'hidden',
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     border: `2px solid ${isExpanded ? category.color : isCompleted ? category.color : 'transparent'}`,
                     bgcolor: isCompleted ? `${category.color}15` : 'white',
