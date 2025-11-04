@@ -888,7 +888,9 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
                   <Box
                     sx={{
                       height: '6px',
-                      background: `linear-gradient(90deg, ${category.color} 0%, ${category.color}80 100%)`
+                      background: `linear-gradient(90deg, ${category.color} 0%, ${category.color}80 100%)`,
+                      borderTopLeftRadius: '16px',
+                      borderTopRightRadius: '16px'
                     }}
                   />
 
