@@ -981,30 +981,37 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
                       }}
                     >
                       <CardContent sx={{ p: 2 }}>
-                        {renderCategoryDetails(category.id)}
-
-                        {/* Navigate button for completed categories */}
-                        {isCompleted && (
-                          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-                            <Button
-                              variant="contained"
-                              endIcon={<ArrowForward />}
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                router.push(`/${locale}/inspection/${property.id}/${category.id}`)
-                              }}
-                              sx={{
-                                bgcolor: category.color,
-                                '&:hover': { bgcolor: category.color, filter: 'brightness(0.9)' },
-                                borderRadius: '12px',
-                                textTransform: 'none',
-                                fontWeight: 600
-                              }}
-                            >
-                              Aller à {category.name}
-                            </Button>
+                        {renderCategoryDetails(category.id) || (
+                          <Box sx={{ py: 3, textAlign: 'center' }}>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                              Aucune donnée disponible
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              Cliquez sur le bouton ci-dessous pour commencer l'inspection de cette catégorie
+                            </Typography>
                           </Box>
                         )}
+
+                        {/* Navigate button - shows for all categories when expanded */}
+                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+                          <Button
+                            variant="contained"
+                            endIcon={<ArrowForward />}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              router.push(`/${locale}/inspection/${property.id}/${category.id}`)
+                            }}
+                            sx={{
+                              bgcolor: category.color,
+                              '&:hover': { bgcolor: category.color, filter: 'brightness(0.9)' },
+                              borderRadius: '12px',
+                              textTransform: 'none',
+                              fontWeight: 600
+                            }}
+                          >
+                            {isCompleted ? `Modifier ${category.name}` : `Commencer ${category.name}`}
+                          </Button>
+                        </Box>
                       </CardContent>
                     </Card>
                   </Box>
