@@ -15,7 +15,8 @@ import {
   CircularProgress,
   Card,
   CardContent,
-  Grid
+  Grid,
+  Button
 } from '@mui/material'
 import {
   ExpandMore,
@@ -36,7 +37,8 @@ import {
   Chair,
   Bed,
   Weekend,
-  MeetingRoom
+  MeetingRoom,
+  ArrowForward
 } from '@mui/icons-material'
 import { useTranslations } from 'next-intl'
 import { useRouter, useParams } from 'next/navigation'
@@ -868,13 +870,6 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
             return (
               <Grid item xs={12} sm={6} md={4} key={category.id}>
                 <Card
-                  onClick={() => {
-                    if (isCompleted) {
-                      router.push(`/${locale}/inspection/${property.id}/${category.id}`)
-                    } else {
-                      toggleCategory(category.id)
-                    }
-                  }}
                   sx={{
                     borderRadius: '16px',
                     cursor: 'pointer',
@@ -897,7 +892,10 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
                     }}
                   />
 
-                  <CardContent sx={{ p: 2 }}>
+                  <CardContent
+                    sx={{ p: 2 }}
+                    onClick={() => toggleCategory(category.id)}
+                  >
                     {/* Icon box + Completion badge */}
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
                       <Box
@@ -984,6 +982,29 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
                     >
                       <CardContent sx={{ p: 2 }}>
                         {renderCategoryDetails(category.id)}
+
+                        {/* Navigate button for completed categories */}
+                        {isCompleted && (
+                          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+                            <Button
+                              variant="contained"
+                              endIcon={<ArrowForward />}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                router.push(`/${locale}/inspection/${property.id}/${category.id}`)
+                              }}
+                              sx={{
+                                bgcolor: category.color,
+                                '&:hover': { bgcolor: category.color, filter: 'brightness(0.9)' },
+                                borderRadius: '12px',
+                                textTransform: 'none',
+                                fontWeight: 600
+                              }}
+                            >
+                              Aller à {category.name}
+                            </Button>
+                          </Box>
+                        )}
                       </CardContent>
                     </Card>
                   </Box>
