@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useTranslations, useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import Image from 'next/image'
 import {
   Box,
@@ -37,8 +37,7 @@ export default function SignupCheckoutPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const locale = useLocale()
-  const t = useTranslations('signup')
-  const tPricing = useTranslations('pricing')
+  const t = useTranslations('landing')
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
@@ -52,10 +51,11 @@ export default function SignupCheckoutPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // Redirect if missing required params
-  if (!email || !fullName || !tempPassword) {
-    router.push(`/${locale}/signup`)
-    return null
+  const handleLanguageChange = (newLocale: string) => {
+    const currentPath = window.location.pathname
+    const searchParamsStr = window.location.search
+    const newPathname = currentPath.replace(`/${locale}`, `/${newLocale}`)
+    router.push(newPathname + searchParamsStr)
   }
 
   const handleCheckout = async () => {
@@ -96,18 +96,21 @@ export default function SignupCheckoutPage() {
   const creditsBundle = selectedCredits ? CREDITS_BUNDLES[selectedCredits] : null
   const totalPrice = plan.price + (creditsBundle?.price || 0)
 
-  const handleLanguageChange = (newLocale: string) => {
-    const newPathname = window.location.pathname.replace(`/${locale}`, `/${newLocale}`)
-    router.push(newPathname + window.location.search)
+  // Redirect if missing required params
+  if (!email || !fullName || !tempPassword) {
+    router.push(`/${locale}/signup`)
+    return null
   }
 
   return (
     <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <AppBar
-        position="static"
+        position="sticky"
         elevation={0}
         sx={{
+          top: 0,
+          zIndex: 1100,
           bgcolor: 'rgba(255, 255, 255, 0.95)',
           backdropFilter: 'blur(10px)',
           borderBottom: `1px solid rgba(26, 31, 54, 0.1)`,
@@ -179,44 +182,58 @@ export default function SignupCheckoutPage() {
         sx={{
           position: 'relative',
           flexGrow: 1,
-          py: 6,
+          py: { xs: 2, md: 3 },
+          px: { xs: 2, sm: 3, md: 0 },
+          backgroundImage: 'url(/backgrounds/bg6.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'fixed',
+          minHeight: 'calc(100vh - 80px)',
+          display: 'flex',
+          alignItems: 'center',
           '&::before': {
             content: '""',
-            position: 'fixed',
+            position: 'absolute',
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundImage: 'url(/backgrounds/bg7.jpg)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            filter: 'brightness(0.7)',
-            zIndex: -1,
+            backgroundColor: 'rgba(0, 0, 0, 0.3)',
+            zIndex: 0,
           },
         }}
       >
       <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
-        <Typography
-          variant="h4"
-          sx={{
-            fontFamily: 'var(--font-montserrat)',
-            fontWeight: 700,
-            color: '#1A1F36',
-            mb: 1,
-            textAlign: 'center',
-          }}
-        >
-          {locale === 'fr' ? 'Choisissez votre plan' : 'Choose Your Plan'}
-        </Typography>
-        <Typography
-          variant="body1"
-          sx={{ color: '#6B7280', textAlign: 'center', mb: 4 }}
-        >
-          {locale === 'fr'
-            ? `Bienvenue, ${fullName}! Sélectionnez votre abonnement pour commencer.`
-            : `Welcome, ${fullName}! Select your subscription to get started.`}
-        </Typography>
+        <Box sx={{ textAlign: 'center', mb: 3, mt: 1 }}>
+          <Typography
+            variant="h4"
+            sx={{
+              fontFamily: 'var(--font-montserrat)',
+              fontWeight: 800,
+              background: 'linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              mb: 1,
+              textShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            {locale === 'fr' ? 'Choisissez votre plan' : 'Choose Your Plan'}
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              color: 'rgba(255, 255, 255, 0.9)',
+              fontWeight: 400,
+              textShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
+            }}
+          >
+            {locale === 'fr'
+              ? `Bienvenue, ${fullName}! Sélectionnez votre abonnement pour commencer.`
+              : `Welcome, ${fullName}! Select your subscription to get started.`}
+          </Typography>
+        </Box>
 
         {error && (
           <Alert severity="error" sx={{ mb: 3, borderRadius: '8px' }}>
@@ -224,32 +241,38 @@ export default function SignupCheckoutPage() {
           </Alert>
         )}
 
-        <Grid container spacing={4}>
+        <Grid container spacing={3}>
           {/* Left: Plan Selection */}
           <Grid item xs={12} md={7}>
-            <Card sx={{ borderRadius: '16px', mb: 3 }}>
-              <CardContent sx={{ p: 4 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
-                  {locale === 'fr' ? 'Abonnement (Requis)' : 'Subscription (Required)'}
-                </Typography>
+            <Card sx={{ borderRadius: '16px', mb: 2, bgcolor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(10px)', boxShadow: '0 4px 24px rgba(0, 0, 0, 0.08)', transition: 'all 0.3s ease', '&:hover': { boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)', transform: 'translateY(-2px)' } }}>
+              <CardContent sx={{ p: 2.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                  <Box sx={{ width: 4, height: 20, bgcolor: '#10B981', borderRadius: 1 }} />
+                  <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1A1F36' }}>
+                    {locale === 'fr' ? 'Abonnement (Requis)' : 'Subscription (Required)'}
+                  </Typography>
+                </Box>
 
                 <RadioGroup
                   value={selectedPlan}
                   onChange={(e) => setSelectedPlan(e.target.value as PlanType)}
                 >
-                  <Stack spacing={2}>
+                  <Stack spacing={1.5}>
                     {Object.entries(STRIPE_PLANS).map(([key, planData]) => (
                       <Box
                         key={key}
                         sx={{
-                          p: 3,
+                          p: 2,
                           border: selectedPlan === key ? '2px solid #10B981' : '2px solid #E5E7EB',
                           borderRadius: '12px',
                           cursor: 'pointer',
-                          transition: 'all 0.2s',
+                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                          bgcolor: selectedPlan === key ? 'rgba(16, 185, 129, 0.05)' : 'transparent',
+                          boxShadow: selectedPlan === key ? '0 4px 12px rgba(16, 185, 129, 0.15)' : 'none',
                           '&:hover': {
                             borderColor: '#10B981',
-                            bgcolor: 'rgba(16, 185, 129, 0.02)',
+                            bgcolor: 'rgba(16, 185, 129, 0.03)',
+                            boxShadow: '0 2px 8px rgba(16, 185, 129, 0.1)',
                           },
                         }}
                         onClick={() => setSelectedPlan(key as PlanType)}
@@ -259,8 +282,8 @@ export default function SignupCheckoutPage() {
                           control={<Radio />}
                           label={
                             <Box sx={{ ml: 1, width: '100%' }}>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                                   {planData.name}
                                 </Typography>
                                 {key === 'annual' && (
@@ -271,18 +294,19 @@ export default function SignupCheckoutPage() {
                                       bgcolor: '#10B981',
                                       color: 'white',
                                       fontWeight: 600,
+                                      height: '20px',
                                     }}
                                   />
                                 )}
                               </Box>
-                              <Typography variant="h4" sx={{ fontWeight: 700, color: '#10B981', mb: 1 }}>
+                              <Typography variant="h5" sx={{ fontWeight: 700, color: '#10B981', mb: 0.5 }}>
                                 ${planData.price}
                                 <Typography component="span" variant="body2" sx={{ color: '#6B7280', ml: 1 }}>
                                   CAD/{locale === 'fr' ? 'mois' : 'month'}
                                 </Typography>
                               </Typography>
-                              {key === 'annual' && planData.savings && (
-                                <Typography variant="body2" sx={{ color: '#6B7280', mb: 1 }}>
+                              {key === 'annual' && 'savings' in planData && planData.savings && (
+                                <Typography variant="caption" sx={{ color: '#6B7280' }}>
                                   {locale === 'fr'
                                     ? `Économisez $${planData.savings}/année`
                                     : `Save $${planData.savings}/year`}
@@ -300,15 +324,17 @@ export default function SignupCheckoutPage() {
             </Card>
 
             {/* AI Credits (Optional) */}
-            <Card sx={{ borderRadius: '16px' }}>
-              <CardContent sx={{ p: 4 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                  <AutoAwesome sx={{ color: '#10B981' }} />
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            <Card sx={{ borderRadius: '16px', bgcolor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(10px)', boxShadow: '0 4px 24px rgba(0, 0, 0, 0.08)', transition: 'all 0.3s ease', '&:hover': { boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)', transform: 'translateY(-2px)' } }}>
+              <CardContent sx={{ p: 2.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '8px', background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)' }}>
+                    <AutoAwesome sx={{ color: 'white', fontSize: 18 }} />
+                  </Box>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1A1F36' }}>
                     {locale === 'fr' ? 'Crédits IA (Optionnel)' : 'AI Credits (Optional)'}
                   </Typography>
                 </Box>
-                <Typography variant="body2" sx={{ color: '#6B7280', mb: 3 }}>
+                <Typography variant="caption" sx={{ color: '#6B7280', mb: 2, display: 'block' }}>
                   {locale === 'fr'
                     ? 'Ajoutez des crédits pour utiliser les fonctionnalités IA. Vous pouvez aussi en acheter plus tard.'
                     : 'Add credits to use AI features. You can also purchase more later.'}
@@ -318,10 +344,10 @@ export default function SignupCheckoutPage() {
                   value={selectedCredits || ''}
                   onChange={(e) => setSelectedCredits(e.target.value as CreditsBundleType || null)}
                 >
-                  <Stack spacing={2}>
+                  <Stack spacing={1.5}>
                     <Box
                       sx={{
-                        p: 2,
+                        p: 1.5,
                         border: selectedCredits === null ? '2px solid #10B981' : '2px solid #E5E7EB',
                         borderRadius: '12px',
                         cursor: 'pointer',
@@ -336,7 +362,7 @@ export default function SignupCheckoutPage() {
                         value=""
                         control={<Radio />}
                         label={
-                          <Typography sx={{ ml: 1 }}>
+                          <Typography variant="body2" sx={{ ml: 1 }}>
                             {locale === 'fr' ? 'Pas maintenant' : 'Not now'}
                           </Typography>
                         }
@@ -347,7 +373,7 @@ export default function SignupCheckoutPage() {
                       <Box
                         key={key}
                         sx={{
-                          p: 2,
+                          p: 1.5,
                           border: selectedCredits === key ? '2px solid #10B981' : '2px solid #E5E7EB',
                           borderRadius: '12px',
                           cursor: 'pointer',
@@ -404,38 +430,48 @@ export default function SignupCheckoutPage() {
                 borderRadius: '16px',
                 position: 'sticky',
                 top: 100,
-                bgcolor: 'rgba(16, 185, 129, 0.05)',
-                border: '1px solid #10B981',
+                bgcolor: 'rgba(255, 255, 255, 0.98)',
+                backdropFilter: 'blur(10px)',
+                border: '2px solid #10B981',
+                boxShadow: '0 12px 40px rgba(16, 185, 129, 0.2)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  boxShadow: '0 16px 48px rgba(16, 185, 129, 0.25)',
+                  transform: 'translateY(-4px)',
+                },
               }}
             >
-              <CardContent sx={{ p: 4 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
-                  {locale === 'fr' ? 'Résumé de la commande' : 'Order Summary'}
-                </Typography>
+              <CardContent sx={{ p: 2.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                  <Box sx={{ width: 4, height: 24, bgcolor: '#10B981', borderRadius: 1 }} />
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#1A1F36' }}>
+                    {locale === 'fr' ? 'Résumé de la commande' : 'Order Summary'}
+                  </Typography>
+                </Box>
 
-                <Stack spacing={2} sx={{ mb: 3 }}>
+                <Stack spacing={1.5} sx={{ mb: 2 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography>{plan.name} {locale === 'fr' ? 'Abonnement' : 'Subscription'}</Typography>
-                    <Typography sx={{ fontWeight: 600 }}>${plan.price} CAD</Typography>
+                    <Typography variant="body2">{plan.name} {locale === 'fr' ? 'Abonnement' : 'Subscription'}</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>${plan.price} CAD</Typography>
                   </Box>
 
                   {creditsBundle && (
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <Typography>
+                      <Typography variant="body2">
                         {creditsBundle.credits} {locale === 'fr' ? 'crédits IA' : 'AI credits'}
                       </Typography>
-                      <Typography sx={{ fontWeight: 600 }}>${creditsBundle.price} CAD</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>${creditsBundle.price} CAD</Typography>
                     </Box>
                   )}
                 </Stack>
 
-                <Divider sx={{ my: 2 }} />
+                <Divider sx={{ my: 1.5 }} />
 
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                     Total
                   </Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#10B981' }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#10B981' }}>
                     ${totalPrice} CAD
                   </Typography>
                 </Box>
@@ -480,6 +516,160 @@ export default function SignupCheckoutPage() {
           </Grid>
         </Grid>
       </Container>
+      </Box>
+
+      {/* Footer */}
+      <Box
+        sx={{
+          bgcolor: '#0F1419',
+          color: '#E8E2D5',
+          pt: 6,
+          pb: 3,
+          borderTop: '1px solid rgba(232, 226, 213, 0.1)',
+        }}
+      >
+        <Container maxWidth="lg">
+          <Grid container spacing={4} sx={{ mb: 4 }}>
+            {/* Brand Section */}
+            <Grid item xs={12} md={6}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Box
+                  sx={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: '50%',
+                    bgcolor: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mr: 2,
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                    position: 'relative',
+                  }}
+                >
+                  <Image
+                    src="/logo.png"
+                    alt="Valea Max"
+                    width={44}
+                    height={44}
+                    style={{ borderRadius: '8px', position: 'relative', zIndex: 1 }}
+                  />
+                </Box>
+                <Box>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontFamily: 'var(--font-montserrat)',
+                      fontWeight: 700,
+                      color: '#E8E2D5',
+                      fontSize: '1.1rem',
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    Valea Max
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'rgba(232, 226, 213, 0.6)',
+                      fontSize: '0.7rem',
+                      letterSpacing: '0.03em',
+                      display: 'block',
+                    }}
+                  >
+                    {locale === 'fr' ? 'Évaluation immobilière' : 'Real Estate Valuation'}
+                  </Typography>
+                </Box>
+              </Box>
+            </Grid>
+
+            {/* Language Toggle */}
+            <Grid item xs={12} md={6} sx={{ display: 'flex', justifyContent: { xs: 'flex-start', md: 'flex-end' }, alignItems: 'center' }}>
+              <Stack direction="row" spacing={1}>
+                <Button
+                  onClick={() => handleLanguageChange('fr')}
+                  variant={locale === 'fr' ? 'contained' : 'outlined'}
+                  size="small"
+                  startIcon={<LanguageIcon />}
+                  sx={{
+                    borderRadius: '6px',
+                    textTransform: 'none',
+                    fontSize: '0.85rem',
+                    ...(locale === 'fr'
+                      ? {
+                          background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                          color: 'white',
+                          '&:hover': {
+                            background: 'linear-gradient(135deg, #0ea570 0%, #047857 100%)',
+                          },
+                        }
+                      : {
+                          borderColor: 'rgba(232, 226, 213, 0.3)',
+                          color: 'rgba(232, 226, 213, 0.6)',
+                          '&:hover': {
+                            borderColor: '#10B981',
+                            color: '#10B981',
+                            bgcolor: 'rgba(16, 185, 129, 0.05)',
+                          },
+                        }),
+                  }}
+                >
+                  Français
+                </Button>
+                <Button
+                  onClick={() => handleLanguageChange('en')}
+                  variant={locale === 'en' ? 'contained' : 'outlined'}
+                  size="small"
+                  startIcon={<LanguageIcon />}
+                  sx={{
+                    borderRadius: '6px',
+                    textTransform: 'none',
+                    fontSize: '0.85rem',
+                    ...(locale === 'en'
+                      ? {
+                          background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                          color: 'white',
+                          '&:hover': {
+                            background: 'linear-gradient(135deg, #0ea570 0%, #047857 100%)',
+                          },
+                        }
+                      : {
+                          borderColor: 'rgba(232, 226, 213, 0.3)',
+                          color: 'rgba(232, 226, 213, 0.6)',
+                          '&:hover': {
+                            borderColor: '#10B981',
+                            color: '#10B981',
+                            bgcolor: 'rgba(16, 185, 129, 0.05)',
+                          },
+                        }),
+                  }}
+                >
+                  English
+                </Button>
+              </Stack>
+            </Grid>
+          </Grid>
+
+          {/* Bottom Bar */}
+          <Box
+            sx={{
+              pt: 3,
+              borderTop: '1px solid rgba(232, 226, 213, 0.1)',
+              textAlign: 'center',
+            }}
+          >
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'rgba(232, 226, 213, 0.5)',
+                fontSize: '0.85rem',
+                letterSpacing: '0.02em',
+              }}
+            >
+              © {new Date().getFullYear()} Valea Max. {t('footer.rights')}
+            </Typography>
+          </Box>
+        </Container>
       </Box>
     </Box>
   )
