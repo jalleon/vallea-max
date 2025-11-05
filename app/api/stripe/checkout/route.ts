@@ -37,6 +37,12 @@ export async function POST(request: Request) {
       ],
       success_url: `${request.headers.get('origin')}/dashboard?payment=success`,
       cancel_url: `${request.headers.get('origin')}/pricing?payment=cancelled`,
+      // Enable automatic tax calculation
+      automatic_tax: {
+        enabled: true,
+      },
+      // Collect billing address for tax calculation
+      billing_address_collection: 'required',
       metadata: {
         userId,
         planType,

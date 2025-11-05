@@ -34,7 +34,8 @@
       "Bash(else echo \"cache not found\")",
       "Bash(else echo \".next not found\")",
       "Bash(npx supabase migration new:*)",
-      "Bash(npx supabase:*)"
+      "Bash(npx supabase:*)",
+      "Bash(git restore:*)"
     ],
     "deny": [],
     "ask": []
