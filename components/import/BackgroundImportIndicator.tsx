@@ -12,11 +12,6 @@ export function BackgroundImportIndicator() {
   const locale = useLocale();
   const router = useRouter();
 
-  // Don't show if not processing
-  if (!state.isProcessing && state.processedFiles === 0) {
-    return null;
-  }
-
   const progress = state.totalFiles > 0
     ? (state.processedFiles / state.totalFiles) * 100
     : 0;
@@ -34,6 +29,11 @@ export function BackgroundImportIndicator() {
       return () => clearTimeout(timer);
     }
   }, [isComplete, clearProgressOnly]);
+
+  // Don't show if not processing (AFTER all hooks)
+  if (!state.isProcessing && state.processedFiles === 0) {
+    return null;
+  }
 
   const handleClick = () => {
     console.log('Click handler called:', {

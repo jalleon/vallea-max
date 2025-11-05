@@ -211,6 +211,66 @@ export const settingsService = {
   },
 
   /**
+   * Enable or disable using own API keys (bypasses master key system)
+   */
+  async toggleOwnApiKeys(enabled: boolean): Promise<boolean> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        console.error('No authenticated user found');
+        return false;
+      }
+
+      const { error } = await supabase
+        .from('users')
+        .update({
+          can_use_own_api_keys: enabled
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('Error updating can_use_own_api_keys:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Exception in toggleOwnApiKeys:', error);
+      return false;
+    }
+  },
+
+  /**
+   * Check if user can use their own API keys
+   */
+  async canUseOwnApiKeys(): Promise<boolean> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        return false;
+      }
+
+      const { data, error } = await supabase
+        .from('users')
+        .select('can_use_own_api_keys')
+        .eq('id', user.id)
+        .single();
+
+      if (error || !data) {
+        console.error('Error checking can_use_own_api_keys:', error);
+        return false;
+      }
+
+      return data.can_use_own_api_keys || false;
+    } catch (error) {
+      console.error('Exception in canUseOwnApiKeys:', error);
+      return false;
+    }
+  },
+
+  /**
    * Get AI API key for a specific provider
    */
   async getAiApiKey(provider: 'deepseek' | 'openai' | 'anthropic'): Promise<string | null> {

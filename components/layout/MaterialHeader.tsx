@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   AppBar,
   Toolbar,
@@ -44,6 +44,8 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null)
   const [apiKeysDialogOpen, setApiKeysDialogOpen] = useState(false)
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false) // Hidden by default
+  const [languageExpanded, setLanguageExpanded] = useState(false) // Language submenu collapsed by default
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
@@ -91,6 +93,19 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
     handleSettingsClose()
     handleMenuClose()
   }
+
+  // Secret keyboard shortcut to show settings menu: Ctrl+Shift+S
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.shiftKey && event.key === 'S') {
+        event.preventDefault()
+        setShowSettingsMenu(prev => !prev)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   // Get user initials for avatar
   const userInitials = user?.user_metadata?.full_name
@@ -184,32 +199,46 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
             transformOrigin={{ horizontal: 'left', vertical: 'top' }}
             anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
           >
-            <MenuItem disabled>
+            <MenuItem onClick={() => setLanguageExpanded(!languageExpanded)}>
               <ListItemIcon>
                 <Language fontSize="small" />
               </ListItemIcon>
               <ListItemText primary="Langue / Language" />
+              <ChevronRight
+                fontSize="small"
+                sx={{
+                  transform: languageExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.2s'
+                }}
+              />
             </MenuItem>
-            <Divider />
-            <MenuItem
-              onClick={() => handleLanguageChange('fr')}
-              selected={locale === 'fr'}
-            >
-              <ListItemText inset>Français</ListItemText>
-            </MenuItem>
-            <MenuItem
-              onClick={() => handleLanguageChange('en')}
-              selected={locale === 'en'}
-            >
-              <ListItemText inset>English</ListItemText>
-            </MenuItem>
-            <Divider />
-            <MenuItem onClick={handleOpenApiKeysDialog}>
-              <ListItemIcon>
-                <Key fontSize="small" />
-              </ListItemIcon>
-              <ListItemText primary={t('menu.aiApiKeys')} />
-            </MenuItem>
+            {languageExpanded && (
+              <>
+                <MenuItem
+                  onClick={() => handleLanguageChange('fr')}
+                  selected={locale === 'fr'}
+                >
+                  <ListItemText inset>Français</ListItemText>
+                </MenuItem>
+                <MenuItem
+                  onClick={() => handleLanguageChange('en')}
+                  selected={locale === 'en'}
+                >
+                  <ListItemText inset>English</ListItemText>
+                </MenuItem>
+              </>
+            )}
+            {showSettingsMenu && (
+              <>
+                <Divider />
+                <MenuItem onClick={handleOpenApiKeysDialog}>
+                  <ListItemIcon>
+                    <Key fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText primary={t('menu.aiApiKeys')} />
+                </MenuItem>
+              </>
+            )}
           </Menu>
         </Box>
       </Toolbar>

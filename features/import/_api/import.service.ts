@@ -33,11 +33,17 @@ class ImportService {
     };
 
     try {
+      // Get auth session for API call
+      const { data: { session: authSession } } = await supabase.auth.getSession();
+
       // Call API route for text processing
       const response = await fetch('/api/import/process-text', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(authSession?.access_token ? {
+            'Authorization': `Bearer ${authSession.access_token}`
+          } : {}),
         },
         body: JSON.stringify({
           text,
@@ -98,6 +104,9 @@ class ImportService {
     };
 
     try {
+      // Get auth session for API call
+      const { data: { session: authSession } } = await supabase.auth.getSession();
+
       // Call API route for server-side PDF processing
       const formData = new FormData();
       formData.append('file', file);
@@ -110,6 +119,9 @@ class ImportService {
 
       const response = await fetch('/api/import/process-pdf', {
         method: 'POST',
+        headers: authSession?.access_token ? {
+          'Authorization': `Bearer ${authSession.access_token}`
+        } : {},
         body: formData,
       });
 

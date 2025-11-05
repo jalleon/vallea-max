@@ -530,8 +530,159 @@ export type Database = {
           },
         ]
       }
+      admin_api_keys: {
+        Row: {
+          id: string
+          provider: string
+          api_key: string
+          model: string
+          is_active: boolean
+          priority: number
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          provider: string
+          api_key: string
+          model: string
+          is_active?: boolean
+          priority?: number
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          provider?: string
+          api_key?: string
+          model?: string
+          is_active?: boolean
+          priority?: number
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      usage_tracking: {
+        Row: {
+          id: string
+          user_id: string
+          organization_id: string | null
+          operation_type: string
+          document_type: string | null
+          file_size_bytes: number | null
+          page_count: number | null
+          credits_used: number
+          provider_used: string | null
+          model_used: string | null
+          tokens_input: number | null
+          tokens_output: number | null
+          cost_estimate: number | null
+          success: boolean
+          error_message: string | null
+          processing_time_ms: number | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          organization_id?: string | null
+          operation_type: string
+          document_type?: string | null
+          file_size_bytes?: number | null
+          page_count?: number | null
+          credits_used?: number
+          provider_used?: string | null
+          model_used?: string | null
+          tokens_input?: number | null
+          tokens_output?: number | null
+          cost_estimate?: number | null
+          success?: boolean
+          error_message?: string | null
+          processing_time_ms?: number | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          organization_id?: string | null
+          operation_type?: string
+          document_type?: string | null
+          file_size_bytes?: number | null
+          page_count?: number | null
+          credits_used?: number
+          provider_used?: string | null
+          model_used?: string | null
+          tokens_input?: number | null
+          tokens_output?: number | null
+          cost_estimate?: number | null
+          success?: boolean
+          error_message?: string | null
+          processing_time_ms?: number | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_tracking_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      user_subscriptions: {
+        Row: {
+          id: string
+          user_id: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
+          status: string
+          plan_type: string
+          current_period_start: string | null
+          current_period_end: string | null
+          cancel_at_period_end: boolean
+          cancelled_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
+          status: string
+          plan_type: string
+          current_period_start?: string | null
+          current_period_end?: string | null
+          cancel_at_period_end?: boolean
+          cancelled_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          stripe_customer_id?: string
+          stripe_subscription_id?: string
+          status?: string
+          plan_type?: string
+          current_period_start?: string | null
+          current_period_end?: string | null
+          cancel_at_period_end?: boolean
+          cancelled_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       users: {
         Row: {
+          api_key_secret_enabled: boolean | null
+          can_use_own_api_keys: boolean | null
           created_at: string | null
           email: string
           full_name: string | null
@@ -539,8 +690,13 @@ export type Database = {
           organization_id: string | null
           preferences: Json | null
           role: string | null
+          scan_credits_quota: number | null
+          scan_credits_reset_at: string | null
+          scan_credits_used: number | null
         }
         Insert: {
+          api_key_secret_enabled?: boolean | null
+          can_use_own_api_keys?: boolean | null
           created_at?: string | null
           email: string
           full_name?: string | null
@@ -548,8 +704,13 @@ export type Database = {
           organization_id?: string | null
           preferences?: Json | null
           role?: string | null
+          scan_credits_quota?: number | null
+          scan_credits_reset_at?: string | null
+          scan_credits_used?: number | null
         }
         Update: {
+          api_key_secret_enabled?: boolean | null
+          can_use_own_api_keys?: boolean | null
           created_at?: string | null
           email?: string
           full_name?: string | null
@@ -557,6 +718,9 @@ export type Database = {
           organization_id?: string | null
           preferences?: Json | null
           role?: string | null
+          scan_credits_quota?: number | null
+          scan_credits_reset_at?: string | null
+          scan_credits_used?: number | null
         }
         Relationships: [
           {
@@ -567,6 +731,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      waitlist: {
+        Row: {
+          id: string
+          email: string
+          name: string
+          locale: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          name: string
+          locale?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          name?: string
+          locale?: string
+          created_at?: string
+        }
+        Relationships: []
       }
     }
     Views: {
