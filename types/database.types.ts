@@ -732,6 +732,39 @@ export type Database = {
           },
         ]
       }
+      demo_requests: {
+        Row: {
+          id: string
+          email: string
+          name: string
+          company: string | null
+          phone: string | null
+          message: string | null
+          locale: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          name: string
+          company?: string | null
+          phone?: string | null
+          message?: string | null
+          locale?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          name?: string
+          company?: string | null
+          phone?: string | null
+          message?: string | null
+          locale?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
       waitlist: {
         Row: {
           id: string
