@@ -1355,11 +1355,31 @@ export default function LandingPage() {
                   color: 'rgba(232, 226, 213, 0.6)',
                   lineHeight: 1.7,
                   fontSize: '0.9rem',
+                  mb: 2,
                 }}
               >
                 {locale === 'fr'
                   ? 'Plateforme professionnelle d\'évaluation immobilière avec intelligence artificielle.'
                   : 'Professional real estate appraisal platform with artificial intelligence.'}
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'rgba(232, 226, 213, 0.6)',
+                  fontSize: '0.9rem',
+                }}
+              >
+                <a
+                  href="mailto:contact@valeamax.com"
+                  style={{
+                    color: '#10B981',
+                    textDecoration: 'none',
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+                  onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+                >
+                  contact@valeamax.com
+                </a>
               </Typography>
             </Grid>
 
