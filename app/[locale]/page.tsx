@@ -45,6 +45,7 @@ import {
   Description,
   Language as LanguageIcon,
 } from '@mui/icons-material'
+import WaitlistForm from '@/components/landing/WaitlistForm'
 
 export default function LandingPage() {
   const t = useTranslations('landing')
@@ -59,10 +60,15 @@ export default function LandingPage() {
 
   const features = [
     {
-      icon: <SmartToy sx={{ fontSize: 48 }} />,
-      title: t('features.aiPdf.title'),
-      description: t('features.aiPdf.description'),
+      icon: <Description sx={{ fontSize: 48 }} />,
+      title: t('features.reports.title'),
+      description: t('features.reports.description'),
       highlight: true,
+    },
+    {
+      icon: <SmartToy sx={{ fontSize: 48 }} />,
+      title: t('features.dataImport.title'),
+      description: t('features.dataImport.description'),
     },
     {
       icon: <Dashboard sx={{ fontSize: 48 }} />,
@@ -81,13 +87,8 @@ export default function LandingPage() {
     },
     {
       icon: <TrendingUp sx={{ fontSize: 48 }} />,
-      title: t('features.analytics.title'),
-      description: t('features.analytics.description'),
-    },
-    {
-      icon: <Cloud sx={{ fontSize: 48 }} />,
-      title: t('features.cloud.title'),
-      description: t('features.cloud.description'),
+      title: t('features.dashboard.title'),
+      description: t('features.dashboard.description'),
     },
   ]
 
@@ -213,6 +214,16 @@ export default function LandingPage() {
                 >
                   {t('nav.pricing')}
                 </Button>
+                <Button
+                  color="inherit"
+                  onClick={() => handleScroll('waitlist')}
+                  sx={{
+                    color: 'text.primary',
+                    fontWeight: 600,
+                  }}
+                >
+                  {t('nav.waitlist')}
+                </Button>
               </Stack>
             )}
 
@@ -268,6 +279,14 @@ export default function LandingPage() {
             <ListItem disablePadding>
               <ListItemButton onClick={() => handleScroll('pricing')}>
                 <ListItemText primary={t('nav.pricing')} />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => handleScroll('waitlist')}>
+                <ListItemText
+                  primary={t('nav.waitlist')}
+                  sx={{ fontWeight: 600 }}
+                />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -861,7 +880,7 @@ export default function LandingPage() {
                   </Typography>
                   <Box sx={{ textAlign: 'center', my: 4 }}>
                     <Typography variant="h2" fontWeight={600} component="span" sx={{ color: '#1A1F36' }}>
-                      100$
+                      99$
                     </Typography>
                     <Typography variant="h6" sx={{ color: '#4A5568' }} component="span">
                       {' '}/ {tPricing('month')}
@@ -956,13 +975,13 @@ export default function LandingPage() {
                   </Typography>
                   <Box sx={{ textAlign: 'center', my: 4 }}>
                     <Typography variant="h2" fontWeight={600} component="span" sx={{ color: '#10B981' }}>
-                      80$
+                      79$
                     </Typography>
                     <Typography variant="h6" sx={{ color: '#4A5568' }} component="span">
                       {' '}/ {tPricing('month')}
                     </Typography>
                     <Typography variant="body2" sx={{ color: '#10B981', fontWeight: 600, mt: 1 }}>
-                      960$ {tPricing('billedAnnually')}
+                      948$ {tPricing('billedAnnually')}
                     </Typography>
                     <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       CAD
@@ -1124,6 +1143,71 @@ export default function LandingPage() {
         </Container>
       </Box>
 
+      {/* Waitlist Section */}
+      <Box
+        id="waitlist"
+        sx={{
+          background: 'linear-gradient(135deg, #059669 0%, #10B981 50%, #34D399 100%)',
+          py: { xs: 10, md: 14 },
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: `
+              radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+              radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+              repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 40px,
+                rgba(255, 255, 255, 0.03) 40px,
+                rgba(255, 255, 255, 0.03) 80px
+              )
+            `,
+            pointerEvents: 'none',
+          },
+        }}
+      >
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
+          <Box sx={{ textAlign: 'center', mb: 6 }}>
+            <Typography
+              variant="h2"
+              sx={{
+                fontSize: { xs: '2rem', md: '3rem' },
+                fontWeight: 400,
+                mb: 2,
+                color: 'white',
+                fontFamily: 'var(--font-fraunces)',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {t('waitlist.title')}
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{
+                maxWidth: 600,
+                mx: 'auto',
+                color: 'rgba(255, 255, 255, 0.95)',
+                fontWeight: 300,
+                fontSize: '1.15rem',
+                lineHeight: 1.7,
+                mb: 4,
+              }}
+            >
+              {t('waitlist.subtitle')}
+            </Typography>
+          </Box>
+
+          <WaitlistForm />
+        </Container>
+      </Box>
+
       {/* Footer */}
       <Box
         sx={{
@@ -1267,6 +1351,24 @@ export default function LandingPage() {
                   }}
                 >
                   {t('nav.pricing')}
+                </Button>
+                <Button
+                  onClick={() => handleScroll('waitlist')}
+                  sx={{
+                    justifyContent: 'flex-start',
+                    color: 'rgba(232, 226, 213, 0.6)',
+                    textTransform: 'none',
+                    fontSize: '0.9rem',
+                    p: 0,
+                    minWidth: 0,
+                    fontWeight: 600,
+                    '&:hover': {
+                      color: '#10B981',
+                      bgcolor: 'transparent',
+                    },
+                  }}
+                >
+                  {t('nav.waitlist')}
                 </Button>
               </Stack>
             </Grid>
@@ -1442,3 +1544,4 @@ export default function LandingPage() {
     </Box>
   )
 }
+

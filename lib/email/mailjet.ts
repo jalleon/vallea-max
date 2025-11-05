@@ -427,7 +427,7 @@ export const emailService = {
 <body>
   <div class="container">
     <div class="header">
-      <h1>${isEnglish ? '🎉 You\'re In!' : '🎉 Vous êtes inscrit !'}</h1>
+      <h1>${isEnglish ? 'You\'re In!' : 'Vous êtes inscrit !'}</h1>
     </div>
 
     <div class="content">
@@ -448,11 +448,16 @@ export const emailService = {
 </html>
     `
 
+    const textContent = isEnglish
+      ? `Thank you, ${name}!\n\nYou've been added to the Valea Max waitlist. We'll notify you as soon as we launch!\n\n© ${new Date().getFullYear()} Valea Max`
+      : `Merci, ${name}!\n\nVous avez été ajouté à la liste d'attente Valea Max. Nous vous informerons dès le lancement !\n\n© ${new Date().getFullYear()} Valea Max`
+
     return emailService.sendEmail({
       to: email,
       toName: name,
       subject,
-      htmlContent
+      htmlContent,
+      textContent
     })
   }
 }

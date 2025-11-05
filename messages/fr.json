@@ -899,7 +899,15 @@
     "getStarted": "Commencer",
     "save240": "Économisez 240$/an (20% de rabais)",
     "footer": "Tous les forfaits incluent un essai gratuit de 14 jours. Annulez à tout moment.",
-    "billedAnnually": "facturé annuellement"
+    "billedAnnually": "facturé annuellement",
+    "benefits": {
+      "unlimited": "Propriétés et rapports illimités",
+      "reporting": "Rapports d'évaluation professionnels",
+      "support": "Support prioritaire par email",
+      "mobile": "Application mobile (iOS et Android)",
+      "export": "Export PDF et Excel",
+      "updates": "Mises à jour et nouvelles fonctionnalités"
+    }
   },
 
   "landing": {
@@ -907,6 +915,7 @@
       "features": "Fonctionnalités",
       "screenshots": "Captures d'écran",
       "pricing": "Tarifs",
+      "waitlist": "Liste d'attente",
       "login": "Connexion",
       "signup": "S'inscrire"
     },
@@ -922,29 +931,29 @@
       "title": "Tout ce dont vous avez besoin",
       "subtitle": "Des outils professionnels pour des évaluations immobilières de qualité",
       "newBadge": "Nouveau",
-      "aiPdf": {
-        "title": "Lecteur PDF intelligent avec IA",
-        "description": "Importez des PDF de comparables et laissez notre IA extraire automatiquement toutes les données. Ajoutez plusieurs propriétés à votre bibliothèque en quelques secondes."
+      "reports": {
+        "title": "Rapports professionnels",
+        "description": "Complétez des rapports d'évaluation complets avec facilité. Remplissez automatiquement les PDFs dynamiques des grandes AMC avec notre plugin desktop et tirez parti de l'IA pour générer des rapports professionnels plus rapidement."
+      },
+      "dataImport": {
+        "title": "Importation intelligente de données",
+        "description": "Importez des données immobilières depuis des PDFs MLS/Matrix ou directement depuis les sites web MLS/Matrix avec notre extension de navigateur. Notre IA extrait avec précision toutes les données de comparables pertinentes incluant les informations municipales et ajoute les dossiers de vente à votre bibliothèque en quelques secondes."
       },
       "propertyLibrary": {
         "title": "Bibliothèque de propriétés",
-        "description": "Gérez votre portefeuille immobilier avec des recherches avancées, des filtres dynamiques et des exports PDF/Excel. Toutes vos données au même endroit."
+        "description": "Gérez un nombre illimité de propriétés avec des recherches avancées, des filtres dynamiques et des exports PDF/Excel. Toutes vos données immobilières au même endroit."
       },
       "inspections": {
         "title": "Inspections détaillées",
-        "description": "Créez des rapports d'inspection complets avec des photos, des mesures et des notes. Suivi des progrès en temps réel par catégorie."
+        "description": "Effectuez des inspections complètes pièce par pièce avec mesures et notes. Interface optimisée pour tablette avec suivi des progrès en temps réel par catégorie."
       },
       "comparables": {
         "title": "Analyse de comparables",
-        "description": "Trouvez et comparez des propriétés similaires avec des ajustements automatiques. Analyses de marché précises pour des évaluations fiables."
+        "description": "Trouvez et comparez des propriétés similaires avec facilité. Les calculs clés sont effectués automatiquement pour des évaluations précises et fiables."
       },
-      "analytics": {
-        "title": "Analyses de marché",
-        "description": "Accédez à des données de marché actualisées et des analyses comparatives pour des évaluations précises basées sur des données réelles."
-      },
-      "cloud": {
-        "title": "Accès cloud sécurisé",
-        "description": "Accédez à vos données depuis n'importe où avec notre plateforme cloud. Synchronisation en temps réel et sauvegardes automatiques."
+      "dashboard": {
+        "title": "Tableau de bord de performance",
+        "description": "Suivez votre activité d'évaluation et vos indicateurs de performance. Analysez votre portefeuille immobilier avec des statistiques en temps réel et des informations sur votre productivité."
       }
     },
     "screenshots": {
@@ -990,6 +999,16 @@
     },
     "footer": {
       "rights": "Tous droits réservés."
+    },
+    "waitlist": {
+      "title": "Rejoignez la Liste d'Attente",
+      "subtitle": "Soyez parmi les premiers à essayer Valea Max",
+      "namePlaceholder": "Nom complet",
+      "emailPlaceholder": "Adresse email",
+      "submitButton": "Rejoindre la liste",
+      "success": "Merci! Vous êtes maintenant sur la liste d'attente.",
+      "error": "Une erreur est survenue. Veuillez réessayer.",
+      "alreadyExists": "Cet email est déjà sur la liste d'attente."
     }
   },
 

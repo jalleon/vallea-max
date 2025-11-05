@@ -777,7 +777,15 @@
     "getStarted": "Get Started",
     "save240": "Save $240/year (20% discount)",
     "footer": "All plans include a 14-day free trial. Cancel anytime.",
-    "billedAnnually": "billed annually"
+    "billedAnnually": "billed annually",
+    "benefits": {
+      "unlimited": "Unlimited properties and reports",
+      "reporting": "Professional appraisal reports",
+      "support": "Priority email support",
+      "mobile": "Mobile app (iOS and Android)",
+      "export": "PDF and Excel export",
+      "updates": "Updates and new features"
+    }
   },
 
   "landing": {
@@ -785,6 +793,7 @@
       "features": "Features",
       "screenshots": "Screenshots",
       "pricing": "Pricing",
+      "waitlist": "Waitlist",
       "login": "Login",
       "signup": "Sign Up"
     },
@@ -800,29 +809,29 @@
       "title": "Everything You Need",
       "subtitle": "Professional tools for quality real estate appraisals",
       "newBadge": "New",
-      "aiPdf": {
-        "title": "Smart AI PDF Reader",
-        "description": "Import comparable PDFs and let our AI automatically extract all data. Add multiple properties to your library in seconds."
+      "reports": {
+        "title": "Professional Reports",
+        "description": "Complete comprehensive appraisal reports with ease. Auto-fill dynamic PDFs from major AMCs with our desktop plugin and leverage AI for faster professional report generation."
+      },
+      "dataImport": {
+        "title": "Smart Data Import",
+        "description": "Import property data from MLS/Matrix PDFs or directly from MLS/Matrix listing websites with our browser extension. Our AI accurately extracts all relevant comparable data including municipality information and adds sale records to your library in seconds."
       },
       "propertyLibrary": {
         "title": "Property Library",
-        "description": "Manage your real estate portfolio with advanced search, dynamic filters, and PDF/Excel exports. All your data in one place."
+        "description": "Manage unlimited properties with advanced search, dynamic filters, and PDF/Excel exports. All your real estate data in one place."
       },
       "inspections": {
         "title": "Detailed Inspections",
-        "description": "Create comprehensive inspection reports with photos, measurements, and notes. Real-time progress tracking by category."
+        "description": "Conduct comprehensive room-by-room inspections with measurements and notes. Tablet-optimized interface with real-time progress tracking by category."
       },
       "comparables": {
         "title": "Comparable Analysis",
-        "description": "Find and compare similar properties with automatic adjustments. Accurate market analysis for reliable appraisals."
+        "description": "Find and compare similar properties with ease. Key calculations done automatically for accurate and reliable appraisals."
       },
-      "analytics": {
-        "title": "Market Analytics",
-        "description": "Access up-to-date market data and comparative analysis for accurate appraisals based on real data."
-      },
-      "cloud": {
-        "title": "Secure Cloud Access",
-        "description": "Access your data from anywhere with our cloud platform. Real-time sync and automatic backups."
+      "dashboard": {
+        "title": "Performance Dashboard",
+        "description": "Track your appraisal activity and performance metrics. Analyze your property portfolio with real-time statistics and productivity insights."
       }
     },
     "screenshots": {
@@ -868,6 +877,16 @@
     },
     "footer": {
       "rights": "All rights reserved."
+    },
+    "waitlist": {
+      "title": "Join the Waitlist",
+      "subtitle": "Be among the first to try Valea Max",
+      "namePlaceholder": "Full name",
+      "emailPlaceholder": "Email address",
+      "submitButton": "Join waitlist",
+      "success": "Thank you! You're now on the waitlist.",
+      "error": "An error occurred. Please try again.",
+      "alreadyExists": "This email is already on the waitlist."
     }
   },
 
