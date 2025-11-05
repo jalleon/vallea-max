@@ -402,7 +402,7 @@ export default function SignupCheckoutPage() {
                                     />
                                   )}
                                 </Box>
-                                {bundle.savings && (
+                                {'savings' in bundle && bundle.savings && (
                                   <Typography variant="caption" sx={{ color: '#10B981' }}>
                                     {locale === 'fr' ? 'Économisez' : 'Save'} ${bundle.savings}
                                   </Typography>
