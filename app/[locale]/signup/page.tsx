@@ -73,28 +73,15 @@ export default function SignupPage() {
       return
     }
 
-    setLoading(true)
+    // Redirect to checkout page with user info
+    // Account will be created after successful Stripe payment
+    const params = new URLSearchParams({
+      email: email,
+      name: fullName,
+      temp: btoa(password) // Base64 encode password temporarily
+    })
 
-    // Clear any existing session first to avoid conflicts
-    await supabase.auth.signOut()
-
-    const { error: signUpError } = await signUp(email, password, fullName)
-
-    if (signUpError) {
-      if (signUpError.message.includes('already registered')) {
-        setError(t('errors.emailExists'))
-      } else {
-        setError(signUpError.message)
-      }
-      setLoading(false)
-    } else {
-      setSuccess(true)
-      setLoading(false)
-      // Auto-login after signup
-      setTimeout(() => {
-        router.push(`/${locale}/dashboard`)
-      }, 2000)
-    }
+    router.push(`/${locale}/signup-checkout?${params.toString()}`)
   }
 
   const handleGoogleSignup = async () => {
