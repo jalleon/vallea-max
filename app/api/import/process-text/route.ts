@@ -8,7 +8,7 @@ import { aiExtractionService } from '@/features/import/_api/ai-extraction.servic
 import { DocumentType } from '@/features/import/types/import.types';
 import { adminApiKeysService } from '@/features/admin/_api/admin-api-keys.service';
 import { usageTrackingService } from '@/features/admin/_api/usage-tracking.service';
-import { createClient } from "@supabase/supabase-js";
+import { createRouteClient } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
@@ -151,19 +151,19 @@ export async function POST(request: NextRequest) {
     const processingTime = Date.now() - startTime;
     await usageTrackingService.trackUsage({
       user_id: user.id,
-      organization_id: user.user_metadata?.organization_id || null,
+      organization_id: user.user_metadata?.organization_id,
       operation_type: 'text_extract',
       document_type: documentType,
       file_size_bytes: text.length,
-      page_count: null,
+      page_count: undefined,
       credits_used: creditsNeeded,
       provider_used: provider || 'deepseek',
-      model_used: model || null,
-      tokens_input: null,
-      tokens_output: null,
-      cost_estimate: null,
+      model_used: model,
+      tokens_input: undefined,
+      tokens_output: undefined,
+      cost_estimate: undefined,
       success: true,
-      error_message: null,
+      error_message: undefined,
       processing_time_ms: processingTime,
     });
 
@@ -188,17 +188,17 @@ export async function POST(request: NextRequest) {
 
         await usageTrackingService.trackUsage({
           user_id: user.id,
-          organization_id: user.user_metadata?.organization_id || null,
+          organization_id: user.user_metadata?.organization_id,
           operation_type: 'text_extract',
           document_type: body.documentType,
           file_size_bytes: body.text?.length || 0,
-          page_count: null,
+          page_count: undefined,
           credits_used: 0,
-          provider_used: null,
-          model_used: null,
-          tokens_input: null,
-          tokens_output: null,
-          cost_estimate: null,
+          provider_used: undefined,
+          model_used: undefined,
+          tokens_input: undefined,
+          tokens_output: undefined,
+          cost_estimate: undefined,
           success: false,
           error_message: error instanceof Error ? error.message : 'Unknown error',
           processing_time_ms: processingTime,

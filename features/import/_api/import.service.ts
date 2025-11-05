@@ -34,15 +34,15 @@ class ImportService {
 
     try {
       // Get auth session for API call
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session: authSession } } = await supabase.auth.getSession();
 
       // Call API route for text processing
       const response = await fetch('/api/import/process-text', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(session?.access_token ? {
-            'Authorization': `Bearer ${session.access_token}`
+          ...(authSession?.access_token ? {
+            'Authorization': `Bearer ${authSession.access_token}`
           } : {}),
         },
         body: JSON.stringify({
@@ -105,7 +105,7 @@ class ImportService {
 
     try {
       // Get auth session for API call
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session: authSession } } = await supabase.auth.getSession();
 
       // Call API route for server-side PDF processing
       const formData = new FormData();
@@ -119,8 +119,8 @@ class ImportService {
 
       const response = await fetch('/api/import/process-pdf', {
         method: 'POST',
-        headers: session?.access_token ? {
-          'Authorization': `Bearer ${session.access_token}`
+        headers: authSession?.access_token ? {
+          'Authorization': `Bearer ${authSession.access_token}`
         } : {},
         body: formData,
       });

@@ -9,7 +9,7 @@ interface CreditBalance {
   quota: number | null;
   used: number;
   remaining: number;
-  resetDate: string;
+  resetDate: string | null;
 }
 
 export function CreditBalanceIndicator() {
@@ -123,7 +123,7 @@ export function CreditBalanceIndicator() {
         </>
       )}
 
-      {isLow && (
+      {isLow && credits.resetDate && (
         <Typography variant="caption" color="warning.main" sx={{ mt: 1, display: 'block' }}>
           Running low on credits! Resets {new Date(credits.resetDate).toLocaleDateString()}
         </Typography>

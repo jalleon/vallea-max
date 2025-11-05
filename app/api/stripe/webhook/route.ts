@@ -154,16 +154,19 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
   console.log('Processing subscription update:', subscription.id)
 
+  // Cast to any since Stripe SDK types may not include all webhook properties
+  const sub: any = subscription
+
   const { error } = await supabaseAdmin
     .from('user_subscriptions')
     .update({
-      status: subscription.status,
-      current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-      current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-      cancel_at_period_end: subscription.cancel_at_period_end,
+      status: sub.status,
+      current_period_start: new Date(sub.current_period_start * 1000).toISOString(),
+      current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
+      cancel_at_period_end: sub.cancel_at_period_end,
       updated_at: new Date().toISOString()
     })
-    .eq('stripe_subscription_id', subscription.id)
+    .eq('stripe_subscription_id', sub.id)
 
   if (error) {
     console.error('Error updating subscription:', error)
@@ -208,15 +211,18 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   console.log('Payment failed for invoice:', invoice.id)
 
+  // Cast to any since Invoice types may not include all properties
+  const inv: any = invoice
+
   // Update subscription status to past_due
-  if (invoice.subscription) {
+  if (inv.subscription) {
     const { error } = await supabaseAdmin
       .from('user_subscriptions')
       .update({
         status: 'past_due',
         updated_at: new Date().toISOString()
       })
-      .eq('stripe_subscription_id', invoice.subscription as string)
+      .eq('stripe_subscription_id', inv.subscription as string)
 
     if (error) {
       console.error('Error updating subscription status to past_due:', error)

@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createRouteClient } from '@/lib/supabase/server';
 import fs from 'fs';
 import path from 'path';
 
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     const sql = fs.readFileSync(migrationPath, 'utf8');
 
     // Create Supabase client with service role
-    const supabase = await createClient();
+    const supabase = createRouteClient();
 
     // Split SQL into individual statements
     const statements = sql
