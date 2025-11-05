@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import {
   Typography,
   Grid,
@@ -152,6 +153,9 @@ const convertToTableFormat = (property: Property, index: number): any => {
 const PROPERTY_TYPES = ['Condo', 'Unifamiliale', 'Plex', 'Appartement', 'Semi-commercial', 'Terrain', 'Commercial', 'Autre'] as const
 
 export default function LibraryPage() {
+  const searchParams = useSearchParams()
+  const propertyIdParam = searchParams.get('propertyId')
+
   const [properties, setProperties] = useState<Property[]>([])
   const [tableProperties, setTableProperties] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -185,6 +189,18 @@ export default function LibraryPage() {
   useEffect(() => {
     loadProperties()
   }, [])
+
+  // Auto-open property view if propertyId is in URL
+  useEffect(() => {
+    if (propertyIdParam && properties.length > 0) {
+      const property = properties.find(p => p.id === propertyIdParam)
+      if (property) {
+        const index = properties.findIndex(p => p.id === propertyIdParam)
+        setViewPropertyIndex(index)
+        setViewProperty(property)
+      }
+    }
+  }, [propertyIdParam, properties])
 
   // Keyboard shortcut handler
   useEffect(() => {

@@ -41,7 +41,9 @@ import {
   CheckCircle,
   AccountBalance,
   ContentCopy,
-  Map
+  Map,
+  Assessment,
+  Balance
 } from '@mui/icons-material'
 import { Property } from '../types/property.types'
 import { formatCurrency, formatDate, formatMeasurement } from '@/lib/utils/formatting'
@@ -176,16 +178,6 @@ export function PropertyView({
   const roomCounts = calculateRoomCounts()
   const hasInspectionData = property.inspection_pieces?.floors && Object.keys(property.inspection_pieces.floors).length > 0
 
-  const getInspectionButtonText = () => {
-    if (isInspectionComplete) {
-      return "Voir inspection"
-    }
-    if (!property.inspection_status || property.inspection_status === 'not_started') {
-      return "Commencer l'inspection"
-    }
-    return "Continuer l'inspection"
-  }
-
   const getStatusColor = (status?: string) => {
     switch (status) {
       case 'Vendu':
@@ -220,6 +212,17 @@ export function PropertyView({
   }
 
   const totals = calculateTotalArea(property.floor_areas)
+
+  // Get appropriate inspection button text
+  const getInspectionButtonText = () => {
+    if (inspectionProgress === 0) {
+      return 'Commencer inspection'
+    } else if (inspectionProgress === 100) {
+      return 'Voir inspection'
+    } else {
+      return `Continuer inspection (${inspectionProgress}%)`
+    }
+  }
 
   // Format lot number as # ### ###
   const formatLotNumber = (lotNumber: string | null | undefined): string => {
@@ -336,6 +339,91 @@ export function PropertyView({
         </Box>
       </DialogTitle>
       <DialogContent sx={{ p: 0, bgcolor: '#f8fafc' }}>
+        {/* Quick Actions Bar */}
+        <Box
+          sx={{
+            p: 2,
+            borderBottom: `1px solid ${theme.palette.divider}`,
+            bgcolor: 'grey.50',
+            display: 'flex',
+            gap: 1.5,
+            flexWrap: 'wrap',
+            justifyContent: 'center'
+          }}
+        >
+          <Button
+            variant="contained"
+            startIcon={<InspectionIcon />}
+            onClick={() => {
+              router.push(`/${locale}/inspection/${property.id}`)
+              onClose()
+            }}
+            sx={{
+              borderRadius: '12px',
+              bgcolor: '#16a34a',
+              minHeight: '48px',
+              px: 3,
+              fontWeight: 600,
+              textTransform: 'none',
+              boxShadow: 2,
+              '&:hover': {
+                bgcolor: '#15803d',
+                boxShadow: 4
+              }
+            }}
+          >
+            {getInspectionButtonText()}
+          </Button>
+
+          <Button
+            variant="outlined"
+            startIcon={<Assessment />}
+            onClick={() => {
+              router.push(`/${locale}/evaluations/create?propertyId=${property.id}`)
+              onClose()
+            }}
+            sx={{
+              borderRadius: '12px',
+              minHeight: '48px',
+              px: 3,
+              borderColor: theme.palette.primary.main,
+              color: theme.palette.primary.main,
+              fontWeight: 600,
+              textTransform: 'none',
+              '&:hover': {
+                borderColor: theme.palette.primary.dark,
+                bgcolor: alpha(theme.palette.primary.main, 0.08)
+              }
+            }}
+          >
+            Nouvelle évaluation
+          </Button>
+
+          <Button
+            variant="outlined"
+            startIcon={<Balance />}
+            onClick={() => {
+              router.push(`/${locale}/adjustments?propertyId=${property.id}`)
+              onClose()
+            }}
+            sx={{
+              borderRadius: '12px',
+              minHeight: '48px',
+              px: 3,
+              borderColor: theme.palette.secondary.main,
+              color: theme.palette.secondary.main,
+              fontWeight: 600,
+              textTransform: 'none',
+              '&:hover': {
+                borderColor: theme.palette.secondary.dark,
+                bgcolor: alpha(theme.palette.secondary.main, 0.08)
+              }
+            }}
+          >
+            Ajustements
+          </Button>
+        </Box>
+
         {/* Two-column layout: Price Banner + Google Maps */}
         <Box sx={{
           borderBottom: `1px solid ${theme.palette.divider}`,

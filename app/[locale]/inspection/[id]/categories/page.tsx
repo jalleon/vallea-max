@@ -15,7 +15,8 @@ import {
   Chip,
   CircularProgress,
   Alert,
-  Snackbar
+  Snackbar,
+  Button
 } from '@mui/material'
 import {
   Layers,
@@ -225,126 +226,53 @@ export default function InspectionCategoriesPage() {
         </Breadcrumbs>
 
         {/* Property Address - Clickable to Google Maps */}
-        <Box sx={{ mb: 3 }}>
-          <Typography
-            variant="h5"
-            component="button"
-            onClick={handleAddressClick}
+        <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <Box>
+            <Typography
+              variant="h5"
+              component="button"
+              onClick={handleAddressClick}
+              sx={{
+                cursor: 'pointer',
+                background: 'none',
+                border: 'none',
+                p: 0,
+                color: 'primary.main',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                '&:hover': {
+                  textDecoration: 'underline'
+                }
+              }}
+            >
+              {property.adresse}, {property.ville}
+              <OpenInNew fontSize="small" />
+            </Typography>
+            {property.province && (
+              <Typography variant="body2" color="text.secondary">
+                {property.province} • {property.type_propriete}
+              </Typography>
+            )}
+          </Box>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => router.push(`/${locale}/library?propertyId=${property.id}`)}
             sx={{
-              cursor: 'pointer',
-              background: 'none',
-              border: 'none',
-              p: 0,
-              color: 'primary.main',
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              '&:hover': {
-                textDecoration: 'underline'
-              }
+              borderRadius: '8px',
+              textTransform: 'none',
+              fontWeight: 600
             }}
           >
-            {property.adresse}, {property.ville}
-            <OpenInNew fontSize="small" />
-          </Typography>
-          {property.province && (
-            <Typography variant="body2" color="text.secondary">
-              {property.province} • {property.type_propriete}
-            </Typography>
-          )}
+            Voir la fiche
+          </Button>
         </Box>
 
         {/* Progress Window */}
         <InspectionProgressWindow property={property} />
 
-        {/* Categories Title */}
-        <Typography variant="h4" fontWeight={700} gutterBottom sx={{ mb: 3 }}>
-          {t('inspection.categories.title')}
-        </Typography>
-
-        {/* Category Grid - 2 columns */}
-        <Grid container spacing={3}>
-          {categories.map((category) => {
-            const Icon = category.icon
-            const isCompleted = isCategoryCompleted(category.id)
-            const hasStarted = isCompleted || (category.id === 'pieces' && (property?.inspection_pieces?.totalRooms ?? 0) > 0)
-
-            return (
-              <Grid item xs={12} sm={6} key={category.id}>
-                <Card
-                  elevation={0}
-                  sx={{
-                    height: '150px',
-                    borderRadius: '16px',
-                    border: hasStarted ? '2px solid' : '1px solid',
-                    borderColor: hasStarted ? category.color : '#e0e0e0',
-                    bgcolor: hasStarted ? `${category.color}1a` : 'white',
-                    opacity: category.enabled ? 1 : 0.6,
-                    position: 'relative',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      transform: category.enabled ? 'translateY(-4px)' : 'none',
-                      boxShadow: category.enabled ? 6 : 1
-                    }
-                  }}
-                >
-                  {isCompleted && (
-                    <CheckCircle
-                      sx={{
-                        position: 'absolute',
-                        top: 12,
-                        right: 12,
-                        fontSize: 32,
-                        color: category.color
-                      }}
-                    />
-                  )}
-                  <CardActionArea
-                    onClick={() => handleCategoryClick(category)}
-                    disabled={!category.enabled}
-                    sx={{
-                      height: '100%',
-                      p: 3,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    <CardContent sx={{
-                      p: 0,
-                      width: '100%',
-                      textAlign: 'center',
-                      '&:last-child': { pb: 0 }
-                    }}>
-                      <Icon sx={{
-                        fontSize: 48,
-                        color: category.color,
-                        mb: 2
-                      }} />
-                      <Typography
-                        variant="h5"
-                        fontWeight="bold"
-                        gutterBottom
-                        sx={{ color: 'text.primary' }}
-                      >
-                        {category.name}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ fontSize: '12px' }}
-                      >
-                        {category.description}
-                      </Typography>
-                    </CardContent>
-                  </CardActionArea>
-                </Card>
-              </Grid>
-            )
-          })}
-        </Grid>
 
         {/* Coming Soon Snackbar */}
         <Snackbar

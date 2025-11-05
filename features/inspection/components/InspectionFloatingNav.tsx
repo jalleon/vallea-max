@@ -74,12 +74,17 @@ export function InspectionFloatingNav({ inspectionId, currentCategory }: Inspect
   const handleClose = () => setOpen(false)
 
   const handleNavigate = (categoryId: string) => {
-    router.push(`/inspection/${inspectionId}/${categoryId}`)
+    // Extract locale from pathname (e.g., /fr/inspection/... or /en/inspection/...)
+    const locale = pathname.split('/')[1]
+    router.push(`/${locale}/inspection/${inspectionId}/${categoryId}`)
     handleClose()
   }
 
+  // Extract locale from pathname
+  const locale = pathname.split('/')[1]
+
   // Don't show on main inspection page or category list page
-  if (pathname === `/inspection/${inspectionId}` || pathname.includes('/categories')) {
+  if (pathname === `/${locale}/inspection/${inspectionId}` || pathname.includes('/categories')) {
     return null
   }
 
@@ -101,6 +106,12 @@ export function InspectionFloatingNav({ inspectionId, currentCategory }: Inspect
           '&:hover': {
             bgcolor: '#15803d',
             boxShadow: 6
+          }
+        },
+        '& .MuiSpeedDialAction-fab': {
+          boxShadow: 2,
+          '&:hover': {
+            boxShadow: 4
           }
         }
       }}
