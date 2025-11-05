@@ -915,15 +915,16 @@
       "features": "Fonctionnalités",
       "screenshots": "Captures d'écran",
       "pricing": "Tarifs",
+      "demo": "Demander une démo",
       "waitlist": "Liste d'attente",
       "login": "Connexion",
       "signup": "S'inscrire"
     },
     "hero": {
       "title": "Évaluations immobilières professionnelles simplifiées",
-      "subtitle": "Valea Max vous aide à gérer vos évaluations immobilières avec précision et efficacité. Inspections détaillées, rapports complets et analyses de marché pilotées par l'IA.",
+      "subtitle": "Valea Max vous aide à gérer vos évaluations immobilières avec précision et efficacité. Inspections détaillées, rapports complets et automatisation intelligente.",
       "cta": {
-        "primary": "Commencer gratuitement",
+        "primary": "Demander une démo",
         "secondary": "Voir les forfaits"
       }
     },
@@ -1009,6 +1010,19 @@
       "success": "Merci! Vous êtes maintenant sur la liste d'attente.",
       "error": "Une erreur est survenue. Veuillez réessayer.",
       "alreadyExists": "Cet email est déjà sur la liste d'attente."
+    },
+    "demo": {
+      "title": "Demander une Démo",
+      "subtitle": "Découvrez Valea Max en action. Planifiez une démo personnalisée avec notre équipe.",
+      "namePlaceholder": "Nom complet",
+      "emailPlaceholder": "Email professionnel",
+      "companyPlaceholder": "Nom de l'entreprise (optionnel)",
+      "phonePlaceholder": "Numéro de téléphone (optionnel)",
+      "messagePlaceholder": "Parlez-nous de vos besoins (optionnel)",
+      "submitButton": "Demander une Démo",
+      "success": "Merci! Nous vous contacterons dans les 24 heures pour planifier votre démo.",
+      "error": "Une erreur est survenue. Veuillez réessayer.",
+      "alreadyExists": "Nous avons déjà reçu votre demande de démo. Nous vous contacterons bientôt!"
     }
   },
 

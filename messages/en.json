@@ -793,15 +793,16 @@
       "features": "Features",
       "screenshots": "Screenshots",
       "pricing": "Pricing",
+      "demo": "Request Demo",
       "waitlist": "Waitlist",
       "login": "Login",
       "signup": "Sign Up"
     },
     "hero": {
       "title": "Professional Real Estate Appraisals Made Simple",
-      "subtitle": "Valea Max helps you manage your property appraisals with precision and efficiency. Detailed inspections, comprehensive reports, and AI-powered market analysis.",
+      "subtitle": "Valea Max helps you manage your property appraisals with precision and efficiency. Detailed inspections, comprehensive reports, and intelligent automation.",
       "cta": {
-        "primary": "Start Free Trial",
+        "primary": "Request a Demo",
         "secondary": "View Pricing"
       }
     },
@@ -887,6 +888,19 @@
       "success": "Thank you! You're now on the waitlist.",
       "error": "An error occurred. Please try again.",
       "alreadyExists": "This email is already on the waitlist."
+    },
+    "demo": {
+      "title": "Request a Demo",
+      "subtitle": "See Valea Max in action. Schedule a personalized demo with our team.",
+      "namePlaceholder": "Full name",
+      "emailPlaceholder": "Work email",
+      "companyPlaceholder": "Company name (optional)",
+      "phonePlaceholder": "Phone number (optional)",
+      "messagePlaceholder": "Tell us about your needs (optional)",
+      "submitButton": "Request Demo",
+      "success": "Thank you! We'll contact you within 24 hours to schedule your demo.",
+      "error": "An error occurred. Please try again.",
+      "alreadyExists": "We've already received your demo request. We'll be in touch soon!"
     }
   },
 

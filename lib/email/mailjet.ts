@@ -459,5 +459,146 @@ export const emailService = {
       htmlContent,
       textContent
     })
+  },
+
+  /**
+   * Send demo request confirmation email (bilingual: FR/EN)
+   */
+  sendDemoRequest: async (email: string, name: string, company: string | null, phone: string | null, message: string | null, locale: string) => {
+    const isEnglish = locale === 'en'
+
+    const subject = isEnglish
+      ? 'Demo Request Received - Valea Max'
+      : 'Demande de démo reçue - Valea Max'
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #1A1F36;
+      background-color: #F5F3EE;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 40px 30px;
+      text-align: center;
+      color: white;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 700;
+    }
+    .content {
+      padding: 40px 30px;
+    }
+    .content h2 {
+      color: #1A1F36;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .content p {
+      color: #4A5568;
+      margin-bottom: 16px;
+      font-size: 16px;
+    }
+    .info-box {
+      background: #F9FAFB;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .info-box p {
+      margin: 8px 0;
+      color: #1A1F36;
+      font-size: 14px;
+    }
+    .footer {
+      background: #F5F3EE;
+      padding: 30px;
+      text-align: center;
+      color: #6B7280;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>${isEnglish ? 'Demo Request Received' : 'Demande de démo reçue'}</h1>
+    </div>
+
+    <div class="content">
+      <h2>${isEnglish ? `Thank you, ${name}!` : `Merci, ${name}!`}</h2>
+
+      <p>
+        ${isEnglish
+          ? 'We\'ve received your demo request for Valea Max. Our team will review your information and contact you within 24 hours to schedule a personalized demo.'
+          : 'Nous avons bien reçu votre demande de démo pour Valea Max. Notre équipe examinera vos informations et vous contactera dans les 24 heures pour planifier une démo personnalisée.'
+        }
+      </p>
+
+      <div class="info-box">
+        <strong>${isEnglish ? 'Your Request Details:' : 'Détails de votre demande :'}</strong>
+        <p><strong>${isEnglish ? 'Name:' : 'Nom :'}</strong> ${name}</p>
+        <p><strong>${isEnglish ? 'Email:' : 'Courriel :'}</strong> ${email}</p>
+        ${company ? `<p><strong>${isEnglish ? 'Company:' : 'Entreprise :'}</strong> ${company}</p>` : ''}
+        ${phone ? `<p><strong>${isEnglish ? 'Phone:' : 'Téléphone :'}</strong> ${phone}</p>` : ''}
+        ${message ? `<p><strong>${isEnglish ? 'Message:' : 'Message :'}</strong> ${message}</p>` : ''}
+      </div>
+
+      <p>
+        ${isEnglish
+          ? 'During your demo, you\'ll discover how Valea Max can help you manage your real estate appraisals with precision and efficiency.'
+          : 'Lors de votre démo, vous découvrirez comment Valea Max peut vous aider à gérer vos évaluations immobilières avec précision et efficacité.'
+        }
+      </p>
+
+      <p style="margin-top: 30px; font-size: 14px; color: #6B7280;">
+        ${isEnglish
+          ? 'Questions? Reply to this email and we\'ll be happy to help.'
+          : 'Des questions ? Répondez à cet e-mail et nous serons ravis de vous aider.'
+        }
+      </p>
+    </div>
+
+    <div class="footer">
+      <p>
+        © ${new Date().getFullYear()} Valea Max<br>
+        ${isEnglish ? 'Professional Real Estate Appraisal Platform' : 'Plateforme professionnelle d\'évaluation immobilière'}
+      </p>
+    </div>
+  </div>
+</body>
+</html>
+    `
+
+    const textContent = isEnglish
+      ? `Demo Request Received - Valea Max\n\nThank you, ${name}!\n\nWe've received your demo request. Our team will contact you within 24 hours to schedule a personalized demo.\n\nYour Details:\nName: ${name}\nEmail: ${email}${company ? `\nCompany: ${company}` : ''}${phone ? `\nPhone: ${phone}` : ''}${message ? `\nMessage: ${message}` : ''}\n\n© ${new Date().getFullYear()} Valea Max`
+      : `Demande de démo reçue - Valea Max\n\nMerci, ${name}!\n\nNous avons bien reçu votre demande de démo. Notre équipe vous contactera dans les 24 heures pour planifier une démo personnalisée.\n\nVos informations:\nNom: ${name}\nCourriel: ${email}${company ? `\nEntreprise: ${company}` : ''}${phone ? `\nTéléphone: ${phone}` : ''}${message ? `\nMessage: ${message}` : ''}\n\n© ${new Date().getFullYear()} Valea Max`
+
+    return emailService.sendEmail({
+      to: email,
+      toName: name,
+      subject,
+      htmlContent,
+      textContent
+    })
   }
 }

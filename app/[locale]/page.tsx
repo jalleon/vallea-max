@@ -46,6 +46,7 @@ import {
   Language as LanguageIcon,
 } from '@mui/icons-material'
 import WaitlistForm from '@/components/landing/WaitlistForm'
+import DemoRequestForm from '@/components/landing/DemoRequestForm'
 
 export default function LandingPage() {
   const t = useTranslations('landing')
@@ -216,11 +217,18 @@ export default function LandingPage() {
                 </Button>
                 <Button
                   color="inherit"
-                  onClick={() => handleScroll('waitlist')}
+                  onClick={() => handleScroll('demo')}
                   sx={{
                     color: 'text.primary',
                     fontWeight: 600,
                   }}
+                >
+                  {t('nav.demo')}
+                </Button>
+                <Button
+                  color="inherit"
+                  onClick={() => handleScroll('waitlist')}
+                  sx={{ color: 'text.primary' }}
                 >
                   {t('nav.waitlist')}
                 </Button>
@@ -282,11 +290,16 @@ export default function LandingPage() {
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
-              <ListItemButton onClick={() => handleScroll('waitlist')}>
+              <ListItemButton onClick={() => handleScroll('demo')}>
                 <ListItemText
-                  primary={t('nav.waitlist')}
+                  primary={t('nav.demo')}
                   sx={{ fontWeight: 600 }}
                 />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => handleScroll('waitlist')}>
+                <ListItemText primary={t('nav.waitlist')} />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -365,7 +378,7 @@ export default function LandingPage() {
                 <Button
                   variant="contained"
                   size="large"
-                  onClick={() => router.push('/login')}
+                  onClick={() => handleScroll('demo')}
                   sx={{
                     bgcolor: '#10B981',
                     color: 'white',
@@ -1140,6 +1153,71 @@ export default function LandingPage() {
             {t('cta.secondary')}
           </Button>
         </Stack>
+        </Container>
+      </Box>
+
+      {/* Demo Request Section */}
+      <Box
+        id="demo"
+        sx={{
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          py: { xs: 10, md: 14 },
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: `
+              radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+              radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+              repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 40px,
+                rgba(255, 255, 255, 0.03) 40px,
+                rgba(255, 255, 255, 0.03) 80px
+              )
+            `,
+            pointerEvents: 'none',
+          },
+        }}
+      >
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
+          <Box sx={{ textAlign: 'center', mb: 6 }}>
+            <Typography
+              variant="h2"
+              sx={{
+                fontSize: { xs: '2rem', md: '3rem' },
+                fontWeight: 400,
+                mb: 2,
+                color: 'white',
+                fontFamily: 'var(--font-fraunces)',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {t('demo.title')}
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{
+                maxWidth: 600,
+                mx: 'auto',
+                color: 'rgba(255, 255, 255, 0.95)',
+                fontWeight: 300,
+                fontSize: '1.15rem',
+                lineHeight: 1.7,
+                mb: 4,
+              }}
+            >
+              {t('demo.subtitle')}
+            </Typography>
+          </Box>
+
+          <DemoRequestForm />
         </Container>
       </Box>
 
