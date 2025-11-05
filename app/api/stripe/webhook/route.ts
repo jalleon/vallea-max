@@ -5,25 +5,35 @@ import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/database.types'
 import { emailService } from '@/lib/email/mailjet'
 
-// Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-09-30.clover',
-  typescript: true,
-})
+// Lazy initialization - only create clients when webhook is actually called
+let stripeClient: Stripe | null = null
+let supabaseAdminClient: ReturnType<typeof createClient<Database>> | null = null
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
-
-// Create Supabase admin client (bypasses RLS) for webhook operations
-const supabaseAdmin = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
+const getStripe = (): Stripe => {
+  if (!stripeClient) {
+    stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: '2025-09-30.clover',
+      typescript: true,
+    })
   }
-)
+  return stripeClient
+}
+
+const getSupabaseAdmin = () => {
+  if (!supabaseAdminClient) {
+    supabaseAdminClient = createClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+  }
+  return supabaseAdminClient
+}
 
 export async function POST(request: Request) {
   try {
@@ -40,6 +50,9 @@ export async function POST(request: Request) {
     }
 
     // Verify webhook signature
+    const stripe = getStripe()
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
+
     let event: Stripe.Event
     try {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
@@ -112,6 +125,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const planType = session.metadata?.planType || 'monthly'
 
   // Create or update subscription record
+  const supabaseAdmin = getSupabaseAdmin()
   const { error } = await supabaseAdmin
     .from('user_subscriptions')
     .upsert({
@@ -131,8 +145,6 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   console.log(`Subscription created for user ${userId}`)
-
-  // Fetch user details to send welcome email
   const { data: user } = await supabaseAdmin.auth.admin.getUserById(userId)
 
   if (user?.user) {
@@ -157,6 +169,7 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
   // Cast to any since Stripe SDK types may not include all webhook properties
   const sub: any = subscription
 
+  const supabaseAdmin = getSupabaseAdmin()
   const { error } = await supabaseAdmin
     .from('user_subscriptions')
     .update({
@@ -180,6 +193,7 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   console.log('Processing subscription deletion:', subscription.id)
 
+  const supabaseAdmin = getSupabaseAdmin()
   const { error } = await supabaseAdmin
     .from('user_subscriptions')
     .update({
@@ -216,6 +230,7 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
 
   // Update subscription status to past_due
   if (inv.subscription) {
+    const supabaseAdmin = getSupabaseAdmin()
     const { error } = await supabaseAdmin
       .from('user_subscriptions')
       .update({
