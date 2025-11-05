@@ -160,7 +160,6 @@ export function InspectionFloatingNav({ inspectionId, currentCategory }: Inspect
                 minWidth: '120px'
               }
             }}
-            tooltipOpen
           />
         )
       })}
