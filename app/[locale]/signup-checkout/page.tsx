@@ -175,7 +175,28 @@ export default function SignupCheckoutPage() {
       </AppBar>
 
       {/* Main Content */}
-      <Container maxWidth="lg" sx={{ flexGrow: 1, py: 6 }}>
+      <Box
+        sx={{
+          position: 'relative',
+          flexGrow: 1,
+          py: 6,
+          '&::before': {
+            content: '""',
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: 'url(/backgrounds/bg7.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            filter: 'brightness(0.7)',
+            zIndex: -1,
+          },
+        }}
+      >
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
         <Typography
           variant="h4"
           sx={{
@@ -459,6 +480,7 @@ export default function SignupCheckoutPage() {
           </Grid>
         </Grid>
       </Container>
+      </Box>
     </Box>
   )
 }

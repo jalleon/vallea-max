@@ -72,7 +72,7 @@ export default function SignupSuccessPage() {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundImage: 'url(/backgrounds/bg6.jpg)',
+          backgroundImage: 'url(/backgrounds/bg7.jpg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           filter: 'brightness(0.6)',
