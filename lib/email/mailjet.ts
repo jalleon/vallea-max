@@ -3,11 +3,18 @@
 
 import Mailjet from 'node-mailjet'
 
-// Initialize Mailjet client
-const mailjet = new Mailjet({
-  apiKey: process.env.MAILJET_API_KEY || '',
-  apiSecret: process.env.MAILJET_SECRET_KEY || ''
-})
+// Lazy initialization - only create client when actually sending email
+let mailjetClient: any = null
+
+const getMailjetClient = () => {
+  if (!mailjetClient) {
+    mailjetClient = new Mailjet({
+      apiKey: process.env.MAILJET_API_KEY || '',
+      apiSecret: process.env.MAILJET_SECRET_KEY || ''
+    })
+  }
+  return mailjetClient
+}
 
 export interface EmailTemplate {
   to: string
@@ -23,6 +30,7 @@ export const emailService = {
    */
   sendEmail: async ({ to, toName, subject, htmlContent, textContent }: EmailTemplate) => {
     try {
+      const mailjet = getMailjetClient()
       const response = await mailjet.post('send', { version: 'v3.1' }).request({
         Messages: [
           {
