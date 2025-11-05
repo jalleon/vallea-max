@@ -61,6 +61,12 @@ export async function POST(request: Request) {
       line_items: lineItems,
       success_url: `${request.headers.get('origin')}/${locale}/signup/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${request.headers.get('origin')}/${locale}/signup?payment=cancelled`,
+      // Enable automatic tax calculation (requires Stripe Tax to be enabled in dashboard)
+      automatic_tax: {
+        enabled: true,
+      },
+      // Collect customer's billing address for tax calculation
+      billing_address_collection: 'required',
       metadata: {
         signupFlow: 'true',
         email,

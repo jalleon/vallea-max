@@ -5,7 +5,7 @@ export const STRIPE_PLANS = {
   monthly: {
     name: 'Monthly',
     priceId: process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID || '',
-    price: 100,
+    price: 99,
     currency: 'CAD',
     interval: 'month' as const,
     features: [
@@ -22,11 +22,11 @@ export const STRIPE_PLANS = {
   annual: {
     name: 'Annual',
     priceId: process.env.NEXT_PUBLIC_STRIPE_YEARLY_PRICE_ID || '',
-    price: 80,
-    displayPrice: 960,
+    price: 79,
+    displayPrice: 948, // 79 * 12
     currency: 'CAD',
     interval: 'year' as const,
-    savings: 240,
+    savings: 240, // Save $240/year vs monthly (99*12 - 948)
     features: [
       'Everything in Monthly',
       'Save $240/year (20% discount)',
@@ -46,28 +46,27 @@ export type PlanType = keyof typeof STRIPE_PLANS
 export const CREDITS_BUNDLES = {
   starter: {
     name: 'Starter',
-    credits: 50,
+    credits: 500,
     price: 5,
-    priceId: process.env.NEXT_PUBLIC_STRIPE_CREDITS_50_PRICE_ID || '',
+    priceId: process.env.NEXT_PUBLIC_STRIPE_CREDITS_500_PRICE_ID || '',
     currency: 'CAD',
     popular: false
   },
   standard: {
     name: 'Standard',
-    credits: 200,
-    price: 18,
-    priceId: process.env.NEXT_PUBLIC_STRIPE_CREDITS_200_PRICE_ID || '',
+    credits: 1000,
+    price: 10,
+    priceId: process.env.NEXT_PUBLIC_STRIPE_CREDITS_1000_PRICE_ID || '',
     currency: 'CAD',
-    savings: 2, // 10% discount
     popular: true
   },
   pro: {
     name: 'Pro',
-    credits: 500,
-    price: 40,
-    priceId: process.env.NEXT_PUBLIC_STRIPE_CREDITS_500_PRICE_ID || '',
+    credits: 2000,
+    price: 18,
+    priceId: process.env.NEXT_PUBLIC_STRIPE_CREDITS_2000_PRICE_ID || '',
     currency: 'CAD',
-    savings: 10, // 20% discount
+    savings: 2, // Save $2 vs buying 2x 1000-credit bundles
     popular: false
   }
 }
