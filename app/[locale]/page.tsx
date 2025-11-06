@@ -198,7 +198,7 @@ export default function LandingPage() {
 
             {/* Desktop Navigation */}
             {!isMobile && (
-              <Stack direction="row" spacing={1} sx={{ mr: 2 }}>
+              <Stack direction="row" spacing={0.5} sx={{ ml: 3, mr: 2 }}>
                 <Button
                   color="inherit"
                   onClick={() => handleScroll('features')}
