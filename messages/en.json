@@ -39,6 +39,44 @@
     },
     "menu": {
       "aiApiKeys": "AI API Keys"
+    },
+    "nav": {
+      "navigation": "Navigation",
+      "dashboard": {
+        "label": "Dashboard",
+        "description": "Overview and analytics"
+      },
+      "library": {
+        "label": "Library",
+        "description": "Property management"
+      },
+      "import": {
+        "label": "Import",
+        "description": "PDF and data import"
+      },
+      "evaluations": {
+        "label": "Appraisals",
+        "description": "RPS, NAS and custom"
+      },
+      "adjustments": {
+        "label": "Adjustments",
+        "description": "Comparative calculations"
+      },
+      "reports": {
+        "label": "Reports",
+        "description": "Professional documents"
+      },
+      "inspection": {
+        "label": "Inspections"
+      },
+      "performance": {
+        "title": "Monthly Performance",
+        "growth": "+15.3%",
+        "completed": "{count} appraisals completed"
+      },
+      "collapse": "Collapse sidebar",
+      "expand": "Expand sidebar",
+      "tagline": "Real Estate Appraisal"
     }
   },
 

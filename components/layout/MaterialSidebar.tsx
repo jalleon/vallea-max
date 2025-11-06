@@ -2,6 +2,7 @@
 
 import React from 'react'
 import Image from 'next/image'
+import { useTranslations, useLocale } from 'next-intl'
 import {
   Drawer,
   List,
@@ -34,58 +35,6 @@ import {
 } from '@mui/icons-material'
 import { usePathname, useRouter } from 'next/navigation'
 
-const regularMenuItems = [
-  {
-    id: 'dashboard',
-    label: 'Tableau de bord',
-    icon: Dashboard,
-    path: '/dashboard',
-    description: 'Vue d\'ensemble et analytiques'
-  },
-  {
-    id: 'library',
-    label: 'Bibliothèque',
-    icon: LibraryBooks,
-    path: '/library',
-    description: 'Gestion des propriétés'
-  },
-  {
-    id: 'import',
-    label: 'Importer',
-    icon: FileUpload,
-    path: '/import',
-    description: 'Import PDF et données'
-  },
-  {
-    id: 'evaluations',
-    label: 'Évaluations',
-    icon: Assessment,
-    path: '/evaluations',
-    description: 'RPS, NAS et personnalisées'
-  },
-  {
-    id: 'adjustments',
-    label: 'Ajustements',
-    icon: Balance,
-    path: '/adjustments',
-    description: 'Calculs comparatifs'
-  },
-  {
-    id: 'reports',
-    label: 'Rapports',
-    icon: Description,
-    path: '/reports',
-    description: 'Documents professionnels'
-  }
-]
-
-const inspectionMenuItem = {
-  id: 'inspection',
-  label: 'Inspections',
-  icon: Search,
-  path: '/inspection'
-}
-
 interface MaterialSidebarProps {
   mobileOpen: boolean
   onMobileClose: () => void
@@ -105,6 +54,60 @@ export function MaterialSidebar({
 }: MaterialSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
+  const locale = useLocale()
+  const t = useTranslations('common.nav')
+
+  const regularMenuItems = [
+    {
+      id: 'dashboard',
+      label: t('dashboard.label'),
+      icon: Dashboard,
+      path: `/${locale}/dashboard`,
+      description: t('dashboard.description')
+    },
+    {
+      id: 'library',
+      label: t('library.label'),
+      icon: LibraryBooks,
+      path: `/${locale}/library`,
+      description: t('library.description')
+    },
+    {
+      id: 'import',
+      label: t('import.label'),
+      icon: FileUpload,
+      path: `/${locale}/import`,
+      description: t('import.description')
+    },
+    {
+      id: 'evaluations',
+      label: t('evaluations.label'),
+      icon: Assessment,
+      path: `/${locale}/evaluations`,
+      description: t('evaluations.description')
+    },
+    {
+      id: 'adjustments',
+      label: t('adjustments.label'),
+      icon: Balance,
+      path: `/${locale}/adjustments`,
+      description: t('adjustments.description')
+    },
+    {
+      id: 'reports',
+      label: t('reports.label'),
+      icon: Description,
+      path: `/${locale}/reports`,
+      description: t('reports.description')
+    }
+  ]
+
+  const inspectionMenuItem = {
+    id: 'inspection',
+    label: t('inspection.label'),
+    icon: Search,
+    path: `/${locale}/inspection`
+  }
 
   const handleItemClick = (path: string) => {
     router.push(path)
@@ -135,7 +138,7 @@ export function MaterialSidebar({
                 Valea Max
               </Typography>
               <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1, display: 'block', mt: '-2px' }}>
-                Évaluation Immobilière
+                {t('tagline')}
               </Typography>
             </Box>
           )}
@@ -153,14 +156,14 @@ export function MaterialSidebar({
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
               <TrendingUp color="primary" fontSize="small" />
               <Typography variant="body2" fontWeight={600}>
-                Performance du mois
+                {t('performance.title')}
               </Typography>
             </Box>
             <Typography variant="h6" color="primary" fontWeight={700}>
-              +15.3%
+              {t('performance.growth')}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              12 évaluations complétées
+              {t('performance.completed', { count: 12 })}
             </Typography>
           </Paper>
         )}
@@ -182,7 +185,7 @@ export function MaterialSidebar({
               letterSpacing: 1
             }}
           >
-            Navigation
+            {t('navigation')}
           </Typography>
         )}
 
@@ -345,7 +348,7 @@ export function MaterialSidebar({
 
       {/* Toggle Button */}
       <Box sx={{ p: 1, display: { xs: 'none', sm: 'flex' }, justifyContent: desktopCollapsed ? 'center' : 'flex-end' }}>
-        <Tooltip title={desktopCollapsed ? "Expand sidebar" : "Collapse sidebar"} placement="right">
+        <Tooltip title={desktopCollapsed ? t('expand') : t('collapse')} placement="right">
           <IconButton onClick={onDesktopToggle} size="small">
             {desktopCollapsed ? <ChevronRight /> : <ChevronLeft />}
           </IconButton>

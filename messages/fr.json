@@ -39,6 +39,44 @@
     },
     "menu": {
       "aiApiKeys": "Clés API IA"
+    },
+    "nav": {
+      "navigation": "Navigation",
+      "dashboard": {
+        "label": "Tableau de bord",
+        "description": "Vue d'ensemble et analytiques"
+      },
+      "library": {
+        "label": "Bibliothèque",
+        "description": "Gestion des propriétés"
+      },
+      "import": {
+        "label": "Importer",
+        "description": "Import PDF et données"
+      },
+      "evaluations": {
+        "label": "Évaluations",
+        "description": "RPS, NAS et personnalisées"
+      },
+      "adjustments": {
+        "label": "Ajustements",
+        "description": "Calculs comparatifs"
+      },
+      "reports": {
+        "label": "Rapports",
+        "description": "Documents professionnels"
+      },
+      "inspection": {
+        "label": "Inspections"
+      },
+      "performance": {
+        "title": "Performance du mois",
+        "growth": "+15.3%",
+        "completed": "{count} évaluations complétées"
+      },
+      "collapse": "Réduire la barre latérale",
+      "expand": "Agrandir la barre latérale",
+      "tagline": "Évaluation Immobilière"
     }
   },
 
