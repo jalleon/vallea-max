@@ -705,133 +705,6 @@ export default function LandingPage() {
         </Container>
       </Box>
 
-      {/* AI-Powered Section */}
-      <Box
-        sx={{
-          background: 'linear-gradient(to bottom, #E8E2D5 0%, #F5F3EE 50%, #E8E2D5 100%)',
-          py: { xs: 8, md: 14 },
-          position: 'relative',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundImage: `
-              radial-gradient(circle at 15% 30%, rgba(16, 185, 129, 0.04) 0%, transparent 40%),
-              radial-gradient(circle at 85% 70%, rgba(245, 158, 11, 0.04) 0%, transparent 40%)
-            `,
-            pointerEvents: 'none',
-          },
-        }}
-      >
-        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
-          <Box sx={{ textAlign: 'center', mb: 10 }}>
-            <Typography
-              variant="h2"
-              sx={{
-                fontSize: { xs: '2rem', md: '3rem' },
-                fontWeight: 400,
-                mb: 2,
-                fontFamily: 'var(--font-fraunces)',
-                color: '#1A1F36',
-                letterSpacing: '-0.01em',
-              }}
-            >
-              {t('aiPowered.title')}
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                maxWidth: 750,
-                mx: 'auto',
-                color: '#4A5568',
-                fontWeight: 300,
-                fontSize: '1.15rem',
-                lineHeight: 1.7,
-              }}
-            >
-              {t('aiPowered.subtitle')}
-            </Typography>
-          </Box>
-
-          <Grid container spacing={4}>
-            {[1, 2, 3].map((feature) => (
-              <Grid item xs={12} md={4} key={feature}>
-                <Card
-                  sx={{
-                    height: '100%',
-                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                    border: '1px solid rgba(26, 31, 54, 0.08)',
-                    background: 'rgba(255, 255, 255, 0.7)',
-                    backdropFilter: 'blur(12px)',
-                    borderRadius: '16px',
-                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)',
-                    '&:hover': {
-                      transform: 'translateY(-8px)',
-                      boxShadow: '0 20px 48px rgba(0, 0, 0, 0.12)',
-                      border: '1px solid rgba(26, 31, 54, 0.15)',
-                    },
-                  }}
-                >
-                  <CardContent sx={{ p: 4, textAlign: 'center' }}>
-                    <Box
-                      sx={{
-                        color: '#10B981',
-                        mb: 3,
-                        display: 'inline-flex',
-                        p: 2.5,
-                        borderRadius: '16px',
-                        background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.15) 100%)',
-                      }}
-                    >
-                      {feature === 1 && <PictureAsPdf sx={{ fontSize: 48 }} />}
-                      {feature === 2 && <Cloud sx={{ fontSize: 48 }} />}
-                      {feature === 3 && <SmartToy sx={{ fontSize: 48 }} />}
-                    </Box>
-                    <Typography
-                      variant="h6"
-                      fontWeight={600}
-                      gutterBottom
-                      sx={{ color: '#1A1F36', mb: 1.5, fontSize: '1.15rem' }}
-                    >
-                      {t(`aiPowered.feature${feature}.title`)}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: '#4A5568',
-                        lineHeight: 1.7,
-                        fontSize: '0.95rem',
-                      }}
-                    >
-                      {t(`aiPowered.feature${feature}.description`)}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-
-          <Typography
-            variant="h6"
-            align="center"
-            sx={{
-              mt: 8,
-              color: '#1A1F36',
-              fontWeight: 400,
-              fontSize: '1.1rem',
-              fontStyle: 'italic',
-              maxWidth: 800,
-              mx: 'auto',
-            }}
-          >
-            {t('aiPowered.tagline')}
-          </Typography>
-        </Container>
-      </Box>
-
       {/* Screenshots Section */}
       <Box
         id="screenshots"
@@ -1048,6 +921,133 @@ export default function LandingPage() {
               </Card>
             </Grid>
           </Grid>
+        </Container>
+      </Box>
+
+      {/* AI-Powered Section */}
+      <Box
+        sx={{
+          background: 'linear-gradient(to bottom, #E8E2D5 0%, #F5F3EE 50%, #E8E2D5 100%)',
+          py: { xs: 8, md: 14 },
+          position: 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: `
+              radial-gradient(circle at 15% 30%, rgba(16, 185, 129, 0.04) 0%, transparent 40%),
+              radial-gradient(circle at 85% 70%, rgba(245, 158, 11, 0.04) 0%, transparent 40%)
+            `,
+            pointerEvents: 'none',
+          },
+        }}
+      >
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+          <Box sx={{ textAlign: 'center', mb: 10 }}>
+            <Typography
+              variant="h2"
+              sx={{
+                fontSize: { xs: '2rem', md: '3rem' },
+                fontWeight: 400,
+                mb: 2,
+                fontFamily: 'var(--font-fraunces)',
+                color: '#1A1F36',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {t('aiPowered.title')}
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{
+                maxWidth: 750,
+                mx: 'auto',
+                color: '#4A5568',
+                fontWeight: 300,
+                fontSize: '1.15rem',
+                lineHeight: 1.7,
+              }}
+            >
+              {t('aiPowered.subtitle')}
+            </Typography>
+          </Box>
+
+          <Grid container spacing={4}>
+            {[1, 2, 3].map((feature) => (
+              <Grid item xs={12} md={4} key={feature}>
+                <Card
+                  sx={{
+                    height: '100%',
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                    border: '1px solid rgba(26, 31, 54, 0.08)',
+                    background: 'rgba(255, 255, 255, 0.7)',
+                    backdropFilter: 'blur(12px)',
+                    borderRadius: '16px',
+                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)',
+                    '&:hover': {
+                      transform: 'translateY(-8px)',
+                      boxShadow: '0 20px 48px rgba(0, 0, 0, 0.12)',
+                      border: '1px solid rgba(26, 31, 54, 0.15)',
+                    },
+                  }}
+                >
+                  <CardContent sx={{ p: 4, textAlign: 'center' }}>
+                    <Box
+                      sx={{
+                        color: '#10B981',
+                        mb: 3,
+                        display: 'inline-flex',
+                        p: 2.5,
+                        borderRadius: '16px',
+                        background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.15) 100%)',
+                      }}
+                    >
+                      {feature === 1 && <PictureAsPdf sx={{ fontSize: 48 }} />}
+                      {feature === 2 && <Cloud sx={{ fontSize: 48 }} />}
+                      {feature === 3 && <SmartToy sx={{ fontSize: 48 }} />}
+                    </Box>
+                    <Typography
+                      variant="h6"
+                      fontWeight={600}
+                      gutterBottom
+                      sx={{ color: '#1A1F36', mb: 1.5, fontSize: '1.15rem' }}
+                    >
+                      {t(`aiPowered.feature${feature}.title`)}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: '#4A5568',
+                        lineHeight: 1.7,
+                        fontSize: '0.95rem',
+                      }}
+                    >
+                      {t(`aiPowered.feature${feature}.description`)}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+
+          <Typography
+            variant="h6"
+            align="center"
+            sx={{
+              mt: 8,
+              color: '#1A1F36',
+              fontWeight: 400,
+              fontSize: '1.1rem',
+              fontStyle: 'italic',
+              maxWidth: 800,
+              mx: 'auto',
+            }}
+          >
+            {t('aiPowered.tagline')}
+          </Typography>
         </Container>
       </Box>
 
@@ -1295,13 +1295,12 @@ export default function LandingPage() {
         </Container>
       </Box>
 
-      {/* CTA Section */}
+      {/* FAQ Section */}
       <Box
         sx={{
-          background: 'linear-gradient(135deg, #1A1F36 0%, #232A44 50%, #2D3561 100%)',
-          py: { xs: 10, md: 14 },
+          background: 'linear-gradient(to bottom, #E8E2D5 0%, #F5F3EE 50%, #E8E2D5 100%)',
+          py: { xs: 8, md: 14 },
           position: 'relative',
-          overflow: 'hidden',
           '&::before': {
             content: '""',
             position: 'absolute',
@@ -1310,91 +1309,86 @@ export default function LandingPage() {
             right: 0,
             bottom: 0,
             backgroundImage: `
-              radial-gradient(ellipse at 50% 50%, rgba(16, 185, 129, 0.08) 0%, transparent 60%),
-              radial-gradient(circle at 20% 80%, rgba(245, 158, 11, 0.06) 0%, transparent 50%)
+              radial-gradient(circle at 20% 40%, rgba(16, 185, 129, 0.04) 0%, transparent 45%),
+              radial-gradient(circle at 80% 60%, rgba(245, 158, 11, 0.04) 0%, transparent 45%)
             `,
             pointerEvents: 'none',
           },
         }}
       >
-        <Container maxWidth="md" sx={{ textAlign: 'center', position: 'relative', zIndex: 1 }}>
-          <Typography
-            variant="h2"
-            sx={{
-              fontSize: { xs: '2rem', md: '3rem' },
-              fontWeight: 400,
-              mb: 3,
-              color: '#E8E2D5',
-              fontFamily: 'var(--font-fraunces)',
-              letterSpacing: '-0.01em',
-            }}
-          >
-            {t('cta.title')}
-          </Typography>
-          <Typography
-            variant="h6"
-            sx={{
-              mb: 6,
-              maxWidth: 600,
-              mx: 'auto',
-              color: 'rgba(232, 226, 213, 0.8)',
-              fontWeight: 300,
-              fontSize: '1.15rem',
-              lineHeight: 1.7,
-            }}
-          >
-            {t('cta.subtitle')}
-          </Typography>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} justifyContent="center">
-          <Button
-            variant="contained"
-            size="large"
-            onClick={() => router.push('/login')}
-            sx={{
-              px: 6,
-              py: 2,
-              fontSize: '1.1rem',
-              fontWeight: 500,
-              borderRadius: '8px',
-              background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-              color: 'white',
-              border: 'none',
-              boxShadow: '0 8px 24px rgba(16, 185, 129, 0.3)',
-              '&:hover': {
-                background: 'linear-gradient(135deg, #0ea570 0%, #047857 100%)',
-                transform: 'translateY(-2px)',
-                boxShadow: '0 12px 32px rgba(16, 185, 129, 0.4)',
-              },
-              transition: 'all 0.3s ease',
-            }}
-            endIcon={<ArrowForward />}
-          >
-            {t('cta.primary')}
-          </Button>
-          <Button
-            variant="outlined"
-            size="large"
-            onClick={() => handleScroll('pricing')}
-            sx={{
-              px: 6,
-              py: 2,
-              fontSize: '1.1rem',
-              fontWeight: 500,
-              borderRadius: '8px',
-              borderColor: 'rgba(232, 226, 213, 0.5)',
-              borderWidth: 1.5,
-              color: '#E8E2D5',
-              backdropFilter: 'blur(8px)',
-              '&:hover': {
-                borderColor: '#E8E2D5',
-                borderWidth: 1.5,
-                bgcolor: 'rgba(232, 226, 213, 0.1)',
-              },
-            }}
-          >
-            {t('cta.secondary')}
-          </Button>
-        </Stack>
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
+          <Box sx={{ textAlign: 'center', mb: 10 }}>
+            <Typography
+              variant="h2"
+              sx={{
+                fontSize: { xs: '2rem', md: '3rem' },
+                fontWeight: 400,
+                mb: 2,
+                fontFamily: 'var(--font-fraunces)',
+                color: '#1A1F36',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {t('faq.title')}
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{
+                maxWidth: 700,
+                mx: 'auto',
+                color: '#4A5568',
+                fontWeight: 300,
+                fontSize: '1.15rem',
+                lineHeight: 1.7,
+              }}
+            >
+              {t('faq.subtitle')}
+            </Typography>
+          </Box>
+
+          <Stack spacing={3}>
+            {[1, 2, 3, 4].map((q) => (
+              <Card
+                key={q}
+                sx={{
+                  background: 'rgba(255, 255, 255, 0.7)',
+                  backdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(26, 31, 54, 0.08)',
+                  borderRadius: '16px',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
+                    border: '1px solid rgba(26, 31, 54, 0.12)',
+                  },
+                }}
+              >
+                <CardContent sx={{ p: 4 }}>
+                  <Typography
+                    variant="h6"
+                    fontWeight={600}
+                    gutterBottom
+                    sx={{
+                      color: '#1A1F36',
+                      mb: 2,
+                      fontSize: '1.1rem',
+                    }}
+                  >
+                    {t(`faq.q${q}.question`)}
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      color: '#4A5568',
+                      lineHeight: 1.7,
+                      fontSize: '0.95rem',
+                    }}
+                  >
+                    {t(`faq.q${q}.answer`)}
+                  </Typography>
+                </CardContent>
+              </Card>
+            ))}
+          </Stack>
         </Container>
       </Box>
 
@@ -1525,103 +1519,6 @@ export default function LandingPage() {
           </Box>
 
           <WaitlistForm />
-        </Container>
-      </Box>
-
-      {/* FAQ Section */}
-      <Box
-        sx={{
-          background: 'linear-gradient(to bottom, #E8E2D5 0%, #F5F3EE 50%, #E8E2D5 100%)',
-          py: { xs: 8, md: 14 },
-          position: 'relative',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundImage: `
-              radial-gradient(circle at 20% 40%, rgba(16, 185, 129, 0.04) 0%, transparent 45%),
-              radial-gradient(circle at 80% 60%, rgba(245, 158, 11, 0.04) 0%, transparent 45%)
-            `,
-            pointerEvents: 'none',
-          },
-        }}
-      >
-        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
-          <Box sx={{ textAlign: 'center', mb: 10 }}>
-            <Typography
-              variant="h2"
-              sx={{
-                fontSize: { xs: '2rem', md: '3rem' },
-                fontWeight: 400,
-                mb: 2,
-                fontFamily: 'var(--font-fraunces)',
-                color: '#1A1F36',
-                letterSpacing: '-0.01em',
-              }}
-            >
-              {t('faq.title')}
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                maxWidth: 700,
-                mx: 'auto',
-                color: '#4A5568',
-                fontWeight: 300,
-                fontSize: '1.15rem',
-                lineHeight: 1.7,
-              }}
-            >
-              {t('faq.subtitle')}
-            </Typography>
-          </Box>
-
-          <Stack spacing={3}>
-            {[1, 2, 3, 4].map((q) => (
-              <Card
-                key={q}
-                sx={{
-                  background: 'rgba(255, 255, 255, 0.7)',
-                  backdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(26, 31, 54, 0.08)',
-                  borderRadius: '16px',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
-                    border: '1px solid rgba(26, 31, 54, 0.12)',
-                  },
-                }}
-              >
-                <CardContent sx={{ p: 4 }}>
-                  <Typography
-                    variant="h6"
-                    fontWeight={600}
-                    gutterBottom
-                    sx={{
-                      color: '#1A1F36',
-                      mb: 2,
-                      fontSize: '1.1rem',
-                    }}
-                  >
-                    {t(`faq.q${q}.question`)}
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      color: '#4A5568',
-                      lineHeight: 1.7,
-                      fontSize: '0.95rem',
-                    }}
-                  >
-                    {t(`faq.q${q}.answer`)}
-                  </Typography>
-                </CardContent>
-              </Card>
-            ))}
-          </Stack>
         </Container>
       </Box>
 
