@@ -652,16 +652,15 @@ export default function LandingPage() {
                 <Card
                   sx={{
                     height: '100%',
-                    background: 'rgba(255, 255, 255, 0.95)',
+                    background: 'rgba(232, 226, 213, 0.08)',
                     backdropFilter: 'blur(12px)',
-                    border: '1px solid rgba(232, 226, 213, 0.2)',
+                    border: '1px solid rgba(232, 226, 213, 0.15)',
                     borderRadius: '16px',
-                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.15)',
                     transition: 'all 0.4s ease',
                     '&:hover': {
                       transform: 'translateY(-8px)',
                       boxShadow: '0 20px 48px rgba(0, 0, 0, 0.3)',
-                      border: '1px solid rgba(16, 185, 129, 0.4)',
+                      border: '1px solid rgba(232, 226, 213, 0.25)',
                     },
                   }}
                 >
