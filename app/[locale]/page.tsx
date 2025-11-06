@@ -613,7 +613,7 @@ export default function LandingPage() {
               radial-gradient(circle at 25% 25%, rgba(16, 185, 129, 0.06) 0%, transparent 50%),
               radial-gradient(circle at 75% 75%, rgba(245, 158, 11, 0.05) 0%, transparent 50%)
             `,
-            backgroundSize: '40px 40px, auto, auto',
+            backgroundSize: '41px 41px, auto, auto',
             backgroundPosition: '0 0, 0 0, 0 0',
             pointerEvents: 'none',
           },
