@@ -590,6 +590,248 @@ export default function LandingPage() {
         </Container>
       </Box>
 
+      {/* How It Works Section */}
+      <Box
+        sx={{
+          background: 'linear-gradient(135deg, #1A1F36 0%, #232A44 50%, #2D3561 100%)',
+          py: { xs: 8, md: 14 },
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: `
+              radial-gradient(circle at 25% 25%, rgba(16, 185, 129, 0.06) 0%, transparent 50%),
+              radial-gradient(circle at 75% 75%, rgba(245, 158, 11, 0.05) 0%, transparent 50%)
+            `,
+            pointerEvents: 'none',
+          },
+        }}
+      >
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+          <Box sx={{ textAlign: 'center', mb: 10 }}>
+            <Typography
+              variant="h2"
+              sx={{
+                fontSize: { xs: '2rem', md: '3rem' },
+                fontWeight: 400,
+                mb: 2,
+                color: '#E8E2D5',
+                fontFamily: 'var(--font-fraunces)',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {t('howItWorks.title')}
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{
+                maxWidth: 700,
+                mx: 'auto',
+                color: 'rgba(232, 226, 213, 0.75)',
+                fontWeight: 300,
+                fontSize: '1.15rem',
+                lineHeight: 1.7,
+              }}
+            >
+              {t('howItWorks.subtitle')}
+            </Typography>
+          </Box>
+
+          <Grid container spacing={4}>
+            {[1, 2, 3, 4].map((step) => (
+              <Grid item xs={12} md={6} key={step}>
+                <Card
+                  sx={{
+                    height: '100%',
+                    background: 'rgba(232, 226, 213, 0.08)',
+                    backdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(232, 226, 213, 0.15)',
+                    borderRadius: '16px',
+                    transition: 'all 0.4s ease',
+                    '&:hover': {
+                      transform: 'translateY(-8px)',
+                      boxShadow: '0 20px 48px rgba(0, 0, 0, 0.3)',
+                      border: '1px solid rgba(232, 226, 213, 0.25)',
+                    },
+                  }}
+                >
+                  <CardContent sx={{ p: 4 }}>
+                    <Box
+                      sx={{
+                        width: 56,
+                        height: 56,
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                        color: 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '1.5rem',
+                        fontWeight: 700,
+                        mb: 3,
+                        boxShadow: '0 8px 24px rgba(16, 185, 129, 0.3)',
+                      }}
+                    >
+                      {step}
+                    </Box>
+                    <Typography
+                      variant="h6"
+                      fontWeight={600}
+                      gutterBottom
+                      sx={{ color: '#E8E2D5', mb: 1.5 }}
+                    >
+                      {t(`howItWorks.step${step}.title`)}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'rgba(232, 226, 213, 0.7)',
+                        lineHeight: 1.7,
+                        fontSize: '0.95rem',
+                      }}
+                    >
+                      {t(`howItWorks.step${step}.description`)}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* AI-Powered Section */}
+      <Box
+        sx={{
+          background: 'linear-gradient(to bottom, #E8E2D5 0%, #F5F3EE 50%, #E8E2D5 100%)',
+          py: { xs: 8, md: 14 },
+          position: 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: `
+              radial-gradient(circle at 15% 30%, rgba(16, 185, 129, 0.04) 0%, transparent 40%),
+              radial-gradient(circle at 85% 70%, rgba(245, 158, 11, 0.04) 0%, transparent 40%)
+            `,
+            pointerEvents: 'none',
+          },
+        }}
+      >
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+          <Box sx={{ textAlign: 'center', mb: 10 }}>
+            <Typography
+              variant="h2"
+              sx={{
+                fontSize: { xs: '2rem', md: '3rem' },
+                fontWeight: 400,
+                mb: 2,
+                fontFamily: 'var(--font-fraunces)',
+                color: '#1A1F36',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {t('aiPowered.title')}
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{
+                maxWidth: 750,
+                mx: 'auto',
+                color: '#4A5568',
+                fontWeight: 300,
+                fontSize: '1.15rem',
+                lineHeight: 1.7,
+              }}
+            >
+              {t('aiPowered.subtitle')}
+            </Typography>
+          </Box>
+
+          <Grid container spacing={4}>
+            {[1, 2, 3].map((feature) => (
+              <Grid item xs={12} md={4} key={feature}>
+                <Card
+                  sx={{
+                    height: '100%',
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                    border: '1px solid rgba(26, 31, 54, 0.08)',
+                    background: 'rgba(255, 255, 255, 0.7)',
+                    backdropFilter: 'blur(12px)',
+                    borderRadius: '16px',
+                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)',
+                    '&:hover': {
+                      transform: 'translateY(-8px)',
+                      boxShadow: '0 20px 48px rgba(0, 0, 0, 0.12)',
+                      border: '1px solid rgba(26, 31, 54, 0.15)',
+                    },
+                  }}
+                >
+                  <CardContent sx={{ p: 4, textAlign: 'center' }}>
+                    <Box
+                      sx={{
+                        color: '#10B981',
+                        mb: 3,
+                        display: 'inline-flex',
+                        p: 2.5,
+                        borderRadius: '16px',
+                        background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.15) 100%)',
+                      }}
+                    >
+                      {feature === 1 && <PictureAsPdf sx={{ fontSize: 48 }} />}
+                      {feature === 2 && <Cloud sx={{ fontSize: 48 }} />}
+                      {feature === 3 && <SmartToy sx={{ fontSize: 48 }} />}
+                    </Box>
+                    <Typography
+                      variant="h6"
+                      fontWeight={600}
+                      gutterBottom
+                      sx={{ color: '#1A1F36', mb: 1.5, fontSize: '1.15rem' }}
+                    >
+                      {t(`aiPowered.feature${feature}.title`)}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: '#4A5568',
+                        lineHeight: 1.7,
+                        fontSize: '0.95rem',
+                      }}
+                    >
+                      {t(`aiPowered.feature${feature}.description`)}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+
+          <Typography
+            variant="h6"
+            align="center"
+            sx={{
+              mt: 8,
+              color: '#1A1F36',
+              fontWeight: 400,
+              fontSize: '1.1rem',
+              fontStyle: 'italic',
+              maxWidth: 800,
+              mx: 'auto',
+            }}
+          >
+            {t('aiPowered.tagline')}
+          </Typography>
+        </Container>
+      </Box>
+
       {/* Screenshots Section */}
       <Box
         id="screenshots"
@@ -1283,6 +1525,103 @@ export default function LandingPage() {
           </Box>
 
           <WaitlistForm />
+        </Container>
+      </Box>
+
+      {/* FAQ Section */}
+      <Box
+        sx={{
+          background: 'linear-gradient(to bottom, #E8E2D5 0%, #F5F3EE 50%, #E8E2D5 100%)',
+          py: { xs: 8, md: 14 },
+          position: 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: `
+              radial-gradient(circle at 20% 40%, rgba(16, 185, 129, 0.04) 0%, transparent 45%),
+              radial-gradient(circle at 80% 60%, rgba(245, 158, 11, 0.04) 0%, transparent 45%)
+            `,
+            pointerEvents: 'none',
+          },
+        }}
+      >
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
+          <Box sx={{ textAlign: 'center', mb: 10 }}>
+            <Typography
+              variant="h2"
+              sx={{
+                fontSize: { xs: '2rem', md: '3rem' },
+                fontWeight: 400,
+                mb: 2,
+                fontFamily: 'var(--font-fraunces)',
+                color: '#1A1F36',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {t('faq.title')}
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{
+                maxWidth: 700,
+                mx: 'auto',
+                color: '#4A5568',
+                fontWeight: 300,
+                fontSize: '1.15rem',
+                lineHeight: 1.7,
+              }}
+            >
+              {t('faq.subtitle')}
+            </Typography>
+          </Box>
+
+          <Stack spacing={3}>
+            {[1, 2, 3, 4].map((q) => (
+              <Card
+                key={q}
+                sx={{
+                  background: 'rgba(255, 255, 255, 0.7)',
+                  backdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(26, 31, 54, 0.08)',
+                  borderRadius: '16px',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
+                    border: '1px solid rgba(26, 31, 54, 0.12)',
+                  },
+                }}
+              >
+                <CardContent sx={{ p: 4 }}>
+                  <Typography
+                    variant="h6"
+                    fontWeight={600}
+                    gutterBottom
+                    sx={{
+                      color: '#1A1F36',
+                      mb: 2,
+                      fontSize: '1.1rem',
+                    }}
+                  >
+                    {t(`faq.q${q}.question`)}
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      color: '#4A5568',
+                      lineHeight: 1.7,
+                      fontSize: '0.95rem',
+                    }}
+                  >
+                    {t(`faq.q${q}.answer`)}
+                  </Typography>
+                </CardContent>
+              </Card>
+            ))}
+          </Stack>
         </Container>
       </Box>
 
