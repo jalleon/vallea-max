@@ -1435,7 +1435,7 @@ export default function LandingPage() {
       <Box
         id="demo"
         sx={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: 'linear-gradient(135deg, #1A1F36 0%, #232A44 50%, #2D3561 100%)',
           py: { xs: 10, md: 14 },
           position: 'relative',
           overflow: 'hidden',
