@@ -931,7 +931,7 @@ export default function LandingPage() {
       {/* AI-Powered Section */}
       <Box
         sx={{
-          background: 'linear-gradient(to bottom, #E8E2D5 0%, #F5F3EE 50%, #E8E2D5 100%)',
+          background: 'linear-gradient(to bottom, #FFFFFF 0%, #F8F9FA 50%, #FFFFFF 100%)',
           py: { xs: 8, md: 14 },
           position: 'relative',
           '&::before': {
@@ -942,8 +942,15 @@ export default function LandingPage() {
             right: 0,
             bottom: 0,
             backgroundImage: `
-              radial-gradient(circle at 15% 30%, rgba(16, 185, 129, 0.04) 0%, transparent 40%),
-              radial-gradient(circle at 85% 70%, rgba(245, 158, 11, 0.04) 0%, transparent 40%)
+              repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 60px,
+                rgba(16, 185, 129, 0.02) 60px,
+                rgba(16, 185, 129, 0.02) 120px
+              ),
+              radial-gradient(circle at 20% 30%, rgba(16, 185, 129, 0.04) 0%, transparent 50%),
+              radial-gradient(circle at 80% 70%, rgba(79, 70, 229, 0.03) 0%, transparent 50%)
             `,
             pointerEvents: 'none',
           },
@@ -1071,9 +1078,13 @@ export default function LandingPage() {
             right: 0,
             bottom: 0,
             backgroundImage: `
+              radial-gradient(circle, rgba(16, 185, 129, 0.08) 1px, transparent 1px),
+              radial-gradient(circle, rgba(245, 158, 11, 0.06) 1px, transparent 1px),
               radial-gradient(circle at 25% 25%, rgba(16, 185, 129, 0.04) 0%, transparent 45%),
               radial-gradient(circle at 75% 75%, rgba(245, 158, 11, 0.04) 0%, transparent 45%)
             `,
+            backgroundSize: '40px 40px, 60px 60px, 100% 100%, 100% 100%',
+            backgroundPosition: '0 0, 20px 20px, 0 0, 0 0',
             pointerEvents: 'none',
           },
         }}
@@ -1302,7 +1313,7 @@ export default function LandingPage() {
       {/* FAQ Section */}
       <Box
         sx={{
-          background: 'linear-gradient(to bottom, #E8E2D5 0%, #F5F3EE 50%, #E8E2D5 100%)',
+          background: 'linear-gradient(to bottom, #F0FDF4 0%, #F7FEF9 50%, #F0FDF4 100%)',
           py: { xs: 8, md: 14 },
           position: 'relative',
           '&::before': {
@@ -1313,9 +1324,12 @@ export default function LandingPage() {
             right: 0,
             bottom: 0,
             backgroundImage: `
-              radial-gradient(circle at 20% 40%, rgba(16, 185, 129, 0.04) 0%, transparent 45%),
-              radial-gradient(circle at 80% 60%, rgba(245, 158, 11, 0.04) 0%, transparent 45%)
+              linear-gradient(90deg, rgba(16, 185, 129, 0.03) 1px, transparent 1px),
+              linear-gradient(0deg, rgba(16, 185, 129, 0.03) 1px, transparent 1px),
+              radial-gradient(circle at 20% 40%, rgba(16, 185, 129, 0.05) 0%, transparent 45%),
+              radial-gradient(circle at 80% 60%, rgba(5, 150, 105, 0.04) 0%, transparent 45%)
             `,
+            backgroundSize: '50px 50px, 50px 50px, 100% 100%, 100% 100%',
             pointerEvents: 'none',
           },
         }}
