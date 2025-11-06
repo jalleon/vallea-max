@@ -652,7 +652,7 @@ export default function LandingPage() {
                 <Card
                   sx={{
                     height: '100%',
-                    background: 'rgba(232, 226, 213, 0.08)',
+                    background: 'rgba(232, 226, 213, 1)',
                     backdropFilter: 'blur(12px)',
                     border: '1px solid rgba(232, 226, 213, 0.15)',
                     borderRadius: '16px',
