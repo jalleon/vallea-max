@@ -1313,9 +1313,9 @@ export default function LandingPage() {
       {/* FAQ Section */}
       <Box
         sx={{
-          background: 'linear-gradient(to bottom, #F0FDF4 0%, #F7FEF9 50%, #F0FDF4 100%)',
           py: { xs: 8, md: 14 },
           position: 'relative',
+          overflow: 'hidden',
           '&::before': {
             content: '""',
             position: 'absolute',
@@ -1323,14 +1323,12 @@ export default function LandingPage() {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundImage: `
-              linear-gradient(90deg, rgba(16, 185, 129, 0.03) 1px, transparent 1px),
-              linear-gradient(0deg, rgba(16, 185, 129, 0.03) 1px, transparent 1px),
-              radial-gradient(circle at 20% 40%, rgba(16, 185, 129, 0.05) 0%, transparent 45%),
-              radial-gradient(circle at 80% 60%, rgba(5, 150, 105, 0.04) 0%, transparent 45%)
-            `,
-            backgroundSize: '50px 50px, 50px 50px, 100% 100%, 100% 100%',
-            pointerEvents: 'none',
+            backgroundImage: 'url(/backgrounds/bg9.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            filter: 'brightness(0.5)',
+            zIndex: 0,
           },
         }}
       >
@@ -1343,7 +1341,7 @@ export default function LandingPage() {
                 fontWeight: 400,
                 mb: 2,
                 fontFamily: 'var(--font-fraunces)',
-                color: '#1A1F36',
+                color: '#E8E2D5',
                 letterSpacing: '-0.01em',
               }}
             >
@@ -1354,7 +1352,7 @@ export default function LandingPage() {
               sx={{
                 maxWidth: 700,
                 mx: 'auto',
-                color: '#4A5568',
+                color: 'rgba(232, 226, 213, 0.85)',
                 fontWeight: 300,
                 fontSize: '1.15rem',
                 lineHeight: 1.7,
@@ -1369,18 +1367,18 @@ export default function LandingPage() {
               <Accordion
                 key={q}
                 sx={{
-                  background: 'rgba(255, 255, 255, 0.7)',
+                  background: 'rgba(255, 255, 255, 0.95)',
                   backdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(26, 31, 54, 0.08)',
+                  border: '1px solid rgba(232, 226, 213, 0.2)',
                   borderRadius: '16px !important',
-                  boxShadow: 'none',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
                   '&:before': {
                     display: 'none',
                   },
                   '&.Mui-expanded': {
                     margin: 0,
-                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
-                    border: '1px solid rgba(26, 31, 54, 0.12)',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.25)',
+                    border: '1px solid rgba(16, 185, 129, 0.3)',
                   },
                   transition: 'all 0.3s ease',
                 }}
