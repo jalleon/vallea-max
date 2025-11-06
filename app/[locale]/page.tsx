@@ -26,9 +26,6 @@ import {
   useMediaQuery,
   Menu,
   MenuItem,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
 } from '@mui/material'
 import {
   Assessment,
@@ -47,18 +44,9 @@ import {
   CompareArrows,
   Description,
   Language as LanguageIcon,
-  FolderOpen,
-  AutoAwesome,
-  PhoneAndroid,
-  FileCopy,
-  CloudUpload,
-  TextFields,
-  HelpOutline,
-  ExpandMore,
 } from '@mui/icons-material'
 import WaitlistForm from '@/components/landing/WaitlistForm'
 import DemoRequestForm from '@/components/landing/DemoRequestForm'
-import ScreenshotCarousel from '@/components/landing/ScreenshotCarousel'
 
 export default function LandingPage() {
   const t = useTranslations('landing')
@@ -602,189 +590,6 @@ export default function LandingPage() {
         </Container>
       </Box>
 
-      {/* How It Works Section */}
-      <Box
-        id="how-it-works"
-        sx={{
-          background: 'linear-gradient(135deg, #F5F3EE 0%, #E8E2D5 100%)',
-          py: { xs: 10, md: 14 },
-          position: 'relative',
-        }}
-      >
-        <Container maxWidth="lg">
-          <Box sx={{ textAlign: 'center', mb: 8 }}>
-            <Typography
-              variant="h2"
-              sx={{
-                fontSize: { xs: '2rem', md: '3rem' },
-                fontWeight: 400,
-                mb: 2,
-                fontFamily: 'var(--font-fraunces)',
-                color: '#1A1F36',
-                letterSpacing: '-0.01em',
-              }}
-            >
-              {t('howItWorks.title')}
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                maxWidth: 700,
-                mx: 'auto',
-                color: '#4A5568',
-                fontWeight: 300,
-                fontSize: '1.15rem',
-                lineHeight: 1.7,
-              }}
-            >
-              {t('howItWorks.subtitle')}
-            </Typography>
-          </Box>
-
-          <Grid container spacing={4}>
-            <Grid item xs={12} md={6} lg={3}>
-              <Box sx={{ textAlign: 'center', height: '100%' }}>
-                <Box
-                  sx={{
-                    display: 'inline-flex',
-                    p: 3,
-                    borderRadius: '50%',
-                    background: 'linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(124, 58, 237, 0.15) 100%)',
-                    mb: 3,
-                  }}
-                >
-                  <FolderOpen sx={{ fontSize: 48, color: '#4F46E5' }} />
-                </Box>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 600,
-                    mb: 2,
-                    color: '#1A1F36',
-                  }}
-                >
-                  {t('howItWorks.step1.title')}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: '#4A5568',
-                    lineHeight: 1.7,
-                  }}
-                >
-                  {t('howItWorks.step1.description')}
-                </Typography>
-              </Box>
-            </Grid>
-
-            <Grid item xs={12} md={6} lg={3}>
-              <Box sx={{ textAlign: 'center', height: '100%' }}>
-                <Box
-                  sx={{
-                    display: 'inline-flex',
-                    p: 3,
-                    borderRadius: '50%',
-                    background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.15) 100%)',
-                    mb: 3,
-                  }}
-                >
-                  <AutoAwesome sx={{ fontSize: 48, color: '#10B981' }} />
-                </Box>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 600,
-                    mb: 2,
-                    color: '#1A1F36',
-                  }}
-                >
-                  {t('howItWorks.step2.title')}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: '#4A5568',
-                    lineHeight: 1.7,
-                  }}
-                >
-                  {t('howItWorks.step2.description')}
-                </Typography>
-              </Box>
-            </Grid>
-
-            <Grid item xs={12} md={6} lg={3}>
-              <Box sx={{ textAlign: 'center', height: '100%' }}>
-                <Box
-                  sx={{
-                    display: 'inline-flex',
-                    p: 3,
-                    borderRadius: '50%',
-                    background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.15) 100%)',
-                    mb: 3,
-                  }}
-                >
-                  <PhoneAndroid sx={{ fontSize: 48, color: '#F59E0B' }} />
-                </Box>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 600,
-                    mb: 2,
-                    color: '#1A1F36',
-                  }}
-                >
-                  {t('howItWorks.step3.title')}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: '#4A5568',
-                    lineHeight: 1.7,
-                  }}
-                >
-                  {t('howItWorks.step3.description')}
-                </Typography>
-              </Box>
-            </Grid>
-
-            <Grid item xs={12} md={6} lg={3}>
-              <Box sx={{ textAlign: 'center', height: '100%' }}>
-                <Box
-                  sx={{
-                    display: 'inline-flex',
-                    p: 3,
-                    borderRadius: '50%',
-                    background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.15) 100%)',
-                    mb: 3,
-                  }}
-                >
-                  <FileCopy sx={{ fontSize: 48, color: '#8B5CF6' }} />
-                </Box>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 600,
-                    mb: 2,
-                    color: '#1A1F36',
-                  }}
-                >
-                  {t('howItWorks.step4.title')}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: '#4A5568',
-                    lineHeight: 1.7,
-                  }}
-                >
-                  {t('howItWorks.step4.description')}
-                </Typography>
-              </Box>
-            </Grid>
-          </Grid>
-        </Container>
-      </Box>
-
       {/* Screenshots Section */}
       <Box
         id="screenshots"
@@ -858,22 +663,18 @@ export default function LandingPage() {
                   },
                 }}
               >
-                <ScreenshotCarousel
-                  images={[
-                    {
-                      icon: <Dashboard sx={{ fontSize: 100, color: 'rgba(232, 226, 213, 0.4)' }} />,
-                      gradient: 'linear-gradient(135deg, rgba(79, 70, 229, 0.08) 0%, rgba(124, 58, 237, 0.12) 100%)',
-                    },
-                    {
-                      icon: <FolderOpen sx={{ fontSize: 100, color: 'rgba(232, 226, 213, 0.4)' }} />,
-                      gradient: 'linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(109, 40, 217, 0.15) 100%)',
-                    },
-                    {
-                      icon: <Search sx={{ fontSize: 100, color: 'rgba(232, 226, 213, 0.4)' }} />,
-                      gradient: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(79, 70, 229, 0.15) 100%)',
-                    },
-                  ]}
-                />
+                <Box
+                  sx={{
+                    height: 300,
+                    background: 'linear-gradient(135deg, rgba(79, 70, 229, 0.08) 0%, rgba(124, 58, 237, 0.12) 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderBottom: '1px solid rgba(232, 226, 213, 0.1)',
+                  }}
+                >
+                  <Dashboard sx={{ fontSize: 100, color: 'rgba(232, 226, 213, 0.4)' }} />
+                </Box>
                 <CardContent sx={{ p: 3 }}>
                   <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: '#E8E2D5' }}>
                     {t('screenshots.library.title')}
@@ -902,22 +703,18 @@ export default function LandingPage() {
                   },
                 }}
               >
-                <ScreenshotCarousel
-                  images={[
-                    {
-                      icon: <Assessment sx={{ fontSize: 100, color: 'rgba(232, 226, 213, 0.4)' }} />,
-                      gradient: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.15) 100%)',
-                    },
-                    {
-                      icon: <PhoneAndroid sx={{ fontSize: 100, color: 'rgba(232, 226, 213, 0.4)' }} />,
-                      gradient: 'linear-gradient(135deg, rgba(5, 150, 105, 0.12) 0%, rgba(4, 120, 87, 0.18) 100%)',
-                    },
-                    {
-                      icon: <CheckCircle sx={{ fontSize: 100, color: 'rgba(232, 226, 213, 0.4)' }} />,
-                      gradient: 'linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(21, 128, 61, 0.15) 100%)',
-                    },
-                  ]}
-                />
+                <Box
+                  sx={{
+                    height: 300,
+                    background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.15) 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderBottom: '1px solid rgba(232, 226, 213, 0.1)',
+                  }}
+                >
+                  <Assessment sx={{ fontSize: 100, color: 'rgba(232, 226, 213, 0.4)' }} />
+                </Box>
                 <CardContent sx={{ p: 3 }}>
                   <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: '#E8E2D5' }}>
                     {t('screenshots.inspection.title')}
@@ -946,22 +743,18 @@ export default function LandingPage() {
                   },
                 }}
               >
-                <ScreenshotCarousel
-                  images={[
-                    {
-                      icon: <PictureAsPdf sx={{ fontSize: 100, color: 'rgba(232, 226, 213, 0.4)' }} />,
-                      gradient: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.15) 100%)',
-                    },
-                    {
-                      icon: <CloudUpload sx={{ fontSize: 100, color: 'rgba(232, 226, 213, 0.4)' }} />,
-                      gradient: 'linear-gradient(135deg, rgba(217, 119, 6, 0.12) 0%, rgba(180, 83, 9, 0.18) 100%)',
-                    },
-                    {
-                      icon: <AutoAwesome sx={{ fontSize: 100, color: 'rgba(232, 226, 213, 0.4)' }} />,
-                      gradient: 'linear-gradient(135deg, rgba(251, 146, 60, 0.1) 0%, rgba(234, 88, 12, 0.15) 100%)',
-                    },
-                  ]}
-                />
+                <Box
+                  sx={{
+                    height: 300,
+                    background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.15) 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderBottom: '1px solid rgba(232, 226, 213, 0.1)',
+                  }}
+                >
+                  <PictureAsPdf sx={{ fontSize: 100, color: 'rgba(232, 226, 213, 0.4)' }} />
+                </Box>
                 <CardContent sx={{ p: 3 }}>
                   <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: '#E8E2D5' }}>
                     {t('screenshots.pdfReader.title')}
@@ -990,22 +783,18 @@ export default function LandingPage() {
                   },
                 }}
               >
-                <ScreenshotCarousel
-                  images={[
-                    {
-                      icon: <Description sx={{ fontSize: 100, color: 'rgba(232, 226, 213, 0.4)' }} />,
-                      gradient: 'linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(109, 40, 217, 0.15) 100%)',
-                    },
-                    {
-                      icon: <FileCopy sx={{ fontSize: 100, color: 'rgba(232, 226, 213, 0.4)' }} />,
-                      gradient: 'linear-gradient(135deg, rgba(109, 40, 217, 0.12) 0%, rgba(91, 33, 182, 0.18) 100%)',
-                    },
-                    {
-                      icon: <TextFields sx={{ fontSize: 100, color: 'rgba(232, 226, 213, 0.4)' }} />,
-                      gradient: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.15) 100%)',
-                    },
-                  ]}
-                />
+                <Box
+                  sx={{
+                    height: 300,
+                    background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(109, 40, 217, 0.15) 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderBottom: '1px solid rgba(232, 226, 213, 0.1)',
+                  }}
+                >
+                  <Description sx={{ fontSize: 100, color: 'rgba(232, 226, 213, 0.4)' }} />
+                </Box>
                 <CardContent sx={{ p: 3 }}>
                   <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: '#E8E2D5' }}>
                     {t('screenshots.reports.title')}
@@ -1017,231 +806,6 @@ export default function LandingPage() {
               </Card>
             </Grid>
           </Grid>
-        </Container>
-      </Box>
-
-      {/* AI-Powered Section */}
-      <Box
-        id="ai-powered"
-        sx={{
-          background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-          py: { xs: 10, md: 14 },
-          position: 'relative',
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundImage: `
-              radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.12) 0%, transparent 50%),
-              radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
-              repeating-linear-gradient(
-                -45deg,
-                transparent,
-                transparent 60px,
-                rgba(255, 255, 255, 0.04) 60px,
-                rgba(255, 255, 255, 0.04) 120px
-              )
-            `,
-            pointerEvents: 'none',
-          },
-        }}
-      >
-        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
-          <Box sx={{ textAlign: 'center', mb: 8 }}>
-            <Typography
-              variant="h2"
-              sx={{
-                fontSize: { xs: '2rem', md: '3rem' },
-                fontWeight: 400,
-                mb: 2,
-                fontFamily: 'var(--font-fraunces)',
-                color: 'white',
-                letterSpacing: '-0.01em',
-              }}
-            >
-              {t('aiPowered.title')}
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                maxWidth: 800,
-                mx: 'auto',
-                color: 'rgba(255, 255, 255, 0.95)',
-                fontWeight: 300,
-                fontSize: '1.15rem',
-                lineHeight: 1.7,
-              }}
-            >
-              {t('aiPowered.subtitle')}
-            </Typography>
-          </Box>
-
-          <Grid container spacing={4}>
-            <Grid item xs={12} md={4}>
-              <Card
-                sx={{
-                  height: '100%',
-                  background: 'rgba(255, 255, 255, 0.95)',
-                  backdropFilter: 'blur(10px)',
-                  borderRadius: '16px',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-8px)',
-                    boxShadow: '0 20px 48px rgba(0, 0, 0, 0.2)',
-                  },
-                }}
-              >
-                <CardContent sx={{ p: 4, textAlign: 'center' }}>
-                  <Box
-                    sx={{
-                      display: 'inline-flex',
-                      p: 3,
-                      borderRadius: '50%',
-                      background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.15) 100%)',
-                      mb: 3,
-                    }}
-                  >
-                    <PictureAsPdf sx={{ fontSize: 48, color: '#EF4444' }} />
-                  </Box>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 600,
-                      mb: 2,
-                      color: '#1A1F36',
-                    }}
-                  >
-                    {t('aiPowered.feature1.title')}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: '#4A5568',
-                      lineHeight: 1.7,
-                    }}
-                  >
-                    {t('aiPowered.feature1.description')}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <Card
-                sx={{
-                  height: '100%',
-                  background: 'rgba(255, 255, 255, 0.95)',
-                  backdropFilter: 'blur(10px)',
-                  borderRadius: '16px',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-8px)',
-                    boxShadow: '0 20px 48px rgba(0, 0, 0, 0.2)',
-                  },
-                }}
-              >
-                <CardContent sx={{ p: 4, textAlign: 'center' }}>
-                  <Box
-                    sx={{
-                      display: 'inline-flex',
-                      p: 3,
-                      borderRadius: '50%',
-                      background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.15) 100%)',
-                      mb: 3,
-                    }}
-                  >
-                    <CloudUpload sx={{ fontSize: 48, color: '#3B82F6' }} />
-                  </Box>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 600,
-                      mb: 2,
-                      color: '#1A1F36',
-                    }}
-                  >
-                    {t('aiPowered.feature2.title')}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: '#4A5568',
-                      lineHeight: 1.7,
-                    }}
-                  >
-                    {t('aiPowered.feature2.description')}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <Card
-                sx={{
-                  height: '100%',
-                  background: 'rgba(255, 255, 255, 0.95)',
-                  backdropFilter: 'blur(10px)',
-                  borderRadius: '16px',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-8px)',
-                    boxShadow: '0 20px 48px rgba(0, 0, 0, 0.2)',
-                  },
-                }}
-              >
-                <CardContent sx={{ p: 4, textAlign: 'center' }}>
-                  <Box
-                    sx={{
-                      display: 'inline-flex',
-                      p: 3,
-                      borderRadius: '50%',
-                      background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.15) 100%)',
-                      mb: 3,
-                    }}
-                  >
-                    <TextFields sx={{ fontSize: 48, color: '#8B5CF6' }} />
-                  </Box>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 600,
-                      mb: 2,
-                      color: '#1A1F36',
-                    }}
-                  >
-                    {t('aiPowered.feature3.title')}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: '#4A5568',
-                      lineHeight: 1.7,
-                    }}
-                  >
-                    {t('aiPowered.feature3.description')}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-
-          <Box sx={{ textAlign: 'center', mt: 6 }}>
-            <Typography
-              variant="h6"
-              sx={{
-                color: 'white',
-                fontWeight: 400,
-                fontSize: '1.1rem',
-                fontStyle: 'italic',
-              }}
-            >
-              {t('aiPowered.tagline')}
-            </Typography>
-          </Box>
         </Container>
       </Box>
 
@@ -1489,163 +1053,106 @@ export default function LandingPage() {
         </Container>
       </Box>
 
-      {/* FAQ Section */}
+      {/* CTA Section */}
       <Box
-        id="faq"
         sx={{
-          background: 'linear-gradient(to bottom, #F5F3EE 0%, #E8E2D5 100%)',
+          background: 'linear-gradient(135deg, #1A1F36 0%, #232A44 50%, #2D3561 100%)',
           py: { xs: 10, md: 14 },
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: `
+              radial-gradient(ellipse at 50% 50%, rgba(16, 185, 129, 0.08) 0%, transparent 60%),
+              radial-gradient(circle at 20% 80%, rgba(245, 158, 11, 0.06) 0%, transparent 50%)
+            `,
+            pointerEvents: 'none',
+          },
         }}
       >
-        <Container maxWidth="md">
-          <Box sx={{ textAlign: 'center', mb: 8 }}>
-            <Typography
-              variant="h2"
-              sx={{
-                fontSize: { xs: '2rem', md: '3rem' },
-                fontWeight: 400,
-                mb: 2,
-                fontFamily: 'var(--font-fraunces)',
-                color: '#1A1F36',
-                letterSpacing: '-0.01em',
-              }}
-            >
-              {t('faq.title')}
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                color: '#4A5568',
-                fontWeight: 300,
-                fontSize: '1.15rem',
-                lineHeight: 1.7,
-              }}
-            >
-              {t('faq.subtitle')}
-            </Typography>
-          </Box>
-
-          <Stack spacing={2}>
-            <Accordion
-              sx={{
-                borderRadius: '12px !important',
-                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.06)',
-                '&:before': { display: 'none' },
-                '&.Mui-expanded': { margin: '0 !important' },
-              }}
-            >
-              <AccordionSummary
-                expandIcon={<ExpandMore sx={{ color: '#10B981' }} />}
-                sx={{
-                  px: 3,
-                  py: 1.5,
-                  '&:hover': { bgcolor: 'rgba(16, 185, 129, 0.04)' },
-                }}
-              >
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                  <HelpOutline sx={{ color: '#10B981', fontSize: 24 }} />
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#1A1F36', fontSize: '1.05rem' }}>
-                    {t('faq.q1.question')}
-                  </Typography>
-                </Box>
-              </AccordionSummary>
-              <AccordionDetails sx={{ px: 3, pb: 3, pt: 0 }}>
-                <Typography variant="body2" sx={{ color: '#4A5568', lineHeight: 1.7, pl: 5 }}>
-                  {t('faq.q1.answer')}
-                </Typography>
-              </AccordionDetails>
-            </Accordion>
-
-            <Accordion
-              sx={{
-                borderRadius: '12px !important',
-                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.06)',
-                '&:before': { display: 'none' },
-                '&.Mui-expanded': { margin: '0 !important' },
-              }}
-            >
-              <AccordionSummary
-                expandIcon={<ExpandMore sx={{ color: '#10B981' }} />}
-                sx={{
-                  px: 3,
-                  py: 1.5,
-                  '&:hover': { bgcolor: 'rgba(16, 185, 129, 0.04)' },
-                }}
-              >
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                  <HelpOutline sx={{ color: '#10B981', fontSize: 24 }} />
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#1A1F36', fontSize: '1.05rem' }}>
-                    {t('faq.q2.question')}
-                  </Typography>
-                </Box>
-              </AccordionSummary>
-              <AccordionDetails sx={{ px: 3, pb: 3, pt: 0 }}>
-                <Typography variant="body2" sx={{ color: '#4A5568', lineHeight: 1.7, pl: 5 }}>
-                  {t('faq.q2.answer')}
-                </Typography>
-              </AccordionDetails>
-            </Accordion>
-
-            <Accordion
-              sx={{
-                borderRadius: '12px !important',
-                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.06)',
-                '&:before': { display: 'none' },
-                '&.Mui-expanded': { margin: '0 !important' },
-              }}
-            >
-              <AccordionSummary
-                expandIcon={<ExpandMore sx={{ color: '#10B981' }} />}
-                sx={{
-                  px: 3,
-                  py: 1.5,
-                  '&:hover': { bgcolor: 'rgba(16, 185, 129, 0.04)' },
-                }}
-              >
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                  <HelpOutline sx={{ color: '#10B981', fontSize: 24 }} />
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#1A1F36', fontSize: '1.05rem' }}>
-                    {t('faq.q3.question')}
-                  </Typography>
-                </Box>
-              </AccordionSummary>
-              <AccordionDetails sx={{ px: 3, pb: 3, pt: 0 }}>
-                <Typography variant="body2" sx={{ color: '#4A5568', lineHeight: 1.7, pl: 5 }}>
-                  {t('faq.q3.answer')}
-                </Typography>
-              </AccordionDetails>
-            </Accordion>
-
-            <Accordion
-              sx={{
-                borderRadius: '12px !important',
-                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.06)',
-                '&:before': { display: 'none' },
-                '&.Mui-expanded': { margin: '0 !important' },
-              }}
-            >
-              <AccordionSummary
-                expandIcon={<ExpandMore sx={{ color: '#10B981' }} />}
-                sx={{
-                  px: 3,
-                  py: 1.5,
-                  '&:hover': { bgcolor: 'rgba(16, 185, 129, 0.04)' },
-                }}
-              >
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                  <HelpOutline sx={{ color: '#10B981', fontSize: 24 }} />
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#1A1F36', fontSize: '1.05rem' }}>
-                    {t('faq.q4.question')}
-                  </Typography>
-                </Box>
-              </AccordionSummary>
-              <AccordionDetails sx={{ px: 3, pb: 3, pt: 0 }}>
-                <Typography variant="body2" sx={{ color: '#4A5568', lineHeight: 1.7, pl: 5 }}>
-                  {t('faq.q4.answer')}
-                </Typography>
-              </AccordionDetails>
-            </Accordion>
-          </Stack>
+        <Container maxWidth="md" sx={{ textAlign: 'center', position: 'relative', zIndex: 1 }}>
+          <Typography
+            variant="h2"
+            sx={{
+              fontSize: { xs: '2rem', md: '3rem' },
+              fontWeight: 400,
+              mb: 3,
+              color: '#E8E2D5',
+              fontFamily: 'var(--font-fraunces)',
+              letterSpacing: '-0.01em',
+            }}
+          >
+            {t('cta.title')}
+          </Typography>
+          <Typography
+            variant="h6"
+            sx={{
+              mb: 6,
+              maxWidth: 600,
+              mx: 'auto',
+              color: 'rgba(232, 226, 213, 0.8)',
+              fontWeight: 300,
+              fontSize: '1.15rem',
+              lineHeight: 1.7,
+            }}
+          >
+            {t('cta.subtitle')}
+          </Typography>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} justifyContent="center">
+          <Button
+            variant="contained"
+            size="large"
+            onClick={() => router.push('/login')}
+            sx={{
+              px: 6,
+              py: 2,
+              fontSize: '1.1rem',
+              fontWeight: 500,
+              borderRadius: '8px',
+              background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+              color: 'white',
+              border: 'none',
+              boxShadow: '0 8px 24px rgba(16, 185, 129, 0.3)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #0ea570 0%, #047857 100%)',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 12px 32px rgba(16, 185, 129, 0.4)',
+              },
+              transition: 'all 0.3s ease',
+            }}
+            endIcon={<ArrowForward />}
+          >
+            {t('cta.primary')}
+          </Button>
+          <Button
+            variant="outlined"
+            size="large"
+            onClick={() => handleScroll('pricing')}
+            sx={{
+              px: 6,
+              py: 2,
+              fontSize: '1.1rem',
+              fontWeight: 500,
+              borderRadius: '8px',
+              borderColor: 'rgba(232, 226, 213, 0.5)',
+              borderWidth: 1.5,
+              color: '#E8E2D5',
+              backdropFilter: 'blur(8px)',
+              '&:hover': {
+                borderColor: '#E8E2D5',
+                borderWidth: 1.5,
+                bgcolor: 'rgba(232, 226, 213, 0.1)',
+              },
+            }}
+          >
+            {t('cta.secondary')}
+          </Button>
+        </Stack>
         </Container>
       </Box>
 
