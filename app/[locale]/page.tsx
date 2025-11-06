@@ -931,9 +931,9 @@ export default function LandingPage() {
       {/* AI-Powered Section */}
       <Box
         sx={{
-          background: 'linear-gradient(to bottom, #FFFFFF 0%, #F8F9FA 50%, #FFFFFF 100%)',
           py: { xs: 8, md: 14 },
           position: 'relative',
+          overflow: 'hidden',
           '&::before': {
             content: '""',
             position: 'absolute',
@@ -941,18 +941,12 @@ export default function LandingPage() {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundImage: `
-              repeating-linear-gradient(
-                45deg,
-                transparent,
-                transparent 60px,
-                rgba(16, 185, 129, 0.02) 60px,
-                rgba(16, 185, 129, 0.02) 120px
-              ),
-              radial-gradient(circle at 20% 30%, rgba(16, 185, 129, 0.04) 0%, transparent 50%),
-              radial-gradient(circle at 80% 70%, rgba(79, 70, 229, 0.03) 0%, transparent 50%)
-            `,
-            pointerEvents: 'none',
+            backgroundImage: 'url(/backgrounds/bg12.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            filter: 'brightness(0.5)',
+            zIndex: 0,
           },
         }}
       >
@@ -965,7 +959,7 @@ export default function LandingPage() {
                 fontWeight: 400,
                 mb: 2,
                 fontFamily: 'var(--font-fraunces)',
-                color: '#1A1F36',
+                color: '#E8E2D5',
                 letterSpacing: '-0.01em',
               }}
             >
@@ -976,7 +970,7 @@ export default function LandingPage() {
               sx={{
                 maxWidth: 750,
                 mx: 'auto',
-                color: '#4A5568',
+                color: 'rgba(232, 226, 213, 0.85)',
                 fontWeight: 300,
                 fontSize: '1.15rem',
                 lineHeight: 1.7,
@@ -993,15 +987,15 @@ export default function LandingPage() {
                   sx={{
                     height: '100%',
                     transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                    border: '1px solid rgba(26, 31, 54, 0.08)',
-                    background: 'rgba(255, 255, 255, 0.7)',
+                    border: '1px solid rgba(232, 226, 213, 0.2)',
+                    background: 'rgba(255, 255, 255, 0.95)',
                     backdropFilter: 'blur(12px)',
                     borderRadius: '16px',
-                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)',
+                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.15)',
                     '&:hover': {
                       transform: 'translateY(-8px)',
-                      boxShadow: '0 20px 48px rgba(0, 0, 0, 0.12)',
-                      border: '1px solid rgba(26, 31, 54, 0.15)',
+                      boxShadow: '0 20px 48px rgba(0, 0, 0, 0.3)',
+                      border: '1px solid rgba(16, 185, 129, 0.4)',
                     },
                   }}
                 >
@@ -1049,7 +1043,7 @@ export default function LandingPage() {
             align="center"
             sx={{
               mt: 8,
-              color: '#1A1F36',
+              color: 'rgba(232, 226, 213, 0.9)',
               fontWeight: 400,
               fontSize: '1.1rem',
               fontStyle: 'italic',
