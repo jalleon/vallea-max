@@ -26,6 +26,9 @@ import {
   useMediaQuery,
   Menu,
   MenuItem,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from '@mui/material'
 import {
   Assessment,
@@ -44,6 +47,7 @@ import {
   CompareArrows,
   Description,
   Language as LanguageIcon,
+  ExpandMore,
 } from '@mui/icons-material'
 import WaitlistForm from '@/components/landing/WaitlistForm'
 import DemoRequestForm from '@/components/landing/DemoRequestForm'
@@ -1346,35 +1350,61 @@ export default function LandingPage() {
             </Typography>
           </Box>
 
-          <Stack spacing={3}>
+          <Stack spacing={2}>
             {[1, 2, 3, 4].map((q) => (
-              <Card
+              <Accordion
                 key={q}
                 sx={{
                   background: 'rgba(255, 255, 255, 0.7)',
                   backdropFilter: 'blur(12px)',
                   border: '1px solid rgba(26, 31, 54, 0.08)',
-                  borderRadius: '16px',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
+                  borderRadius: '16px !important',
+                  boxShadow: 'none',
+                  '&:before': {
+                    display: 'none',
+                  },
+                  '&.Mui-expanded': {
+                    margin: 0,
                     boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
                     border: '1px solid rgba(26, 31, 54, 0.12)',
                   },
+                  transition: 'all 0.3s ease',
                 }}
               >
-                <CardContent sx={{ p: 4 }}>
+                <AccordionSummary
+                  expandIcon={<ExpandMore sx={{ color: '#10B981' }} />}
+                  sx={{
+                    px: 4,
+                    py: 2,
+                    '&.Mui-expanded': {
+                      minHeight: 'auto',
+                    },
+                    '& .MuiAccordionSummary-content': {
+                      my: 1,
+                      '&.Mui-expanded': {
+                        my: 1,
+                      },
+                    },
+                  }}
+                >
                   <Typography
                     variant="h6"
                     fontWeight={600}
-                    gutterBottom
                     sx={{
                       color: '#1A1F36',
-                      mb: 2,
                       fontSize: '1.1rem',
                     }}
                   >
                     {t(`faq.q${q}.question`)}
                   </Typography>
+                </AccordionSummary>
+                <AccordionDetails
+                  sx={{
+                    px: 4,
+                    pb: 3,
+                    pt: 0,
+                  }}
+                >
                   <Typography
                     variant="body1"
                     sx={{
@@ -1385,8 +1415,8 @@ export default function LandingPage() {
                   >
                     {t(`faq.q${q}.answer`)}
                   </Typography>
-                </CardContent>
-              </Card>
+                </AccordionDetails>
+              </Accordion>
             ))}
           </Stack>
         </Container>
