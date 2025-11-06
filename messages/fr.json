@@ -396,11 +396,14 @@
     "propertyTypes": {
       "Condo": "Condo",
       "Unifamiliale": "Unifamiliale",
+      "Duplex": "Duplex",
+      "Triplex": "Triplex",
+      "Quadriplex+": "Quadriplex+",
       "Plex": "Plex",
       "Appartement": "Appartement",
       "Semi-commercial": "Semi-commercial",
-      "Terrain": "Terrain",
       "Commercial": "Commercial",
+      "Terrain": "Terrain",
       "Autre": "Autre"
     },
 
@@ -408,9 +411,22 @@
       "Vendu": "Vendu",
       "À vendre": "À vendre",
       "Actif": "Actif",
+      "Sujet": "Sujet",
       "Retiré": "Retiré",
       "Conditionnel": "Conditionnel",
       "Expiré": "Expiré"
+    },
+
+    "basementTypes": {
+      "Aucun": "Aucun",
+      "Complet": "Complet",
+      "Partiel": "Partiel",
+      "Complet aménagé": "Complet aménagé",
+      "Complet non-aménagé": "Complet non-aménagé",
+      "Partiel aménagé": "Partiel aménagé",
+      "Partiel non-aménagé": "Partiel non-aménagé",
+      "Vide sanitaire": "Vide sanitaire",
+      "Dalle de béton": "Dalle de béton"
     },
 
     "notifications": {

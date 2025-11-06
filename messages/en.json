@@ -396,11 +396,14 @@
     "propertyTypes": {
       "Condo": "Condo",
       "Unifamiliale": "Single Family",
+      "Duplex": "Duplex",
+      "Triplex": "Triplex",
+      "Quadriplex+": "Quadriplex+",
       "Plex": "Plex",
       "Appartement": "Apartment",
       "Semi-commercial": "Semi-commercial",
-      "Terrain": "Land",
       "Commercial": "Commercial",
+      "Terrain": "Land",
       "Autre": "Other"
     },
 
@@ -408,9 +411,22 @@
       "Vendu": "Sold",
       "À vendre": "For Sale",
       "Actif": "Active",
+      "Sujet": "Conditional",
       "Retiré": "Withdrawn",
       "Conditionnel": "Conditional",
       "Expiré": "Expired"
+    },
+
+    "basementTypes": {
+      "Aucun": "None",
+      "Complet": "Full",
+      "Partiel": "Partial",
+      "Complet aménagé": "Full Finished",
+      "Complet non-aménagé": "Full Unfinished",
+      "Partiel aménagé": "Partial Finished",
+      "Partiel non-aménagé": "Partial Unfinished",
+      "Vide sanitaire": "Crawl Space",
+      "Dalle de béton": "Concrete Slab"
     },
 
     "notifications": {

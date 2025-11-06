@@ -67,6 +67,9 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
   const params = useParams()
   const locale = params.locale as string
   const t = useTranslations('library.form')
+  const tTypes = useTranslations('library.propertyTypes')
+  const tStatus = useTranslations('library.propertyStatus')
+  const tBasement = useTranslations('library.basementTypes')
 
   // Helper functions for currency formatting
   const formatCurrencyDisplay = (value: number | undefined): string => {
@@ -820,7 +823,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           label={t('status')}
                         >
                           {propertyStatuses.map((status) => (
-                            <MenuItem key={status} value={status}>{status}</MenuItem>
+                            <MenuItem key={status} value={status}>{tStatus(status)}</MenuItem>
                           ))}
                         </Select>
                       </FormControl>
@@ -834,7 +837,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           label={t('propertyType')}
                         >
                           {propertyTypes.map((type) => (
-                            <MenuItem key={type} value={type}>{type}</MenuItem>
+                            <MenuItem key={type} value={type}>{tTypes(type)}</MenuItem>
                           ))}
                         </Select>
                       </FormControl>
@@ -1272,7 +1275,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           label={t('basementType')}
                         >
                           {basementTypes.map((type) => (
-                            <MenuItem key={type} value={type}>{type}</MenuItem>
+                            <MenuItem key={type} value={type}>{tBasement(type)}</MenuItem>
                           ))}
                         </Select>
                       </FormControl>

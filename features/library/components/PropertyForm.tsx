@@ -75,6 +75,9 @@ const basementTypes: BasementType[] = [...BASEMENT_TYPES]
 
 export function PropertyForm({ property, onSubmit, loading = false }: PropertyFormProps) {
   const t = useTranslations('library.form')
+  const tTypes = useTranslations('library.propertyTypes')
+  const tStatus = useTranslations('library.propertyStatus')
+  const tBasement = useTranslations('library.basementTypes')
   const {
     control,
     handleSubmit,
@@ -252,7 +255,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
                 <InputLabel>{t('propertyType')}</InputLabel>
                 <Select {...field} label={t('propertyType')}>
                   {propertyTypes.map(type => (
-                    <MenuItem key={type} value={type}>{type}</MenuItem>
+                    <MenuItem key={type} value={type}>{tTypes(type)}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -362,7 +365,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
                 <InputLabel>{t('status')}</InputLabel>
                 <Select {...field} label={t('status')}>
                   {propertyStatuses.map(status => (
-                    <MenuItem key={status} value={status}>{status}</MenuItem>
+                    <MenuItem key={status} value={status}>{tStatus(status)}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -555,7 +558,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
                 <InputLabel>{t('basementType')}</InputLabel>
                 <Select {...field} label={t('basementType')}>
                   {basementTypes.map(type => (
-                    <MenuItem key={type} value={type}>{type}</MenuItem>
+                    <MenuItem key={type} value={type}>{tBasement(type)}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
