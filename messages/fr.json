@@ -160,7 +160,8 @@
       "minimum": "Minimum",
       "maximum": "Maximum",
       "clearFilters": "Effacer les filtres",
-      "resultsFound": "{count} résultat{count, plural, =0 {} =1 {} other {s}} trouvé{count, plural, =0 {} =1 {} other {s}}"
+      "resultsFound": "{count} résultat{count, plural, =0 {} =1 {} other {s}} trouvé{count, plural, =0 {} =1 {} other {s}}",
+      "loadingProperties": "Chargement des propriétés..."
     },
 
     "table": {
@@ -201,7 +202,10 @@
       "duplicateMergeNote": "Fusionner: Les nouvelles valeurs remplaceront les champs vides de la propriété existante.",
       "duplicateCreateNote": "Créer un doublon: Une nouvelle propriété distincte sera créée.",
       "duplicateMerge": "Fusionner",
-      "duplicateCreate": "Créer un doublon"
+      "duplicateCreate": "Créer un doublon",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "mergeOrCreateQuestion": "Fusionner ou créer ?"
     },
 
     "form": {

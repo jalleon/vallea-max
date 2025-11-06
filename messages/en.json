@@ -160,7 +160,8 @@
       "minimum": "Minimum",
       "maximum": "Maximum",
       "clearFilters": "Clear filters",
-      "resultsFound": "{count} result{count, plural, =0 {s} =1 {} other {s}} found"
+      "resultsFound": "{count} result{count, plural, =0 {s} =1 {} other {s}} found",
+      "loadingProperties": "Loading properties..."
     },
 
     "table": {
@@ -201,7 +202,10 @@
       "duplicateMergeNote": "Merge: New values will fill empty fields in the existing property.",
       "duplicateCreateNote": "Create duplicate: A new separate property will be created.",
       "duplicateMerge": "Merge",
-      "duplicateCreate": "Create Duplicate"
+      "duplicateCreate": "Create Duplicate",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "mergeOrCreateQuestion": "Merge or Create?"
     },
 
     "form": {
