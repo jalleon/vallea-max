@@ -29,6 +29,7 @@ import {
 import { Property, PropertyTableRow } from '../types/property.types'
 import { formatCurrency, formatDate, formatMeasurement } from '@/lib/utils/formatting'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import { useTranslations } from 'next-intl'
 
 interface PropertyTableProps {
   properties: Property[]
@@ -51,6 +52,9 @@ export function PropertyTable({
   onDelete,
   onDuplicate
 }: PropertyTableProps) {
+  const t = useTranslations('library.table')
+  const tLib = useTranslations('library')
+  const tCommon = useTranslations('common')
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null)
 
@@ -129,7 +133,7 @@ export function PropertyTable({
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" py={8}>
-        <LoadingSpinner message="Chargement des propriétés..." />
+        <LoadingSpinner message={tCommon('loading')} />
       </Box>
     )
   }
@@ -138,10 +142,10 @@ export function PropertyTable({
     return (
       <Box textAlign="center" py={8}>
         <Typography variant="h6" color="text.secondary" gutterBottom>
-          Aucune propriété trouvée
+          {tLib('noProperties')}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Ajoutez votre première propriété pour commencer.
+          {tLib('addFirstProperty')}
         </Typography>
       </Box>
     )
@@ -167,17 +171,17 @@ export function PropertyTable({
                   onChange={(e) => handleSelectAll(e.target.checked)}
                 />
               </TableCell>
-              <TableCell sx={{ bgcolor: 'background.paper' }}>ID No.</TableCell>
-              <TableCell sx={{ bgcolor: 'background.paper' }}>Adresse</TableCell>
-              <TableCell sx={{ bgcolor: 'background.paper' }}>Ville</TableCell>
-              <TableCell sx={{ bgcolor: 'background.paper' }}>Prix de vente / Valeur effective</TableCell>
-              <TableCell sx={{ bgcolor: 'background.paper', minWidth: 120 }}>Date Vente / Effective</TableCell>
-              <TableCell sx={{ bgcolor: 'background.paper' }}>Type</TableCell>
-              <TableCell sx={{ bgcolor: 'background.paper' }}>Statut</TableCell>
-              <TableCell sx={{ bgcolor: 'background.paper' }}>Année constr.</TableCell>
-              <TableCell sx={{ bgcolor: 'background.paper' }}>Source</TableCell>
-              <TableCell sx={{ bgcolor: 'background.paper' }}>Matrix/MLS No.</TableCell>
-              <TableCell align="right" sx={{ bgcolor: 'background.paper' }}>Actions</TableCell>
+              <TableCell sx={{ bgcolor: 'background.paper' }}>{t('idNo')}</TableCell>
+              <TableCell sx={{ bgcolor: 'background.paper' }}>{t('address')}</TableCell>
+              <TableCell sx={{ bgcolor: 'background.paper' }}>{t('city')}</TableCell>
+              <TableCell sx={{ bgcolor: 'background.paper' }}>{t('salePriceOrEffValue')}</TableCell>
+              <TableCell sx={{ bgcolor: 'background.paper', minWidth: 120 }}>{t('saleDateOrEffective')}</TableCell>
+              <TableCell sx={{ bgcolor: 'background.paper' }}>{t('type')}</TableCell>
+              <TableCell sx={{ bgcolor: 'background.paper' }}>{t('status')}</TableCell>
+              <TableCell sx={{ bgcolor: 'background.paper' }}>{t('yearBuilt')}</TableCell>
+              <TableCell sx={{ bgcolor: 'background.paper' }}>{t('source')}</TableCell>
+              <TableCell sx={{ bgcolor: 'background.paper' }}>{t('mlsNo')}</TableCell>
+              <TableCell align="right" sx={{ bgcolor: 'background.paper' }}>{t('actions')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -234,7 +238,7 @@ export function PropertyTable({
                   )}
                   {property.prix_demande && property.prix_demande !== property.prix_vente && (
                     <Typography variant="caption" color="text.secondary">
-                      Liste: {formatCurrency(property.prix_demande)}
+                      {t('listPrice')}: {formatCurrency(property.prix_demande)}
                     </Typography>
                   )}
                 </TableCell>
@@ -307,25 +311,25 @@ export function PropertyTable({
           <ListItemIcon>
             <Visibility fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Voir</ListItemText>
+          <ListItemText>{tCommon('view')}</ListItemText>
         </MenuItem>
         <MenuItem onClick={() => handleMenuAction('edit')}>
           <ListItemIcon>
             <Edit fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Modifier</ListItemText>
+          <ListItemText>{tCommon('edit')}</ListItemText>
         </MenuItem>
         <MenuItem onClick={() => handleMenuAction('duplicate')}>
           <ListItemIcon>
             <ContentCopy fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Dupliquer</ListItemText>
+          <ListItemText>{t('duplicate')}</ListItemText>
         </MenuItem>
         <MenuItem onClick={() => handleMenuAction('delete')}>
           <ListItemIcon>
             <Delete fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Supprimer</ListItemText>
+          <ListItemText>{tCommon('delete')}</ListItemText>
         </MenuItem>
       </Menu>
     </>

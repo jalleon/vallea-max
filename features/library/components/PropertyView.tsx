@@ -74,7 +74,9 @@ export function PropertyView({
   const router = useRouter()
   const params = useParams()
   const locale = params.locale as string
-  const t = useTranslations()
+  const t = useTranslations('library.view')
+  const tCommon = useTranslations('common')
+  const tInspection = useTranslations('inspection')
 
   // Keyboard navigation
   useEffect(() => {
@@ -216,11 +218,11 @@ export function PropertyView({
   // Get appropriate inspection button text
   const getInspectionButtonText = () => {
     if (inspectionProgress === 0) {
-      return 'Commencer inspection'
+      return t('startInspection')
     } else if (inspectionProgress === 100) {
-      return 'Voir inspection'
+      return t('viewInspection')
     } else {
-      return `Continuer inspection (${inspectionProgress}%)`
+      return t('continueInspection', { percent: inspectionProgress })
     }
   }
 
@@ -396,7 +398,7 @@ export function PropertyView({
               }
             }}
           >
-            Nouvelle évaluation
+            {t('newAppraisal')}
           </Button>
 
           <Button
@@ -420,7 +422,7 @@ export function PropertyView({
               }
             }}
           >
-            Ajustements
+            {t('adjustments')}
           </Button>
         </Box>
 
@@ -447,7 +449,7 @@ export function PropertyView({
                 <AttachMoney sx={{ color: theme.palette.success.main }} />
                 <Box>
                   <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
-                    {property.status === 'Sujet' ? "Valeur d'évaluation" : 'Prix de vente'}
+                    {property.status === 'Sujet' ? t('evaluationValue') : t('salePrice')}
                   </Typography>
                   <Typography variant="h4" fontWeight={700} color="success.main">
                     {property.prix_vente ? formatCurrency(property.prix_vente) : 'N/A'}
@@ -458,7 +460,7 @@ export function PropertyView({
                 <CalendarToday sx={{ color: theme.palette.primary.main }} />
                 <Box>
                   <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
-                    {property.status === 'Sujet' ? 'Date effective' : 'Date de vente'}
+                    {property.status === 'Sujet' ? t('effectiveDate') : t('saleDate')}
                   </Typography>
                   <Typography variant="h6" fontWeight={600}>
                     {property.date_vente ? formatDate(property.date_vente) : 'N/A'}
@@ -472,7 +474,7 @@ export function PropertyView({
               <Straighten sx={{ color: theme.palette.info.main }} />
               <Box>
                 <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
-                  Superficie habitable
+                  {t('livingArea')}
                 </Typography>
                 <Typography variant="h6" fontWeight={600}>
                   {property.superficie_habitable_m2 ?
@@ -528,35 +530,35 @@ export function PropertyView({
                 >
                   <Typography variant="h6" fontWeight={700} color="primary">
                     <LocationOn sx={{ mr: 1, verticalAlign: 'middle' }} />
-                    Informations générales
+                    {t('generalInformation')}
                   </Typography>
                 </Box>
                 <CardContent sx={{ p: 3, bgcolor: 'rgba(33, 150, 243, 0.03)' }}>
                 <Grid container spacing={1}>
                   <Grid item xs={12} md={1.5}>
-                    <Typography variant="body2" color="text.secondary">ID No</Typography>
+                    <Typography variant="body2" color="text.secondary">{t('idNo')}</Typography>
                     <Typography variant="body1" fontWeight={700} sx={{ color: '#1565C0' }}>
                       {property.property_id_no || 'N/A'}
                     </Typography>
                   </Grid>
                   <Grid item xs={12} md={3.5}>
-                    <Typography variant="body2" color="text.secondary">Adresse</Typography>
+                    <Typography variant="body2" color="text.secondary">{t('address')}</Typography>
                     <Typography variant="body1" fontWeight={600}>{property.adresse}</Typography>
                   </Grid>
                   <Grid item xs={12} md={2}>
-                    <Typography variant="body2" color="text.secondary">Ville</Typography>
+                    <Typography variant="body2" color="text.secondary">{t('city')}</Typography>
                     <Typography variant="body1" fontWeight={600}>{property.ville || 'N/A'}</Typography>
                   </Grid>
                   <Grid item xs={12} md={2}>
-                    <Typography variant="body2" color="text.secondary">Arrondissement</Typography>
+                    <Typography variant="body2" color="text.secondary">{t('district')}</Typography>
                     <Typography variant="body1" fontWeight={600}>{property.municipalite || 'N/A'}</Typography>
                   </Grid>
                   <Grid item xs={12} md={1.75}>
-                    <Typography variant="body2" color="text.secondary">Code postal</Typography>
+                    <Typography variant="body2" color="text.secondary">{t('postalCode')}</Typography>
                     <Typography variant="body1" fontWeight={600}>{property.code_postal || 'N/A'}</Typography>
                   </Grid>
                   <Grid item xs={12} md={0.75}>
-                    <Typography variant="body2" color="text.secondary">Province</Typography>
+                    <Typography variant="body2" color="text.secondary">{t('province')}</Typography>
                     <Typography variant="body1" fontWeight={600}>{property.province || 'N/A'}</Typography>
                   </Grid>
 
@@ -818,7 +820,7 @@ export function PropertyView({
               >
                 <Typography variant="h6" fontWeight={700} color="info.main">
                   <Layers sx={{ mr: 1, verticalAlign: 'middle' }} />
-                  Superficies
+                  {t('areas')}
                 </Typography>
               </Box>
               <CardContent sx={{ p: 3, bgcolor: 'rgba(33, 150, 243, 0.04)' }}>
@@ -953,7 +955,7 @@ export function PropertyView({
               >
                 <Typography variant="h6" fontWeight={700} color="success.main">
                   <Home sx={{ mr: 1, verticalAlign: 'middle' }} />
-                  Caractéristiques du bâtiment
+                  {t('buildingCharacteristics')}
                 </Typography>
               </Box>
               <CardContent sx={{ p: 3, bgcolor: 'rgba(76, 175, 80, 0.04)' }}>
@@ -1119,7 +1121,7 @@ export function PropertyView({
               >
                 <Typography variant="h6" fontWeight={700} color="warning.main">
                   <AccountBalance sx={{ mr: 1, verticalAlign: 'middle' }} />
-                  Données municipales
+                  {t('municipalData')}
                 </Typography>
               </Box>
               <CardContent sx={{ p: 3, bgcolor: 'rgba(255, 152, 0, 0.03)' }}>
@@ -1259,14 +1261,14 @@ export function PropertyView({
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <InspectionIcon sx={{ color: 'white', mr: 1 }} />
                     <Typography variant="h6" sx={{ color: 'white', fontWeight: 600 }}>
-                      Inspection
+                      {t('inspection')}
                     </Typography>
                   </Box>
                   <Chip
                     label={
-                      isInspectionComplete ? 'Complété' :
-                      property.inspection_status === 'in_progress' ? 'En cours' :
-                      'Non commencé'
+                      isInspectionComplete ? t('completed') :
+                      property.inspection_status === 'in_progress' ? t('inProgress') :
+                      t('notStarted')
                     }
                     sx={{
                       backgroundColor:
@@ -1471,12 +1473,12 @@ export function PropertyView({
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mr: 'auto' }}>
           <Typography variant="body2" color="text.secondary">
-            Utilisez ← → pour naviguer entre les propriétés
+            {t('keyboardNavigation')}
           </Typography>
         </Box>
 
         <Button onClick={onClose} sx={{ mr: 1 }}>
-          Fermer
+          {tCommon('close')}
         </Button>
         {onEdit && (
           <Button
@@ -1490,7 +1492,7 @@ export function PropertyView({
               }
             }}
           >
-            Modifier
+            {tCommon('edit')}
           </Button>
         )}
       </DialogActions>
