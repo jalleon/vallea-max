@@ -184,7 +184,7 @@ export default function SignupCheckoutPage() {
           flexGrow: 1,
           py: { xs: 2, md: 3 },
           px: { xs: 2, sm: 3, md: 0 },
-          backgroundImage: 'url(/backgrounds/bg6.jpg)',
+          backgroundImage: 'url(/backgrounds/bg9.jpg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -241,9 +241,9 @@ export default function SignupCheckoutPage() {
           </Alert>
         )}
 
-        <Grid container spacing={3}>
+        <Grid container spacing={3} sx={{ px: { xs: 0, md: 8, lg: 16 } }}>
           {/* Left: Plan Selection */}
-          <Grid item xs={12} md={7}>
+          <Grid item xs={12} md={6}>
             <Card sx={{ borderRadius: '16px', mb: 2, bgcolor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(10px)', boxShadow: '0 4px 24px rgba(0, 0, 0, 0.08)', transition: 'all 0.3s ease', '&:hover': { boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)', transform: 'translateY(-2px)' } }}>
               <CardContent sx={{ p: 2.5 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
@@ -424,7 +424,7 @@ export default function SignupCheckoutPage() {
           </Grid>
 
           {/* Right: Order Summary */}
-          <Grid item xs={12} md={5}>
+          <Grid item xs={12} md={6}>
             <Card
               sx={{
                 borderRadius: '16px',
