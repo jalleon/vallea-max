@@ -44,7 +44,9 @@ export default function SignupCheckoutPage() {
   // Get user info from URL params (passed from signup form)
   const email = searchParams.get('email') || ''
   const fullName = searchParams.get('name') || ''
+  const organizationName = searchParams.get('organization') || ''
   const tempPassword = searchParams.get('temp') || ''
+  const verified = searchParams.get('verified') === 'true'
 
   const [selectedPlan, setSelectedPlan] = useState<PlanType>('monthly')
   const [selectedCredits, setSelectedCredits] = useState<CreditsBundleType | null>('standard')
@@ -69,6 +71,7 @@ export default function SignupCheckoutPage() {
         body: JSON.stringify({
           email,
           fullName,
+          organizationName,
           tempPassword,
           planType: selectedPlan,
           creditsBundle: selectedCredits,
@@ -96,8 +99,14 @@ export default function SignupCheckoutPage() {
   const creditsBundle = selectedCredits ? CREDITS_BUNDLES[selectedCredits] : null
   const totalPrice = plan.price + (creditsBundle?.price || 0)
 
-  // Redirect if missing required params
-  if (!email || !fullName || !tempPassword) {
+  // Email validation function
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
+  // Redirect if missing required params, invalid email, or not verified
+  if (!email || !fullName || !tempPassword || !isValidEmail(email) || !verified) {
     router.push(`/${locale}/signup`)
     return null
   }

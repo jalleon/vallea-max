@@ -4,7 +4,7 @@ import { CREDITS_BUNDLES, CreditsBundleType } from '@/lib/stripe/client-config'
 
 export async function POST(request: Request) {
   try {
-    const { email, fullName, tempPassword, planType, creditsBundle, locale } = await request.json()
+    const { email, fullName, organizationName, tempPassword, planType, creditsBundle, locale } = await request.json()
 
     // Validation
     if (!email || !fullName || !tempPassword) {
@@ -71,6 +71,7 @@ export async function POST(request: Request) {
         signupFlow: 'true',
         email,
         fullName,
+        organizationName: organizationName || '',
         tempPassword, // Will be used to create account after payment
         planType,
         creditsAmount: creditsAmount.toString(),
@@ -80,6 +81,7 @@ export async function POST(request: Request) {
         metadata: {
           email,
           fullName,
+          organizationName: organizationName || '',
         },
       },
       customer_email: email,

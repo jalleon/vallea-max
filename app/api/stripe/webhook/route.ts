@@ -125,6 +125,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
     const email = session.metadata?.email
     const fullName = session.metadata?.fullName
+    const organizationName = session.metadata?.organizationName
     const tempPassword = session.metadata?.tempPassword
     const locale = session.metadata?.locale || 'fr'
     const creditsAmount = parseInt(session.metadata?.creditsAmount || '0')
@@ -155,6 +156,23 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
     userId = authData.user.id
     console.log(`User account created: ${userId}`)
+
+    // Update profile with full name and organization
+    const { error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .update({
+        full_name: fullName,
+        organization_name: organizationName || null,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId)
+
+    if (profileError) {
+      console.error('Error updating profile:', profileError)
+      // Don't throw - this is not critical enough to fail the webhook
+    } else {
+      console.log(`Profile updated for user ${userId}`)
+    }
 
     // Add AI credits if purchased
     if (creditsAmount > 0) {
