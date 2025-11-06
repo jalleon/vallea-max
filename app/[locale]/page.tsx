@@ -609,7 +609,7 @@ export default function LandingPage() {
             right: 0,
             bottom: 0,
             backgroundImage: `
-              radial-gradient(circle at 0 0, rgba(232, 226, 213, 0.12) 1.5px, transparent 1.5px),
+              radial-gradient(circle at 0 0, rgba(232, 226, 213, 0.15) 2.5px, transparent 2.5px),
               radial-gradient(circle at 25% 25%, rgba(16, 185, 129, 0.06) 0%, transparent 50%),
               radial-gradient(circle at 75% 75%, rgba(245, 158, 11, 0.05) 0%, transparent 50%)
             `,
