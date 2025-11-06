@@ -1310,6 +1310,63 @@
       "success": "Merci! Nous vous contacterons dans les 24 heures pour planifier votre démo.",
       "error": "Une erreur est survenue. Veuillez réessayer.",
       "alreadyExists": "Nous avons déjà reçu votre demande de démo. Nous vous contacterons bientôt!"
+    },
+    "howItWorks": {
+      "title": "Comment Ça Fonctionne",
+      "subtitle": "Évaluations professionnelles simplifiées avec l'automatisation IA",
+      "step1": {
+        "title": "Créez Votre Bibliothèque",
+        "description": "Créez des propriétés manuellement ou importez des données existantes"
+      },
+      "step2": {
+        "title": "Utilisez l'IA au Besoin",
+        "description": "Numérisez des PDF pour extraire les détails (1 crédit), importez depuis des sites web (1 crédit), ou générez des sections automatiquement (1 crédit)"
+      },
+      "step3": {
+        "title": "Complétez les Inspections",
+        "description": "Optimisé pour tablette pour le travail sur le terrain (aucun crédit requis)"
+      },
+      "step4": {
+        "title": "Générez les Rapports Finaux",
+        "description": "Exportez des évaluations professionnelles conformes CUSPAP/OEAQ"
+      }
+    },
+    "aiPowered": {
+      "title": "Automatisation IA, Paiement à l'Utilisation",
+      "subtitle": "Utilisez l'IA pour numériser des documents, extraire des données et générer du contenu professionnel. Chaque opération IA utilise 1 crédit (fichiers de plus de 2 Mo peuvent utiliser 2 à 4 crédits).",
+      "feature1": {
+        "title": "Numériser des PDF",
+        "description": "Extraire automatiquement les données immobilières (1 crédit par numérisation)"
+      },
+      "feature2": {
+        "title": "Importer depuis des URLs",
+        "description": "Récupérer les données des sites web (1 crédit par importation)"
+      },
+      "feature3": {
+        "title": "Contenu Généré par IA",
+        "description": "Remplir automatiquement les sections de rapport avec précision (1 crédit par génération)"
+      },
+      "tagline": "Les crédits alimentent votre assistant IA - utilisez-les quand vous avez besoin d'automatisation, sautez-les quand ce n'est pas nécessaire."
+    },
+    "faq": {
+      "title": "Questions Fréquemment Posées",
+      "subtitle": "Tout ce que vous devez savoir sur Valea Max et les crédits",
+      "q1": {
+        "question": "Comment fonctionnent les crédits?",
+        "answer": "Les crédits alimentent vos fonctionnalités IA. Chaque opération IA (numérisation PDF, importation de site web, génération de contenu) utilise 1 crédit. Les fichiers de plus de 2 Mo peuvent utiliser 2 à 4 crédits. Vous avez le contrôle - utilisez l'IA quand vous avez besoin de rapidité, entrez les données manuellement quand vous ne le faites pas."
+      },
+      "q2": {
+        "question": "Les crédits expirent-ils?",
+        "answer": "Non, les crédits n'expirent jamais. Achetez-les une fois et utilisez-les quand vous en avez besoin."
+      },
+      "q3": {
+        "question": "Puis-je utiliser Valea Max sans crédits?",
+        "answer": "Oui! Vous pouvez créer des propriétés, effectuer des inspections et générer des rapports manuellement sans utiliser de crédits. Les crédits ne sont nécessaires que pour les fonctionnalités d'automatisation IA."
+      },
+      "q4": {
+        "question": "Quels formats de fichiers sont supportés?",
+        "answer": "Nous supportons les documents PDF pour l'extraction de données. Vous pouvez également importer des données depuis MLS et les sites d'annonces immobilières."
+      }
     }
   },
 

@@ -35,7 +35,14 @@
       "Bash(else echo \".next not found\")",
       "Bash(npx supabase migration new:*)",
       "Bash(npx supabase:*)",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Bash(Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue)",
+      "Bash(timeout /t 5)",
+      "Bash(if [ -d .next ] then rm -rf .next else echo \".next not found\" fi)",
+      "Bash(node scripts/create-demo-user.mjs:*)",
+      "Bash(node scripts/setup-demo-account.mjs:*)",
+      "Bash(node scripts/link-demo-user.mjs:*)",
+      "Bash(git stash:*)"
     ],
     "deny": [],
     "ask": []
