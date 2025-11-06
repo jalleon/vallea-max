@@ -597,6 +597,7 @@ export default function LandingPage() {
       {/* How It Works Section */}
       <Box
         sx={{
+          background: 'linear-gradient(135deg, #1A1F36 0%, #232A44 50%, #2D3561 100%)',
           py: { xs: 8, md: 14 },
           position: 'relative',
           overflow: 'hidden',
@@ -607,12 +608,11 @@ export default function LandingPage() {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundImage: 'url(/backgrounds/bg13.jpg)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            filter: 'brightness(0.5)',
-            zIndex: 0,
+            backgroundImage: `
+              radial-gradient(circle at 25% 25%, rgba(16, 185, 129, 0.06) 0%, transparent 50%),
+              radial-gradient(circle at 75% 75%, rgba(245, 158, 11, 0.05) 0%, transparent 50%)
+            `,
+            pointerEvents: 'none',
           },
         }}
       >
@@ -652,7 +652,7 @@ export default function LandingPage() {
                 <Card
                   sx={{
                     height: '100%',
-                    background: 'linear-gradient(135deg, #1A1F36 0%, #232A44 50%, #2D3561 100%)',
+                    background: 'rgba(232, 226, 213, 0.08)',
                     backdropFilter: 'blur(12px)',
                     border: '1px solid rgba(232, 226, 213, 0.15)',
                     borderRadius: '16px',
