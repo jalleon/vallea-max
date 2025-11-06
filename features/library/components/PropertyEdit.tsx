@@ -66,7 +66,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
   const router = useRouter()
   const params = useParams()
   const locale = params.locale as string
-  const t = useTranslations()
+  const t = useTranslations('library.form')
 
   // Helper functions for currency formatting
   const formatCurrencyDisplay = (value: number | undefined): string => {
@@ -651,7 +651,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={2}>
                       <TextField
                         fullWidth
-                        label="ID No"
+                        label={t('idNo')}
                         value={formData.property_id_no || 'Auto-généré'}
                         variant="outlined"
                         size="small"
@@ -671,33 +671,33 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={3}>
                       <TextField
                         fullWidth
-                        label="Adresse"
+                        label={t('address')}
                         value={formData.adresse}
                         onChange={(e) => handleInputChange('adresse', e.target.value)}
                         variant="outlined"
                         size="small"
                         required
                         error={validationError !== '' && (!formData.adresse || formData.adresse.trim() === '')}
-                        helperText={validationError !== '' && (!formData.adresse || formData.adresse.trim() === '') ? 'Champ requis' : ''}
+                        helperText={validationError !== '' && (!formData.adresse || formData.adresse.trim() === '') ? t('addressRequired') : ''}
                       />
                     </Grid>
                     <Grid item xs={12} md={2}>
                       <TextField
                         fullWidth
-                        label="Ville"
+                        label={t('city')}
                         value={formData.ville}
                         onChange={(e) => handleInputChange('ville', e.target.value)}
                         variant="outlined"
                         size="small"
                         required
                         error={validationError !== '' && (!formData.ville || formData.ville.trim() === '')}
-                        helperText={validationError !== '' && (!formData.ville || formData.ville.trim() === '') ? 'Champ requis' : ''}
+                        helperText={validationError !== '' && (!formData.ville || formData.ville.trim() === '') ? t('addressRequired') : ''}
                       />
                     </Grid>
                     <Grid item xs={12} md={2}>
                       <TextField
                         fullWidth
-                        label="Arrondissement"
+                        label={t('municipality')}
                         value={formData.municipalite}
                         onChange={(e) => handleInputChange('municipalite', e.target.value)}
                         variant="outlined"
@@ -707,7 +707,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={1}>
                       <TextField
                         fullWidth
-                        label="Code postal"
+                        label={t('postalCode')}
                         value={formData.code_postal}
                         onChange={(e) => handleInputChange('code_postal', e.target.value)}
                         variant="outlined"
@@ -716,10 +716,10 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     </Grid>
                     <Grid item xs={12} md={2}>
                       <FormControl fullWidth size="small">
-                        <InputLabel>Province</InputLabel>
+                        <InputLabel>{t('province')}</InputLabel>
                         <Select
                           value={formData.province || 'QC'}
-                          label="Province"
+                          label={t('province')}
                           onChange={(e) => handleInputChange('province', e.target.value)}
                         >
                           <MenuItem value="QC">Québec</MenuItem>
@@ -766,7 +766,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       <Grid item xs={12} md={2}>
                         <TextField
                           fullWidth
-                          label="Prix demandé"
+                          label={t('askingPrice')}
                           type="text"
                           value={formatCurrencyDisplay(formData.prix_demande)}
                           onChange={(e) => handleInputChange('prix_demande', parseCurrencyInput(e.target.value))}
@@ -785,7 +785,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={2}>
                       <TextField
                         fullWidth
-                        label={formData.status === 'Sujet' ? "Date effective" : "Date de vente"}
+                        label={formData.status === 'Sujet' ? t('effectiveDate') : t('saleDate')}
                         type="date"
                         value={formData.date_vente || ''}
                         onChange={(e) => handleInputChange(
@@ -802,7 +802,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       <Grid item xs={12} md={1}>
                         <TextField
                           fullWidth
-                          label="Jours sur marché"
+                          label={t('daysOnMarket')}
                           type="number"
                           value={formData.jours_sur_marche || ''}
                           onChange={(e) => handleInputChange('jours_sur_marche', e.target.value ? parseInt(e.target.value) : undefined)}
@@ -813,11 +813,11 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     )}
                     <Grid item xs={12} md={1.5}>
                       <FormControl fullWidth size="small">
-                        <InputLabel>Statut</InputLabel>
+                        <InputLabel>{t('status')}</InputLabel>
                         <Select
                           value={formData.status || ''}
                           onChange={(e) => handleInputChange('status', e.target.value as PropertyStatus)}
-                          label="Statut"
+                          label={t('status')}
                         >
                           {propertyStatuses.map((status) => (
                             <MenuItem key={status} value={status}>{status}</MenuItem>
@@ -827,11 +827,11 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     </Grid>
                     <Grid item xs={12} md={2}>
                       <FormControl fullWidth size="small">
-                        <InputLabel>Type de propriété</InputLabel>
+                        <InputLabel>{t('propertyType')}</InputLabel>
                         <Select
                           value={formData.type_propriete || ''}
                           onChange={(e) => handleInputChange('type_propriete', e.target.value as PropertyType)}
-                          label="Type de propriété"
+                          label={t('propertyType')}
                         >
                           {propertyTypes.map((type) => (
                             <MenuItem key={type} value={type}>{type}</MenuItem>
@@ -842,7 +842,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={1.5}>
                       <TextField
                         fullWidth
-                        label="# MLS"
+                        label={t('mlsNumber')}
                         value={formData.numero_mls}
                         onChange={(e) => handleInputChange('numero_mls', e.target.value)}
                         variant="outlined"
@@ -854,11 +854,11 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     {formData.status === 'Sujet' && (
                       <Grid item xs={12} md={3}>
                         <FormControl fullWidth size="small">
-                          <InputLabel>Type d'évaluation</InputLabel>
+                          <InputLabel>{t('appraisalType')}</InputLabel>
                           <Select
                             value={formData.type_evaluation || ''}
                             onChange={(e) => handleInputChange('type_evaluation', e.target.value as EvaluationType)}
-                            label="Type d'évaluation"
+                            label={t('appraisalType')}
                           >
                             {evaluationTypes.map((type) => (
                               <MenuItem key={type} value={type}>{type}</MenuItem>
@@ -874,11 +874,11 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       <>
                         <Grid item xs={12} md={3}>
                           <FormControl fullWidth size="small">
-                            <InputLabel>Occupancy</InputLabel>
+                            <InputLabel>{t('occupancy')}</InputLabel>
                             <Select
                               value={formData.occupancy || ''}
                               onChange={(e) => handleInputChange('occupancy', e.target.value as OccupancyType)}
-                              label="Occupancy"
+                              label={t('occupancy')}
                             >
                               {occupancyTypes.map((type) => (
                                 <MenuItem key={type} value={type}>{type}</MenuItem>
@@ -890,7 +890,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           <Grid item xs={12} md={3}>
                             <TextField
                               fullWidth
-                              label="Loyer en place"
+                              label={t('rentInPlace')}
                               type="number"
                               value={formData.loyer_en_place || ''}
                               onChange={(e) => handleInputChange('loyer_en_place', e.target.value ? parseFloat(e.target.value) : undefined)}
@@ -914,7 +914,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       <Grid item xs={12} md={3}>
                         <TextField
                           fullWidth
-                          label="Frais de condo"
+                          label={t('condoFees')}
                           type="number"
                           value={formData.frais_condo || ''}
                           onChange={(e) => handleInputChange('frais_condo', e.target.value ? parseFloat(e.target.value) : undefined)}
@@ -948,7 +948,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                                       <Grid item xs={12} sm={4}>
                                         <TextField
                                           fullWidth
-                                          label="No. d'unité"
+                                          label={t('unitNumber')}
                                           value={unitRent.unitNumber}
                                           onChange={(e) => {
                                             const newRents = [...unitRents]
@@ -966,7 +966,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                                       <Grid item xs={12} sm={5}>
                                         <TextField
                                           fullWidth
-                                          label="Loyer mensuel"
+                                          label={t('monthlyRent')}
                                           type="number"
                                           value={unitRent.isOwnerOccupied ? '' : (unitRent.monthlyRent || '')}
                                           onChange={(e) => {
@@ -992,10 +992,10 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                                       </Grid>
                                       <Grid item xs={12} sm={3}>
                                         <FormControl fullWidth size="small">
-                                          <InputLabel>Occupant</InputLabel>
+                                          <InputLabel>{t('occupant')}</InputLabel>
                                           <Select
                                             value={unitRent.isOwnerOccupied ? 'owner' : 'tenant'}
-                                            label="Occupant"
+                                            label={t('occupant')}
                                             onChange={(e) => {
                                               const newRents = [...unitRents]
                                               newRents[i] = {
@@ -1045,10 +1045,10 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     {/* Row 1 - Building characteristics */}
                     <Grid item xs={12} md={2}>
                       <FormControl fullWidth size="small">
-                        <InputLabel>Genre de propriété</InputLabel>
+                        <InputLabel>{t('propertyGenre')}</InputLabel>
                         <Select
                           value={formData.genre_propriete || ''}
-                          label="Genre de propriété"
+                          label={t('propertyGenre')}
                           onChange={(e) => handleInputChange('genre_propriete', e.target.value)}
                         >
                           <MenuItem value="Plain-pied">Plain-pied</MenuItem>
@@ -1068,10 +1068,10 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     </Grid>
                     <Grid item xs={12} md={2}>
                       <FormControl fullWidth size="small">
-                        <InputLabel>Type de bâtiment</InputLabel>
+                        <InputLabel>{t('buildingType')}</InputLabel>
                         <Select
                           value={formData.type_batiment || ''}
-                          label="Type de bâtiment"
+                          label={t('buildingType')}
                           onChange={(e) => handleInputChange('type_batiment', e.target.value)}
                         >
                           <MenuItem value="Isolé">Isolé</MenuItem>
@@ -1087,10 +1087,10 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       <>
                         <Grid item xs={12} md={2}>
                           <FormControl fullWidth size="small">
-                            <InputLabel>Localisation</InputLabel>
+                            <InputLabel>{t('location')}</InputLabel>
                             <Select
                               value={formData.localisation || ''}
-                              label="Localisation"
+                              label={t('location')}
                               onChange={(e) => handleInputChange('localisation', e.target.value)}
                             >
                               <MenuItem value="Coin">Coin</MenuItem>
@@ -1100,10 +1100,10 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         </Grid>
                         <Grid item xs={12} md={2}>
                           <FormControl fullWidth size="small">
-                            <InputLabel>Type de copropriété</InputLabel>
+                            <InputLabel>{t('condoType')}</InputLabel>
                             <Select
                               value={formData.type_copropriete || 'Divise'}
-                              label="Type de copropriété"
+                              label={t('condoType')}
                               onChange={(e) => handleInputChange('type_copropriete', e.target.value)}
                             >
                               <MenuItem value="Divise">Divise</MenuItem>
@@ -1117,7 +1117,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={1.3}>
                       <TextField
                         fullWidth
-                        label="Année de construction"
+                        label={t('constructionYear')}
                         type="number"
                         value={formData.annee_construction || ''}
                         onChange={(e) => {
@@ -1137,7 +1137,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={1.1}>
                       <TextField
                         fullWidth
-                        label="Chrono. Age"
+                        label={t('chronologicalAge')}
                         type="number"
                         value={formData.chrono_age || ''}
                         onChange={(e) => handleInputChange('chrono_age', e.target.value ? parseInt(e.target.value) : undefined)}
@@ -1148,7 +1148,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={1.1}>
                       <TextField
                         fullWidth
-                        label="Eff. Age"
+                        label={t('effectiveAge')}
                         type="number"
                         value={formData.eff_age || ''}
                         onChange={(e) => handleInputChange('eff_age', e.target.value ? parseInt(e.target.value) : undefined)}
@@ -1162,7 +1162,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={3}>
                       <TextField
                         fullWidth
-                        label="Nombre de pièces"
+                        label={t('roomCount')}
                         type="number"
                         value={formData.nombre_pieces || ''}
                         onChange={(e) => handleInputChange('nombre_pieces', e.target.value ? parseInt(e.target.value) : undefined)}
@@ -1177,7 +1177,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={3}>
                       <TextField
                         fullWidth
-                        label="Nombre de chambres"
+                        label={t('bedroomCount')}
                         type="number"
                         value={formData.nombre_chambres || ''}
                         onChange={(e) => handleInputChange('nombre_chambres', e.target.value ? parseInt(e.target.value) : undefined)}
@@ -1192,7 +1192,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={3}>
                       <TextField
                         fullWidth
-                        label="Salle de bain"
+                        label={t('bathroomCount')}
                         type="number"
                         value={formData.salle_bain || ''}
                         onChange={(e) => handleInputChange('salle_bain', e.target.value ? parseFloat(e.target.value) : undefined)}
@@ -1208,7 +1208,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={3}>
                       <TextField
                         fullWidth
-                        label="Salle d'eau"
+                        label={t('powderRoomCount')}
                         type="number"
                         inputProps={{ step: 0.5 }}
                         value={formData.salle_eau || ''}
@@ -1225,11 +1225,11 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     {/* Row 3 */}
                     <Grid item xs={12} md={2.4}>
                       <FormControl fullWidth size="small">
-                        <InputLabel>Stationnement</InputLabel>
+                        <InputLabel>{t('parking')}</InputLabel>
                         <Select
                           value={formData.stationnement || ''}
                           onChange={(e) => handleInputChange('stationnement', e.target.value as ParkingType)}
-                          label="Stationnement"
+                          label={t('parking')}
                         >
                           {parkingTypes.map((type) => (
                             <MenuItem key={type} value={type}>{type}</MenuItem>
@@ -1239,11 +1239,11 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     </Grid>
                     <Grid item xs={12} md={2.4}>
                       <FormControl fullWidth size="small">
-                        <InputLabel>Type de garage</InputLabel>
+                        <InputLabel>{t('garageType')}</InputLabel>
                         <Select
                           value={formData.type_garage || ''}
                           onChange={(e) => handleInputChange('type_garage', e.target.value)}
-                          label="Type de garage"
+                          label={t('garageType')}
                         >
                           <MenuItem value="Attaché">Attaché</MenuItem>
                           <MenuItem value="Détaché">Détaché</MenuItem>
@@ -1256,7 +1256,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={2.4}>
                       <TextField
                         fullWidth
-                        label="Dimension garage"
+                        label={t('garageDimension')}
                         value={formData.dimension_garage}
                         onChange={(e) => handleInputChange('dimension_garage', e.target.value)}
                         variant="outlined"
@@ -1265,11 +1265,11 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     </Grid>
                     <Grid item xs={12} md={2.4}>
                       <FormControl fullWidth size="small">
-                        <InputLabel>Type de sous-sol</InputLabel>
+                        <InputLabel>{t('basementType')}</InputLabel>
                         <Select
                           value={formData.type_sous_sol || ''}
                           onChange={(e) => handleInputChange('type_sous_sol', e.target.value as BasementType)}
-                          label="Type de sous-sol"
+                          label={t('basementType')}
                         >
                           {basementTypes.map((type) => (
                             <MenuItem key={type} value={type}>{type}</MenuItem>
@@ -1280,7 +1280,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={2.4}>
                       <TextField
                         fullWidth
-                        label="Toiture"
+                        label={t('roofing')}
                         value={formData.toiture}
                         onChange={(e) => handleInputChange('toiture', e.target.value)}
                         variant="outlined"
@@ -1292,7 +1292,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12}>
                       <TextField
                         fullWidth
-                        label="Extras"
+                        label={t('extras')}
                         value={formData.extras}
                         onChange={(e) => handleInputChange('extras', e.target.value)}
                         variant="outlined"
@@ -1302,7 +1302,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12}>
                       <TextField
                         fullWidth
-                        label="Améliorations hors-sol"
+                        label={t('improvementsAboveGround')}
                         value={formData.ameliorations_hors_sol}
                         onChange={(e) => handleInputChange('ameliorations_hors_sol', e.target.value)}
                         variant="outlined"
@@ -1338,7 +1338,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={3}>
                       <TextField
                         fullWidth
-                        label="Numéro de lot"
+                        label={t('lotNumber')}
                         value={formData.province === 'QC' ? formatLotNumber(formData.lot_number || '') : formData.lot_number || ''}
                         onChange={(e) => {
                           const value = formData.province === 'QC' ? parseLotNumber(e.target.value) : e.target.value
@@ -1352,7 +1352,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={3}>
                       <TextField
                         fullWidth
-                        label="Matricule"
+                        label={t('cadastre')}
                         value={formData.matricule || ''}
                         onChange={(e) => handleInputChange('matricule', e.target.value)}
                         variant="outlined"
@@ -1367,7 +1367,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           <Grid item xs={12} md={1}>
                             <TextField
                               fullWidth
-                              label="Unité"
+                              label={t('unit')}
                               value={lot.unit_number || ''}
                               onChange={(e) => updateAdditionalLot(lot.id, 'unit_number', e.target.value)}
                               variant="outlined"
@@ -1377,7 +1377,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           <Grid item xs={12} md={3}>
                             <TextField
                               fullWidth
-                              label="Lot additionnel"
+                              label={t('additionalLot')}
                               value={formData.province === 'QC' ? formatLotNumber(lot.lot_number) : lot.lot_number}
                               onChange={(e) => {
                                 const value = formData.province === 'QC' ? parseLotNumber(e.target.value) : e.target.value
@@ -1390,11 +1390,11 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           </Grid>
                           <Grid item xs={12} md={2}>
                             <FormControl fullWidth size="small">
-                              <InputLabel>Type de lot</InputLabel>
+                              <InputLabel>{t('lotType')}</InputLabel>
                               <Select
                                 value={lot.type_lot}
                                 onChange={(e) => updateAdditionalLot(lot.id, 'type_lot', e.target.value)}
-                                label="Type de lot"
+                                label={t('lotType')}
                               >
                                 <MenuItem value="Exclusif">Exclusif</MenuItem>
                                 <MenuItem value="Commun">Commun</MenuItem>
@@ -1404,7 +1404,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           <Grid item xs={12} md={4}>
                             <TextField
                               fullWidth
-                              label="Matricule"
+                              label={t('cadastre')}
                               value={lot.matricule || ''}
                               onChange={(e) => updateAdditionalLot(lot.id, 'matricule', e.target.value)}
                               variant="outlined"
@@ -1440,7 +1440,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={2}>
                       <TextField
                         fullWidth
-                        label="Date"
+                        label={t('date')}
                         type="date"
                         value={formData.eval_municipale_annee || ''}
                         onChange={(e) => handleInputChange('eval_municipale_annee', e.target.value)}
@@ -1452,7 +1452,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={2}>
                       <TextField
                         fullWidth
-                        label="Terrain"
+                        label={t('land')}
                         type="text"
                         value={formatCurrencyDisplay(formData.eval_municipale_terrain)}
                         onChange={(e) => {
@@ -1472,7 +1472,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={2}>
                       <TextField
                         fullWidth
-                        label="Bâtiment"
+                        label={t('building')}
                         type="text"
                         value={formatCurrencyDisplay(formData.eval_municipale_batiment)}
                         onChange={(e) => {
@@ -1492,7 +1492,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={2}>
                       <TextField
                         fullWidth
-                        label="Total"
+                        label={t('total')}
                         type="text"
                         value={formatCurrencyDisplay(formData.eval_municipale_total)}
                         variant="outlined"
@@ -1521,7 +1521,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={1.2}>
                       <TextField
                         fullWidth
-                        label="Année"
+                        label={t('year')}
                         type="number"
                         value={formData.taxes_municipales_annee || ''}
                         onChange={(e) => handleInputChange('taxes_municipales_annee', e.target.value ? parseInt(e.target.value) : undefined)}
@@ -1532,7 +1532,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={2}>
                       <TextField
                         fullWidth
-                        label="Montant"
+                        label={t('amount')}
                         type="text"
                         value={formatCurrencyDisplay(formData.taxes_municipales_montant)}
                         onChange={(e) => handleInputChange('taxes_municipales_montant', parseCurrencyInput(e.target.value))}
@@ -1551,7 +1551,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={1.2}>
                       <TextField
                         fullWidth
-                        label="Année"
+                        label={t('year')}
                         type="number"
                         value={formData.taxes_scolaires_annee || ''}
                         onChange={(e) => handleInputChange('taxes_scolaires_annee', e.target.value ? parseInt(e.target.value) : undefined)}
@@ -1562,7 +1562,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={2}>
                       <TextField
                         fullWidth
-                        label="Montant"
+                        label={t('amount')}
                         type="text"
                         value={formatCurrencyDisplay(formData.taxes_scolaires_montant)}
                         onChange={(e) => handleInputChange('taxes_scolaires_montant', parseCurrencyInput(e.target.value))}
@@ -1581,7 +1581,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={3}>
                       <TextField
                         fullWidth
-                        label="Aire habitable (m²)"
+                        label={t('livingAreaM2')}
                         type="number"
                         value={formData.aire_habitable_m2 || ''}
                         onChange={(e) => {
@@ -1599,7 +1599,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={3}>
                       <TextField
                         fullWidth
-                        label="Aire habitable (pi²)"
+                        label={t('livingAreaPi2')}
                         type="number"
                         value={formData.aire_habitable_pi2 || ''}
                         onChange={(e) => {
@@ -1627,7 +1627,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={2}>
                       <TextField
                         fullWidth
-                        label="Zonage"
+                        label={t('zoning')}
                         value={formData.zonage || ''}
                         onChange={(e) => handleInputChange('zonage', e.target.value)}
                         variant="outlined"
@@ -1637,7 +1637,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={12} md={10}>
                       <TextField
                         fullWidth
-                        label="Usages permis"
+                        label={t('permittedUses')}
                         value={formData.zoning_usages_permis || ''}
                         onChange={(e) => handleInputChange('zoning_usages_permis', e.target.value)}
                         variant="outlined"
@@ -1673,7 +1673,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={6}>
                       <TextField
                         fullWidth
-                        label="Superficie terrain (m²)"
+                        label={t('lotAreaM2')}
                         type="text"
                         value={rawInputs.superficie_terrain_m2 ?? (formData.superficie_terrain_m2?.toFixed(2) || '')}
                         onChange={(e) => {
@@ -1702,7 +1702,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={6}>
                       <TextField
                         fullWidth
-                        label="Superficie terrain (pi²)"
+                        label={t('lotAreaPi2')}
                         type="text"
                         value={rawInputs.superficie_terrain_pi2 ?? (formData.superficie_terrain_pi2?.toFixed(2) || '')}
                         onChange={(e) => {
@@ -1735,7 +1735,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={3}>
                       <TextField
                         fullWidth
-                        label="Frontage (m)"
+                        label={t('frontageM')}
                         type="text"
                         value={rawInputs.frontage_m2 ?? (formData.frontage_m2?.toFixed(2) || '')}
                         onChange={(e) => {
@@ -1764,7 +1764,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={3}>
                       <TextField
                         fullWidth
-                        label="Frontage (pi)"
+                        label={t('frontagePi')}
                         type="text"
                         value={rawInputs.frontage_pi2 ?? (formData.frontage_pi2?.toFixed(2) || '')}
                         onChange={(e) => {
@@ -1793,7 +1793,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={3}>
                       <TextField
                         fullWidth
-                        label="Profondeur (m)"
+                        label={t('depthM')}
                         type="text"
                         value={rawInputs.profondeur_m2 ?? (formData.profondeur_m2?.toFixed(2) || '')}
                         onChange={(e) => {
@@ -1822,7 +1822,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={3}>
                       <TextField
                         fullWidth
-                        label="Profondeur (pi)"
+                        label={t('depthPi')}
                         type="text"
                         value={rawInputs.profondeur_pi2 ?? (formData.profondeur_pi2?.toFixed(2) || '')}
                         onChange={(e) => {
@@ -1855,7 +1855,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={6}>
                       <TextField
                         fullWidth
-                        label="Périmètre du bâtiment (m)"
+                        label={t('buildingPerimeterM')}
                         type="text"
                         value={rawInputs.perimetre_batiment_m2 ?? (formData.perimetre_batiment_m2?.toFixed(2) || '')}
                         onChange={(e) => {
@@ -1884,7 +1884,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid item xs={6}>
                       <TextField
                         fullWidth
-                        label="Périmètre du bâtiment (pi)"
+                        label={t('buildingPerimeterPi')}
                         type="text"
                         value={rawInputs.perimetre_batiment_pi2 ?? (formData.perimetre_batiment_pi2?.toFixed(2) || '')}
                         onChange={(e) => {
@@ -1936,11 +1936,11 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid container spacing={2} alignItems="center">
                       <Grid item xs={12} md={3}>
                         <FormControl fullWidth size="small">
-                          <InputLabel>Étage</InputLabel>
+                          <InputLabel>{t('floor')}</InputLabel>
                           <Select
                             value={newFloor.floor}
                             onChange={(e) => setNewFloor(prev => ({ ...prev, floor: e.target.value as FloorType }))}
-                            label="Étage"
+                            label={t('floor')}
                           >
                             {floorTypes.map((floor) => (
                               <MenuItem key={floor} value={floor}>{floor}</MenuItem>
@@ -1951,7 +1951,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       <Grid item xs={12} md={3}>
                         <TextField
                           fullWidth
-                          label="Superficie (m²)"
+                          label={t('areaM2')}
                           type="text"
                           value={newFloorRawInputs.area_m2 || (newFloor.area_m2 ? newFloor.area_m2.toFixed(2) : '')}
                           onChange={(e) => {
@@ -1981,7 +1981,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       <Grid item xs={12} md={3}>
                         <TextField
                           fullWidth
-                          label="Superficie (pi²)"
+                          label={t('areaPi2')}
                           type="text"
                           value={newFloorRawInputs.area_ft2 || (newFloor.area_ft2 ? newFloor.area_ft2.toFixed(2) : '')}
                           onChange={(e) => {
@@ -2112,7 +2112,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                               </TableCell>
                               <TableCell>
                                 <Chip
-                                  label="Habitable"
+                                  label={t('habitable')}
                                   size="small"
                                   color="success"
                                   sx={{ fontWeight: 600 }}
@@ -2318,7 +2318,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="Notes"
+                label={t('notes')}
                 value={formData.notes}
                 onChange={(e) => handleInputChange('notes', e.target.value)}
                 variant="outlined"
