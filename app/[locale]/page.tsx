@@ -188,6 +188,7 @@ export default function LandingPage() {
                     letterSpacing: '0.03em',
                     display: 'block',
                     mt: -0.5,
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   {locale === 'fr' ? 'Évaluation immobilière' : 'Real Estate Valuation'}
@@ -201,21 +202,21 @@ export default function LandingPage() {
                 <Button
                   color="inherit"
                   onClick={() => handleScroll('features')}
-                  sx={{ color: 'text.primary' }}
+                  sx={{ color: 'text.primary', lineHeight: 1.2 }}
                 >
                   {t('nav.features')}
                 </Button>
                 <Button
                   color="inherit"
                   onClick={() => handleScroll('screenshots')}
-                  sx={{ color: 'text.primary' }}
+                  sx={{ color: 'text.primary', lineHeight: 1.2 }}
                 >
                   {t('nav.screenshots')}
                 </Button>
                 <Button
                   color="inherit"
                   onClick={() => handleScroll('pricing')}
-                  sx={{ color: 'text.primary' }}
+                  sx={{ color: 'text.primary', lineHeight: 1.2 }}
                 >
                   {t('nav.pricing')}
                 </Button>
@@ -225,6 +226,7 @@ export default function LandingPage() {
                   sx={{
                     color: 'text.primary',
                     fontWeight: 600,
+                    lineHeight: 1.2,
                   }}
                 >
                   {t('nav.demo')}
@@ -232,7 +234,7 @@ export default function LandingPage() {
                 <Button
                   color="inherit"
                   onClick={() => handleScroll('waitlist')}
-                  sx={{ color: 'text.primary' }}
+                  sx={{ color: 'text.primary', lineHeight: 1.2 }}
                 >
                   {t('nav.waitlist')}
                 </Button>
@@ -245,14 +247,14 @@ export default function LandingPage() {
                 <Button
                   variant="outlined"
                   onClick={() => router.push('/login')}
-                  sx={{ textTransform: 'none' }}
+                  sx={{ textTransform: 'none', lineHeight: 1.2 }}
                 >
                   {t('nav.login')}
                 </Button>
                 <Button
                   variant="contained"
                   onClick={() => router.push('/login')}
-                  sx={{ textTransform: 'none' }}
+                  sx={{ textTransform: 'none', lineHeight: 1.2 }}
                 >
                   {t('nav.signup')}
                 </Button>
