@@ -614,7 +614,7 @@ export default function LandingPage() {
               radial-gradient(circle at 75% 75%, rgba(245, 158, 11, 0.05) 0%, transparent 50%)
             `,
             backgroundSize: '41px 41px, auto, auto',
-            backgroundPosition: '0 0, 0 0, 0 0',
+            backgroundPosition: '0 -15px, 0 0, 0 0',
             pointerEvents: 'none',
           },
         }}
