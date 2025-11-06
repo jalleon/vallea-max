@@ -1364,7 +1364,7 @@ export default function LandingPage() {
               <Accordion
                 key={q}
                 sx={{
-                  background: 'rgba(255, 255, 255, 0.95)',
+                  background: 'rgba(255, 255, 255, 0.98)',
                   backdropFilter: 'blur(12px)',
                   border: '1px solid rgba(232, 226, 213, 0.2)',
                   borderRadius: '16px !important',
