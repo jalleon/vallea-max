@@ -128,7 +128,7 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
       const authData = localStorage.getItem('supabase.auth.token')
       const token = authData ? JSON.parse(authData).access_token : null
 
-      const headers = token ? { 'Authorization': `Bearer ${token}` } : {}
+      const headers: HeadersInit = token ? { 'Authorization': `Bearer ${token}` } : {}
 
       const [usersRes, demoRes, waitlistRes] = await Promise.all([
         fetch('/api/admin/users', { headers }),

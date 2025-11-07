@@ -39,7 +39,7 @@ export async function GET(request: Request) {
       .from('profiles')
       .select('is_admin')
       .eq('id', user.id)
-      .single()
+      .single() as { data: { is_admin: boolean } | null; error: any }
 
     if (profileError || !profile?.is_admin) {
       return NextResponse.json(

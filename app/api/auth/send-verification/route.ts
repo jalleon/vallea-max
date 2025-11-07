@@ -66,7 +66,7 @@ export async function POST(request: Request) {
         locale: locale || 'fr',
         expires_at: expiresAt.toISOString(),
         verified: false,
-      })
+      } as any)
 
     if (insertError) {
       console.error('Database insert error:', insertError)

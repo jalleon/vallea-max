@@ -44,6 +44,7 @@ export interface Database {
           role: 'admin' | 'appraiser' | 'viewer'
           preferences: Json
           created_at: string
+          can_use_own_api_keys: boolean
         }
         Insert: {
           id: string
@@ -53,6 +54,7 @@ export interface Database {
           role?: 'admin' | 'appraiser' | 'viewer'
           preferences?: Json
           created_at?: string
+          can_use_own_api_keys?: boolean
         }
         Update: {
           id?: string
@@ -61,6 +63,77 @@ export interface Database {
           organization_id?: string | null
           role?: 'admin' | 'appraiser' | 'viewer'
           preferences?: Json
+          created_at?: string
+          can_use_own_api_keys?: boolean
+        }
+      }
+      profiles: {
+        Row: {
+          id: string
+          email: string
+          full_name: string | null
+          organization_name: string | null
+          is_admin: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          email: string
+          full_name?: string | null
+          organization_name?: string | null
+          is_admin?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          full_name?: string | null
+          organization_name?: string | null
+          is_admin?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      email_verifications: {
+        Row: {
+          id: string
+          email: string
+          full_name: string
+          organization_name: string | null
+          temp_password: string
+          verification_token: string
+          locale: string
+          expires_at: string
+          verified: boolean
+          verified_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          full_name: string
+          organization_name?: string | null
+          temp_password: string
+          verification_token: string
+          locale: string
+          expires_at: string
+          verified?: boolean
+          verified_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          full_name?: string
+          organization_name?: string | null
+          temp_password?: string
+          verification_token?: string
+          locale?: string
+          expires_at?: string
+          verified?: boolean
+          verified_at?: string | null
           created_at?: string
         }
       }

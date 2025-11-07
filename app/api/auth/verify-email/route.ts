@@ -20,7 +20,7 @@ export async function GET(request: Request) {
       .from('email_verifications')
       .select('*')
       .eq('verification_token', token)
-      .single()
+      .single() as any
 
     if (fetchError || !verification) {
       return NextResponse.json(
@@ -48,13 +48,13 @@ export async function GET(request: Request) {
     }
 
     // Mark as verified
-    const { error: updateError } = await supabase
-      .from('email_verifications')
-      .update({
-        verified: true,
-        verified_at: new Date().toISOString(),
-      })
-      .eq('verification_token', token)
+    const updateData: any = {
+      verified: true,
+      verified_at: new Date().toISOString(),
+    }
+    // @ts-expect-error - Type assertion at database boundary for email_verifications table
+    const result: any = await supabase.from('email_verifications').update(updateData).eq('verification_token', token)
+    const updateError = result.error
 
     if (updateError) {
       console.error('Update verification error:', updateError)

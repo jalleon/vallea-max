@@ -45,11 +45,11 @@ export async function GET(request: Request) {
     }
 
     // Check if user is admin
-    const { data: profile, error: profileError } = await supabase
+    const { data: profile, error: profileError} = await supabase
       .from('profiles')
       .select('is_admin')
       .eq('id', user.id)
-      .single()
+      .single() as { data: { is_admin: boolean } | null; error: any }
 
     console.log('[Admin API] Profile check:', {
       profile,

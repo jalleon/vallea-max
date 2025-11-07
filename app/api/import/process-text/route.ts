@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       .from('users')
       .select('can_use_own_api_keys')
       .eq('id', user.id)
-      .single();
+      .single() as { data: { can_use_own_api_keys: boolean } | null; error: any };
 
     const canUseOwnKeys = userData?.can_use_own_api_keys || false;
 
