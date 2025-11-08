@@ -5,7 +5,6 @@ import { Database } from '@/lib/supabase/types'
 export const dynamic = 'force-dynamic'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY!
 
 export async function POST(request: Request) {
   try {
@@ -53,11 +52,6 @@ export async function POST(request: Request) {
       )
     }
 
-    // If no service key, use regular client (with limitations)
-    const adminClient = supabaseServiceKey
-      ? createClient<Database>(supabaseUrl, supabaseServiceKey)
-      : supabase
-
     // Get the body to see which user we're fixing
     const body = await request.json()
     const { userEmail } = body
@@ -72,7 +66,7 @@ export async function POST(request: Request) {
     console.log(`[Fix Property Organization] Processing user: ${userEmail}`)
 
     // Get the user's profile
-    const { data: userProfile, error: userError } = await adminClient
+    const { data: userProfile, error: userError } = await supabase
       .from('profiles')
       .select('id, organization_id, email')
       .eq('email', userEmail)
@@ -98,15 +92,22 @@ export async function POST(request: Request) {
     }
 
     // Get all properties created by this user
-    const { data: userProperties, error: propError } = await adminClient
+    // Note: Using the authenticated client with the admin's token
+    const { data: userProperties, error: propError } = await supabase
       .from('properties')
-      .select('id, address, organization_id')
+      .select('id, address, organization_id, created_by')
       .eq('created_by', userProfile.id)
 
     if (propError) {
-      console.error('Error fetching properties:', propError)
+      console.error('[Fix Property Organization] Error fetching properties:', propError)
+      console.error('[Fix Property Organization] Error details:', {
+        message: propError.message,
+        code: propError.code,
+        details: propError.details,
+        hint: propError.hint
+      })
       return NextResponse.json(
-        { error: 'Failed to fetch user properties' },
+        { error: `Failed to fetch user properties: ${propError.message}` },
         { status: 500 }
       )
     }
@@ -138,15 +139,21 @@ export async function POST(request: Request) {
     // Update the mismatched properties
     const propertyIds = mismatchedProperties.map(p => p.id)
 
-    const { error: updateError } = await adminClient
+    const { error: updateError } = await supabase
       .from('properties')
       .update({ organization_id: userProfile.organization_id })
       .in('id', propertyIds)
 
     if (updateError) {
-      console.error('Error updating properties:', updateError)
+      console.error('[Fix Property Organization] Error updating properties:', updateError)
+      console.error('[Fix Property Organization] Update error details:', {
+        message: updateError.message,
+        code: updateError.code,
+        details: updateError.details,
+        hint: updateError.hint
+      })
       return NextResponse.json(
-        { error: 'Failed to update properties' },
+        { error: `Failed to update properties: ${updateError.message}` },
         { status: 500 }
       )
     }
