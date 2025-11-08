@@ -34,19 +34,19 @@ export async function GET(request: Request) {
     }
 
     // Get users data
-    const { data: users } = await supabase.from('profiles').select('*')
+    const { data: users } = await supabase.from('profiles').select('*') as { data: any[] | null; error: any }
 
     // Get subscriptions data
-    const { data: subscriptions } = await supabase.from('user_subscriptions').select('*')
+    const { data: subscriptions } = await supabase.from('user_subscriptions').select('*') as { data: any[] | null; error: any }
 
     // Get usage tracking data
-    const { data: usageData } = await supabase.from('usage_tracking').select('*')
+    const { data: usageData } = await supabase.from('usage_tracking').select('*') as { data: any[] | null; error: any }
 
     // Get demo requests
-    const { data: demoRequests } = await supabase.from('demo_requests').select('*')
+    const { data: demoRequests } = await supabase.from('demo_requests').select('*') as { data: any[] | null; error: any }
 
     // Get waitlist
-    const { data: waitlist } = await supabase.from('waitlist').select('*')
+    const { data: waitlist } = await supabase.from('waitlist').select('*') as { data: any[] | null; error: any }
 
     // Calculate metrics
     const now = new Date()
