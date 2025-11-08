@@ -33,7 +33,8 @@ import {
   FormControl,
   InputLabel,
   TablePagination,
-  TableSortLabel
+  TableSortLabel,
+  Checkbox
 } from '@mui/material'
 import {
   People,
@@ -62,6 +63,7 @@ import MetricCard from './components/MetricCard'
 import UserDetailsModal from './components/UserDetailsModal'
 import EditCreditsModal from './components/EditCreditsModal'
 import DemoNotesModal from './components/DemoNotesModal'
+import BulkActionToolbar from './components/BulkActionToolbar'
 import { LineChart, Line, PieChart, Pie, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts'
 
 interface AnalyticsData {
@@ -114,6 +116,11 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
   const [editCreditsOpen, setEditCreditsOpen] = useState(false)
   const [selectedDemo, setSelectedDemo] = useState<any>(null)
   const [demoNotesOpen, setDemoNotesOpen] = useState(false)
+
+  // Bulk selection state
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([])
+  const [selectedDemos, setSelectedDemos] = useState<string[]>([])
+  const [selectedWaitlist, setSelectedWaitlist] = useState<string[]>([])
 
   // Advanced filtering, sorting, and pagination state (Users)
   const [subscriptionFilter, setSubscriptionFilter] = useState<string>('all')
@@ -412,6 +419,63 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
     } catch (error: any) {
       showSnackbar(error.message || 'Failed to promote user', 'error')
     }
+  }
+
+  // Bulk selection handlers
+  const handleSelectAllUsers = (checked: boolean) => {
+    if (checked) {
+      setSelectedUsers(paginatedUsers.map(u => u.id))
+    } else {
+      setSelectedUsers([])
+    }
+  }
+
+  const handleSelectUser = (userId: string) => {
+    setSelectedUsers(prev =>
+      prev.includes(userId)
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    )
+  }
+
+  const handleSelectAllDemos = (checked: boolean) => {
+    if (checked) {
+      setSelectedDemos(paginatedDemos.map(d => d.id))
+    } else {
+      setSelectedDemos([])
+    }
+  }
+
+  const handleSelectDemo = (demoId: string) => {
+    setSelectedDemos(prev =>
+      prev.includes(demoId)
+        ? prev.filter(id => id !== demoId)
+        : [...prev, demoId]
+    )
+  }
+
+  const handleSelectAllWaitlist = (checked: boolean) => {
+    if (checked) {
+      setSelectedWaitlist(paginatedWaitlist.map(w => w.id))
+    } else {
+      setSelectedWaitlist([])
+    }
+  }
+
+  const handleSelectWaitlist = (waitlistId: string) => {
+    setSelectedWaitlist(prev =>
+      prev.includes(waitlistId)
+        ? prev.filter(id => id !== waitlistId)
+        : [...prev, waitlistId]
+    )
+  }
+
+  const handleBulkExport = (data: any[], filename: string) => {
+    exportToCSV(data, filename)
+    showSnackbar(
+      locale === 'fr' ? 'Export réussi' : 'Export successful',
+      'success'
+    )
   }
 
   // Advanced filter, sort, and pagination functions
@@ -897,10 +961,33 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                   </Grid>
                 </Grid>
 
+                <BulkActionToolbar
+                  selectedCount={selectedUsers.length}
+                  onClearSelection={() => setSelectedUsers([])}
+                  locale={locale}
+                  actions={[
+                    {
+                      label: locale === 'fr' ? 'Exporter sélection' : 'Export selected',
+                      icon: <Download fontSize="small" />,
+                      onClick: () => handleBulkExport(
+                        users.filter(u => selectedUsers.includes(u.id)),
+                        'selected-users'
+                      )
+                    }
+                  ]}
+                />
+
                 <TableContainer>
                   <Table>
                     <TableHead>
                       <TableRow>
+                        <TableCell padding="checkbox">
+                          <Checkbox
+                            indeterminate={selectedUsers.length > 0 && selectedUsers.length < paginatedUsers.length}
+                            checked={paginatedUsers.length > 0 && selectedUsers.length === paginatedUsers.length}
+                            onChange={(e) => handleSelectAllUsers(e.target.checked)}
+                          />
+                        </TableCell>
                         <TableCell>
                           <TableSortLabel
                             active={sortBy === 'full_name'}
@@ -952,7 +1039,13 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                     </TableHead>
                     <TableBody>
                       {paginatedUsers.map((user) => (
-                        <TableRow key={user.id} hover>
+                        <TableRow key={user.id} hover selected={selectedUsers.includes(user.id)}>
+                          <TableCell padding="checkbox">
+                            <Checkbox
+                              checked={selectedUsers.includes(user.id)}
+                              onChange={() => handleSelectUser(user.id)}
+                            />
+                          </TableCell>
                           <TableCell>{user.full_name || '-'}</TableCell>
                           <TableCell>{user.email}</TableCell>
                           <TableCell>{user.organization_name || '-'}</TableCell>
@@ -975,7 +1068,7 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                       ))}
                       {paginatedUsers.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={7} align="center">
+                          <TableCell colSpan={8} align="center">
                             {locale === 'fr' ? 'Aucun utilisateur trouvé' : 'No users found'}
                           </TableCell>
                         </TableRow>
@@ -1039,10 +1132,33 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                   }}
                 />
 
+                <BulkActionToolbar
+                  selectedCount={selectedDemos.length}
+                  onClearSelection={() => setSelectedDemos([])}
+                  locale={locale}
+                  actions={[
+                    {
+                      label: locale === 'fr' ? 'Exporter sélection' : 'Export selected',
+                      icon: <Download fontSize="small" />,
+                      onClick: () => handleBulkExport(
+                        demoRequests.filter(d => selectedDemos.includes(d.id)),
+                        'selected-demos'
+                      )
+                    }
+                  ]}
+                />
+
                 <TableContainer>
                   <Table>
                     <TableHead>
                       <TableRow>
+                        <TableCell padding="checkbox">
+                          <Checkbox
+                            indeterminate={selectedDemos.length > 0 && selectedDemos.length < paginatedDemos.length}
+                            checked={paginatedDemos.length > 0 && selectedDemos.length === paginatedDemos.length}
+                            onChange={(e) => handleSelectAllDemos(e.target.checked)}
+                          />
+                        </TableCell>
                         <TableCell>
                           <TableSortLabel
                             active={demoSortBy === 'name'}
@@ -1086,7 +1202,13 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                     </TableHead>
                     <TableBody>
                       {paginatedDemos.map((request) => (
-                        <TableRow key={request.id} hover>
+                        <TableRow key={request.id} hover selected={selectedDemos.includes(request.id)}>
+                          <TableCell padding="checkbox">
+                            <Checkbox
+                              checked={selectedDemos.includes(request.id)}
+                              onChange={() => handleSelectDemo(request.id)}
+                            />
+                          </TableCell>
                           <TableCell>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                               {request.name}
@@ -1140,7 +1262,7 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                       ))}
                       {paginatedDemos.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={7} align="center">
+                          <TableCell colSpan={8} align="center">
                             {locale === 'fr' ? 'Aucune demande trouvée' : 'No requests found'}
                           </TableCell>
                         </TableRow>
@@ -1204,10 +1326,33 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                   }}
                 />
 
+                <BulkActionToolbar
+                  selectedCount={selectedWaitlist.length}
+                  onClearSelection={() => setSelectedWaitlist([])}
+                  locale={locale}
+                  actions={[
+                    {
+                      label: locale === 'fr' ? 'Exporter sélection' : 'Export selected',
+                      icon: <Download fontSize="small" />,
+                      onClick: () => handleBulkExport(
+                        waitlist.filter(w => selectedWaitlist.includes(w.id)),
+                        'selected-waitlist'
+                      )
+                    }
+                  ]}
+                />
+
                 <TableContainer>
                   <Table>
                     <TableHead>
                       <TableRow>
+                        <TableCell padding="checkbox">
+                          <Checkbox
+                            indeterminate={selectedWaitlist.length > 0 && selectedWaitlist.length < paginatedWaitlist.length}
+                            checked={paginatedWaitlist.length > 0 && selectedWaitlist.length === paginatedWaitlist.length}
+                            onChange={(e) => handleSelectAllWaitlist(e.target.checked)}
+                          />
+                        </TableCell>
                         <TableCell>
                           <TableSortLabel
                             active={waitlistSortBy === 'name'}
@@ -1242,7 +1387,13 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                     </TableHead>
                     <TableBody>
                       {paginatedWaitlist.map((entry) => (
-                        <TableRow key={entry.id} hover>
+                        <TableRow key={entry.id} hover selected={selectedWaitlist.includes(entry.id)}>
+                          <TableCell padding="checkbox">
+                            <Checkbox
+                              checked={selectedWaitlist.includes(entry.id)}
+                              onChange={() => handleSelectWaitlist(entry.id)}
+                            />
+                          </TableCell>
                           <TableCell>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                               {entry.name}
@@ -1307,7 +1458,7 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                       ))}
                       {paginatedWaitlist.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={6} align="center">
+                          <TableCell colSpan={7} align="center">
                             {locale === 'fr' ? 'Aucune inscription trouvée' : 'No entries found'}
                           </TableCell>
                         </TableRow>
