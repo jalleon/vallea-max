@@ -27,7 +27,13 @@ import {
   IconButton,
   Tooltip,
   LinearProgress,
-  Snackbar
+  Snackbar,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  TablePagination,
+  TableSortLabel
 } from '@mui/material'
 import {
   People,
@@ -101,6 +107,27 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
   const [selectedUser, setSelectedUser] = useState<any>(null)
   const [userDetailsOpen, setUserDetailsOpen] = useState(false)
   const [editCreditsOpen, setEditCreditsOpen] = useState(false)
+
+  // Advanced filtering, sorting, and pagination state (Users)
+  const [subscriptionFilter, setSubscriptionFilter] = useState<string>('all')
+  const [planTypeFilter, setPlanTypeFilter] = useState<string>('all')
+  const [dateRangeFilter, setDateRangeFilter] = useState<string>('all')
+  const [sortBy, setSortBy] = useState<string>('created_at')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [page, setPage] = useState(0)
+  const [rowsPerPage, setRowsPerPage] = useState(25)
+
+  // Demo Requests sorting and pagination
+  const [demoSortBy, setDemoSortBy] = useState<string>('created_at')
+  const [demoSortOrder, setDemoSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [demoPage, setDemoPage] = useState(0)
+  const [demoRowsPerPage, setDemoRowsPerPage] = useState(25)
+
+  // Waitlist sorting and pagination
+  const [waitlistSortBy, setWaitlistSortBy] = useState<string>('created_at')
+  const [waitlistSortOrder, setWaitlistSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [waitlistPage, setWaitlistPage] = useState(0)
+  const [waitlistRowsPerPage, setWaitlistRowsPerPage] = useState(25)
 
   useEffect(() => {
     checkAdminAccess()
@@ -257,26 +284,191 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
     fetchAllData() // Refresh data
   }
 
+  // Advanced filter, sort, and pagination functions
+  const handleSort = (column: string) => {
+    const isAsc = sortBy === column && sortOrder === 'asc'
+    setSortOrder(isAsc ? 'desc' : 'asc')
+    setSortBy(column)
+  }
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage)
+  }
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10))
+    setPage(0)
+  }
+
+  // Demo Requests sort and pagination handlers
+  const handleDemoSort = (column: string) => {
+    const isAsc = demoSortBy === column && demoSortOrder === 'asc'
+    setDemoSortOrder(isAsc ? 'desc' : 'asc')
+    setDemoSortBy(column)
+  }
+
+  const handleDemoChangePage = (event: unknown, newPage: number) => {
+    setDemoPage(newPage)
+  }
+
+  const handleDemoChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setDemoRowsPerPage(parseInt(event.target.value, 10))
+    setDemoPage(0)
+  }
+
+  // Waitlist sort and pagination handlers
+  const handleWaitlistSort = (column: string) => {
+    const isAsc = waitlistSortBy === column && waitlistSortOrder === 'asc'
+    setWaitlistSortOrder(isAsc ? 'desc' : 'asc')
+    setWaitlistSortBy(column)
+  }
+
+  const handleWaitlistChangePage = (event: unknown, newPage: number) => {
+    setWaitlistPage(newPage)
+  }
+
+  const handleWaitlistChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setWaitlistRowsPerPage(parseInt(event.target.value, 10))
+    setWaitlistPage(0)
+  }
+
   // Filter functions
-  const filteredUsers = users.filter(u =>
-    userSearch === '' ||
-    u.email?.toLowerCase().includes(userSearch.toLowerCase()) ||
-    u.full_name?.toLowerCase().includes(userSearch.toLowerCase()) ||
-    u.organization_name?.toLowerCase().includes(userSearch.toLowerCase())
-  )
+  const filteredUsers = users
+    .filter(u => {
+      // Search filter
+      const matchesSearch = userSearch === '' ||
+        u.email?.toLowerCase().includes(userSearch.toLowerCase()) ||
+        u.full_name?.toLowerCase().includes(userSearch.toLowerCase()) ||
+        u.organization_name?.toLowerCase().includes(userSearch.toLowerCase())
 
-  const filteredDemos = demoRequests.filter(d =>
-    demoSearch === '' ||
-    d.email?.toLowerCase().includes(demoSearch.toLowerCase()) ||
-    d.name?.toLowerCase().includes(demoSearch.toLowerCase()) ||
-    d.company?.toLowerCase().includes(demoSearch.toLowerCase())
-  )
+      // Subscription status filter
+      const subscription = u.user_subscriptions?.[0]
+      const matchesSubscription = subscriptionFilter === 'all' ||
+        (subscriptionFilter === 'none' && !subscription) ||
+        subscription?.status === subscriptionFilter
 
-  const filteredWaitlist = waitlist.filter(w =>
-    waitlistSearch === '' ||
-    w.email?.toLowerCase().includes(waitlistSearch.toLowerCase()) ||
-    w.name?.toLowerCase().includes(waitlistSearch.toLowerCase())
-  )
+      // Plan type filter
+      const matchesPlanType = planTypeFilter === 'all' ||
+        subscription?.plan_type === planTypeFilter
+
+      // Date range filter
+      let matchesDateRange = true
+      if (dateRangeFilter !== 'all') {
+        const now = new Date()
+        const createdAt = new Date(u.created_at)
+
+        if (dateRangeFilter === 'today') {
+          matchesDateRange = createdAt.toDateString() === now.toDateString()
+        } else if (dateRangeFilter === 'week') {
+          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+          matchesDateRange = createdAt >= weekAgo
+        } else if (dateRangeFilter === 'month') {
+          const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+          matchesDateRange = createdAt >= monthAgo
+        } else if (dateRangeFilter === 'year') {
+          const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000)
+          matchesDateRange = createdAt >= yearAgo
+        }
+      }
+
+      return matchesSearch && matchesSubscription && matchesPlanType && matchesDateRange
+    })
+    .sort((a, b) => {
+      let aVal: any
+      let bVal: any
+
+      if (sortBy === 'created_at') {
+        aVal = new Date(a.created_at).getTime()
+        bVal = new Date(b.created_at).getTime()
+      } else if (sortBy === 'email') {
+        aVal = a.email || ''
+        bVal = b.email || ''
+      } else if (sortBy === 'full_name') {
+        aVal = a.full_name || ''
+        bVal = b.full_name || ''
+      } else if (sortBy === 'organization_name') {
+        aVal = a.organization_name || ''
+        bVal = b.organization_name || ''
+      } else if (sortBy === 'credits') {
+        aVal = a.ai_credits_balance || 0
+        bVal = b.ai_credits_balance || 0
+      }
+
+      if (sortOrder === 'asc') {
+        return aVal > bVal ? 1 : -1
+      } else {
+        return aVal < bVal ? 1 : -1
+      }
+    })
+
+  // Paginated users
+  const paginatedUsers = filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+
+  // Filtered and sorted demo requests
+  const filteredDemos = demoRequests
+    .filter(d =>
+      demoSearch === '' ||
+      d.email?.toLowerCase().includes(demoSearch.toLowerCase()) ||
+      d.name?.toLowerCase().includes(demoSearch.toLowerCase()) ||
+      d.company?.toLowerCase().includes(demoSearch.toLowerCase())
+    )
+    .sort((a, b) => {
+      let aVal: any, bVal: any
+
+      if (demoSortBy === 'created_at') {
+        aVal = new Date(a.created_at).getTime()
+        bVal = new Date(b.created_at).getTime()
+      } else if (demoSortBy === 'name') {
+        aVal = (a.name || '').toLowerCase()
+        bVal = (b.name || '').toLowerCase()
+      } else if (demoSortBy === 'email') {
+        aVal = (a.email || '').toLowerCase()
+        bVal = (b.email || '').toLowerCase()
+      } else if (demoSortBy === 'company') {
+        aVal = (a.company || '').toLowerCase()
+        bVal = (b.company || '').toLowerCase()
+      }
+
+      if (demoSortOrder === 'asc') {
+        return aVal > bVal ? 1 : -1
+      } else {
+        return aVal < bVal ? 1 : -1
+      }
+    })
+
+  // Paginated demo requests
+  const paginatedDemos = filteredDemos.slice(demoPage * demoRowsPerPage, demoPage * demoRowsPerPage + demoRowsPerPage)
+
+  // Filtered and sorted waitlist
+  const filteredWaitlist = waitlist
+    .filter(w =>
+      waitlistSearch === '' ||
+      w.email?.toLowerCase().includes(waitlistSearch.toLowerCase()) ||
+      w.name?.toLowerCase().includes(waitlistSearch.toLowerCase())
+    )
+    .sort((a, b) => {
+      let aVal: any, bVal: any
+
+      if (waitlistSortBy === 'created_at') {
+        aVal = new Date(a.created_at).getTime()
+        bVal = new Date(b.created_at).getTime()
+      } else if (waitlistSortBy === 'name') {
+        aVal = (a.name || '').toLowerCase()
+        bVal = (b.name || '').toLowerCase()
+      } else if (waitlistSortBy === 'email') {
+        aVal = (a.email || '').toLowerCase()
+        bVal = (b.email || '').toLowerCase()
+      }
+
+      if (waitlistSortOrder === 'asc') {
+        return aVal > bVal ? 1 : -1
+      } else {
+        return aVal < bVal ? 1 : -1
+      }
+    })
+
+  // Paginated waitlist
+  const paginatedWaitlist = filteredWaitlist.slice(waitlistPage * waitlistRowsPerPage, waitlistPage * waitlistRowsPerPage + waitlistRowsPerPage)
 
   if (loading) {
     return (
@@ -491,37 +683,137 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
 
             <Card sx={{ borderRadius: '16px' }}>
               <CardContent>
-                <TextField
-                  fullWidth
-                  size="small"
-                  placeholder={locale === 'fr' ? 'Rechercher par nom, email, organisation...' : 'Search by name, email, organization...'}
-                  value={userSearch}
-                  onChange={(e) => setUserSearch(e.target.value)}
-                  sx={{ mb: 3 }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Search fontSize="small" />
-                      </InputAdornment>
-                    )
-                  }}
-                />
+                {/* Search and Filters Row */}
+                <Grid container spacing={2} sx={{ mb: 3 }}>
+                  <Grid item xs={12} md={4}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      placeholder={locale === 'fr' ? 'Rechercher...' : 'Search...'}
+                      value={userSearch}
+                      onChange={(e) => setUserSearch(e.target.value)}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Search fontSize="small" />
+                          </InputAdornment>
+                        )
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} md={2}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>{locale === 'fr' ? 'Statut' : 'Status'}</InputLabel>
+                      <Select
+                        value={subscriptionFilter}
+                        onChange={(e) => setSubscriptionFilter(e.target.value)}
+                        label={locale === 'fr' ? 'Statut' : 'Status'}
+                      >
+                        <MenuItem value="all">{locale === 'fr' ? 'Tous' : 'All'}</MenuItem>
+                        <MenuItem value="active">Active</MenuItem>
+                        <MenuItem value="trialing">Trialing</MenuItem>
+                        <MenuItem value="past_due">Past Due</MenuItem>
+                        <MenuItem value="canceled">Canceled</MenuItem>
+                        <MenuItem value="none">{locale === 'fr' ? 'Aucun' : 'None'}</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+
+                  <Grid item xs={12} md={2}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>{locale === 'fr' ? 'Plan' : 'Plan'}</InputLabel>
+                      <Select
+                        value={planTypeFilter}
+                        onChange={(e) => setPlanTypeFilter(e.target.value)}
+                        label={locale === 'fr' ? 'Plan' : 'Plan'}
+                      >
+                        <MenuItem value="all">{locale === 'fr' ? 'Tous' : 'All'}</MenuItem>
+                        <MenuItem value="monthly">{locale === 'fr' ? 'Mensuel' : 'Monthly'}</MenuItem>
+                        <MenuItem value="yearly">{locale === 'fr' ? 'Annuel' : 'Yearly'}</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+
+                  <Grid item xs={12} md={2}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>{locale === 'fr' ? 'Période' : 'Period'}</InputLabel>
+                      <Select
+                        value={dateRangeFilter}
+                        onChange={(e) => setDateRangeFilter(e.target.value)}
+                        label={locale === 'fr' ? 'Période' : 'Period'}
+                      >
+                        <MenuItem value="all">{locale === 'fr' ? 'Tous' : 'All Time'}</MenuItem>
+                        <MenuItem value="today">{locale === 'fr' ? 'Aujourd\'hui' : 'Today'}</MenuItem>
+                        <MenuItem value="week">{locale === 'fr' ? 'Cette semaine' : 'This Week'}</MenuItem>
+                        <MenuItem value="month">{locale === 'fr' ? 'Ce mois' : 'This Month'}</MenuItem>
+                        <MenuItem value="year">{locale === 'fr' ? 'Cette année' : 'This Year'}</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+
+                  <Grid item xs={12} md={2}>
+                    <Typography variant="body2" sx={{ color: '#6B7280', textAlign: 'right', mt: 1 }}>
+                      {filteredUsers.length} {locale === 'fr' ? 'résultats' : 'results'}
+                    </Typography>
+                  </Grid>
+                </Grid>
 
                 <TableContainer>
                   <Table>
                     <TableHead>
                       <TableRow>
-                        <TableCell><strong>{locale === 'fr' ? 'Nom' : 'Name'}</strong></TableCell>
-                        <TableCell><strong>Email</strong></TableCell>
-                        <TableCell><strong>{locale === 'fr' ? 'Organisation' : 'Organization'}</strong></TableCell>
+                        <TableCell>
+                          <TableSortLabel
+                            active={sortBy === 'full_name'}
+                            direction={sortBy === 'full_name' ? sortOrder : 'asc'}
+                            onClick={() => handleSort('full_name')}
+                          >
+                            <strong>{locale === 'fr' ? 'Nom' : 'Name'}</strong>
+                          </TableSortLabel>
+                        </TableCell>
+                        <TableCell>
+                          <TableSortLabel
+                            active={sortBy === 'email'}
+                            direction={sortBy === 'email' ? sortOrder : 'asc'}
+                            onClick={() => handleSort('email')}
+                          >
+                            <strong>Email</strong>
+                          </TableSortLabel>
+                        </TableCell>
+                        <TableCell>
+                          <TableSortLabel
+                            active={sortBy === 'organization_name'}
+                            direction={sortBy === 'organization_name' ? sortOrder : 'asc'}
+                            onClick={() => handleSort('organization_name')}
+                          >
+                            <strong>{locale === 'fr' ? 'Organisation' : 'Organization'}</strong>
+                          </TableSortLabel>
+                        </TableCell>
                         <TableCell><strong>{locale === 'fr' ? 'Abonnement' : 'Subscription'}</strong></TableCell>
-                        <TableCell><strong>{locale === 'fr' ? 'Crédits' : 'Credits'}</strong></TableCell>
-                        <TableCell><strong>{locale === 'fr' ? 'Inscrit le' : 'Created'}</strong></TableCell>
+                        <TableCell>
+                          <TableSortLabel
+                            active={sortBy === 'credits'}
+                            direction={sortBy === 'credits' ? sortOrder : 'asc'}
+                            onClick={() => handleSort('credits')}
+                          >
+                            <strong>{locale === 'fr' ? 'Crédits' : 'Credits'}</strong>
+                          </TableSortLabel>
+                        </TableCell>
+                        <TableCell>
+                          <TableSortLabel
+                            active={sortBy === 'created_at'}
+                            direction={sortBy === 'created_at' ? sortOrder : 'asc'}
+                            onClick={() => handleSort('created_at')}
+                          >
+                            <strong>{locale === 'fr' ? 'Inscrit le' : 'Created'}</strong>
+                          </TableSortLabel>
+                        </TableCell>
                         <TableCell align="right"><strong>Actions</strong></TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {filteredUsers.map((user) => (
+                      {paginatedUsers.map((user) => (
                         <TableRow key={user.id} hover>
                           <TableCell>{user.full_name || '-'}</TableCell>
                           <TableCell>{user.email}</TableCell>
@@ -543,7 +835,7 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                           </TableCell>
                         </TableRow>
                       ))}
-                      {filteredUsers.length === 0 && (
+                      {paginatedUsers.length === 0 && (
                         <TableRow>
                           <TableCell colSpan={7} align="center">
                             {locale === 'fr' ? 'Aucun utilisateur trouvé' : 'No users found'}
@@ -553,6 +845,22 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                     </TableBody>
                   </Table>
                 </TableContainer>
+
+                <TablePagination
+                  rowsPerPageOptions={[25, 50, 100]}
+                  component="div"
+                  count={filteredUsers.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  labelRowsPerPage={locale === 'fr' ? 'Lignes par page:' : 'Rows per page:'}
+                  labelDisplayedRows={({ from, to, count }) =>
+                    locale === 'fr'
+                      ? `${from}–${to} sur ${count !== -1 ? count : `plus de ${to}`}`
+                      : `${from}–${to} of ${count !== -1 ? count : `more than ${to}`}`
+                  }
+                />
               </CardContent>
             </Card>
           </Box>
@@ -597,17 +905,49 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                   <Table>
                     <TableHead>
                       <TableRow>
-                        <TableCell><strong>{locale === 'fr' ? 'Nom' : 'Name'}</strong></TableCell>
-                        <TableCell><strong>Email</strong></TableCell>
-                        <TableCell><strong>{locale === 'fr' ? 'Entreprise' : 'Company'}</strong></TableCell>
+                        <TableCell>
+                          <TableSortLabel
+                            active={demoSortBy === 'name'}
+                            direction={demoSortBy === 'name' ? demoSortOrder : 'asc'}
+                            onClick={() => handleDemoSort('name')}
+                          >
+                            <strong>{locale === 'fr' ? 'Nom' : 'Name'}</strong>
+                          </TableSortLabel>
+                        </TableCell>
+                        <TableCell>
+                          <TableSortLabel
+                            active={demoSortBy === 'email'}
+                            direction={demoSortBy === 'email' ? demoSortOrder : 'asc'}
+                            onClick={() => handleDemoSort('email')}
+                          >
+                            <strong>Email</strong>
+                          </TableSortLabel>
+                        </TableCell>
+                        <TableCell>
+                          <TableSortLabel
+                            active={demoSortBy === 'company'}
+                            direction={demoSortBy === 'company' ? demoSortOrder : 'asc'}
+                            onClick={() => handleDemoSort('company')}
+                          >
+                            <strong>{locale === 'fr' ? 'Entreprise' : 'Company'}</strong>
+                          </TableSortLabel>
+                        </TableCell>
                         <TableCell><strong>{locale === 'fr' ? 'Téléphone' : 'Phone'}</strong></TableCell>
                         <TableCell><strong>Message</strong></TableCell>
-                        <TableCell><strong>{locale === 'fr' ? 'Date' : 'Date'}</strong></TableCell>
+                        <TableCell>
+                          <TableSortLabel
+                            active={demoSortBy === 'created_at'}
+                            direction={demoSortBy === 'created_at' ? demoSortOrder : 'asc'}
+                            onClick={() => handleDemoSort('created_at')}
+                          >
+                            <strong>{locale === 'fr' ? 'Date' : 'Date'}</strong>
+                          </TableSortLabel>
+                        </TableCell>
                         <TableCell align="right"><strong>Actions</strong></TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {filteredDemos.map((request) => (
+                      {paginatedDemos.map((request) => (
                         <TableRow key={request.id} hover>
                           <TableCell>{request.name}</TableCell>
                           <TableCell>{request.email}</TableCell>
@@ -628,7 +968,7 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                           </TableCell>
                         </TableRow>
                       ))}
-                      {filteredDemos.length === 0 && (
+                      {paginatedDemos.length === 0 && (
                         <TableRow>
                           <TableCell colSpan={7} align="center">
                             {locale === 'fr' ? 'Aucune demande trouvée' : 'No requests found'}
@@ -638,6 +978,22 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                     </TableBody>
                   </Table>
                 </TableContainer>
+
+                <TablePagination
+                  rowsPerPageOptions={[25, 50, 100]}
+                  component="div"
+                  count={filteredDemos.length}
+                  rowsPerPage={demoRowsPerPage}
+                  page={demoPage}
+                  onPageChange={handleDemoChangePage}
+                  onRowsPerPageChange={handleDemoChangeRowsPerPage}
+                  labelRowsPerPage={locale === 'fr' ? 'Lignes par page:' : 'Rows per page:'}
+                  labelDisplayedRows={({ from, to, count }) =>
+                    locale === 'fr'
+                      ? `${from}–${to} sur ${count !== -1 ? count : `plus de ${to}`}`
+                      : `${from}–${to} of ${count !== -1 ? count : `more than ${to}`}`
+                  }
+                />
               </CardContent>
             </Card>
           </Box>
@@ -682,16 +1038,40 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                   <Table>
                     <TableHead>
                       <TableRow>
-                        <TableCell><strong>{locale === 'fr' ? 'Nom' : 'Name'}</strong></TableCell>
-                        <TableCell><strong>Email</strong></TableCell>
+                        <TableCell>
+                          <TableSortLabel
+                            active={waitlistSortBy === 'name'}
+                            direction={waitlistSortBy === 'name' ? waitlistSortOrder : 'asc'}
+                            onClick={() => handleWaitlistSort('name')}
+                          >
+                            <strong>{locale === 'fr' ? 'Nom' : 'Name'}</strong>
+                          </TableSortLabel>
+                        </TableCell>
+                        <TableCell>
+                          <TableSortLabel
+                            active={waitlistSortBy === 'email'}
+                            direction={waitlistSortBy === 'email' ? waitlistSortOrder : 'asc'}
+                            onClick={() => handleWaitlistSort('email')}
+                          >
+                            <strong>Email</strong>
+                          </TableSortLabel>
+                        </TableCell>
                         <TableCell><strong>{locale === 'fr' ? 'Langue' : 'Language'}</strong></TableCell>
                         <TableCell><strong>{locale === 'fr' ? 'Notifié' : 'Notified'}</strong></TableCell>
-                        <TableCell><strong>{locale === 'fr' ? 'Inscrit le' : 'Joined'}</strong></TableCell>
+                        <TableCell>
+                          <TableSortLabel
+                            active={waitlistSortBy === 'created_at'}
+                            direction={waitlistSortBy === 'created_at' ? waitlistSortOrder : 'asc'}
+                            onClick={() => handleWaitlistSort('created_at')}
+                          >
+                            <strong>{locale === 'fr' ? 'Inscrit le' : 'Joined'}</strong>
+                          </TableSortLabel>
+                        </TableCell>
                         <TableCell align="right"><strong>Actions</strong></TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {filteredWaitlist.map((entry) => (
+                      {paginatedWaitlist.map((entry) => (
                         <TableRow key={entry.id} hover>
                           <TableCell>{entry.name}</TableCell>
                           <TableCell>{entry.email}</TableCell>
@@ -718,7 +1098,7 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                           </TableCell>
                         </TableRow>
                       ))}
-                      {filteredWaitlist.length === 0 && (
+                      {paginatedWaitlist.length === 0 && (
                         <TableRow>
                           <TableCell colSpan={6} align="center">
                             {locale === 'fr' ? 'Aucune inscription trouvée' : 'No entries found'}
@@ -728,6 +1108,22 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                     </TableBody>
                   </Table>
                 </TableContainer>
+
+                <TablePagination
+                  rowsPerPageOptions={[25, 50, 100]}
+                  component="div"
+                  count={filteredWaitlist.length}
+                  rowsPerPage={waitlistRowsPerPage}
+                  page={waitlistPage}
+                  onPageChange={handleWaitlistChangePage}
+                  onRowsPerPageChange={handleWaitlistChangeRowsPerPage}
+                  labelRowsPerPage={locale === 'fr' ? 'Lignes par page:' : 'Rows per page:'}
+                  labelDisplayedRows={({ from, to, count }) =>
+                    locale === 'fr'
+                      ? `${from}–${to} sur ${count !== -1 ? count : `plus de ${to}`}`
+                      : `${from}–${to} of ${count !== -1 ? count : `more than ${to}`}`
+                  }
+                />
               </CardContent>
             </Card>
           </Box>
