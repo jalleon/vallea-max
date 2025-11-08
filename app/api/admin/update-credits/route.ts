@@ -72,12 +72,14 @@ export async function POST(request: Request) {
     }
 
     // Update credits
+    const creditsData: any = {
+      ai_credits_balance: newCredits,
+      updated_at: new Date().toISOString()
+    }
+
     const { error: updateError } = await supabaseAdmin
       .from('profiles')
-      .update({
-        ai_credits_balance: newCredits,
-        updated_at: new Date().toISOString()
-      })
+      .update(creditsData)
       .eq('id', userId)
 
     if (updateError) {

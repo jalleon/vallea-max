@@ -47,13 +47,15 @@ export async function POST(request: Request) {
 
     if (action === 'notify') {
       // Mark as notified
+      const notifyData: any = {
+        notified: true,
+        notified_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+
       const { error: updateError } = await supabaseAdmin
         .from('waitlist')
-        .update({
-          notified: true,
-          notified_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
+        .update(notifyData)
         .eq('id', waitlistId)
 
       if (updateError) {
@@ -107,14 +109,16 @@ export async function POST(request: Request) {
       }
 
       // Update waitlist entry
+      const promoteData: any = {
+        promoted: true,
+        promoted_at: new Date().toISOString(),
+        promoted_user_id: newUser.user.id,
+        updated_at: new Date().toISOString()
+      }
+
       await supabaseAdmin
         .from('waitlist')
-        .update({
-          promoted: true,
-          promoted_at: new Date().toISOString(),
-          promoted_user_id: newUser.user.id,
-          updated_at: new Date().toISOString()
-        })
+        .update(promoteData)
         .eq('id', waitlistId)
 
       // TODO: Send welcome email with password setup link

@@ -46,13 +46,15 @@ export async function POST(request: Request) {
     const supabaseAdmin = createClient<Database>(supabaseUrl, supabaseServiceKey)
 
     // Update demo request
+    const updateData: any = {
+      admin_notes,
+      contacted,
+      updated_at: new Date().toISOString()
+    }
+
     const { error: updateError } = await supabaseAdmin
       .from('demo_requests')
-      .update({
-        admin_notes,
-        contacted,
-        updated_at: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('id', demoId)
 
     if (updateError) {
