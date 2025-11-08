@@ -516,7 +516,7 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
       display: 'flex',
       minHeight: '100vh',
       bgcolor: '#F9FAFB',
-      backgroundImage: 'url(/bg9.jpg)',
+      backgroundImage: 'url(/backgrounds/bg9.jpg)',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundAttachment: 'fixed'
