@@ -101,10 +101,10 @@ interface AnalyticsData {
   failedPayments: number
 }
 
-export default function AdminPage({ params }: { params: Promise<{ locale: string }> }) {
+export default function AdminPage({ params }: { params: { locale: string } }) {
   const router = useRouter()
   const { user } = useAuth()
-  const [locale, setLocale] = useState<string>('')
+  const locale = params.locale
 
   // State management
   const [activeSection, setActiveSection] = useState('dashboard')
@@ -158,18 +158,9 @@ export default function AdminPage({ params }: { params: Promise<{ locale: string
   const [waitlistPage, setWaitlistPage] = useState(0)
   const [waitlistRowsPerPage, setWaitlistRowsPerPage] = useState(25)
 
-  // Unwrap params Promise
   useEffect(() => {
-    params.then(({ locale: resolvedLocale }) => {
-      setLocale(resolvedLocale)
-    })
-  }, [params])
-
-  useEffect(() => {
-    if (locale) {
-      checkAdminAccess()
-    }
-  }, [locale])
+    checkAdminAccess()
+  }, [])
 
   useEffect(() => {
     if (isAdmin) {
@@ -703,7 +694,7 @@ export default function AdminPage({ params }: { params: Promise<{ locale: string
   }
   const currentSectionTitle = sectionTitles[activeSection]?.[locale as 'fr' | 'en'] || sectionTitles.dashboard[locale as 'fr' | 'en'] || ''
 
-  if (loading || !locale) {
+  if (loading) {
     return (
       <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <CircularProgress size={60} />
