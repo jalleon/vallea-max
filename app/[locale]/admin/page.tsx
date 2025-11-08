@@ -73,13 +73,15 @@ import {
   ErrorOutline,
   Logout,
   ExitToApp,
-  AccountCircle
+  AccountCircle,
+  Person
 } from '@mui/icons-material'
 import { useAuth } from '@/contexts/AuthContext'
 import AdminSidebar from './components/AdminSidebar'
 import MetricCard from './components/MetricCard'
 import UserDetailsModal from './components/UserDetailsModal'
 import EditCreditsModal from './components/EditCreditsModal'
+import EditUserModal from './components/EditUserModal'
 import DemoNotesModal from './components/DemoNotesModal'
 import BulkActionToolbar from './components/BulkActionToolbar'
 import { LineChart, Line, PieChart, Pie, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts'
@@ -134,6 +136,7 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
   const [selectedUser, setSelectedUser] = useState<any>(null)
   const [userDetailsOpen, setUserDetailsOpen] = useState(false)
   const [editCreditsOpen, setEditCreditsOpen] = useState(false)
+  const [editUserOpen, setEditUserOpen] = useState(false)
   const [selectedDemo, setSelectedDemo] = useState<any>(null)
   const [demoNotesOpen, setDemoNotesOpen] = useState(false)
 
@@ -319,9 +322,19 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
     setEditCreditsOpen(true)
   }
 
+  const handleEditUser = (user: any) => {
+    setSelectedUser(user)
+    setEditUserOpen(true)
+  }
+
   const handleCreditsUpdated = (message: string) => {
     showSnackbar(message, 'success')
     fetchAllData() // Refresh data
+  }
+
+  const handleUserUpdated = async () => {
+    await fetchAllData() // Refresh data first
+    showSnackbar(locale === 'fr' ? 'Utilisateur mis à jour avec succès' : 'User updated successfully', 'success')
   }
 
   const handleDemoNotes = (demo: any) => {
@@ -1190,6 +1203,11 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                             <Tooltip title={locale === 'fr' ? 'Voir détails' : 'View details'}>
                               <IconButton size="small" color="primary" onClick={() => handleViewUser(user)}>
                                 <Visibility fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title={locale === 'fr' ? 'Modifier profil' : 'Edit profile'}>
+                              <IconButton size="small" color="info" onClick={() => handleEditUser(user)}>
+                                <Person fontSize="small" />
                               </IconButton>
                             </Tooltip>
                             <Tooltip title={locale === 'fr' ? 'Modifier crédits' : 'Edit credits'}>
@@ -2546,6 +2564,14 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
         user={selectedUser}
         locale={locale}
         onSuccess={handleCreditsUpdated}
+      />
+
+      <EditUserModal
+        open={editUserOpen}
+        onClose={() => setEditUserOpen(false)}
+        user={selectedUser}
+        onUserUpdated={handleUserUpdated}
+        locale={locale}
       />
 
       <DemoNotesModal

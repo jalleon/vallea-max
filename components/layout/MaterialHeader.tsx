@@ -37,7 +37,7 @@ interface MaterialHeaderProps {
 }
 
 export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: MaterialHeaderProps) {
-  const { user, signOut } = useAuth()
+  const { user, profile, signOut, refreshProfile } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
   const { t, locale } = useTranslation('common')
@@ -107,8 +107,20 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  // Get user initials for avatar
-  const userInitials = user?.user_metadata?.full_name
+  // Periodically refresh profile to catch admin updates (every 30 seconds)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (user?.id && refreshProfile) {
+        refreshProfile()
+      }
+    }, 30000) // Refresh every 30 seconds
+
+    return () => clearInterval(interval)
+  }, [user?.id, refreshProfile])
+
+  // Get user initials for avatar - prioritize profile over metadata
+  const userFullName = profile?.full_name || user?.user_metadata?.full_name
+  const userInitials = userFullName
     ?.split(' ')
     .map((n: string) => n[0])
     .join('')
@@ -152,7 +164,7 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
                 </Avatar>
                 <Box sx={{ display: { xs: 'none', md: 'block' } }}>
                   <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.1, mb: '-3px' }}>
-                    {user?.user_metadata?.full_name || user?.email?.split('@')[0]}
+                    {profile?.full_name || user?.user_metadata?.full_name || user?.email?.split('@')[0]}
                   </Typography>
                   <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.1, display: 'block' }}>
                     {user?.email}
