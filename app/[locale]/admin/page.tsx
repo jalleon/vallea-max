@@ -258,8 +258,28 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
   }
 
   return (
-    <Box sx={{ bgcolor: '#F9FAFB', minHeight: '100vh', py: 4 }}>
-      <Container maxWidth="xl">
+    <Box sx={{
+      position: 'relative',
+      minHeight: '100vh',
+      py: 4,
+      backgroundImage: 'url(/backgrounds/bg9.jpg)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundAttachment: 'fixed',
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(249, 250, 251, 0.85)',
+        backdropFilter: 'blur(8px)',
+        zIndex: 0
+      }
+    }}>
+      <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1 }}>
         {/* Header */}
         <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 2 }}>
           <Button
