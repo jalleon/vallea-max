@@ -512,7 +512,15 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
   }
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#F9FAFB' }}>
+    <Box sx={{
+      display: 'flex',
+      minHeight: '100vh',
+      bgcolor: '#F9FAFB',
+      backgroundImage: 'url(/bg9.jpg)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed'
+    }}>
       <AdminSidebar activeSection={activeSection} onSectionChange={setActiveSection} locale={locale} />
 
       <Box sx={{ flexGrow: 1, p: 4 }}>
@@ -1140,12 +1148,236 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
             <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
               {locale === 'fr' ? 'Gestion des abonnements' : 'Subscription Management'}
             </Typography>
-            <Card sx={{ borderRadius: '16px', p: 4, textAlign: 'center' }}>
-              <CreditCard sx={{ fontSize: 80, color: '#9CA3AF', mb: 2 }} />
-              <Typography variant="h6" sx={{ color: '#6B7280' }}>
-                {locale === 'fr' ? 'Section en développement' : 'Coming soon'}
-              </Typography>
-            </Card>
+
+            {!analytics ? (
+              <Card sx={{ borderRadius: '16px', p: 4, textAlign: 'center' }}>
+                <CircularProgress size={60} />
+                <Typography variant="h6" sx={{ color: '#6B7280', mt: 2 }}>
+                  {locale === 'fr' ? 'Chargement des données...' : 'Loading data...'}
+                </Typography>
+              </Card>
+            ) : (
+              <Grid container spacing={3}>
+                {/* Summary Cards */}
+                <Grid item xs={12} md={3}>
+                  <Card sx={{ borderRadius: '16px', p: 3, background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', color: '#FFF' }}>
+                    <Typography variant="body2" sx={{ opacity: 0.9, mb: 1 }}>
+                      {locale === 'fr' ? 'Abonnements actifs' : 'Active Subscriptions'}
+                    </Typography>
+                    <Typography variant="h3" sx={{ fontWeight: 700 }}>
+                      {analytics.overview.activeSubscriptions}
+                    </Typography>
+                  </Card>
+                </Grid>
+
+                <Grid item xs={12} md={3}>
+                  <Card sx={{ borderRadius: '16px', p: 3, background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)', color: '#FFF' }}>
+                    <Typography variant="body2" sx={{ opacity: 0.9, mb: 1 }}>
+                      {locale === 'fr' ? 'En période d\'essai' : 'Trialing'}
+                    </Typography>
+                    <Typography variant="h3" sx={{ fontWeight: 700 }}>
+                      {analytics.overview.trialingSubscriptions}
+                    </Typography>
+                  </Card>
+                </Grid>
+
+                <Grid item xs={12} md={3}>
+                  <Card sx={{ borderRadius: '16px', p: 3, background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)', color: '#FFF' }}>
+                    <Typography variant="body2" sx={{ opacity: 0.9, mb: 1 }}>
+                      {locale === 'fr' ? 'Renouvellements à venir' : 'Upcoming Renewals'}
+                    </Typography>
+                    <Typography variant="h3" sx={{ fontWeight: 700 }}>
+                      {analytics.upcomingRenewals?.length || 0}
+                    </Typography>
+                  </Card>
+                </Grid>
+
+                <Grid item xs={12} md={3}>
+                  <Card sx={{ borderRadius: '16px', p: 3, background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)', color: '#FFF' }}>
+                    <Typography variant="body2" sx={{ opacity: 0.9, mb: 1 }}>
+                      {locale === 'fr' ? 'Paiements échoués' : 'Failed Payments'}
+                    </Typography>
+                    <Typography variant="h3" sx={{ fontWeight: 700 }}>
+                      {analytics.failedPayments || 0}
+                    </Typography>
+                  </Card>
+                </Grid>
+
+                {/* Upcoming Renewals Table */}
+                <Grid item xs={12}>
+                  <Card sx={{ borderRadius: '16px' }}>
+                    <CardContent>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                          {locale === 'fr' ? 'Renouvellements à venir (30 prochains jours)' : 'Upcoming Renewals (Next 30 Days)'}
+                        </Typography>
+                        <Chip
+                          label={`${analytics.upcomingRenewals?.length || 0} ${locale === 'fr' ? 'renouvellements' : 'renewals'}`}
+                          color="warning"
+                          size="small"
+                        />
+                      </Box>
+
+                      {analytics.upcomingRenewals && analytics.upcomingRenewals.length > 0 ? (
+                        <TableContainer>
+                          <Table>
+                            <TableHead>
+                              <TableRow>
+                                <TableCell><strong>{locale === 'fr' ? 'Utilisateur' : 'User'}</strong></TableCell>
+                                <TableCell><strong>Email</strong></TableCell>
+                                <TableCell><strong>{locale === 'fr' ? 'Type de plan' : 'Plan Type'}</strong></TableCell>
+                                <TableCell><strong>{locale === 'fr' ? 'Fin de période' : 'Period Ends'}</strong></TableCell>
+                                <TableCell><strong>Status</strong></TableCell>
+                                <TableCell align="right"><strong>Actions</strong></TableCell>
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {analytics.upcomingRenewals.map((renewal: any) => {
+                                const user = users.find(u => u.id === renewal.user_id)
+                                const daysUntilRenewal = Math.ceil((new Date(renewal.current_period_end).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+                                return (
+                                  <TableRow key={renewal.id} hover>
+                                    <TableCell>{user?.full_name || '-'}</TableCell>
+                                    <TableCell>{user?.email || '-'}</TableCell>
+                                    <TableCell>
+                                      <Chip
+                                        label={renewal.plan_type === 'yearly' ? (locale === 'fr' ? 'Annuel' : 'Yearly') : (locale === 'fr' ? 'Mensuel' : 'Monthly')}
+                                        size="small"
+                                        color={renewal.plan_type === 'yearly' ? 'primary' : 'default'}
+                                      />
+                                    </TableCell>
+                                    <TableCell>
+                                      {formatDate(renewal.current_period_end)}
+                                      <Typography variant="caption" display="block" sx={{ color: '#6B7280' }}>
+                                        {locale === 'fr' ? `Dans ${daysUntilRenewal} jours` : `In ${daysUntilRenewal} days`}
+                                      </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                      <Chip label={renewal.status?.toUpperCase()} size="small" color="success" />
+                                    </TableCell>
+                                    <TableCell align="right">
+                                      <Tooltip title={locale === 'fr' ? 'Envoyer un rappel' : 'Send reminder'}>
+                                        <IconButton size="small" color="primary">
+                                          <Send fontSize="small" />
+                                        </IconButton>
+                                      </Tooltip>
+                                    </TableCell>
+                                  </TableRow>
+                                )
+                              })}
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
+                      ) : (
+                        <Box sx={{ textAlign: 'center', py: 6 }}>
+                          <CheckCircle sx={{ fontSize: 60, color: '#10B981', mb: 2 }} />
+                          <Typography variant="h6" sx={{ color: '#6B7280' }}>
+                            {locale === 'fr' ? 'Aucun renouvellement prévu dans les 30 prochains jours' : 'No renewals scheduled in the next 30 days'}
+                          </Typography>
+                        </Box>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Grid>
+
+                {/* Trial Expirations */}
+                <Grid item xs={12} lg={6}>
+                  <Card sx={{ borderRadius: '16px' }}>
+                    <CardContent>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                          {locale === 'fr' ? 'Essais se terminant bientôt' : 'Trials Ending Soon'}
+                        </Typography>
+                        <Chip
+                          label={analytics.overview.trialingSubscriptions}
+                          color="info"
+                          size="small"
+                        />
+                      </Box>
+
+                      {analytics.overview.trialingSubscriptions > 0 ? (
+                        <TableContainer>
+                          <Table size="small">
+                            <TableHead>
+                              <TableRow>
+                                <TableCell><strong>{locale === 'fr' ? 'Utilisateur' : 'User'}</strong></TableCell>
+                                <TableCell><strong>{locale === 'fr' ? 'Fin d\'essai' : 'Trial Ends'}</strong></TableCell>
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {users.filter(u => u.user_subscriptions?.[0]?.status === 'trialing').slice(0, 5).map((user: any) => (
+                                <TableRow key={user.id} hover>
+                                  <TableCell>{user.full_name || user.email}</TableCell>
+                                  <TableCell>{formatDate(user.user_subscriptions[0].current_period_end)}</TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
+                      ) : (
+                        <Box sx={{ textAlign: 'center', py: 4 }}>
+                          <Typography variant="body2" sx={{ color: '#6B7280' }}>
+                            {locale === 'fr' ? 'Aucun essai en cours' : 'No active trials'}
+                          </Typography>
+                        </Box>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Grid>
+
+                {/* Failed Payments */}
+                <Grid item xs={12} lg={6}>
+                  <Card sx={{ borderRadius: '16px' }}>
+                    <CardContent>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                          {locale === 'fr' ? 'Paiements échoués' : 'Failed Payments'}
+                        </Typography>
+                        <Chip
+                          label={analytics.failedPayments || 0}
+                          color="error"
+                          size="small"
+                        />
+                      </Box>
+
+                      {analytics.failedPayments > 0 ? (
+                        <TableContainer>
+                          <Table size="small">
+                            <TableHead>
+                              <TableRow>
+                                <TableCell><strong>{locale === 'fr' ? 'Utilisateur' : 'User'}</strong></TableCell>
+                                <TableCell align="right"><strong>Actions</strong></TableCell>
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {users.filter(u => u.user_subscriptions?.[0]?.status === 'past_due').slice(0, 5).map((user: any) => (
+                                <TableRow key={user.id} hover>
+                                  <TableCell>{user.full_name || user.email}</TableCell>
+                                  <TableCell align="right">
+                                    <Tooltip title={locale === 'fr' ? 'Relancer le paiement' : 'Retry payment'}>
+                                      <IconButton size="small" color="error">
+                                        <Send fontSize="small" />
+                                      </IconButton>
+                                    </Tooltip>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
+                      ) : (
+                        <Box sx={{ textAlign: 'center', py: 4 }}>
+                          <CheckCircle sx={{ fontSize: 40, color: '#10B981', mb: 1 }} />
+                          <Typography variant="body2" sx={{ color: '#6B7280' }}>
+                            {locale === 'fr' ? 'Aucun paiement échoué' : 'No failed payments'}
+                          </Typography>
+                        </Box>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Grid>
+              </Grid>
+            )}
           </Box>
         )}
 
