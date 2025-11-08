@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import {
   Drawer,
   List,
@@ -57,13 +58,44 @@ export default function AdminSidebar({ activeSection, onSectionChange, locale }:
         }
       }}
     >
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h5" sx={{ fontWeight: 700, color: '#10B981' }}>
-          Valea Max
-        </Typography>
-        <Typography variant="caption" sx={{ color: '#6B7280' }}>
-          Admin Panel
-        </Typography>
+      <Box sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Image
+          src="/logo.png"
+          alt="Valea Max"
+          width={48}
+          height={48}
+          style={{ borderRadius: '8px' }}
+        />
+        <Box>
+          <Typography
+            variant="h5"
+            sx={{
+              fontFamily: 'var(--font-montserrat)',
+              fontWeight: 700,
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              letterSpacing: '-0.5px',
+              lineHeight: 1.2,
+            }}
+          >
+            Valea Max
+          </Typography>
+          <Typography
+            variant="caption"
+            sx={{
+              fontFamily: 'var(--font-inter)',
+              fontWeight: 400,
+              color: '#4A5568',
+              fontSize: '0.7rem',
+              letterSpacing: '0.03em',
+              display: 'block',
+              mt: -0.5,
+            }}
+          >
+            {locale === 'fr' ? 'Admin - Panneau de contrôle' : 'Admin - Control Panel'}
+          </Typography>
+        </Box>
       </Box>
 
       <Divider />

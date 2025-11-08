@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 
 export const dynamic = 'force-dynamic'
 
@@ -743,7 +742,7 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
       <AdminSidebar activeSection={activeSection} onSectionChange={setActiveSection} locale={locale} />
 
       <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-        {/* Header with Valea Max Branding */}
+        {/* Header with Section Title */}
         <Box sx={{
           bgcolor: 'rgba(255, 255, 255, 0.95)',
           backdropFilter: 'blur(10px)',
@@ -752,52 +751,11 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
           py: 2.5,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-start',
           position: 'sticky',
           top: 0,
           zIndex: 100
         }}>
-          {/* Logo and Brand */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Image
-              src="/logo.png"
-              alt="Valea Max"
-              width={48}
-              height={48}
-              style={{ borderRadius: '8px' }}
-            />
-            <Box>
-              <Typography
-                variant="h5"
-                sx={{
-                  fontFamily: 'var(--font-montserrat)',
-                  fontWeight: 700,
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  letterSpacing: '-0.5px',
-                  lineHeight: 1.2,
-                }}
-              >
-                Valea Max
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{
-                  fontFamily: 'var(--font-inter)',
-                  fontWeight: 400,
-                  color: '#4A5568',
-                  fontSize: '0.7rem',
-                  letterSpacing: '0.03em',
-                  display: 'block',
-                  mt: -0.5,
-                }}
-              >
-                {locale === 'fr' ? 'Admin - Panneau de contrôle' : 'Admin - Control Panel'}
-              </Typography>
-            </Box>
-          </Box>
-
           {/* Section Title */}
           <Typography
             variant="h4"
