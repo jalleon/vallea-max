@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 
 export const dynamic = 'force-dynamic'
 
@@ -435,52 +436,6 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
     }
   }
 
-  // Integration test handlers
-  const handleTestSentry = () => {
-    try {
-      // Capture a test message
-      Sentry.captureMessage('Sentry test from Valea Max admin panel', 'info')
-
-      showSnackbar(
-        locale === 'fr'
-          ? 'Test envoyé à Sentry! Vérifiez votre tableau de bord.'
-          : 'Test sent to Sentry! Check your dashboard.',
-        'success'
-      )
-    } catch (error) {
-      showSnackbar(
-        locale === 'fr'
-          ? 'Erreur lors du test Sentry'
-          : 'Error testing Sentry',
-        'error'
-      )
-    }
-  }
-
-  const handleTestPostHog = () => {
-    try {
-      // Capture a test event
-      captureEvent('admin_test_event', {
-        source: 'admin_panel',
-        timestamp: new Date().toISOString(),
-        user_email: user?.email
-      })
-
-      showSnackbar(
-        locale === 'fr'
-          ? 'Événement test envoyé à PostHog! Vérifiez votre tableau de bord.'
-          : 'Test event sent to PostHog! Check your dashboard.',
-        'success'
-      )
-    } catch (error) {
-      showSnackbar(
-        locale === 'fr'
-          ? 'Erreur lors du test PostHog'
-          : 'Error testing PostHog',
-        'error'
-      )
-    }
-  }
 
   // Bulk selection handlers
   const handleSelectAllUsers = (checked: boolean) => {
@@ -725,6 +680,22 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
   // Paginated waitlist
   const paginatedWaitlist = filteredWaitlist.slice(waitlistPage * waitlistRowsPerPage, waitlistPage * waitlistRowsPerPage + waitlistRowsPerPage)
 
+  // Get section title based on activeSection
+  const getSectionTitle = () => {
+    const titles: Record<string, { fr: string; en: string }> = {
+      dashboard: { fr: 'Vue d\'ensemble', en: 'Dashboard Overview' },
+      users: { fr: 'Utilisateurs', en: 'Users' },
+      demos: { fr: 'Demandes de démo', en: 'Demo Requests' },
+      waitlist: { fr: 'Liste d\'attente', en: 'Waitlist' },
+      subscriptions: { fr: 'Abonnements', en: 'Subscriptions' },
+      analytics: { fr: 'Analytique', en: 'Analytics' },
+      health: { fr: 'Santé du système', en: 'System Health' },
+      settings: { fr: 'Paramètres', en: 'Settings' },
+      integrations: { fr: 'Intégrations', en: 'Integrations' }
+    }
+    return titles[activeSection]?.[locale] || titles.dashboard[locale]
+  }
+
   if (loading) {
     return (
       <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -773,15 +744,81 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
     }}>
       <AdminSidebar activeSection={activeSection} onSectionChange={setActiveSection} locale={locale} />
 
-      <Box sx={{ flexGrow: 1, p: 4 }}>
-        {/* Dashboard Overview Section */}
-        {activeSection === 'dashboard' && (
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
-              {locale === 'fr' ? 'Vue d\'ensemble' : 'Dashboard Overview'}
-            </Typography>
+      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+        {/* Header with Valea Max Branding */}
+        <Box sx={{
+          bgcolor: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(10px)',
+          borderBottom: '1px solid rgba(26, 31, 54, 0.1)',
+          px: 4,
+          py: 2.5,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          position: 'sticky',
+          top: 0,
+          zIndex: 100
+        }}>
+          {/* Logo and Brand */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Image
+              src="/logo.png"
+              alt="Valea Max"
+              width={48}
+              height={48}
+              style={{ borderRadius: '8px' }}
+            />
+            <Box>
+              <Typography
+                variant="h5"
+                sx={{
+                  fontFamily: 'var(--font-montserrat)',
+                  fontWeight: 700,
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  letterSpacing: '-0.5px',
+                  lineHeight: 1.2,
+                }}
+              >
+                Valea Max
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  fontFamily: 'var(--font-inter)',
+                  fontWeight: 400,
+                  color: '#4A5568',
+                  fontSize: '0.7rem',
+                  letterSpacing: '0.03em',
+                  display: 'block',
+                  mt: -0.5,
+                }}
+              >
+                {locale === 'fr' ? 'Admin - Panneau de contrôle' : 'Admin - Control Panel'}
+              </Typography>
+            </Box>
+          </Box>
 
-            {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
+          {/* Section Title */}
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 700,
+              color: '#1A1F36',
+              fontFamily: 'var(--font-montserrat)',
+            }}
+          >
+            {getSectionTitle()}
+          </Typography>
+        </Box>
+
+        {/* Main Content Area */}
+        <Box sx={{ flexGrow: 1, p: 4, overflow: 'auto' }}>
+          {/* Dashboard Overview Section */}
+          {activeSection === 'dashboard' && (
+            <Box>
+              {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
             {/* Key Metrics Row */}
             <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -931,9 +968,6 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
         {activeSection === 'users' && (
           <Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                {locale === 'fr' ? 'Utilisateurs' : 'Users'}
-              </Typography>
               <Button
                 variant="outlined"
                 startIcon={<Download />}
@@ -1162,9 +1196,6 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
         {activeSection === 'demos' && (
           <Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                {locale === 'fr' ? 'Demandes de démo' : 'Demo Requests'}
-              </Typography>
               <Button
                 variant="outlined"
                 startIcon={<Download />}
@@ -1356,9 +1387,6 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
         {activeSection === 'waitlist' && (
           <Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                {locale === 'fr' ? 'Liste d\'attente' : 'Waitlist'}
-              </Typography>
               <Button
                 variant="outlined"
                 startIcon={<Download />}
@@ -1551,9 +1579,6 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
         {/* Placeholder sections for other tabs */}
         {activeSection === 'subscriptions' && (
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
-              {locale === 'fr' ? 'Gestion des abonnements' : 'Subscription Management'}
-            </Typography>
 
             {!analytics ? (
               <Card sx={{ borderRadius: '16px', p: 4, textAlign: 'center' }}>
@@ -1789,9 +1814,6 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
 
         {activeSection === 'analytics' && (
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
-              {locale === 'fr' ? 'Analytique avancée' : 'Advanced Analytics'}
-            </Typography>
 
             {!timeseriesData ? (
               <Card sx={{ borderRadius: '16px', p: 4, textAlign: 'center' }}>
@@ -1968,10 +1990,7 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
 
         {activeSection === 'health' && (
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
-              {locale === 'fr' ? 'Santé du système' : 'System Health'}
-            </Typography>
-            <Card sx={{ borderRadius: '16px', p: 4, textAlign: 'center' }}>
+            <Card sx={{ borderRadius: '16px', p: 4, textAlign: 'center', mt: 3 }}>
               <Typography variant="h6" sx={{ color: '#6B7280' }}>
                 {locale === 'fr' ? 'Monitoring en développement' : 'Monitoring coming soon'}
               </Typography>
@@ -1981,9 +2000,6 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
 
         {activeSection === 'settings' && (
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
-              {locale === 'fr' ? 'Santé du système' : 'System Health'}
-            </Typography>
 
             {/* System Status Cards */}
             <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -2152,12 +2168,6 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
         {/* Integrations Section */}
         {activeSection === 'integrations' && (
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-              {locale === 'fr' ? 'Intégrations' : 'Integrations'}
-            </Typography>
-            <Typography variant="body2" sx={{ color: '#6B7280', mb: 3 }}>
-              {locale === 'fr' ? 'Surveillance et analyse de vos services tiers' : 'Monitor and analyze your third-party services'}
-            </Typography>
 
             {/* Integration Service Cards */}
             <Grid container spacing={3}>
@@ -2228,33 +2238,16 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                       </Grid>
                     </Grid>
 
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                      <Button
-                        fullWidth
-                        variant="contained"
-                        onClick={handleTestSentry}
-                        sx={{
-                          textTransform: 'none',
-                          borderRadius: '12px',
-                          background: 'linear-gradient(135deg, #6D28D9 0%, #5B21B6 100%)',
-                          '&:hover': {
-                            background: 'linear-gradient(135deg, #5B21B6 0%, #4C1D95 100%)'
-                          }
-                        }}
-                      >
-                        {locale === 'fr' ? 'Tester' : 'Test'}
-                      </Button>
-                      <Button
-                        fullWidth
-                        variant="outlined"
-                        endIcon={<OpenInNew />}
-                        href="https://sentry.io"
-                        target="_blank"
-                        sx={{ textTransform: 'none', borderRadius: '12px' }}
-                      >
-                        {locale === 'fr' ? 'Dashboard' : 'Dashboard'}
-                      </Button>
-                    </Box>
+                    <Button
+                      fullWidth
+                      variant="outlined"
+                      endIcon={<OpenInNew />}
+                      href="https://sentry.io"
+                      target="_blank"
+                      sx={{ textTransform: 'none', borderRadius: '12px' }}
+                    >
+                      {locale === 'fr' ? 'Dashboard' : 'Dashboard'}
+                    </Button>
                   </CardContent>
                 </Card>
               </Grid>
@@ -2318,33 +2311,16 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                       </Grid>
                     </Grid>
 
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                      <Button
-                        fullWidth
-                        variant="contained"
-                        onClick={handleTestPostHog}
-                        sx={{
-                          textTransform: 'none',
-                          borderRadius: '12px',
-                          background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
-                          '&:hover': {
-                            background: 'linear-gradient(135deg, #D97706 0%, #B45309 100%)'
-                          }
-                        }}
-                      >
-                        {locale === 'fr' ? 'Tester' : 'Test'}
-                      </Button>
-                      <Button
-                        fullWidth
-                        variant="outlined"
-                        endIcon={<OpenInNew />}
-                        href="https://app.posthog.com"
-                        target="_blank"
-                        sx={{ textTransform: 'none', borderRadius: '12px' }}
-                      >
-                        {locale === 'fr' ? 'Dashboard' : 'Dashboard'}
-                      </Button>
-                    </Box>
+                    <Button
+                      fullWidth
+                      variant="outlined"
+                      endIcon={<OpenInNew />}
+                      href="https://app.posthog.com"
+                      target="_blank"
+                      sx={{ textTransform: 'none', borderRadius: '12px' }}
+                    >
+                      {locale === 'fr' ? 'Dashboard' : 'Dashboard'}
+                    </Button>
                   </CardContent>
                 </Card>
               </Grid>
