@@ -690,20 +690,18 @@ export default function AdminPage({ params }: { params: Promise<{ locale: string
   const paginatedWaitlist = filteredWaitlist.slice(waitlistPage * waitlistRowsPerPage, waitlistPage * waitlistRowsPerPage + waitlistRowsPerPage)
 
   // Get section title based on activeSection
-  const getSectionTitle = () => {
-    const titles: Record<string, { fr: string; en: string }> = {
-      dashboard: { fr: 'Vue d\'ensemble', en: 'Dashboard Overview' },
-      users: { fr: 'Utilisateurs', en: 'Users' },
-      demos: { fr: 'Demandes de démo', en: 'Demo Requests' },
-      waitlist: { fr: 'Liste d\'attente', en: 'Waitlist' },
-      subscriptions: { fr: 'Abonnements', en: 'Subscriptions' },
-      analytics: { fr: 'Analytique', en: 'Analytics' },
-      health: { fr: 'Santé du système', en: 'System Health' },
-      settings: { fr: 'Paramètres', en: 'Settings' },
-      integrations: { fr: 'Intégrations', en: 'Integrations' }
-    }
-    return titles[activeSection]?.[locale] || titles.dashboard[locale]
+  const sectionTitles: Record<string, { fr: string; en: string }> = {
+    dashboard: { fr: 'Vue d\'ensemble', en: 'Dashboard Overview' },
+    users: { fr: 'Utilisateurs', en: 'Users' },
+    demos: { fr: 'Demandes de démo', en: 'Demo Requests' },
+    waitlist: { fr: 'Liste d\'attente', en: 'Waitlist' },
+    subscriptions: { fr: 'Abonnements', en: 'Subscriptions' },
+    analytics: { fr: 'Analytique', en: 'Analytics' },
+    health: { fr: 'Santé du système', en: 'System Health' },
+    settings: { fr: 'Paramètres', en: 'Settings' },
+    integrations: { fr: 'Intégrations', en: 'Integrations' }
   }
+  const currentSectionTitle = sectionTitles[activeSection]?.[locale as 'fr' | 'en'] || sectionTitles.dashboard[locale as 'fr' | 'en'] || ''
 
   if (loading || !locale) {
     return (
@@ -818,7 +816,7 @@ export default function AdminPage({ params }: { params: Promise<{ locale: string
               fontFamily: 'var(--font-montserrat)',
             }}
           >
-            {getSectionTitle()}
+            {currentSectionTitle}
           </Typography>
         </Box>
 
