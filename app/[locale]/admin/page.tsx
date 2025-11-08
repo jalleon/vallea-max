@@ -59,6 +59,7 @@ import AdminSidebar from './components/AdminSidebar'
 import MetricCard from './components/MetricCard'
 import UserDetailsModal from './components/UserDetailsModal'
 import EditCreditsModal from './components/EditCreditsModal'
+import { LineChart, Line, PieChart, Pie, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts'
 
 interface AnalyticsData {
   overview: {
@@ -97,6 +98,7 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
   const [demoRequests, setDemoRequests] = useState<any[]>([])
   const [waitlist, setWaitlist] = useState<any[]>([])
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
+  const [timeseriesData, setTimeseriesData] = useState<any>(null)
 
   // Search & filter state
   const [userSearch, setUserSearch] = useState('')
@@ -181,28 +183,31 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
       const token = authData ? JSON.parse(authData).access_token : null
       const headers: HeadersInit = token ? { 'Authorization': `Bearer ${token}` } : {}
 
-      const [usersRes, demoRes, waitlistRes, analyticsRes] = await Promise.all([
+      const [usersRes, demoRes, waitlistRes, analyticsRes, timeseriesRes] = await Promise.all([
         fetch('/api/admin/users', { headers }),
         fetch('/api/admin/demo-requests', { headers }),
         fetch('/api/admin/waitlist', { headers }),
-        fetch('/api/admin/analytics', { headers })
+        fetch('/api/admin/analytics', { headers }),
+        fetch('/api/admin/analytics/timeseries', { headers })
       ])
 
       if (!usersRes.ok || !demoRes.ok || !waitlistRes.ok) {
         throw new Error('Failed to fetch data')
       }
 
-      const [usersData, demoData, waitlistData, analyticsData] = await Promise.all([
+      const [usersData, demoData, waitlistData, analyticsData, timeseriesData] = await Promise.all([
         usersRes.json(),
         demoRes.json(),
         waitlistRes.json(),
-        analyticsRes.ok ? analyticsRes.json() : null
+        analyticsRes.ok ? analyticsRes.json() : null,
+        timeseriesRes.ok ? timeseriesRes.json() : null
       ])
 
       setUsers(usersData.users || [])
       setDemoRequests(demoData.demoRequests || [])
       setWaitlist(waitlistData.waitlist || [])
       setAnalytics(analyticsData)
+      setTimeseriesData(timeseriesData)
     } catch (err: any) {
       setError(err.message || 'Failed to load admin data')
     } finally {
@@ -1149,11 +1154,177 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
             <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
               {locale === 'fr' ? 'Analytique avancée' : 'Advanced Analytics'}
             </Typography>
-            <Card sx={{ borderRadius: '16px', p: 4, textAlign: 'center' }}>
-              <Typography variant="h6" sx={{ color: '#6B7280' }}>
-                {locale === 'fr' ? 'Graphiques et analyses à venir' : 'Charts and insights coming soon'}
-              </Typography>
-            </Card>
+
+            {!timeseriesData ? (
+              <Card sx={{ borderRadius: '16px', p: 4, textAlign: 'center' }}>
+                <CircularProgress size={60} />
+                <Typography variant="h6" sx={{ color: '#6B7280', mt: 2 }}>
+                  {locale === 'fr' ? 'Chargement des données...' : 'Loading data...'}
+                </Typography>
+              </Card>
+            ) : (
+              <Grid container spacing={3}>
+                {/* MRR Over Time Chart */}
+                <Grid item xs={12} lg={8}>
+                  <Card sx={{ borderRadius: '16px', p: 3 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                      {locale === 'fr' ? 'Revenus récurrents mensuels (MRR)' : 'Monthly Recurring Revenue (MRR)'}
+                    </Typography>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <LineChart data={timeseriesData.monthlyData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" style={{ fontSize: '12px' }} />
+                        <YAxis style={{ fontSize: '12px' }} />
+                        <RechartsTooltip
+                          formatter={(value: any) => [`$${value}`, 'MRR']}
+                          contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB' }}
+                        />
+                        <Legend />
+                        <Line type="monotone" dataKey="mrr" stroke="#10B981" strokeWidth={3} name="MRR ($)" dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </Card>
+                </Grid>
+
+                {/* Revenue by Plan Type (Pie Chart) */}
+                <Grid item xs={12} lg={4}>
+                  <Card sx={{ borderRadius: '16px', p: 3 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                      {locale === 'fr' ? 'Revenus par type de plan' : 'Revenue by Plan Type'}
+                    </Typography>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={timeseriesData.revenueByPlan}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={(entry) => `${entry.name}: $${entry.value}`}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {timeseriesData.revenueByPlan.map((entry: any, index: number) => (
+                            <Cell key={`cell-${index}`} fill={index === 0 ? '#10B981' : '#3B82F6'} />
+                          ))}
+                        </Pie>
+                        <RechartsTooltip
+                          formatter={(value: any, name: any, props: any) => [`$${value} (${props.payload.count} ${locale === 'fr' ? 'abonnements' : 'subscriptions'})`, name]}
+                          contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB' }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </Card>
+                </Grid>
+
+                {/* User Growth Chart */}
+                <Grid item xs={12} lg={6}>
+                  <Card sx={{ borderRadius: '16px', p: 3 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                      {locale === 'fr' ? 'Croissance des utilisateurs' : 'User Growth'}
+                    </Typography>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <LineChart data={timeseriesData.monthlyData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" style={{ fontSize: '12px' }} />
+                        <YAxis style={{ fontSize: '12px' }} />
+                        <RechartsTooltip contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB' }} />
+                        <Legend />
+                        <Line type="monotone" dataKey="newUsers" stroke="#8B5CF6" strokeWidth={2} name={locale === 'fr' ? 'Nouveaux' : 'New Users'} dot={{ r: 4 }} />
+                        <Line type="monotone" dataKey="totalUsers" stroke="#3B82F6" strokeWidth={2} name={locale === 'fr' ? 'Total' : 'Total Users'} dot={{ r: 4 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </Card>
+                </Grid>
+
+                {/* Conversion Funnel */}
+                <Grid item xs={12} lg={6}>
+                  <Card sx={{ borderRadius: '16px', p: 3 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                      {locale === 'fr' ? 'Tunnel de conversion' : 'Conversion Funnel'}
+                    </Typography>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={timeseriesData.conversionFunnel} layout="vertical">
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis type="number" style={{ fontSize: '12px' }} />
+                        <YAxis dataKey="stage" type="category" width={100} style={{ fontSize: '12px' }} />
+                        <RechartsTooltip
+                          formatter={(value: any, name: any, props: any) => [`${value} (${props.payload.percentage}%)`, locale === 'fr' ? 'Utilisateurs' : 'Users']}
+                          contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB' }}
+                        />
+                        <Bar dataKey="count" fill="#10B981" radius={[0, 8, 8, 0]}>
+                          {timeseriesData.conversionFunnel.map((entry: any, index: number) => (
+                            <Cell key={`cell-${index}`} fill={index === 0 ? '#10B981' : index === 1 ? '#3B82F6' : index === 2 ? '#8B5CF6' : '#F59E0B'} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </Card>
+                </Grid>
+
+                {/* Credits Consumption (Last 30 Days) */}
+                <Grid item xs={12}>
+                  <Card sx={{ borderRadius: '16px', p: 3 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                      {locale === 'fr' ? 'Consommation de crédits (30 derniers jours)' : 'Credits Consumption (Last 30 Days)'}
+                    </Typography>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <LineChart data={timeseriesData.dailyCredits}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="day" style={{ fontSize: '12px' }} angle={-45} textAnchor="end" height={80} />
+                        <YAxis style={{ fontSize: '12px' }} />
+                        <RechartsTooltip
+                          formatter={(value: any) => [`${value}`, locale === 'fr' ? 'Crédits' : 'Credits']}
+                          contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB' }}
+                        />
+                        <Legend />
+                        <Line type="monotone" dataKey="credits" stroke="#F59E0B" strokeWidth={2} name={locale === 'fr' ? 'Crédits utilisés' : 'Credits Used'} dot={false} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </Card>
+                </Grid>
+
+                {/* Active Subscriptions Over Time */}
+                <Grid item xs={12} lg={6}>
+                  <Card sx={{ borderRadius: '16px', p: 3 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                      {locale === 'fr' ? 'Abonnements actifs' : 'Active Subscriptions'}
+                    </Typography>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <LineChart data={timeseriesData.monthlyData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" style={{ fontSize: '12px' }} />
+                        <YAxis style={{ fontSize: '12px' }} />
+                        <RechartsTooltip contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB' }} />
+                        <Legend />
+                        <Line type="monotone" dataKey="activeSubscriptions" stroke="#10B981" strokeWidth={3} name={locale === 'fr' ? 'Actifs' : 'Active'} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </Card>
+                </Grid>
+
+                {/* Credits Used by Month */}
+                <Grid item xs={12} lg={6}>
+                  <Card sx={{ borderRadius: '16px', p: 3 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                      {locale === 'fr' ? 'Crédits utilisés par mois' : 'Credits Used by Month'}
+                    </Typography>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={timeseriesData.monthlyData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" style={{ fontSize: '12px' }} />
+                        <YAxis style={{ fontSize: '12px' }} />
+                        <RechartsTooltip
+                          formatter={(value: any) => [`${value}`, locale === 'fr' ? 'Crédits' : 'Credits']}
+                          contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB' }}
+                        />
+                        <Bar dataKey="creditsUsed" fill="#F59E0B" radius={[8, 8, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </Card>
+                </Grid>
+              </Grid>
+            )}
           </Box>
         )}
 
