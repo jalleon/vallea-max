@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+export const dynamic = 'force-dynamic'
+
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '@/lib/supabase/types'
 
@@ -53,8 +55,8 @@ export async function POST(request: Request) {
         updated_at: new Date().toISOString()
       }
 
-      const { error: updateError } = await supabaseAdmin
-        .from('waitlist')
+      const { error: updateError } = await (supabaseAdmin
+        .from('waitlist') as any)
         .update(notifyData)
         .eq('id', waitlistId)
 
@@ -72,11 +74,11 @@ export async function POST(request: Request) {
       })
     } else if (action === 'promote') {
       // Get waitlist entry
-      const { data: waitlistEntry } = await supabaseAdmin
-        .from('waitlist')
+      const { data: waitlistEntry } = await (supabaseAdmin
+        .from('waitlist') as any)
         .select('*')
         .eq('id', waitlistId)
-        .single()
+        .single() as { data: any | null; error: any }
 
       if (!waitlistEntry) {
         return NextResponse.json({ error: 'Waitlist entry not found' }, { status: 404 })
@@ -87,7 +89,7 @@ export async function POST(request: Request) {
         .from('profiles')
         .select('id')
         .eq('email', waitlistEntry.email)
-        .single()
+        .single() as { data: any | null; error: any }
 
       if (existingUser) {
         return NextResponse.json({ error: 'User already exists with this email' }, { status: 400 })
@@ -116,8 +118,8 @@ export async function POST(request: Request) {
         updated_at: new Date().toISOString()
       }
 
-      await supabaseAdmin
-        .from('waitlist')
+      await (supabaseAdmin
+        .from('waitlist') as any)
         .update(promoteData)
         .eq('id', waitlistId)
 

@@ -11,6 +11,8 @@ import { BackgroundImportProvider } from '@/contexts/BackgroundImportContext'
 import { PostHogProvider } from '@/lib/analytics/posthog'
 import '../globals.css'
 
+export const dynamic = 'force-dynamic'
+
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const montserrat = Montserrat({ subsets: ['latin'], variable: '--font-montserrat' })
 const fraunces = Fraunces({ subsets: ['latin'], variable: '--font-fraunces' })

@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+export const dynamic = 'force-dynamic'
+
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '@/lib/supabase/types'
 
@@ -43,19 +45,19 @@ export async function POST(request: Request) {
     }
 
     // Use service role to update demo request
-    const supabaseAdmin = createClient<Database>(supabaseUrl, supabaseServiceKey)
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
 
     // Update demo request
-    const updateData: any = {
+    const updateData = {
       admin_notes,
       contacted,
       updated_at: new Date().toISOString()
     }
 
-    const { error: updateError } = await supabaseAdmin
+    const { error: updateError } = (await (supabaseAdmin as any)
       .from('demo_requests')
       .update(updateData)
-      .eq('id', demoId)
+      .eq('id', demoId)) as any
 
     if (updateError) {
       console.error('Error updating demo request:', updateError)
