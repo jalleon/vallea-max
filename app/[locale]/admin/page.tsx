@@ -84,6 +84,7 @@ import EditCreditsModal from './components/EditCreditsModal'
 import EditUserModal from './components/EditUserModal'
 import DemoNotesModal from './components/DemoNotesModal'
 import BulkActionToolbar from './components/BulkActionToolbar'
+import OrganizationStats from './components/OrganizationStats'
 import { LineChart, Line, PieChart, Pie, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts'
 import * as Sentry from '@sentry/nextjs'
 import { captureEvent } from '@/lib/analytics/posthog'
@@ -325,6 +326,49 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
   const handleEditUser = (user: any) => {
     setSelectedUser(user)
     setEditUserOpen(true)
+  }
+
+  const handleFixPropertyOrg = async (user: any) => {
+    if (!session?.access_token) return
+
+    try {
+      setSnackbar({
+        open: true,
+        message: `Fixing property organization for ${user.email}...`,
+        severity: 'info'
+      })
+
+      const response = await fetch('/api/admin/fix-property-organization', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ userEmail: user.email })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fix property organization')
+      }
+
+      setSnackbar({
+        open: true,
+        message: data.message || `Fixed ${data.updated} properties for ${user.email}`,
+        severity: 'success'
+      })
+
+      // Refresh data to show updated counts
+      fetchAllData()
+    } catch (error: any) {
+      console.error('Error fixing property organization:', error)
+      setSnackbar({
+        open: true,
+        message: error.message || 'Failed to fix property organization',
+        severity: 'error'
+      })
+    }
   }
 
   const handleCreditsUpdated = (message: string) => {
@@ -1013,6 +1057,11 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                 </Card>
               </Grid>
             </Grid>
+
+            {/* Organizations Overview */}
+            <Box sx={{ mt: 3 }}>
+              <OrganizationStats />
+            </Box>
           </Box>
         )}
 
@@ -1215,6 +1264,13 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                                 <Edit fontSize="small" />
                               </IconButton>
                             </Tooltip>
+                            {user.email === 'demo@valeamax.com' && (
+                              <Tooltip title={locale === 'fr' ? 'Corriger organisation des propriétés' : 'Fix property organization'}>
+                                <IconButton size="small" color="warning" onClick={() => handleFixPropertyOrg(user)}>
+                                  <Storage fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}
