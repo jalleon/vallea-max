@@ -51,6 +51,8 @@ import {
 import { useAuth } from '@/contexts/AuthContext'
 import AdminSidebar from './components/AdminSidebar'
 import MetricCard from './components/MetricCard'
+import UserDetailsModal from './components/UserDetailsModal'
+import EditCreditsModal from './components/EditCreditsModal'
 
 interface AnalyticsData {
   overview: {
@@ -94,6 +96,11 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
   const [userSearch, setUserSearch] = useState('')
   const [demoSearch, setDemoSearch] = useState('')
   const [waitlistSearch, setWaitlistSearch] = useState('')
+
+  // Modal state
+  const [selectedUser, setSelectedUser] = useState<any>(null)
+  const [userDetailsOpen, setUserDetailsOpen] = useState(false)
+  const [editCreditsOpen, setEditCreditsOpen] = useState(false)
 
   useEffect(() => {
     checkAdminAccess()
@@ -233,6 +240,21 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
 
   const showSnackbar = (message: string, severity: 'success' | 'error') => {
     setSnackbar({ open: true, message, severity })
+  }
+
+  const handleViewUser = (user: any) => {
+    setSelectedUser(user)
+    setUserDetailsOpen(true)
+  }
+
+  const handleEditCredits = (user: any) => {
+    setSelectedUser(user)
+    setEditCreditsOpen(true)
+  }
+
+  const handleCreditsUpdated = (message: string) => {
+    showSnackbar(message, 'success')
+    fetchAllData() // Refresh data
   }
 
   // Filter functions
@@ -509,12 +531,12 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                           <TableCell>{formatDate(user.created_at)}</TableCell>
                           <TableCell align="right">
                             <Tooltip title={locale === 'fr' ? 'Voir détails' : 'View details'}>
-                              <IconButton size="small" color="primary">
+                              <IconButton size="small" color="primary" onClick={() => handleViewUser(user)}>
                                 <Visibility fontSize="small" />
                               </IconButton>
                             </Tooltip>
                             <Tooltip title={locale === 'fr' ? 'Modifier crédits' : 'Edit credits'}>
-                              <IconButton size="small" color="success">
+                              <IconButton size="small" color="success" onClick={() => handleEditCredits(user)}>
                                 <Edit fontSize="small" />
                               </IconButton>
                             </Tooltip>
@@ -765,6 +787,22 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
           </Box>
         )}
       </Box>
+
+      {/* Modals */}
+      <UserDetailsModal
+        open={userDetailsOpen}
+        onClose={() => setUserDetailsOpen(false)}
+        user={selectedUser}
+        locale={locale}
+      />
+
+      <EditCreditsModal
+        open={editCreditsOpen}
+        onClose={() => setEditCreditsOpen(false)}
+        user={selectedUser}
+        locale={locale}
+        onSuccess={handleCreditsUpdated}
+      />
 
       {/* Snackbar for notifications */}
       <Snackbar
