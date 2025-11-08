@@ -54,7 +54,8 @@ export default function AdminSidebar({ activeSection, onSectionChange, locale }:
           width: SIDEBAR_WIDTH,
           boxSizing: 'border-box',
           borderRight: '1px solid rgba(0,0,0,0.12)',
-          background: 'linear-gradient(180deg, #FFFFFF 0%, #F9FAFB 100%)'
+          background: 'linear-gradient(180deg, #FFFFFF 0%, #F9FAFB 100%)',
+          borderRadius: 0
         }
       }}
     >

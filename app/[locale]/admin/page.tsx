@@ -34,7 +34,10 @@ import {
   InputLabel,
   TablePagination,
   TableSortLabel,
-  Checkbox
+  Checkbox,
+  Menu,
+  Avatar,
+  Divider
 } from '@mui/material'
 import {
   People,
@@ -67,7 +70,10 @@ import {
   Analytics as AnalyticsIcon,
   OpenInNew,
   CheckCircleOutline,
-  ErrorOutline
+  ErrorOutline,
+  Logout,
+  ExitToApp,
+  AccountCircle
 } from '@mui/icons-material'
 import { useAuth } from '@/contexts/AuthContext'
 import AdminSidebar from './components/AdminSidebar'
@@ -130,6 +136,9 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
   const [editCreditsOpen, setEditCreditsOpen] = useState(false)
   const [selectedDemo, setSelectedDemo] = useState<any>(null)
   const [demoNotesOpen, setDemoNotesOpen] = useState(false)
+
+  // Profile menu state
+  const [profileMenuAnchor, setProfileMenuAnchor] = useState<null | HTMLElement>(null)
 
   // Bulk selection state
   const [selectedUsers, setSelectedUsers] = useState<string[]>([])
@@ -751,7 +760,7 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
           py: 2.5,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'flex-start',
+          justifyContent: 'space-between',
           position: 'sticky',
           top: 0,
           zIndex: 100
@@ -767,6 +776,80 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
           >
             {currentSectionTitle}
           </Typography>
+
+          {/* Right Side: Back to App + Profile Menu */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {/* Back to App Button */}
+            <Button
+              startIcon={<ExitToApp />}
+              onClick={() => router.push(`/${locale}/dashboard`)}
+              sx={{
+                textTransform: 'none',
+                color: '#6B7280',
+                '&:hover': {
+                  bgcolor: 'rgba(0,0,0,0.04)'
+                }
+              }}
+            >
+              {locale === 'fr' ? 'Retour à l\'app' : 'Back to App'}
+            </Button>
+
+            {/* Profile Menu */}
+            <IconButton
+              onClick={(e) => setProfileMenuAnchor(e.currentTarget)}
+              sx={{
+                bgcolor: 'rgba(102, 126, 234, 0.1)',
+                '&:hover': {
+                  bgcolor: 'rgba(102, 126, 234, 0.2)'
+                }
+              }}
+            >
+              <AccountCircle sx={{ color: '#667eea' }} />
+            </IconButton>
+
+            <Menu
+              anchorEl={profileMenuAnchor}
+              open={Boolean(profileMenuAnchor)}
+              onClose={() => setProfileMenuAnchor(null)}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              sx={{
+                mt: 1,
+                '& .MuiPaper-root': {
+                  minWidth: 200,
+                  borderRadius: '12px',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                }
+              }}
+            >
+              <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: '#1A1F36' }}>
+                  {user?.email || 'Admin User'}
+                </Typography>
+                <Typography variant="caption" sx={{ color: '#6B7280' }}>
+                  {locale === 'fr' ? 'Administrateur' : 'Administrator'}
+                </Typography>
+              </Box>
+              <MenuItem
+                onClick={() => {
+                  setProfileMenuAnchor(null)
+                  router.push(`/${locale}/logout`)
+                }}
+                sx={{ py: 1.5, gap: 1.5 }}
+              >
+                <Logout fontSize="small" sx={{ color: '#6B7280' }} />
+                <Typography variant="body2">
+                  {locale === 'fr' ? 'Déconnexion' : 'Logout'}
+                </Typography>
+              </MenuItem>
+            </Menu>
+          </Box>
         </Box>
 
         {/* Main Content Area */}
