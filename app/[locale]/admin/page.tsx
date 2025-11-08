@@ -2532,5 +2532,6 @@ export default function AdminPage({ params }: { params: Promise<{ locale: string
         message={snackbar.message}
       />
     </Box>
+    </Box>
   )
 }
