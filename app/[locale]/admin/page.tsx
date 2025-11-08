@@ -296,7 +296,7 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#F9FAFB' }}>
       <AdminSidebar activeSection={activeSection} onSectionChange={setActiveSection} locale={locale} />
 
-      <Box sx={{ flexGrow: 1, p: 4, marginLeft: '280px' }}>
+      <Box sx={{ flexGrow: 1, p: 4 }}>
         {/* Dashboard Overview Section */}
         {activeSection === 'dashboard' && (
           <Box>
