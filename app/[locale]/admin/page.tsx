@@ -338,6 +338,82 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
     }
   }
 
+  const handleNotifyWaitlist = async (waitlistEntry: any) => {
+    try {
+      const authData = localStorage.getItem('supabase.auth.token')
+      const token = authData ? JSON.parse(authData).access_token : null
+
+      const response = await fetch('/api/admin/waitlist/action', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          waitlistId: waitlistEntry.id,
+          action: 'notify'
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to notify user')
+      }
+
+      showSnackbar(
+        locale === 'fr'
+          ? 'Utilisateur notifié avec succès'
+          : 'User notified successfully',
+        'success'
+      )
+      fetchAllData()
+    } catch (error: any) {
+      showSnackbar(error.message || 'Failed to notify user', 'error')
+    }
+  }
+
+  const handlePromoteWaitlist = async (waitlistEntry: any) => {
+    if (!confirm(
+      locale === 'fr'
+        ? `Êtes-vous sûr de vouloir promouvoir ${waitlistEntry.name} en utilisateur? Un compte sera créé et un email de bienvenue sera envoyé.`
+        : `Are you sure you want to promote ${waitlistEntry.name} to user? An account will be created and a welcome email will be sent.`
+    )) {
+      return
+    }
+
+    try {
+      const authData = localStorage.getItem('supabase.auth.token')
+      const token = authData ? JSON.parse(authData).access_token : null
+
+      const response = await fetch('/api/admin/waitlist/action', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          waitlistId: waitlistEntry.id,
+          action: 'promote'
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to promote user')
+      }
+
+      showSnackbar(
+        locale === 'fr'
+          ? 'Utilisateur promu avec succès'
+          : 'User promoted successfully',
+        'success'
+      )
+      fetchAllData()
+    } catch (error: any) {
+      showSnackbar(error.message || 'Failed to promote user', 'error')
+    }
+  }
+
   // Advanced filter, sort, and pagination functions
   const handleSort = (column: string) => {
     const isAsc = sortBy === column && sortOrder === 'asc'
@@ -1167,7 +1243,20 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                     <TableBody>
                       {paginatedWaitlist.map((entry) => (
                         <TableRow key={entry.id} hover>
-                          <TableCell>{entry.name}</TableCell>
+                          <TableCell>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              {entry.name}
+                              {entry.promoted && (
+                                <Chip
+                                  label={locale === 'fr' ? 'Promu' : 'Promoted'}
+                                  size="small"
+                                  color="success"
+                                  icon={<CheckCircle />}
+                                  sx={{ fontSize: '10px', height: '20px' }}
+                                />
+                              )}
+                            </Box>
+                          </TableCell>
                           <TableCell>{entry.email}</TableCell>
                           <TableCell>{entry.locale?.toUpperCase()}</TableCell>
                           <TableCell>
@@ -1179,14 +1268,38 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                           </TableCell>
                           <TableCell>{formatDate(entry.created_at)}</TableCell>
                           <TableCell align="right">
-                            <Tooltip title={locale === 'fr' ? 'Notifier' : 'Notify'}>
-                              <IconButton size="small" color="primary" disabled={entry.notified}>
-                                <Send fontSize="small" />
-                              </IconButton>
+                            <Tooltip title={entry.notified ? (locale === 'fr' ? 'Déjà notifié' : 'Already notified') : (locale === 'fr' ? 'Envoyer notification' : 'Send notification')}>
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  color={entry.notified ? 'success' : 'primary'}
+                                  disabled={entry.notified}
+                                  onClick={() => handleNotifyWaitlist(entry)}
+                                >
+                                  <Send fontSize="small" />
+                                </IconButton>
+                              </span>
                             </Tooltip>
-                            <Tooltip title={locale === 'fr' ? 'Promouvoir' : 'Promote to user'}>
-                              <IconButton size="small" color="success">
-                                <PersonAdd fontSize="small" />
+                            <Tooltip title={entry.promoted ? (locale === 'fr' ? 'Déjà promu' : 'Already promoted') : (locale === 'fr' ? 'Promouvoir en utilisateur' : 'Promote to user')}>
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  color="success"
+                                  disabled={entry.promoted}
+                                  onClick={() => handlePromoteWaitlist(entry)}
+                                >
+                                  <PersonAdd fontSize="small" />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
+                            <Tooltip title={locale === 'fr' ? 'Envoyer email' : 'Send email'}>
+                              <IconButton
+                                size="small"
+                                color="primary"
+                                component="a"
+                                href={`mailto:${entry.email}`}
+                              >
+                                <Mail fontSize="small" />
                               </IconButton>
                             </Tooltip>
                           </TableCell>
