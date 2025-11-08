@@ -52,13 +52,16 @@ import {
   Delete,
   PersonAdd,
   Send,
-  FilterList
+  FilterList,
+  Check,
+  Note
 } from '@mui/icons-material'
 import { useAuth } from '@/contexts/AuthContext'
 import AdminSidebar from './components/AdminSidebar'
 import MetricCard from './components/MetricCard'
 import UserDetailsModal from './components/UserDetailsModal'
 import EditCreditsModal from './components/EditCreditsModal'
+import DemoNotesModal from './components/DemoNotesModal'
 import { LineChart, Line, PieChart, Pie, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts'
 
 interface AnalyticsData {
@@ -109,6 +112,8 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
   const [selectedUser, setSelectedUser] = useState<any>(null)
   const [userDetailsOpen, setUserDetailsOpen] = useState(false)
   const [editCreditsOpen, setEditCreditsOpen] = useState(false)
+  const [selectedDemo, setSelectedDemo] = useState<any>(null)
+  const [demoNotesOpen, setDemoNotesOpen] = useState(false)
 
   // Advanced filtering, sorting, and pagination state (Users)
   const [subscriptionFilter, setSubscriptionFilter] = useState<string>('all')
@@ -287,6 +292,50 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
   const handleCreditsUpdated = (message: string) => {
     showSnackbar(message, 'success')
     fetchAllData() // Refresh data
+  }
+
+  const handleDemoNotes = (demo: any) => {
+    setSelectedDemo(demo)
+    setDemoNotesOpen(true)
+  }
+
+  const handleDemoUpdated = (message: string) => {
+    showSnackbar(message, 'success')
+    fetchAllData() // Refresh data
+  }
+
+  const handleMarkContacted = async (demo: any) => {
+    try {
+      const authData = localStorage.getItem('supabase.auth.token')
+      const token = authData ? JSON.parse(authData).access_token : null
+
+      const response = await fetch('/api/admin/demo-requests/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          demoId: demo.id,
+          contacted: !demo.contacted,
+          admin_notes: demo.admin_notes
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update demo request')
+      }
+
+      showSnackbar(
+        locale === 'fr'
+          ? 'Statut mis à jour avec succès'
+          : 'Status updated successfully',
+        'success'
+      )
+      fetchAllData()
+    } catch (error: any) {
+      showSnackbar(error.message || 'Failed to update status', 'error')
+    }
   }
 
   // Advanced filter, sort, and pagination functions
@@ -962,7 +1011,20 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                     <TableBody>
                       {paginatedDemos.map((request) => (
                         <TableRow key={request.id} hover>
-                          <TableCell>{request.name}</TableCell>
+                          <TableCell>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              {request.name}
+                              {request.contacted && (
+                                <Chip
+                                  label={locale === 'fr' ? 'Contacté' : 'Contacted'}
+                                  size="small"
+                                  color="success"
+                                  icon={<CheckCircle />}
+                                  sx={{ fontSize: '10px', height: '20px' }}
+                                />
+                              )}
+                            </Box>
+                          </TableCell>
                           <TableCell>{request.email}</TableCell>
                           <TableCell>{request.company || '-'}</TableCell>
                           <TableCell>{request.phone || '-'}</TableCell>
@@ -973,8 +1035,27 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                           </TableCell>
                           <TableCell>{formatDate(request.created_at)}</TableCell>
                           <TableCell align="right">
-                            <Tooltip title={locale === 'fr' ? 'Contacter' : 'Contact'}>
-                              <IconButton size="small" color="primary">
+                            <Tooltip title={request.contacted ? (locale === 'fr' ? 'Marquer comme non contacté' : 'Mark as not contacted') : (locale === 'fr' ? 'Marquer comme contacté' : 'Mark as contacted')}>
+                              <IconButton
+                                size="small"
+                                color={request.contacted ? 'success' : 'default'}
+                                onClick={() => handleMarkContacted(request)}
+                              >
+                                <Check fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title={locale === 'fr' ? 'Ajouter/Voir notes' : 'Add/View notes'}>
+                              <IconButton size="small" color="primary" onClick={() => handleDemoNotes(request)}>
+                                <Note fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title={locale === 'fr' ? 'Envoyer email' : 'Send email'}>
+                              <IconButton
+                                size="small"
+                                color="primary"
+                                component="a"
+                                href={`mailto:${request.email}`}
+                              >
                                 <Send fontSize="small" />
                               </IconButton>
                             </Tooltip>
@@ -1601,6 +1682,14 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
         user={selectedUser}
         locale={locale}
         onSuccess={handleCreditsUpdated}
+      />
+
+      <DemoNotesModal
+        open={demoNotesOpen}
+        onClose={() => setDemoNotesOpen(false)}
+        demo={selectedDemo}
+        locale={locale}
+        onSuccess={handleDemoUpdated}
       />
 
       {/* Snackbar for notifications */}
