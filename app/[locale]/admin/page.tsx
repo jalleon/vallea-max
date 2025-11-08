@@ -329,7 +329,10 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
   }
 
   const handleFixPropertyOrg = async (user: any) => {
-    if (!session?.access_token) return
+    const authData = localStorage.getItem('supabase.auth.token')
+    const token = authData ? JSON.parse(authData).access_token : null
+
+    if (!token) return
 
     try {
       setSnackbar({
@@ -342,7 +345,7 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ userEmail: user.email })
       })
