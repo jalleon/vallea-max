@@ -8,6 +8,7 @@ import { ValleaThemeProvider } from '@/components/providers/ThemeProvider'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { SettingsProvider } from '@/contexts/SettingsContext'
 import { BackgroundImportProvider } from '@/contexts/BackgroundImportContext'
+import { PostHogProvider } from '@/lib/analytics/posthog'
 import '../globals.css'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
@@ -45,17 +46,19 @@ export default async function LocaleLayout({
   return (
     <html lang={locale}>
       <body className={`${inter.variable} ${montserrat.variable} ${fraunces.variable} ${inter.className}`}>
-        <NextIntlClientProvider messages={messages}>
-          <ValleaThemeProvider>
-            <AuthProvider>
-              <SettingsProvider>
-                <BackgroundImportProvider>
-                  {children}
-                </BackgroundImportProvider>
-              </SettingsProvider>
-            </AuthProvider>
-          </ValleaThemeProvider>
-        </NextIntlClientProvider>
+        <PostHogProvider>
+          <NextIntlClientProvider messages={messages}>
+            <ValleaThemeProvider>
+              <AuthProvider>
+                <SettingsProvider>
+                  <BackgroundImportProvider>
+                    {children}
+                  </BackgroundImportProvider>
+                </SettingsProvider>
+              </AuthProvider>
+            </ValleaThemeProvider>
+          </NextIntlClientProvider>
+        </PostHogProvider>
       </body>
     </html>
   )
