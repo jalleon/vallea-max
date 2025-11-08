@@ -19,7 +19,8 @@ import {
   Mail,
   Analytics,
   HealthAndSafety,
-  Settings
+  Settings,
+  Extension
 } from '@mui/icons-material'
 
 interface SidebarProps {
@@ -38,8 +39,8 @@ export default function AdminSidebar({ activeSection, onSectionChange, locale }:
     { id: 'demos', icon: RequestPage, labelFr: 'Demandes démo', labelEn: 'Demo Requests' },
     { id: 'waitlist', icon: Mail, labelFr: 'Liste d\'attente', labelEn: 'Waitlist' },
     { id: 'analytics', icon: Analytics, labelFr: 'Analytique', labelEn: 'Analytics' },
-    { id: 'health', icon: HealthAndSafety, labelFr: 'Santé système', labelEn: 'System Health' },
-    { id: 'settings', icon: Settings, labelFr: 'Paramètres', labelEn: 'Settings' }
+    { id: 'settings', icon: HealthAndSafety, labelFr: 'Santé système', labelEn: 'System Health' },
+    { id: 'integrations', icon: Extension, labelFr: 'Intégrations', labelEn: 'Integrations' }
   ]
 
   return (

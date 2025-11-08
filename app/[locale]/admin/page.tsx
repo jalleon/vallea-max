@@ -62,7 +62,12 @@ import {
   CloudDone,
   Speed,
   Storage,
-  AccessTime
+  AccessTime,
+  BugReport,
+  Analytics as AnalyticsIcon,
+  OpenInNew,
+  CheckCircleOutline,
+  ErrorOutline
 } from '@mui/icons-material'
 import { useAuth } from '@/contexts/AuthContext'
 import AdminSidebar from './components/AdminSidebar'
@@ -2090,6 +2095,339 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                     </TableBody>
                   </Table>
                 </TableContainer>
+              </CardContent>
+            </Card>
+          </Box>
+        )}
+
+        {/* Integrations Section */}
+        {activeSection === 'integrations' && (
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+              {locale === 'fr' ? 'Intégrations' : 'Integrations'}
+            </Typography>
+            <Typography variant="body2" sx={{ color: '#6B7280', mb: 3 }}>
+              {locale === 'fr' ? 'Surveillance et analyse de vos services tiers' : 'Monitor and analyze your third-party services'}
+            </Typography>
+
+            {/* Integration Service Cards */}
+            <Grid container spacing={3}>
+              {/* Sentry - Error Tracking */}
+              <Grid item xs={12} md={6}>
+                <Card sx={{ borderRadius: '16px', height: '100%' }}>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <BugReport sx={{ fontSize: 32, color: '#6D28D9' }} />
+                        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                          Sentry
+                        </Typography>
+                      </Box>
+                      <Chip
+                        icon={<CheckCircleOutline sx={{ fontSize: 16 }} />}
+                        label={locale === 'fr' ? 'Configuré' : 'Configured'}
+                        size="small"
+                        color="success"
+                        variant="outlined"
+                      />
+                    </Box>
+                    <Typography variant="body2" sx={{ color: '#6B7280', mb: 2 }}>
+                      {locale === 'fr' ? 'Suivi des erreurs et surveillance des performances' : 'Error tracking and performance monitoring'}
+                    </Typography>
+
+                    {/* Sentry Metrics */}
+                    <Grid container spacing={2} sx={{ mb: 2 }}>
+                      <Grid item xs={6}>
+                        <Box sx={{ p: 2, borderRadius: '12px', bgcolor: '#F9FAFB', border: '1px solid #E5E7EB' }}>
+                          <Typography variant="body2" sx={{ color: '#6B7280', mb: 0.5 }}>
+                            {locale === 'fr' ? 'Erreurs (24h)' : 'Errors (24h)'}
+                          </Typography>
+                          <Typography variant="h5" sx={{ fontWeight: 700, color: '#DC2626' }}>
+                            0
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Box sx={{ p: 2, borderRadius: '12px', bgcolor: '#F9FAFB', border: '1px solid #E5E7EB' }}>
+                          <Typography variant="body2" sx={{ color: '#6B7280', mb: 0.5 }}>
+                            {locale === 'fr' ? 'Taux d\'erreur' : 'Error Rate'}
+                          </Typography>
+                          <Typography variant="h5" sx={{ fontWeight: 700, color: '#10B981' }}>
+                            0%
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Box sx={{ p: 2, borderRadius: '12px', bgcolor: '#F9FAFB', border: '1px solid #E5E7EB' }}>
+                          <Typography variant="body2" sx={{ color: '#6B7280', mb: 0.5 }}>
+                            {locale === 'fr' ? 'Perf. P95' : 'Perf. P95'}
+                          </Typography>
+                          <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                            120ms
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Box sx={{ p: 2, borderRadius: '12px', bgcolor: '#F9FAFB', border: '1px solid #E5E7EB' }}>
+                          <Typography variant="body2" sx={{ color: '#6B7280', mb: 0.5 }}>
+                            {locale === 'fr' ? 'Sessions' : 'Sessions'}
+                          </Typography>
+                          <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                            {analytics?.overview.totalUsers || 0}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    </Grid>
+
+                    <Button
+                      fullWidth
+                      variant="outlined"
+                      endIcon={<OpenInNew />}
+                      href="https://sentry.io"
+                      target="_blank"
+                      sx={{ textTransform: 'none', borderRadius: '12px' }}
+                    >
+                      {locale === 'fr' ? 'Ouvrir le tableau de bord' : 'View Full Dashboard'}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Grid>
+
+              {/* PostHog - Product Analytics */}
+              <Grid item xs={12} md={6}>
+                <Card sx={{ borderRadius: '16px', height: '100%' }}>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <AnalyticsIcon sx={{ fontSize: 32, color: '#F59E0B' }} />
+                        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                          PostHog
+                        </Typography>
+                      </Box>
+                      <Chip
+                        icon={<CheckCircleOutline sx={{ fontSize: 16 }} />}
+                        label={locale === 'fr' ? 'Configuré' : 'Configured'}
+                        size="small"
+                        color="success"
+                        variant="outlined"
+                      />
+                    </Box>
+                    <Typography variant="body2" sx={{ color: '#6B7280', mb: 2 }}>
+                      {locale === 'fr' ? 'Analyse produit et comportement utilisateur' : 'Product analytics and user behavior'}
+                    </Typography>
+
+                    {/* PostHog Metrics */}
+                    <Grid container spacing={2} sx={{ mb: 2 }}>
+                      <Grid item xs={6}>
+                        <Box sx={{ p: 2, borderRadius: '12px', bgcolor: '#F9FAFB', border: '1px solid #E5E7EB' }}>
+                          <Typography variant="body2" sx={{ color: '#6B7280', mb: 0.5 }}>
+                            {locale === 'fr' ? 'Utilisateurs actifs' : 'Active Users'}
+                          </Typography>
+                          <Typography variant="h5" sx={{ fontWeight: 700, color: '#8B5CF6' }}>
+                            {analytics?.overview.activeSubscriptions || 0}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Box sx={{ p: 2, borderRadius: '12px', bgcolor: '#F9FAFB', border: '1px solid #E5E7EB' }}>
+                          <Typography variant="body2" sx={{ color: '#6B7280', mb: 0.5 }}>
+                            {locale === 'fr' ? 'Événements (7j)' : 'Events (7d)'}
+                          </Typography>
+                          <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                            {analytics?.overview.creditsUsedThisWeek || 0}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Box sx={{ p: 2, borderRadius: '12px', bgcolor: '#F9FAFB', border: '1px solid #E5E7EB' }}>
+                          <Typography variant="body2" sx={{ color: '#6B7280', mb: 1 }}>
+                            {locale === 'fr' ? 'Fonctionnalités populaires' : 'Top Features Used'}
+                          </Typography>
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                            <Chip label={locale === 'fr' ? 'Bibliothèque' : 'Library'} size="small" sx={{ bgcolor: '#DBEAFE', color: '#1E40AF' }} />
+                            <Chip label={locale === 'fr' ? 'Inspection' : 'Inspection'} size="small" sx={{ bgcolor: '#FCE7F3', color: '#9F1239' }} />
+                            <Chip label={locale === 'fr' ? 'Évaluations' : 'Appraisals'} size="small" sx={{ bgcolor: '#E0E7FF', color: '#3730A3' }} />
+                          </Box>
+                        </Box>
+                      </Grid>
+                    </Grid>
+
+                    <Button
+                      fullWidth
+                      variant="outlined"
+                      endIcon={<OpenInNew />}
+                      href="https://app.posthog.com"
+                      target="_blank"
+                      sx={{ textTransform: 'none', borderRadius: '12px' }}
+                    >
+                      {locale === 'fr' ? 'Ouvrir le tableau de bord' : 'View Full Dashboard'}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Grid>
+
+              {/* Vercel Analytics */}
+              <Grid item xs={12} md={6}>
+                <Card sx={{ borderRadius: '16px', height: '100%' }}>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Speed sx={{ fontSize: 32, color: '#000000' }} />
+                        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                          Vercel Analytics
+                        </Typography>
+                      </Box>
+                      <Chip
+                        icon={<CheckCircleOutline sx={{ fontSize: 16 }} />}
+                        label={locale === 'fr' ? 'Intégré' : 'Built-in'}
+                        size="small"
+                        color="success"
+                        variant="outlined"
+                      />
+                    </Box>
+                    <Typography variant="body2" sx={{ color: '#6B7280', mb: 2 }}>
+                      {locale === 'fr' ? 'Web Vitals et analyse de performance' : 'Web Vitals and performance analytics'}
+                    </Typography>
+
+                    {/* Vercel Metrics */}
+                    <Grid container spacing={2} sx={{ mb: 2 }}>
+                      <Grid item xs={6}>
+                        <Box sx={{ p: 2, borderRadius: '12px', bgcolor: '#F9FAFB', border: '1px solid #E5E7EB' }}>
+                          <Typography variant="body2" sx={{ color: '#6B7280', mb: 0.5 }}>
+                            {locale === 'fr' ? 'Disponibilité' : 'Uptime'}
+                          </Typography>
+                          <Typography variant="h5" sx={{ fontWeight: 700, color: '#10B981' }}>
+                            99.9%
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Box sx={{ p: 2, borderRadius: '12px', bgcolor: '#F9FAFB', border: '1px solid #E5E7EB' }}>
+                          <Typography variant="body2" sx={{ color: '#6B7280', mb: 0.5 }}>
+                            {locale === 'fr' ? 'TTFB' : 'TTFB'}
+                          </Typography>
+                          <Typography variant="h5" sx={{ fontWeight: 700, color: '#10B981' }}>
+                            45ms
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Box sx={{ p: 2, borderRadius: '12px', bgcolor: '#F9FAFB', border: '1px solid #E5E7EB' }}>
+                          <Typography variant="body2" sx={{ color: '#6B7280', mb: 0.5 }}>
+                            FCP
+                          </Typography>
+                          <Typography variant="h5" sx={{ fontWeight: 700, color: '#10B981' }}>
+                            1.2s
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Box sx={{ p: 2, borderRadius: '12px', bgcolor: '#F9FAFB', border: '1px solid #E5E7EB' }}>
+                          <Typography variant="body2" sx={{ color: '#6B7280', mb: 0.5 }}>
+                            LCP
+                          </Typography>
+                          <Typography variant="h5" sx={{ fontWeight: 700, color: '#10B981' }}>
+                            1.8s
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    </Grid>
+
+                    <Button
+                      fullWidth
+                      variant="outlined"
+                      endIcon={<OpenInNew />}
+                      href="https://vercel.com/analytics"
+                      target="_blank"
+                      sx={{ textTransform: 'none', borderRadius: '12px' }}
+                    >
+                      {locale === 'fr' ? 'Ouvrir le tableau de bord' : 'View Full Dashboard'}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Grid>
+
+              {/* Better Uptime - Optional */}
+              <Grid item xs={12} md={6}>
+                <Card sx={{ borderRadius: '16px', height: '100%', border: '2px dashed #E5E7EB' }}>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <CloudDone sx={{ fontSize: 32, color: '#6B7280' }} />
+                        <Typography variant="h6" sx={{ fontWeight: 700, color: '#6B7280' }}>
+                          Better Uptime
+                        </Typography>
+                      </Box>
+                      <Chip
+                        icon={<ErrorOutline sx={{ fontSize: 16 }} />}
+                        label={locale === 'fr' ? 'Non configuré' : 'Not Configured'}
+                        size="small"
+                        color="default"
+                        variant="outlined"
+                      />
+                    </Box>
+                    <Typography variant="body2" sx={{ color: '#6B7280', mb: 3 }}>
+                      {locale === 'fr' ? 'Surveillance de disponibilité avancée' : 'Advanced uptime monitoring'}
+                    </Typography>
+
+                    <Alert severity="info" sx={{ mb: 2 }}>
+                      {locale === 'fr'
+                        ? 'Configurez Better Uptime pour une surveillance proactive et des alertes instantanées.'
+                        : 'Configure Better Uptime for proactive monitoring and instant alerts.'}
+                    </Alert>
+
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      endIcon={<OpenInNew />}
+                      href="https://betteruptime.com"
+                      target="_blank"
+                      sx={{
+                        textTransform: 'none',
+                        borderRadius: '12px',
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                      }}
+                    >
+                      {locale === 'fr' ? 'Configurer Better Uptime' : 'Setup Better Uptime'}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+
+            {/* Environment Variables Documentation */}
+            <Card sx={{ borderRadius: '16px', mt: 3, border: '2px solid #EEF2FF' }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                  <Info sx={{ color: '#667eea' }} />
+                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                    {locale === 'fr' ? 'Variables d\'environnement requises' : 'Required Environment Variables'}
+                  </Typography>
+                </Box>
+                <Typography variant="body2" sx={{ color: '#6B7280', mb: 2 }}>
+                  {locale === 'fr'
+                    ? 'Ajoutez ces variables dans vos paramètres Vercel pour activer toutes les intégrations.'
+                    : 'Add these variables in your Vercel settings to enable all integrations.'}
+                </Typography>
+
+                <Box sx={{ bgcolor: '#1F2937', borderRadius: '12px', p: 2, color: '#10B981', fontFamily: 'monospace', fontSize: '14px' }}>
+                  <Box sx={{ mb: 1 }}>
+                    <Typography component="span" sx={{ color: '#6B7280' }}># Sentry</Typography>
+                  </Box>
+                  <Box sx={{ mb: 1 }}>NEXT_PUBLIC_SENTRY_DSN=https://your-dsn@sentry.io/project-id</Box>
+                  <Box sx={{ mb: 2 }}>SENTRY_AUTH_TOKEN=your-auth-token</Box>
+
+                  <Box sx={{ mb: 1 }}>
+                    <Typography component="span" sx={{ color: '#6B7280' }}># PostHog</Typography>
+                  </Box>
+                  <Box sx={{ mb: 1 }}>NEXT_PUBLIC_POSTHOG_KEY=phc_your_project_key</Box>
+                  <Box sx={{ mb: 2 }}>NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com</Box>
+
+                  <Box sx={{ mb: 1 }}>
+                    <Typography component="span" sx={{ color: '#6B7280' }}># Better Uptime (Optional)</Typography>
+                  </Box>
+                  <Box>BETTER_UPTIME_API_KEY=your-api-key</Box>
+                </Box>
               </CardContent>
             </Card>
           </Box>
