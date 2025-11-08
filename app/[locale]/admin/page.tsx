@@ -77,6 +77,8 @@ import EditCreditsModal from './components/EditCreditsModal'
 import DemoNotesModal from './components/DemoNotesModal'
 import BulkActionToolbar from './components/BulkActionToolbar'
 import { LineChart, Line, PieChart, Pie, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts'
+import * as Sentry from '@sentry/nextjs'
+import { captureEvent } from '@/lib/analytics/posthog'
 
 interface AnalyticsData {
   overview: {
@@ -430,6 +432,53 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
       fetchAllData()
     } catch (error: any) {
       showSnackbar(error.message || 'Failed to promote user', 'error')
+    }
+  }
+
+  // Integration test handlers
+  const handleTestSentry = () => {
+    try {
+      // Capture a test message
+      Sentry.captureMessage('Sentry test from Valea Max admin panel', 'info')
+
+      showSnackbar(
+        locale === 'fr'
+          ? 'Test envoyé à Sentry! Vérifiez votre tableau de bord.'
+          : 'Test sent to Sentry! Check your dashboard.',
+        'success'
+      )
+    } catch (error) {
+      showSnackbar(
+        locale === 'fr'
+          ? 'Erreur lors du test Sentry'
+          : 'Error testing Sentry',
+        'error'
+      )
+    }
+  }
+
+  const handleTestPostHog = () => {
+    try {
+      // Capture a test event
+      captureEvent('admin_test_event', {
+        source: 'admin_panel',
+        timestamp: new Date().toISOString(),
+        user_email: user?.email
+      })
+
+      showSnackbar(
+        locale === 'fr'
+          ? 'Événement test envoyé à PostHog! Vérifiez votre tableau de bord.'
+          : 'Test event sent to PostHog! Check your dashboard.',
+        'success'
+      )
+    } catch (error) {
+      showSnackbar(
+        locale === 'fr'
+          ? 'Erreur lors du test PostHog'
+          : 'Error testing PostHog',
+        'error'
+      )
     }
   }
 
@@ -2179,16 +2228,33 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                       </Grid>
                     </Grid>
 
-                    <Button
-                      fullWidth
-                      variant="outlined"
-                      endIcon={<OpenInNew />}
-                      href="https://sentry.io"
-                      target="_blank"
-                      sx={{ textTransform: 'none', borderRadius: '12px' }}
-                    >
-                      {locale === 'fr' ? 'Ouvrir le tableau de bord' : 'View Full Dashboard'}
-                    </Button>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        onClick={handleTestSentry}
+                        sx={{
+                          textTransform: 'none',
+                          borderRadius: '12px',
+                          background: 'linear-gradient(135deg, #6D28D9 0%, #5B21B6 100%)',
+                          '&:hover': {
+                            background: 'linear-gradient(135deg, #5B21B6 0%, #4C1D95 100%)'
+                          }
+                        }}
+                      >
+                        {locale === 'fr' ? 'Tester' : 'Test'}
+                      </Button>
+                      <Button
+                        fullWidth
+                        variant="outlined"
+                        endIcon={<OpenInNew />}
+                        href="https://sentry.io"
+                        target="_blank"
+                        sx={{ textTransform: 'none', borderRadius: '12px' }}
+                      >
+                        {locale === 'fr' ? 'Dashboard' : 'Dashboard'}
+                      </Button>
+                    </Box>
                   </CardContent>
                 </Card>
               </Grid>
@@ -2252,16 +2318,33 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                       </Grid>
                     </Grid>
 
-                    <Button
-                      fullWidth
-                      variant="outlined"
-                      endIcon={<OpenInNew />}
-                      href="https://app.posthog.com"
-                      target="_blank"
-                      sx={{ textTransform: 'none', borderRadius: '12px' }}
-                    >
-                      {locale === 'fr' ? 'Ouvrir le tableau de bord' : 'View Full Dashboard'}
-                    </Button>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        onClick={handleTestPostHog}
+                        sx={{
+                          textTransform: 'none',
+                          borderRadius: '12px',
+                          background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+                          '&:hover': {
+                            background: 'linear-gradient(135deg, #D97706 0%, #B45309 100%)'
+                          }
+                        }}
+                      >
+                        {locale === 'fr' ? 'Tester' : 'Test'}
+                      </Button>
+                      <Button
+                        fullWidth
+                        variant="outlined"
+                        endIcon={<OpenInNew />}
+                        href="https://app.posthog.com"
+                        target="_blank"
+                        sx={{ textTransform: 'none', borderRadius: '12px' }}
+                      >
+                        {locale === 'fr' ? 'Dashboard' : 'Dashboard'}
+                      </Button>
+                    </Box>
                   </CardContent>
                 </Card>
               </Grid>
