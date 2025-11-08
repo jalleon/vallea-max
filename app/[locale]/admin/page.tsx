@@ -328,52 +328,6 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
     setEditUserOpen(true)
   }
 
-  const handleFixPropertyOrg = async (user: any) => {
-    const authData = localStorage.getItem('supabase.auth.token')
-    const token = authData ? JSON.parse(authData).access_token : null
-
-    if (!token) return
-
-    try {
-      setSnackbar({
-        open: true,
-        message: `Fixing property organization for ${user.email}...`,
-        severity: 'info'
-      })
-
-      const response = await fetch('/api/admin/fix-property-organization', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ userEmail: user.email })
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to fix property organization')
-      }
-
-      setSnackbar({
-        open: true,
-        message: data.message || `Fixed ${data.updated} properties for ${user.email}`,
-        severity: 'success'
-      })
-
-      // Refresh data to show updated counts
-      fetchAllData()
-    } catch (error: any) {
-      console.error('Error fixing property organization:', error)
-      setSnackbar({
-        open: true,
-        message: error.message || 'Failed to fix property organization',
-        severity: 'error'
-      })
-    }
-  }
-
   const handleCreditsUpdated = (message: string) => {
     showSnackbar(message, 'success')
     fetchAllData() // Refresh data
@@ -1267,13 +1221,6 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                                 <Edit fontSize="small" />
                               </IconButton>
                             </Tooltip>
-                            {user.email === 'demo@valeamax.com' && (
-                              <Tooltip title={locale === 'fr' ? 'Corriger organisation des propriétés' : 'Fix property organization'}>
-                                <IconButton size="small" color="warning" onClick={() => handleFixPropertyOrg(user)}>
-                                  <Storage fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
-                            )}
                           </TableCell>
                         </TableRow>
                       ))}

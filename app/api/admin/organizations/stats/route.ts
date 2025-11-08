@@ -81,73 +81,27 @@ export async function GET(request: Request) {
       )
     }
 
-    // Debug: Log organization data
-    console.log('[Organization Stats] Organizations found:', organizations?.length || 0)
-    if (organizations) {
-      organizations.forEach((org: any) => {
-        console.log(`[Organization Stats] Org: ${org.name} (ID: ${org.id})`)
-      })
-    }
 
-    // Get user counts per organization (with email and id for debugging)
+    // Get user counts per organization
     const { data: userCounts, error: userCountsError } = await supabase
       .from('profiles')
-      .select('id, organization_id, email')
+      .select('organization_id')
       .not('organization_id', 'is', null)
 
     if (userCountsError) {
       console.error('Error fetching user counts:', userCountsError)
     }
 
-    // Debug: Log demo@valeamax.com organization
-    const demoUser = userCounts?.find((u: any) => u.email === 'demo@valeamax.com')
-    if (demoUser) {
-      console.log(`[Organization Stats] demo@valeamax.com belongs to org: ${demoUser.organization_id}`)
 
-      // Find the organization name for demo user
-      const demoOrgName = organizations?.find((o: any) => o.id === demoUser.organization_id)?.name
-      console.log(`[Organization Stats] demo@valeamax.com organization name: ${demoOrgName}`)
-    }
-
-    // Get library record counts per organization (with created_by for debugging)
+    // Get library record counts per organization
     const { data: properties, error: propertiesError } = await supabase
       .from('properties')
-      .select('organization_id, created_by')
+      .select('organization_id')
 
     if (propertiesError) {
       console.error('Error fetching properties:', propertiesError)
     }
 
-    // Debug: Log property data
-    console.log('[Organization Stats] Total properties fetched:', properties?.length || 0)
-    if (properties && properties.length > 0) {
-      const propertiesWithOrg = properties.filter((p: any) => p.organization_id !== null)
-      const propertiesWithoutOrg = properties.filter((p: any) => p.organization_id === null)
-      console.log('[Organization Stats] Properties with organization:', propertiesWithOrg.length)
-      console.log('[Organization Stats] Properties without organization:', propertiesWithoutOrg.length)
-
-      // Log unique organization IDs from properties
-      const uniqueOrgIds = new Set(propertiesWithOrg.map((p: any) => p.organization_id))
-      console.log('[Organization Stats] Unique organization IDs in properties:', Array.from(uniqueOrgIds))
-
-      // Check properties created by demo user
-      const demoUserId = userCounts?.find((u: any) => u.email === 'demo@valeamax.com')?.id
-      if (demoUserId) {
-        const demoUserProperties = properties.filter((p: any) => p.created_by === demoUserId)
-        console.log(`[Organization Stats] Properties created by demo@valeamax.com: ${demoUserProperties.length}`)
-        if (demoUserProperties.length > 0) {
-          const demoUserOrgIds = new Set(demoUserProperties.map((p: any) => p.organization_id))
-          console.log(`[Organization Stats] Org IDs for demo user properties:`, Array.from(demoUserOrgIds))
-
-          // Show org names for demo user's properties
-          demoUserOrgIds.forEach(orgId => {
-            const orgName = organizations?.find((o: any) => o.id === orgId)?.name || 'Unknown'
-            const propCount = demoUserProperties.filter((p: any) => p.organization_id === orgId).length
-            console.log(`[Organization Stats]   - ${propCount} properties in org: ${orgName} (${orgId})`)
-          })
-        }
-      }
-    }
 
     // Create maps for counts
     const userCountMap = new Map<string, number>()
@@ -174,23 +128,13 @@ export async function GET(request: Request) {
     }
 
     // Build the response with organization stats
-    const organizationStats = (organizations || []).map((org: any) => {
-      const userCount = userCountMap.get(org.id) || 0
-      const propertyCount = propertyCountMap.get(org.id) || 0
-
-      // Debug logging for each organization
-      if (userCount > 0 || propertyCount > 0) {
-        console.log(`[Organization Stats] ${org.name}: ${userCount} users, ${propertyCount} properties`)
-      }
-
-      return {
-        id: org.id,
-        name: org.name,
-        created_at: org.created_at,
-        user_count: userCount,
-        property_count: propertyCount
-      }
-    })
+    const organizationStats = (organizations || []).map((org: any) => ({
+      id: org.id,
+      name: org.name,
+      created_at: org.created_at,
+      user_count: userCountMap.get(org.id) || 0,
+      property_count: propertyCountMap.get(org.id) || 0
+    }))
 
     // Calculate totals
     const totalUsers = Array.from(userCountMap.values()).reduce((sum, count) => sum + count, 0)
