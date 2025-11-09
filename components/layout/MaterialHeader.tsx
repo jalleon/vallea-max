@@ -67,7 +67,7 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
 
   const handleLogout = async () => {
     await signOut()
-    router.push('/login')
+    router.push(`/${locale}/login`)
   }
 
   const handleLanguageChange = (newLocale: string) => {
@@ -133,13 +133,25 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
       sx={{
         width: { sm: `calc(100% - ${mobileOpen ? 0 : drawerWidth}px)` },
         ml: { sm: `${mobileOpen ? 0 : drawerWidth}px` },
-        bgcolor: 'background.paper',
-        color: 'text.primary',
+        backgroundColor: '#ffffff',
+        backgroundImage: `
+          linear-gradient(160deg, rgba(239, 246, 255, 0.9) 0%, rgba(227, 239, 255, 0.85) 70%, rgba(210, 229, 255, 0.82) 100%),
+          repeating-linear-gradient(135deg, rgba(59, 130, 246, 0.25) 0px, rgba(59, 130, 246, 0.25) 2px, transparent 2px, transparent 18px),
+          repeating-linear-gradient(315deg, rgba(59, 130, 246, 0.18) 0px, rgba(59, 130, 246, 0.18) 1px, transparent 1px, transparent 16px),
+          radial-gradient(135% 165% at 100% 120%, rgba(96, 165, 250, 0.18) 0%, rgba(96, 165, 250, 0) 65%)
+        `,
+        backgroundSize: 'cover, 220px 220px, 260px 260px, 140% 140%',
+        backgroundPosition: 'center, 0 0, 12px 12px, 100% 100%',
+        backgroundBlendMode: 'normal, overlay, overlay, normal',
+        borderBottom: '1px solid rgba(148, 163, 184, 0.18)',
+        boxShadow: '0 6px 18px rgba(15, 23, 42, 0.13)',
+        backdropFilter: 'blur(3px)',
+        color: '#1F2937',
         transition: 'all 0.3s ease-in-out',
         borderRadius: 0
       }}
     >
-      <Toolbar sx={{ justifyContent: 'space-between', px: 3 }}>
+      <Toolbar sx={{ justifyContent: 'space-between', px: 3, color: '#1F2937' }}>
         {/* Left side */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
           <IconButton
@@ -159,11 +171,20 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
           <Tooltip title="Compte">
             <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
+                <Avatar
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    bgcolor: 'rgba(96, 165, 250, 0.88)',
+                    color: '#FFFFFF',
+                    boxShadow: '0 4px 12px rgba(15, 23, 42, 0.2)',
+                    border: '1px solid rgba(255, 255, 255, 0.5)'
+                  }}
+                >
                   {userInitials}
                 </Avatar>
                 <Box sx={{ display: { xs: 'none', md: 'block' } }}>
-                  <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.1, mb: '-3px' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.1, mb: '-3px', color: '#1F2937' }}>
                     {profile?.full_name || user?.user_metadata?.full_name || user?.email?.split('@')[0]}
                   </Typography>
                   <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.1, display: 'block' }}>

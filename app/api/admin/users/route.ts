@@ -68,20 +68,40 @@ export async function GET(request: Request) {
     }
 
     // Get all profiles
-    const { data: profiles, error } = await supabase
+    const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
       .select('*')
       .order('created_at', { ascending: false })
 
-    if (error) {
-      console.error('Error fetching users:', error)
+    if (profilesError) {
+      console.error('Error fetching users:', profilesError)
       return NextResponse.json(
         { error: 'Failed to fetch users' },
         { status: 500 }
       )
     }
 
-    return NextResponse.json({ users: profiles || [] })
+    // Get all organizations
+    const { data: organizations, error: orgsError } = await supabase
+      .from('organizations')
+      .select('id, name')
+
+    if (orgsError) {
+      console.error('Error fetching organizations:', orgsError)
+    }
+
+    // Create a map of organization IDs to names
+    const orgMap = new Map(
+      (organizations || []).map((org: any) => [org.id, org.name])
+    )
+
+    // Add organization names to profiles
+    const usersWithOrgNames = (profiles || []).map((profile: any) => ({
+      ...profile,
+      organization_name: profile.organization_id ? orgMap.get(profile.organization_id) || null : null
+    }))
+
+    return NextResponse.json({ users: usersWithOrgNames })
   } catch (error: any) {
     console.error('Admin users error:', error)
     return NextResponse.json(
