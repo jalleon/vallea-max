@@ -6,7 +6,10 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+export type Database = {
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5"
+  }
   public: {
     Tables: {
       organizations: {
@@ -434,6 +437,35 @@ export interface Database {
           created_at?: string
         }
       }
+      floor_areas: {
+        Row: {
+          id: string
+          property_id: string | null
+          floor: string
+          type: string
+          area_m2: number
+          area_ft2: number
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          property_id?: string | null
+          floor: string
+          type: string
+          area_m2: number
+          area_ft2: number
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          property_id?: string | null
+          floor?: string
+          type?: string
+          area_m2?: number
+          area_ft2?: number
+          created_at?: string | null
+        }
+      }
       activity_log: {
         Row: {
           id: string
@@ -464,6 +496,123 @@ export interface Database {
           entity_id?: string | null
           metadata?: Json
           created_at?: string
+        }
+      }
+      admin_api_keys: {
+        Row: {
+          id: string
+          provider: string
+          api_key: string
+          model: string
+          is_active: boolean
+          priority: number
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          provider: string
+          api_key: string
+          model: string
+          is_active?: boolean
+          priority?: number
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          provider?: string
+          api_key?: string
+          model?: string
+          is_active?: boolean
+          priority?: number
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      usage_tracking: {
+        Row: {
+          id: string
+          organization_id: string | null
+          user_id: string | null
+          entity_type: string
+          entity_id: string | null
+          action: string
+          tokens_used: number | null
+          cost: number | null
+          metadata: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id?: string | null
+          user_id?: string | null
+          entity_type: string
+          entity_id?: string | null
+          action: string
+          tokens_used?: number | null
+          cost?: number | null
+          metadata?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string | null
+          user_id?: string | null
+          entity_type?: string
+          entity_id?: string | null
+          action?: string
+          tokens_used?: number | null
+          cost?: number | null
+          metadata?: Json | null
+          created_at?: string
+        }
+      }
+      user_subscriptions: {
+        Row: {
+          id: string
+          user_id: string
+          stripe_subscription_id: string | null
+          stripe_customer_id: string | null
+          subscription_plan: string
+          status: string
+          trial_end: string | null
+          current_period_start: string | null
+          current_period_end: string | null
+          canceled_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          stripe_subscription_id?: string | null
+          stripe_customer_id?: string | null
+          subscription_plan?: string
+          status?: string
+          trial_end?: string | null
+          current_period_start?: string | null
+          current_period_end?: string | null
+          canceled_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          stripe_subscription_id?: string | null
+          stripe_customer_id?: string | null
+          subscription_plan?: string
+          status?: string
+          trial_end?: string | null
+          current_period_start?: string | null
+          current_period_end?: string | null
+          canceled_at?: string | null
+          created_at?: string
+          updated_at?: string
         }
       }
     }
