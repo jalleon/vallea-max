@@ -154,7 +154,6 @@ export default function AdminSidebar({ activeSection, onSectionChange, locale }:
                     color: isActive ? '#FFFFFF' : '#3B82F6',
                     transition: 'color 0.18s ease'
                   },
-                  borderRadius: '12px',
                   '&.Mui-selected': {
                     color: '#FFFFFF',
                     backgroundImage: activeGradient,
