@@ -50,7 +50,7 @@ export async function GET(request: Request) {
     }
 
     // Mark as verified
-    const updateData: any = {
+    const updateData = {
       verified: true,
       verified_at: new Date().toISOString(),
     }
