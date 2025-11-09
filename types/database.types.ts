@@ -679,6 +679,48 @@ export type Database = {
         }
         Relationships: []
       }
+      email_verifications: {
+        Row: {
+          id: string
+          email: string
+          full_name: string
+          organization_name: string | null
+          temp_password: string
+          verification_token: string
+          locale: string
+          expires_at: string
+          verified: boolean
+          verified_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          full_name: string
+          organization_name?: string | null
+          temp_password: string
+          verification_token: string
+          locale: string
+          expires_at: string
+          verified?: boolean
+          verified_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          full_name?: string
+          organization_name?: string | null
+          temp_password?: string
+          verification_token?: string
+          locale?: string
+          expires_at?: string
+          verified?: boolean
+          verified_at?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           id: string
