@@ -139,8 +139,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('[AuthContext] Sign in successful:', data.user?.email)
       console.log('[AuthContext] Session:', data.session ? 'established' : 'none')
 
-      // The onAuthStateChange listener will handle profile fetching
-      // No need to fetch here to avoid duplicate calls
+      // Explicitly fetch profile to ensure it's ready before navigation
+      // The deduplication logic will prevent duplicate fetches if onAuthStateChange also triggers
+      if (data.user?.id) {
+        currentUserIdRef.current = data.user.id
+        await fetchProfile(data.user.id)
+      }
 
       return { error: null }
     } catch (err: any) {
