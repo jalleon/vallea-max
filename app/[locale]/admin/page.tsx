@@ -767,9 +767,18 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
       <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
         {/* Header with Section Title */}
         <Box sx={{
-          bgcolor: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          borderBottom: '1px solid rgba(26, 31, 54, 0.1)',
+          backgroundImage: `
+            linear-gradient(160deg, rgba(59, 130, 246, 0.96) 0%, rgba(37, 99, 235, 0.96) 52%, rgba(30, 64, 175, 0.94) 100%),
+            repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0px, rgba(255, 255, 255, 0.08) 2px, transparent 2px, transparent 12px),
+            radial-gradient(125% 145% at 100% 110%, rgba(14, 82, 200, 0.45) 0%, rgba(14, 82, 200, 0) 65%),
+            radial-gradient(rgba(148, 163, 184, 0.18) 1px, transparent 1px)
+          `,
+          backgroundSize: 'cover, 260px 260px, 120% 120%, 60px 60px',
+          backgroundPosition: 'center, 0 0, 100% 100%, 14px 14px',
+          backgroundBlendMode: 'overlay, overlay, normal, overlay',
+          backdropFilter: 'blur(4px)',
+          borderBottom: '1px solid rgba(15, 23, 42, 0.35)',
+          boxShadow: '0 10px 30px rgba(15, 23, 42, 0.35)',
           px: 4,
           py: 2.5,
           display: 'flex',
@@ -784,7 +793,8 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
             variant="h4"
             sx={{
               fontWeight: 700,
-              color: '#1A1F36',
+              color: '#F8FAFC',
+              textShadow: '0 4px 14px rgba(15, 23, 42, 0.45)',
               fontFamily: 'var(--font-montserrat)',
             }}
           >
@@ -799,9 +809,15 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
               onClick={() => router.push(`/${locale}/dashboard`)}
               sx={{
                 textTransform: 'none',
-                color: '#6B7280',
+                color: '#E0F2FE',
+                border: '1px solid rgba(191, 219, 254, 0.35)',
+                borderRadius: '10px',
+                px: 2.5,
+                py: 1,
+                boxShadow: '0 6px 18px rgba(15, 23, 42, 0.3)',
                 '&:hover': {
-                  bgcolor: 'rgba(0,0,0,0.04)'
+                  bgcolor: 'rgba(15, 23, 42, 0.2)',
+                  borderColor: 'rgba(191, 219, 254, 0.55)'
                 }
               }}
             >
@@ -812,13 +828,14 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
             <IconButton
               onClick={(e) => setProfileMenuAnchor(e.currentTarget)}
               sx={{
-                bgcolor: 'rgba(102, 126, 234, 0.1)',
+                bgcolor: 'rgba(15, 23, 42, 0.3)',
+                border: '1px solid rgba(191, 219, 254, 0.4)',
                 '&:hover': {
-                  bgcolor: 'rgba(102, 126, 234, 0.2)'
+                  bgcolor: 'rgba(15, 23, 42, 0.45)'
                 }
               }}
             >
-              <AccountCircle sx={{ color: '#667eea' }} />
+              <AccountCircle sx={{ color: '#F1F5F9' }} />
             </IconButton>
 
             <Menu
