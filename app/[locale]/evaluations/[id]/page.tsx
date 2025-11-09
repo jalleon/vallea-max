@@ -31,7 +31,7 @@ interface TabPanelProps {
 function TabPanel({ children, value, index }: TabPanelProps) {
   return (
     <div role="tabpanel" hidden={value !== index}>
-      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   );
 }
@@ -42,6 +42,8 @@ export default function AppraisalEditPage() {
   const id = params.id as string;
   const t = useTranslations('evaluations.detail');
   const tSections = useTranslations('evaluations.sections');
+  const tEval = useTranslations('evaluations');
+  const tTemplates = useTranslations('evaluations.templates');
 
   const [appraisal, setAppraisal] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -128,7 +130,6 @@ export default function AppraisalEditPage() {
   };
 
   const getTemplateName = () => {
-    const tTemplates = useTranslations('evaluations.templates');
     switch (appraisal?.template_type) {
       case 'RPS':
         return tTemplates('rps.subtitle');
@@ -182,7 +183,7 @@ export default function AppraisalEditPage() {
               onClick={() => router.push('/evaluations')}
               sx={{ mb: 2, textTransform: 'none' }}
             >
-              {useTranslations('evaluations')('backToList')}
+              {tEval('backToList')}
             </Button>
 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>

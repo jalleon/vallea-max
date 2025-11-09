@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import {
   Box,
   Typography,
@@ -27,7 +26,10 @@ interface WizardStep2Props {
 
 export default function WizardStep2({ data, onChange }: WizardStep2Props) {
   const t = useTranslations('evaluations.wizard.step2');
-  const [propertySource, setPropertySource] = useState<'library' | 'manual'>('library');
+
+  // Derive property source from data instead of maintaining separate state
+  const propertySource: 'library' | 'manual' = data.propertyId ? 'library' :
+    (data.address || data.city) ? 'manual' : 'library';
 
   const handlePropertySelect = (propertyId: string, propertyData: any) => {
     onChange({
@@ -40,11 +42,10 @@ export default function WizardStep2({ data, onChange }: WizardStep2Props) {
   };
 
   const handleSourceChange = (source: 'library' | 'manual') => {
-    setPropertySource(source);
     if (source === 'manual') {
-      onChange({ ...data, propertyId: null });
+      onChange({ ...data, propertyId: null, address: '', city: '', postalCode: '' });
     } else {
-      onChange({ ...data, address: '', city: '', postalCode: '' });
+      onChange({ ...data, propertyId: null, address: '', city: '', postalCode: '' });
     }
   };
 

@@ -9,7 +9,8 @@ import {
   Step,
   StepLabel,
   Button,
-  Typography
+  Typography,
+  CircularProgress
 } from '@mui/material';
 import { ArrowBack, ArrowForward, CheckCircle } from '@mui/icons-material';
 import { TemplateType, WizardStep1Data, WizardStep2Data } from '../types/evaluation.types';
@@ -22,9 +23,10 @@ interface AppraisalWizardProps {
   templateType: TemplateType;
   onComplete: (data: any) => void;
   onCancel: () => void;
+  creating?: boolean;
 }
 
-export default function AppraisalWizard({ templateType, onComplete, onCancel }: AppraisalWizardProps) {
+export default function AppraisalWizard({ templateType, onComplete, onCancel, creating = false }: AppraisalWizardProps) {
   const t = useTranslations('evaluations.wizard');
   const [activeStep, setActiveStep] = useState(0);
 
@@ -128,14 +130,23 @@ export default function AppraisalWizard({ templateType, onComplete, onCancel }: 
             <Button
               variant="contained"
               onClick={activeStep === STEPS.length - 1 ? handleComplete : handleNext}
-              endIcon={activeStep === STEPS.length - 1 ? <CheckCircle /> : <ArrowForward />}
+              endIcon={
+                creating && activeStep === STEPS.length - 1 ? (
+                  <CircularProgress size={16} color="inherit" />
+                ) : activeStep === STEPS.length - 1 ? (
+                  <CheckCircle />
+                ) : (
+                  <ArrowForward />
+                )
+              }
               disabled={
+                creating ||
                 (activeStep === 0 && !canProceedStep1()) ||
                 (activeStep === 1 && !canProceedStep2())
               }
               sx={{ textTransform: 'none', px: 4 }}
             >
-              {activeStep === STEPS.length - 1 ? t('create') : t('next')}
+              {creating && activeStep === STEPS.length - 1 ? t('creating') : activeStep === STEPS.length - 1 ? t('create') : t('next')}
             </Button>
           </Box>
         </CardContent>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Box,
@@ -25,6 +25,7 @@ export default function NewEvaluationPage() {
   const t = useTranslations('evaluations');
   const tTemplates = useTranslations('evaluations.templates');
   const tWizard = useTranslations('evaluations.wizard');
+  const isCreatingRef = useRef(false);
 
   const templateOptions = [
     {
@@ -63,8 +64,15 @@ export default function NewEvaluationPage() {
   };
 
   const handleComplete = async (data: any) => {
+    // Prevent double-clicks using ref (immediate check)
+    if (isCreatingRef.current) {
+      return;
+    }
+
+    isCreatingRef.current = true;
+    setCreating(true);
+
     try {
-      setCreating(true);
       const supabase = createClient();
 
       // Get current user
@@ -73,6 +81,7 @@ export default function NewEvaluationPage() {
       if (userError || !user) {
         console.error('Authentication error:', userError);
         alert('You must be logged in to create an appraisal');
+        isCreatingRef.current = false;
         setCreating(false);
         return;
       }
@@ -83,6 +92,7 @@ export default function NewEvaluationPage() {
       if (!organizationId) {
         console.error('No organization_id found for user');
         alert('User must belong to an organization');
+        isCreatingRef.current = false;
         setCreating(false);
         return;
       }
@@ -114,6 +124,7 @@ export default function NewEvaluationPage() {
       if (error) {
         console.error('Database error:', error);
         alert(`Error creating appraisal: ${error.message}`);
+        isCreatingRef.current = false;
         setCreating(false);
         return;
       }
@@ -121,8 +132,9 @@ export default function NewEvaluationPage() {
       // Navigate to the appraisal edit page
       router.push(`/evaluations/${appraisal.id}`);
     } catch (error) {
-      console.error('Error creating appraisal:', error);
+      console.error('Caught error creating appraisal:', error);
       alert('An unexpected error occurred. Please try again.');
+      isCreatingRef.current = false;
       setCreating(false);
     }
   };
@@ -206,6 +218,7 @@ export default function NewEvaluationPage() {
             templateType={selectedTemplate}
             onComplete={handleComplete}
             onCancel={handleCancel}
+            creating={creating}
           />
         )}
       </Box>
