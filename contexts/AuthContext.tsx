@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useRef } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase/client'
 
@@ -30,29 +30,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [profileFetchPromise, setProfileFetchPromise] = useState<Promise<UserProfile | null> | null>(null)
+  const currentUserIdRef = useRef<string | null>(null)
 
-  // Function to fetch user profile from database
+  // Function to fetch user profile from database with deduplication
   const fetchProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, email, full_name, organization_id, is_admin')
-        .eq('id', userId)
-        .single()
-
-      if (!error && data) {
-        setProfile(data as UserProfile)
-        return data as UserProfile
-      }
-    } catch (err) {
-      console.error('[AuthContext] Error fetching profile:', err)
+    // If profile already exists and matches the userId, return it
+    if (profile?.id === userId) {
+      return profile
     }
-    return null
+
+    // If there's already a fetch in progress for this user, return that promise
+    if (profileFetchPromise) {
+      return profileFetchPromise
+    }
+
+    // Create and store the promise to prevent duplicate fetches
+    const promise = (async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id, email, full_name, organization_id, is_admin')
+          .eq('id', userId)
+          .single()
+
+        if (!error && data) {
+          const profileData = data as UserProfile
+          setProfile(profileData)
+          setProfileFetchPromise(null) // Clear the promise after completion
+          return profileData
+        }
+      } catch (err) {
+        console.error('[AuthContext] Error fetching profile:', err)
+      }
+      setProfileFetchPromise(null) // Clear the promise on error
+      return null
+    })()
+
+    setProfileFetchPromise(promise)
+    return promise
   }
 
   // Function to refresh the current user's profile
   const refreshProfile = async () => {
     if (user?.id) {
+      // Clear the cached profile to force a fresh fetch
+      setProfile(null)
+      setProfileFetchPromise(null)
       await fetchProfile(user.id)
     }
   }
@@ -65,6 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Fetch profile from database
       if (session?.user?.id) {
+        currentUserIdRef.current = session.user.id
         await fetchProfile(session.user.id)
       }
 
@@ -75,20 +100,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const prevUserId = currentUserIdRef.current
+      const newUserId = session?.user?.id
+
       setSession(session)
       setUser(session?.user ?? null)
 
-      // Fetch profile when user changes
-      if (session?.user?.id) {
-        await fetchProfile(session.user.id)
-      } else {
+      // Only fetch profile if user ID has changed
+      if (newUserId && newUserId !== prevUserId) {
+        currentUserIdRef.current = newUserId
+        await fetchProfile(newUserId)
+      } else if (!newUserId) {
+        currentUserIdRef.current = null
         setProfile(null)
+        setProfileFetchPromise(null)
       }
 
       setLoading(false)
     })
 
     return () => subscription.unsubscribe()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const signIn = async (email: string, password: string) => {
@@ -107,10 +139,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('[AuthContext] Sign in successful:', data.user?.email)
       console.log('[AuthContext] Session:', data.session ? 'established' : 'none')
 
-      // Fetch profile after successful sign in
-      if (data.user?.id) {
-        await fetchProfile(data.user.id)
-      }
+      // The onAuthStateChange listener will handle profile fetching
+      // No need to fetch here to avoid duplicate calls
 
       return { error: null }
     } catch (err: any) {
