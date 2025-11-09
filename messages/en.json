@@ -1248,6 +1248,257 @@
     }
   },
 
+  "evaluations": {
+    "title": "Appraisals",
+    "subtitle": "Create and manage your RPS, NAS and custom appraisals",
+    "createNew": "New Appraisal",
+    "newAppraisal": "New Appraisal",
+    "backToList": "Back to appraisals",
+    "saving": "Saving...",
+    "save": "Save",
+    "appraisals": "appraisals",
+    "start": "Start",
+    "recentAppraisals": "Recent Appraisals",
+    "noAppraisals": "No appraisals yet. Create your first appraisal to get started.",
+    "untitled": "Untitled",
+    "noAddress": "Address not specified",
+
+    "empty": {
+      "title": "No appraisals",
+      "description": "Get started by creating your first appraisal",
+      "button": "Create an appraisal"
+    },
+
+    "templates": {
+      "title": "Select appraisal report type",
+      "rps": {
+        "title": "RPS Appraisal",
+        "subtitle": "Real Property Solutions",
+        "description": "Standardized RPS format appraisal"
+      },
+      "nas": {
+        "title": "NAS Appraisal",
+        "subtitle": "Nationwide Appraisal Services",
+        "description": "NAS format appraisal"
+      },
+      "custom": {
+        "title": "Custom Appraisal",
+        "subtitle": "Custom format",
+        "description": "Create an appraisal with your own criteria"
+      }
+    },
+
+    "wizard": {
+      "title": "New appraisal",
+      "subtitle": "Fill in the information to create your appraisal",
+      "back": "Back",
+      "next": "Next",
+      "create": "Create appraisal",
+      "cancel": "Cancel",
+      "creating": "Creating...",
+
+      "steps": {
+        "propertyType": "Property type",
+        "basicInfo": "Basic information",
+        "confirmation": "Confirmation"
+      },
+
+      "step1": {
+        "title": "Property type",
+        "subtitle": "Select the type and genre of property to appraise",
+        "propertyType": "Property type",
+        "propertyGenre": "Property genre",
+        "propertyTypeRequired": "Property type is required",
+        "propertyGenreRequired": "Property genre is required"
+      },
+
+      "step2": {
+        "title": "Basic information",
+        "subtitle": "Enter the basic information for the appraisal",
+        "clientName": "Client name",
+        "clientNamePlaceholder": "e.g.: National Bank, John Smith, etc.",
+        "appraisalNumber": "Appraisal number",
+        "appraisalNumberInfo": "Will be automatically generated in YY-#### format (e.g.: 25-0001)",
+        "propertySource": "Property source",
+        "propertySourceLibrary": "Select from library",
+        "propertySourceManual": "Enter manually",
+        "address": "Address",
+        "addressPlaceholder": "e.g.: 123 Main Street",
+        "city": "City",
+        "cityPlaceholder": "e.g.: Montreal",
+        "postalCode": "Postal code",
+        "postalCodePlaceholder": "H2X 1Y3",
+        "valueType": "Value type",
+        "effectiveDate": "Effective date",
+        "evaluationObjective": "Appraisal objective"
+      },
+
+      "step3": {
+        "title": "Confirmation",
+        "subtitle": "Review the information before creating the appraisal",
+        "allInfoProvided": "All required information has been provided. You can create the appraisal now.",
+        "templateType": "Report template",
+        "typeOfTemplate": "Template type",
+        "propertyInfo": "Property type",
+        "propertyType": "Property type",
+        "propertyGenre": "Property genre",
+        "basicInfo": "Basic information",
+        "clientName": "Client name",
+        "appraisalNumber": "Appraisal number",
+        "willBeGenerated": "Will be automatically generated",
+        "address": "Address",
+        "notSpecified": "Not specified",
+        "valueType": "Value type",
+        "effectiveDate": "Effective date",
+        "evaluationObjective": "Appraisal objective"
+      }
+    },
+
+    "propertySelector": {
+      "searchPlaceholder": "Search by address, city or postal code...",
+      "noProperties": "No properties in your library",
+      "noPropertiesDescription": "To use this option, you must first create at least one property in the Library module.",
+      "alternative": "Alternative",
+      "useManualEntry": "Select \"Enter manually\" above to enter the address directly.",
+      "noResults": "No properties found for \"{query}\""
+    },
+
+    "detail": {
+      "appraisalNumber": "Appraisal number",
+      "status": {
+        "draft": "Draft",
+        "completed": "Completed"
+      },
+      "progress": "Progress",
+      "save": "Save",
+      "saving": "Saving...",
+      "notFound": "Appraisal not found"
+    },
+
+    "sections": {
+      "markComplete": "Mark as complete",
+      "sectionCompleted": "Section completed",
+      "fillFields": "Fill in the fields for this section and mark as completed when done",
+      "inDevelopment": "Section under development",
+      "content": "Section content",
+      "contentPlaceholder": "Enter content for this section...",
+      "notes": "Notes",
+
+      "client": "Client",
+      "clientInfo": "Client information",
+      "clientName": "Client name",
+      "clientAddress": "Client address",
+      "clientPhone": "Phone",
+      "clientEmail": "Email",
+      "additionalNotes": "Additional notes",
+
+      "evaluateur": "Appraiser",
+      "appraiserInfo": "Appraiser information",
+      "appraiserName": "Appraiser name",
+      "licenseNumber": "License number",
+      "appraiserPhone": "Phone",
+      "appraiserEmail": "Email",
+      "company": "Company",
+
+      "propriete_evaluee": "Subject property",
+      "propertyDescription": "Subject property description",
+      "fullAddress": "Full address",
+      "cadastreNumber": "Cadastre number",
+      "matriculeNumber": "Matricule number",
+      "yearBuilt": "Year built",
+      "generalDescription": "General description",
+      "generalDescriptionPlaceholder": "Describe the property in detail...",
+
+      "quartier": "Neighborhood",
+      "neighborhoodAnalysis": "Neighborhood analysis",
+      "neighborhoodName": "Neighborhood name",
+      "neighborhoodType": "Neighborhood type",
+      "neighborhoodTypeUrban": "Urban",
+      "neighborhoodTypeSuburban": "Suburban",
+      "neighborhoodTypeRural": "Rural",
+      "neighborhoodFeatures": "Neighborhood features",
+      "neighborhoodFeaturesPlaceholder": "Services, shops, transportation, schools, parks, etc.",
+      "marketTrends": "Market trends",
+      "marketTrendsPlaceholder": "Price evolution, demand, supply, etc.",
+
+      "ameliorations": "Improvements",
+      "improvementsAndRenovations": "Improvements and renovations",
+      "overallCondition": "Overall property condition",
+      "conditionExcellent": "Excellent",
+      "conditionVeryGood": "Very good",
+      "conditionGood": "Good",
+      "conditionAverage": "Average",
+      "conditionBelowAverage": "Below average",
+      "conditionPoor": "Poor",
+      "recentRenovations": "Recent renovations",
+      "recentRenovationsPlaceholder": "List renovations with approximate years...",
+      "requiredRepairs": "Required repairs",
+      "requiredRepairsPlaceholder": "List necessary or recommended repairs...",
+      "suggestedImprovements": "Suggested improvements",
+      "suggestedImprovementsPlaceholder": "Improvements that could increase value...",
+
+      "informations_generales": "General information",
+      "generalInfo": "General information",
+      "generalMandateDescription": "General mandate description",
+      "generalMandatePlaceholder": "Describe the mandate, objective, context, etc.",
+      "notesAndObservations": "Notes and observations",
+
+      "description_propriete": "Property description",
+      "detailedPropertyDescription": "Detailed property description",
+      "architecturalDescription": "Architectural description",
+      "architecturalDescriptionPlaceholder": "Style, dimensions, materials, etc.",
+      "landDescription": "Land description",
+      "landDescriptionPlaceholder": "Area, topography, orientation, etc."
+    },
+
+    "propertyTypes": {
+      "condo": "Condo",
+      "single_family": "Single Family",
+      "duplex": "Duplex",
+      "triplex": "Triplex",
+      "quadriplex_plus": "Quadriplex+",
+      "apartment": "Apartment",
+      "semi_commercial": "Semi-Commercial",
+      "commercial": "Commercial",
+      "land": "Land",
+      "other": "Other"
+    },
+
+    "propertyGenres": {
+      "plain_pied": "Bungalow",
+      "a_etages": "Multi-storey",
+      "1_etage": "1 Storey",
+      "un_etage_et_demi": "One and a half storey",
+      "deux_etages": "Two storey",
+      "deux_etages_et_demi": "Two and a half storey",
+      "trois_etages": "Three storey",
+      "paliers_multiples": "Multi-level",
+      "mobile": "Mobile",
+      "maison_de_ville": "Townhouse",
+      "tour_appartement": "Apartment tower",
+      "terrain_vacant": "Vacant land"
+    },
+
+    "valueTypes": {
+      "valeur_actuelle": "Current value",
+      "valeur_retrospective": "Retrospective value"
+    },
+
+    "objectives": {
+      "financement": "Mortgage financing",
+      "achat_vente": "Purchase/Sale",
+      "succession": "Estate",
+      "divorce": "Divorce/Separation",
+      "expropriation": "Expropriation",
+      "litige": "Litigation",
+      "assurance": "Insurance",
+      "fiscalite": "Taxation",
+      "refinancement": "Refinancing",
+      "eval_municipale": "Municipal assessment",
+      "autre": "Other"
+    }
+  },
+
   "import": {
     "title": "Import Wizard",
     "subtitle": "Import properties from PDFs or listing websites",

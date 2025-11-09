@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   Typography,
   Grid,
@@ -14,159 +15,88 @@ import {
   IconButton,
   LinearProgress,
   alpha,
-  Divider,
-  Fab,
-  Tooltip
+  CircularProgress,
+  Alert
 } from '@mui/material'
 import {
   Add,
   Assessment,
   Business,
   Settings,
-  CalendarToday,
   TrendingUp,
   CheckCircle,
   Schedule,
   Edit,
   Visibility,
-  Delete,
-  AttachMoney,
   LocationOn,
-  BarChart,
   PlayArrow
 } from '@mui/icons-material'
 import { MaterialDashboardLayout } from '../../../components/layout/MaterialDashboardLayout'
-
-// Données factices pour les évaluations
-const evaluationTypes = [
-  {
-    id: 'rps',
-    title: 'Évaluation RPS',
-    subtitle: 'Rôle provincial standardisé',
-    description: 'Évaluation municipale standardisée selon les normes provinciales du Québec',
-    icon: Business,
-    color: 'primary',
-    count: 12,
-    avgTime: '2-3 jours'
-  },
-  {
-    id: 'nas',
-    title: 'Évaluation NAS',
-    subtitle: 'Normes d\'approbation spécialisées',
-    description: 'Évaluation selon les normes d\'approbation spécialisées pour les institutions financières',
-    icon: Assessment,
-    color: 'success',
-    count: 8,
-    avgTime: '3-4 jours'
-  },
-  {
-    id: 'custom',
-    title: 'Évaluation personnalisée',
-    subtitle: 'Paramètres sur mesure',
-    description: 'Créez vos propres modèles d\'évaluation avec des critères personnalisés',
-    icon: Settings,
-    color: 'warning',
-    count: 5,
-    avgTime: '1-2 jours'
-  }
-]
-
-const recentEvaluations = [
-  {
-    id: 1,
-    property: '123 Rue Principale',
-    city: 'Montréal',
-    type: 'RPS',
-    status: 'completed',
-    date: '2024-03-15',
-    value: 485000,
-    progress: 100,
-    client: 'Banque Nationale'
-  },
-  {
-    id: 2,
-    property: '456 Avenue des Érables',
-    city: 'Laval',
-    type: 'NAS',
-    status: 'in_progress',
-    date: '2024-03-22',
-    value: 620000,
-    progress: 75,
-    client: 'Desjardins'
-  },
-  {
-    id: 3,
-    property: '789 Boulevard St-Laurent',
-    city: 'Québec',
-    type: 'Personnalisée',
-    status: 'draft',
-    date: '2024-03-08',
-    value: 1250000,
-    progress: 25,
-    client: 'Investisseur privé'
-  },
-  {
-    id: 4,
-    property: '321 Rue Sherbrooke',
-    city: 'Montréal',
-    type: 'RPS',
-    status: 'pending',
-    date: '2024-03-28',
-    value: 890000,
-    progress: 0,
-    client: 'BMO'
-  }
-]
-
-const stats = [
-  {
-    title: 'Évaluations ce mois',
-    value: '18',
-    change: '+12%',
-    icon: Assessment,
-    color: 'primary'
-  },
-  {
-    title: 'Valeur totale évaluée',
-    value: '3.2M $',
-    change: '+8.3%',
-    icon: AttachMoney,
-    color: 'success'
-  },
-  {
-    title: 'Temps moyen',
-    value: '2.8 jours',
-    change: '-15%',
-    icon: Schedule,
-    color: 'info'
-  },
-  {
-    title: 'Taux de complétion',
-    value: '94%',
-    change: '+5%',
-    icon: CheckCircle,
-    color: 'warning'
-  }
-]
+import { appraisalsService } from '@/features/evaluations/_api/appraisals.service'
+import { useTranslations } from 'next-intl'
 
 export default function EvaluationsPage() {
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'success'
-      case 'in_progress': return 'info'
-      case 'pending': return 'warning'
-      case 'draft': return 'default'
-      default: return 'default'
+  const router = useRouter()
+  const t = useTranslations('evaluations')
+  const tTemplates = useTranslations('evaluations.templates')
+  const tDetail = useTranslations('evaluations.detail')
+
+  const [appraisals, setAppraisals] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadAppraisals()
+  }, [])
+
+  const loadAppraisals = async () => {
+    try {
+      const data = await appraisalsService.getAll()
+      setAppraisals(data)
+    } catch (error) {
+      console.error('Error loading appraisals:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
-  const getStatusLabel = (status: string) => {
+  const evaluationTypes = [
+    {
+      id: 'RPS',
+      title: tTemplates('rps.title'),
+      subtitle: tTemplates('rps.subtitle'),
+      description: tTemplates('rps.description'),
+      icon: Business,
+      color: 'primary',
+      count: appraisals.filter(a => a.template_type === 'RPS').length
+    },
+    {
+      id: 'NAS',
+      title: tTemplates('nas.title'),
+      subtitle: tTemplates('nas.subtitle'),
+      description: tTemplates('nas.description'),
+      icon: Assessment,
+      color: 'success',
+      count: appraisals.filter(a => a.template_type === 'NAS').length
+    },
+    {
+      id: 'CUSTOM',
+      title: tTemplates('custom.title'),
+      subtitle: tTemplates('custom.subtitle'),
+      description: tTemplates('custom.description'),
+      icon: Settings,
+      color: 'warning',
+      count: appraisals.filter(a => a.template_type === 'CUSTOM').length
+    }
+  ]
+
+  const getStatusColor = (status: string): any => {
     switch (status) {
-      case 'completed': return 'Complétée'
-      case 'in_progress': return 'En cours'
-      case 'pending': return 'En attente'
-      case 'draft': return 'Brouillon'
-      default: return status
+      case 'completed': return 'success'
+      case 'in_progress': return 'info'
+      case 'review': return 'warning'
+      case 'draft': return 'default'
+      case 'archived': return 'default'
+      default: return 'default'
     }
   }
 
@@ -174,10 +104,29 @@ export default function EvaluationsPage() {
     switch (status) {
       case 'completed': return <CheckCircle />
       case 'in_progress': return <TrendingUp />
-      case 'pending': return <Schedule />
+      case 'review': return <Schedule />
       case 'draft': return <Edit />
       default: return <Edit />
     }
+  }
+
+  const getTemplateLabel = (templateType: string) => {
+    switch (templateType) {
+      case 'RPS': return tTemplates('rps.subtitle')
+      case 'NAS': return tTemplates('nas.subtitle')
+      case 'CUSTOM': return tTemplates('custom.subtitle')
+      default: return templateType
+    }
+  }
+
+  if (loading) {
+    return (
+      <MaterialDashboardLayout>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+          <CircularProgress />
+        </Box>
+      </MaterialDashboardLayout>
+    )
   }
 
   return (
@@ -188,28 +137,20 @@ export default function EvaluationsPage() {
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Box>
               <Typography variant="h4" fontWeight={700} gutterBottom>
-                Évaluations
+                {t('title')}
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Créez et gérez vos évaluations RPS, NAS et personnalisées
+                {t('subtitle')}
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Button
-                variant="outlined"
-                startIcon={<BarChart />}
-                sx={{ borderRadius: 3 }}
-              >
-                Statistiques
-              </Button>
-              <Button
-                variant="contained"
-                startIcon={<Add />}
-                sx={{ borderRadius: 3 }}
-              >
-                Nouvelle Évaluation
-              </Button>
-            </Box>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => router.push('/evaluations/new')}
+              sx={{ borderRadius: 3, textTransform: 'none' }}
+            >
+              {t('createNew')}
+            </Button>
           </Box>
         </Box>
 
@@ -230,6 +171,7 @@ export default function EvaluationsPage() {
                       boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)'
                     }
                   }}
+                  onClick={() => router.push(`/evaluations/new?template=${type.id}`)}
                 >
                   <CardContent sx={{ p: 3 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
@@ -257,18 +199,16 @@ export default function EvaluationsPage() {
                     </Typography>
 
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Box>
-                        <Typography variant="body2" color="text.secondary">
-                          {type.count} évaluations • {type.avgTime}
-                        </Typography>
-                      </Box>
+                      <Typography variant="body2" color="text.secondary">
+                        {type.count} {t('appraisals')}
+                      </Typography>
                       <Button
                         variant="outlined"
                         size="small"
                         startIcon={<PlayArrow />}
-                        sx={{ borderRadius: 2 }}
+                        sx={{ borderRadius: 2, textTransform: 'none' }}
                       >
-                        Commencer
+                        {t('start')}
                       </Button>
                     </Box>
                   </CardContent>
@@ -278,132 +218,117 @@ export default function EvaluationsPage() {
           })}
         </Grid>
 
-        {/* Recent Evaluations */}
+        {/* Recent Appraisals */}
         <Card>
           <CardContent sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
               <Typography variant="h6" fontWeight={600}>
-                Évaluations Récentes
+                {t('recentAppraisals')}
               </Typography>
-              <Button size="small" endIcon={<Assessment />}>
-                Voir toutes
-              </Button>
             </Box>
 
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {recentEvaluations.map((evaluation) => (
-                <Paper
-                  key={evaluation.id}
-                  sx={{
-                    p: 3,
-                    bgcolor: alpha('#1e3a8a', 0.02),
-                    border: '1px solid',
-                    borderColor: alpha('#1e3a8a', 0.1),
-                    transition: 'all 0.2s ease-in-out',
-                    '&:hover': {
-                      bgcolor: alpha('#1e3a8a', 0.05),
-                      transform: 'translateY(-1px)'
-                    }
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Avatar
-                        sx={{
-                          bgcolor: 'primary.main',
-                          width: 48,
-                          height: 48
-                        }}
-                      >
-                        {getStatusIcon(evaluation.status)}
-                      </Avatar>
-                      <Box>
-                        <Typography variant="body1" fontWeight={600}>
-                          {evaluation.property}
-                        </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <LocationOn fontSize="small" color="action" />
-                          <Typography variant="body2" color="text.secondary">
-                            {evaluation.city}
+            {appraisals.length === 0 ? (
+              <Alert severity="info">
+                {t('noAppraisals')}
+              </Alert>
+            ) : (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {appraisals.map((appraisal) => (
+                  <Paper
+                    key={appraisal.id}
+                    sx={{
+                      p: 3,
+                      bgcolor: alpha('#1e3a8a', 0.02),
+                      border: '1px solid',
+                      borderColor: alpha('#1e3a8a', 0.1),
+                      transition: 'all 0.2s ease-in-out',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        bgcolor: alpha('#1e3a8a', 0.05),
+                        transform: 'translateY(-1px)'
+                      }
+                    }}
+                    onClick={() => router.push(`/evaluations/${appraisal.id}`)}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Avatar
+                          sx={{
+                            bgcolor: 'primary.main',
+                            width: 48,
+                            height: 48
+                          }}
+                        >
+                          {getStatusIcon(appraisal.status)}
+                        </Avatar>
+                        <Box>
+                          <Typography variant="body1" fontWeight={600}>
+                            {appraisal.appraisal_number || t('untitled')}
                           </Typography>
-                          <Typography variant="body2" color="text.secondary">•</Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {evaluation.client}
-                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <LocationOn fontSize="small" color="action" />
+                            <Typography variant="body2" color="text.secondary">
+                              {appraisal.address || appraisal.city || t('noAddress')}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">•</Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {appraisal.client_name}
+                            </Typography>
+                          </Box>
                         </Box>
                       </Box>
+
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Box sx={{ textAlign: 'right' }}>
+                          <Chip
+                            label={getTemplateLabel(appraisal.template_type)}
+                            color="primary"
+                            variant="outlined"
+                            size="small"
+                            sx={{ mb: 0.5 }}
+                          />
+                          <Typography variant="body2" color="text.secondary">
+                            {new Date(appraisal.created_at).toLocaleDateString('fr-CA')}
+                          </Typography>
+                        </Box>
+                        <Chip
+                          label={tDetail(`status.${appraisal.status}`)}
+                          color={getStatusColor(appraisal.status)}
+                          size="small"
+                          variant="outlined"
+                        />
+                        <IconButton size="small" color="primary" onClick={(e) => {
+                          e.stopPropagation()
+                          router.push(`/evaluations/${appraisal.id}`)
+                        }}>
+                          <Edit />
+                        </IconButton>
+                      </Box>
                     </Box>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Box sx={{ textAlign: 'right' }}>
-                        <Typography variant="body1" fontWeight={600} color="success.main">
-                          {evaluation.value.toLocaleString('fr-CA', {
-                            style: 'currency',
-                            currency: 'CAD',
-                            minimumFractionDigits: 0
-                          })}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {new Date(evaluation.date).toLocaleDateString('fr-CA')}
-                        </Typography>
+                    {(appraisal.status === 'in_progress' || appraisal.status === 'draft') && (
+                      <Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                          <Typography variant="body2" color="text.secondary">
+                            {tDetail('progress')}
+                          </Typography>
+                          <Typography variant="body2" fontWeight={600}>
+                            {appraisal.completion_percentage || 0}%
+                          </Typography>
+                        </Box>
+                        <LinearProgress
+                          variant="determinate"
+                          value={appraisal.completion_percentage || 0}
+                          sx={{ height: 6, borderRadius: 3 }}
+                        />
                       </Box>
-                      <Chip
-                        label={getStatusLabel(evaluation.status)}
-                        color={getStatusColor(evaluation.status) as any}
-                        size="small"
-                        variant="outlined"
-                      />
-                      <Box sx={{ display: 'flex', gap: 1 }}>
-                        <Tooltip title="Voir détails">
-                          <IconButton size="small" color="primary">
-                            <Visibility />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Modifier">
-                          <IconButton size="small" color="info">
-                            <Edit />
-                          </IconButton>
-                        </Tooltip>
-                      </Box>
-                    </Box>
-                  </Box>
-
-                  {evaluation.status === 'in_progress' && (
-                    <Box>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                        <Typography variant="body2" color="text.secondary">
-                          Progression
-                        </Typography>
-                        <Typography variant="body2" fontWeight={600}>
-                          {evaluation.progress}%
-                        </Typography>
-                      </Box>
-                      <LinearProgress
-                        variant="determinate"
-                        value={evaluation.progress}
-                        sx={{ height: 6, borderRadius: 3 }}
-                      />
-                    </Box>
-                  )}
-                </Paper>
-              ))}
-            </Box>
+                    )}
+                  </Paper>
+                ))}
+              </Box>
+            )}
           </CardContent>
         </Card>
-
-        {/* Floating Action Button */}
-        <Fab
-          color="primary"
-          aria-label="add evaluation"
-          sx={{
-            position: 'fixed',
-            bottom: 24,
-            right: 24,
-            background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)'
-          }}
-        >
-          <Add />
-        </Fab>
       </Box>
     </MaterialDashboardLayout>
   )

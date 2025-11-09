@@ -1370,6 +1370,257 @@
     }
   },
 
+  "evaluations": {
+    "title": "Évaluations",
+    "subtitle": "Créez et gérez vos évaluations RPS, NAS et personnalisées",
+    "createNew": "Nouvelle Évaluation",
+    "newAppraisal": "Nouvelle Évaluation",
+    "backToList": "Retour aux évaluations",
+    "saving": "Enregistrement...",
+    "save": "Enregistrer",
+    "appraisals": "évaluations",
+    "start": "Commencer",
+    "recentAppraisals": "Évaluations Récentes",
+    "noAppraisals": "Aucune évaluation pour le moment. Créez votre première évaluation pour commencer.",
+    "untitled": "Sans titre",
+    "noAddress": "Adresse non spécifiée",
+
+    "empty": {
+      "title": "Aucune évaluation",
+      "description": "Commencez par créer votre première évaluation",
+      "button": "Créer une évaluation"
+    },
+
+    "templates": {
+      "title": "Sélectionnez le type de rapport d'évaluation",
+      "rps": {
+        "title": "Évaluation RPS",
+        "subtitle": "Real Property Solutions",
+        "description": "Évaluation selon le format RPS standardisé"
+      },
+      "nas": {
+        "title": "Évaluation NAS",
+        "subtitle": "Nationwide Appraisal Services",
+        "description": "Évaluation selon le format NAS"
+      },
+      "custom": {
+        "title": "Évaluation personnalisée",
+        "subtitle": "Format personnalisé",
+        "description": "Créez une évaluation selon vos critères"
+      }
+    },
+
+    "wizard": {
+      "title": "Nouvelle évaluation",
+      "subtitle": "Remplissez les informations pour créer votre évaluation",
+      "back": "Retour",
+      "next": "Suivant",
+      "create": "Créer l'évaluation",
+      "cancel": "Annuler",
+      "creating": "Création en cours...",
+
+      "steps": {
+        "propertyType": "Type de propriété",
+        "basicInfo": "Informations de base",
+        "confirmation": "Confirmation"
+      },
+
+      "step1": {
+        "title": "Type de propriété",
+        "subtitle": "Sélectionnez le type et le genre de propriété à évaluer",
+        "propertyType": "Type de propriété",
+        "propertyGenre": "Genre de propriété",
+        "propertyTypeRequired": "Le type de propriété est requis",
+        "propertyGenreRequired": "Le genre de propriété est requis"
+      },
+
+      "step2": {
+        "title": "Informations de base",
+        "subtitle": "Entrez les informations de base pour l'évaluation",
+        "clientName": "Nom du client",
+        "clientNamePlaceholder": "Ex: Banque Nationale, Jean Tremblay, etc.",
+        "appraisalNumber": "Numéro d'évaluation",
+        "appraisalNumberInfo": "Sera généré automatiquement au format YY-#### (ex: 25-0001)",
+        "propertySource": "Source de la propriété",
+        "propertySourceLibrary": "Sélectionner de la bibliothèque",
+        "propertySourceManual": "Entrer manuellement",
+        "address": "Adresse",
+        "addressPlaceholder": "Ex: 123 Rue Principale",
+        "city": "Ville",
+        "cityPlaceholder": "Ex: Montréal",
+        "postalCode": "Code postal",
+        "postalCodePlaceholder": "H2X 1Y3",
+        "valueType": "Type de valeur",
+        "effectiveDate": "Date effective",
+        "evaluationObjective": "Objectif de l'évaluation"
+      },
+
+      "step3": {
+        "title": "Confirmation",
+        "subtitle": "Vérifiez les informations avant de créer l'évaluation",
+        "allInfoProvided": "Toutes les informations requises ont été fournies. Vous pouvez créer l'évaluation maintenant.",
+        "templateType": "Modèle de rapport",
+        "typeOfTemplate": "Type de modèle",
+        "propertyInfo": "Type de propriété",
+        "propertyType": "Type de propriété",
+        "propertyGenre": "Genre de propriété",
+        "basicInfo": "Informations de base",
+        "clientName": "Nom du client",
+        "appraisalNumber": "Numéro d'évaluation",
+        "willBeGenerated": "Sera généré automatiquement",
+        "address": "Adresse",
+        "notSpecified": "Non spécifiée",
+        "valueType": "Type de valeur",
+        "effectiveDate": "Date effective",
+        "evaluationObjective": "Objectif de l'évaluation"
+      }
+    },
+
+    "propertySelector": {
+      "searchPlaceholder": "Rechercher par adresse, ville ou code postal...",
+      "noProperties": "Aucune propriété dans votre bibliothèque",
+      "noPropertiesDescription": "Pour utiliser cette option, vous devez d'abord créer au moins une propriété dans le module Bibliothèque.",
+      "alternative": "Alternative",
+      "useManualEntry": "Sélectionnez \"Entrer manuellement\" ci-dessus pour saisir l'adresse directement.",
+      "noResults": "Aucune propriété trouvée pour \"{query}\""
+    },
+
+    "detail": {
+      "appraisalNumber": "Numéro d'évaluation",
+      "status": {
+        "draft": "Brouillon",
+        "completed": "Complété"
+      },
+      "progress": "Progression",
+      "save": "Enregistrer",
+      "saving": "Enregistrement...",
+      "notFound": "Évaluation non trouvée"
+    },
+
+    "sections": {
+      "markComplete": "Marquer comme complété",
+      "sectionCompleted": "Section complétée",
+      "fillFields": "Remplissez les champs de cette section et marquez comme complétée une fois terminé",
+      "inDevelopment": "Section en cours de développement",
+      "content": "Contenu de la section",
+      "contentPlaceholder": "Entrez le contenu pour cette section...",
+      "notes": "Notes",
+
+      "client": "Client",
+      "clientInfo": "Informations du client",
+      "clientName": "Nom du client",
+      "clientAddress": "Adresse du client",
+      "clientPhone": "Téléphone",
+      "clientEmail": "Courriel",
+      "additionalNotes": "Notes additionnelles",
+
+      "evaluateur": "Évaluateur",
+      "appraiserInfo": "Informations de l'évaluateur",
+      "appraiserName": "Nom de l'évaluateur",
+      "licenseNumber": "Numéro de permis",
+      "appraiserPhone": "Téléphone",
+      "appraiserEmail": "Courriel",
+      "company": "Entreprise",
+
+      "propriete_evaluee": "Propriété évaluée",
+      "propertyDescription": "Description de la propriété évaluée",
+      "fullAddress": "Adresse complète",
+      "cadastreNumber": "Numéro cadastral",
+      "matriculeNumber": "Numéro de matricule",
+      "yearBuilt": "Année de construction",
+      "generalDescription": "Description générale",
+      "generalDescriptionPlaceholder": "Décrivez la propriété de manière détaillée...",
+
+      "quartier": "Quartier",
+      "neighborhoodAnalysis": "Analyse du quartier",
+      "neighborhoodName": "Nom du quartier",
+      "neighborhoodType": "Type de quartier",
+      "neighborhoodTypeUrban": "Urbain",
+      "neighborhoodTypeSuburban": "Banlieue",
+      "neighborhoodTypeRural": "Rural",
+      "neighborhoodFeatures": "Caractéristiques du quartier",
+      "neighborhoodFeaturesPlaceholder": "Services, commerces, transports, écoles, parcs, etc.",
+      "marketTrends": "Tendances du marché",
+      "marketTrendsPlaceholder": "Évolution des prix, demande, offre, etc.",
+
+      "ameliorations": "Améliorations",
+      "improvementsAndRenovations": "Améliorations et rénovations",
+      "overallCondition": "État général de la propriété",
+      "conditionExcellent": "Excellent",
+      "conditionVeryGood": "Très bon",
+      "conditionGood": "Bon",
+      "conditionAverage": "Moyen",
+      "conditionBelowAverage": "Inférieur à la moyenne",
+      "conditionPoor": "Pauvre",
+      "recentRenovations": "Rénovations récentes",
+      "recentRenovationsPlaceholder": "Listez les rénovations effectuées avec les années approximatives...",
+      "requiredRepairs": "Réparations requises",
+      "requiredRepairsPlaceholder": "Listez les réparations nécessaires ou recommandées...",
+      "suggestedImprovements": "Améliorations suggérées",
+      "suggestedImprovementsPlaceholder": "Améliorations qui pourraient augmenter la valeur...",
+
+      "informations_generales": "Informations générales",
+      "generalInfo": "Informations générales",
+      "generalMandateDescription": "Description générale du mandat",
+      "generalMandatePlaceholder": "Décrivez le mandat, l'objectif, le contexte, etc.",
+      "notesAndObservations": "Notes et observations",
+
+      "description_propriete": "Description de la propriété",
+      "detailedPropertyDescription": "Description détaillée de la propriété",
+      "architecturalDescription": "Description architecturale",
+      "architecturalDescriptionPlaceholder": "Style, dimensions, matériaux, etc.",
+      "landDescription": "Description du terrain",
+      "landDescriptionPlaceholder": "Superficie, topographie, orientation, etc."
+    },
+
+    "propertyTypes": {
+      "condo": "Condo",
+      "single_family": "Unifamiliale",
+      "duplex": "Duplex",
+      "triplex": "Triplex",
+      "quadriplex_plus": "Quadriplex+",
+      "apartment": "Appartement",
+      "semi_commercial": "Semi-Commercial",
+      "commercial": "Commercial",
+      "land": "Terrain",
+      "other": "Autre"
+    },
+
+    "propertyGenres": {
+      "plain_pied": "Plain-pied",
+      "a_etages": "À étages",
+      "1_etage": "1 Étage",
+      "un_etage_et_demi": "Un étage et demi",
+      "deux_etages": "Deux étages",
+      "deux_etages_et_demi": "Deux étages et demi",
+      "trois_etages": "Trois étages",
+      "paliers_multiples": "Paliers multiples",
+      "mobile": "Mobile",
+      "maison_de_ville": "Maison de ville",
+      "tour_appartement": "Tour d'appartement",
+      "terrain_vacant": "Terrain vacant"
+    },
+
+    "valueTypes": {
+      "valeur_actuelle": "Valeur actuelle",
+      "valeur_retrospective": "Valeur rétrospective"
+    },
+
+    "objectives": {
+      "financement": "Financement hypothécaire",
+      "achat_vente": "Achat/Vente",
+      "succession": "Succession",
+      "divorce": "Divorce/Séparation",
+      "expropriation": "Expropriation",
+      "litige": "Litige",
+      "assurance": "Assurance",
+      "fiscalite": "Fiscalité",
+      "refinancement": "Refinancement",
+      "eval_municipale": "Évaluation municipale",
+      "autre": "Autre"
+    }
+  },
+
   "import": {
     "title": "Assistant d'importation",
     "subtitle": "Importez des propriétés depuis des PDF ou des sites d'annonces",
