@@ -96,6 +96,61 @@ export interface Database {
           updated_at?: string
         }
       }
+      demo_requests: {
+        Row: {
+          id: string
+          email: string
+          name: string
+          company: string | null
+          phone: string | null
+          message: string | null
+          locale: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          name: string
+          company?: string | null
+          phone?: string | null
+          message?: string | null
+          locale?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          name?: string
+          company?: string | null
+          phone?: string | null
+          message?: string | null
+          locale?: string
+          created_at?: string
+        }
+      }
+      waitlist: {
+        Row: {
+          id: string
+          email: string
+          name: string
+          locale: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          name: string
+          locale?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          name?: string
+          locale?: string
+          created_at?: string
+        }
+      }
       email_verifications: {
         Row: {
           id: string
