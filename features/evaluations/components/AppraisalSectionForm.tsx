@@ -21,6 +21,7 @@ import {
 import { CheckCircle, Circle } from '@mui/icons-material';
 import { TemplateType } from '../types/evaluation.types';
 import { useTranslations } from 'next-intl';
+import DirectComparisonForm from './DirectComparisonForm';
 
 interface AppraisalSectionFormProps {
   sectionId: string;
@@ -69,6 +70,8 @@ export default function AppraisalSectionForm({
           return renderQuartierSection();
         case 'ameliorations':
           return renderAmeliorationsSection();
+        case 'technique_parite':
+          return <DirectComparisonForm data={formData} onChange={onChange} />;
         default:
           return renderGenericSection();
       }
@@ -83,6 +86,8 @@ export default function AppraisalSectionForm({
           return renderEvaluateurSection();
         case 'identification_bien':
           return renderPropertySection();
+        case 'methode_parite':
+          return <DirectComparisonForm data={formData} onChange={onChange} />;
         default:
           return renderGenericSection();
       }
