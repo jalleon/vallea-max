@@ -111,7 +111,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
 
   // Helper function to format Quebec lot number: # ### ###
   const formatLotNumber = (value: string): string => {
-    if (formData.province !== 'QC') return value
+    if (!value) return ''
     // Remove all non-numeric characters
     const cleaned = value.replace(/\D/g, '')
     // Limit to 7 digits
