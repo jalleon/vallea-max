@@ -138,7 +138,22 @@ export default function AppraisalEditPage() {
       setIsInitialLoad(false);
 
       // Calculate and update completion percentage if needed
-      const sections = getSections();
+      // Get sections based on template type from the loaded data (not state, which hasn't updated yet)
+      let sections: string[] = [];
+      switch (data.template_type as TemplateType) {
+        case 'NAS':
+          sections = NAS_SECTIONS;
+          break;
+        case 'RPS':
+          sections = RPS_SECTIONS;
+          break;
+        case 'CUSTOM':
+          sections = CUSTOM_SECTIONS;
+          break;
+        default:
+          sections = [];
+      }
+
       if (sections.length > 0) {
         const completedSections = sections.filter(
           (section) => loadedData[section]?.completed
