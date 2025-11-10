@@ -205,7 +205,8 @@
       "duplicateCreate": "Create Duplicate",
       "cancel": "Cancel",
       "delete": "Delete",
-      "mergeOrCreateQuestion": "Merge or Create?"
+      "mergeOrCreateQuestion": "Merge or Create?",
+      "mergeButton": "Merge"
     },
 
     "form": {

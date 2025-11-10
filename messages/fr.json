@@ -205,7 +205,8 @@
       "duplicateCreate": "Créer un doublon",
       "cancel": "Annuler",
       "delete": "Supprimer",
-      "mergeOrCreateQuestion": "Fusionner ou créer ?"
+      "mergeOrCreateQuestion": "Fusionner ou créer ?",
+      "mergeButton": "Fusionner"
     },
 
     "form": {
