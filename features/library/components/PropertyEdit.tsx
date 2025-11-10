@@ -1550,7 +1550,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         size="small"
                         variant="outlined"
                       >
-                        Ajouter un lot additionnel
+                        {t('addAdditionalLot')}
                       </Button>
                     </Grid>
 

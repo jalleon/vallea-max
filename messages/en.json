@@ -305,7 +305,8 @@
       "buildingCharacteristics": "Building Characteristics",
       "municipalData": "Municipal Data",
       "areas": "Areas",
-      "areaByFloor": "Area by Floor"
+      "areaByFloor": "Area by Floor",
+      "addAdditionalLot": "Add additional lot"
     },
     "view": {
       "generalInformation": "General Information",

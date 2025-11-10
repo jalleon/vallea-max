@@ -305,7 +305,8 @@
       "buildingCharacteristics": "Caractéristiques du bâtiment",
       "municipalData": "Données municipales",
       "areas": "Superficies",
-      "areaByFloor": "Superficie par étage"
+      "areaByFloor": "Superficie par étage",
+      "addAdditionalLot": "Ajouter un lot additionnel"
     },
     "view": {
       "generalInformation": "Informations générales",
