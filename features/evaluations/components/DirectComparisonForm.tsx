@@ -248,12 +248,15 @@ export default function DirectComparisonForm({
           }
 
           // Update subject with property data
+          // Note: Subject property doesn't have sale data (saleDate, salePrice, dataSource, daysOnMarket)
           const updatedSubject = {
             ...subject,
             propertyId: property.id,
             address: fullAddress,
-            saleDate: property.date_vente || '',
-            salePrice: property.prix_vente || 0,
+            dataSource: '', // Subject property has no data source
+            saleDate: '', // Subject property has no sale date
+            salePrice: 0, // Subject property has no sale price
+            daysOnMarket: 0, // Subject property has no days on market
             lotSize: lotSizeText,
             buildingType: property.type_batiment || '',
             livingArea: livingAreaText,
@@ -630,7 +633,8 @@ export default function DirectComparisonForm({
             width: 160,
             editable: (params: any) => {
               const calculated = ['distance', 'totalAdjustment', 'adjustedValue', 'grossAdjustmentPercent', 'netAdjustmentPercent', 'pricePerSqFt'];
-              return !calculated.includes(params.data.rowId);
+              const subjectNotApplicable = ['dataSource', 'saleDate', 'salePrice', 'daysOnMarket'];
+              return !calculated.includes(params.data.rowId) && !subjectNotApplicable.includes(params.data.rowId);
             },
             cellStyle: (params: any) => {
               const calculated = ['distance', 'totalAdjustment', 'adjustedValue', 'grossAdjustmentPercent', 'netAdjustmentPercent', 'pricePerSqFt'];
@@ -660,6 +664,11 @@ export default function DirectComparisonForm({
               // Subject columns should be empty for percentage rows
               if (params.data.rowId === 'grossAdjustmentPercent' || params.data.rowId === 'netAdjustmentPercent') {
                 return '';
+              }
+
+              // Subject property doesn't have sale data - show N/A
+              if (['dataSource', 'saleDate', 'salePrice', 'daysOnMarket'].includes(params.data.rowId)) {
+                return 'N/A';
               }
 
               // Format bathrooms as "full:half"
