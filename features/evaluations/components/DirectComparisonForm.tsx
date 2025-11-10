@@ -244,7 +244,7 @@ export default function DirectComparisonForm({
             lotSizeText = `${m2} m² / ${ft2.toLocaleString()} ft²`;
           }
 
-          // Build living area with both pi² and m²
+          // Build living area with both pi² and m² - check both aire_habitable and superficie_habitable
           let livingAreaText = '';
           if (property.aire_habitable_pi2) {
             const pi2 = property.aire_habitable_pi2;
@@ -252,6 +252,14 @@ export default function DirectComparisonForm({
             livingAreaText = `${pi2.toLocaleString()} pi² / ${m2} m²`;
           } else if (property.aire_habitable_m2) {
             const m2 = property.aire_habitable_m2;
+            const pi2 = Math.round(m2 * 10.764);
+            livingAreaText = `${pi2.toLocaleString()} pi² / ${m2} m²`;
+          } else if (property.superficie_habitable_pi2) {
+            const pi2 = property.superficie_habitable_pi2;
+            const m2 = Math.round(pi2 / 10.764);
+            livingAreaText = `${pi2.toLocaleString()} pi² / ${m2} m²`;
+          } else if (property.superficie_habitable_m2) {
+            const m2 = property.superficie_habitable_m2;
             const pi2 = Math.round(m2 * 10.764);
             livingAreaText = `${pi2.toLocaleString()} pi² / ${m2} m²`;
           }
@@ -496,7 +504,7 @@ export default function DirectComparisonForm({
         lotSizeText = `${m2} m² / ${ft2.toLocaleString()} ft²`;
       }
 
-      // Build living area with both pi² and m²
+      // Build living area with both pi² and m² - check both aire_habitable and superficie_habitable
       let livingAreaText = '';
       if (property.aire_habitable_pi2) {
         const pi2 = property.aire_habitable_pi2;
@@ -504,6 +512,14 @@ export default function DirectComparisonForm({
         livingAreaText = `${pi2.toLocaleString()} pi² / ${m2} m²`;
       } else if (property.aire_habitable_m2) {
         const m2 = property.aire_habitable_m2;
+        const pi2 = Math.round(m2 * 10.764);
+        livingAreaText = `${pi2.toLocaleString()} pi² / ${m2} m²`;
+      } else if (property.superficie_habitable_pi2) {
+        const pi2 = property.superficie_habitable_pi2;
+        const m2 = Math.round(pi2 / 10.764);
+        livingAreaText = `${pi2.toLocaleString()} pi² / ${m2} m²`;
+      } else if (property.superficie_habitable_m2) {
+        const m2 = property.superficie_habitable_m2;
         const pi2 = Math.round(m2 * 10.764);
         livingAreaText = `${pi2.toLocaleString()} pi² / ${m2} m²`;
       }
@@ -514,6 +530,7 @@ export default function DirectComparisonForm({
         address: fullAddress,
         saleDate: property.date_vente || '',
         salePrice: property.prix_vente || 0,
+        daysOnMarket: property.jours_sur_marche || 0,
         lotSize: lotSizeText,
         buildingType: property.type_propriete || '',
         age: property.chrono_age?.toString() || '',
