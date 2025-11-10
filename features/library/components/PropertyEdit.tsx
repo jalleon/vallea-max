@@ -1678,17 +1678,20 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label={t('lotAreaM2')}
                         type="text"
-                        value={rawInputs.superficie_terrain_m2 ?? (formData.superficie_terrain_m2?.toFixed(2) || '')}
+                        value={'superficie_terrain_m2' in rawInputs ? rawInputs.superficie_terrain_m2 : (formData.superficie_terrain_m2?.toFixed(2) || '')}
                         onChange={(e) => {
                           const input = e.target.value
                           updateRawInput('superficie_terrain_m2', input)
-                          const formulaResult = evaluateFormula(input)
-                          const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
+                          const val = input ? parseFloat(input) : undefined
                           handleInputChange('superficie_terrain_m2', val)
                           if (val !== undefined && !isNaN(val)) {
                             const converted = parseFloat((val * 10.764).toFixed(2))
                             handleInputChange('superficie_terrain_pi2', converted)
-                            setRawInputs(prev => ({ ...prev, superficie_terrain_pi2: '' }))
+                            setRawInputs(prev => {
+                              const newInputs = { ...prev }
+                              delete newInputs.superficie_terrain_pi2
+                              return newInputs
+                            })
                           } else {
                             handleInputChange('superficie_terrain_pi2', undefined)
                           }
@@ -1699,7 +1702,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           }
                         }}
                         size="small"
-                        placeholder="Ex: 100 ou =25+25+50"
+                        placeholder="Ex: 100"
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -1707,17 +1710,20 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label={t('lotAreaPi2')}
                         type="text"
-                        value={rawInputs.superficie_terrain_pi2 ?? (formData.superficie_terrain_pi2?.toFixed(2) || '')}
+                        value={'superficie_terrain_pi2' in rawInputs ? rawInputs.superficie_terrain_pi2 : (formData.superficie_terrain_pi2?.toFixed(2) || '')}
                         onChange={(e) => {
                           const input = e.target.value
                           updateRawInput('superficie_terrain_pi2', input)
-                          const formulaResult = evaluateFormula(input)
-                          const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
+                          const val = input ? parseFloat(input) : undefined
                           handleInputChange('superficie_terrain_pi2', val)
                           if (val !== undefined && !isNaN(val)) {
                             const converted = parseFloat((val / 10.764).toFixed(2))
                             handleInputChange('superficie_terrain_m2', converted)
-                            setRawInputs(prev => ({ ...prev, superficie_terrain_m2: '' }))
+                            setRawInputs(prev => {
+                              const newInputs = { ...prev }
+                              delete newInputs.superficie_terrain_m2
+                              return newInputs
+                            })
                           } else {
                             handleInputChange('superficie_terrain_m2', undefined)
                           }
@@ -1740,17 +1746,20 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label={t('frontageM')}
                         type="text"
-                        value={rawInputs.frontage_m2 ?? (formData.frontage_m2?.toFixed(2) || '')}
+                        value={'frontage_m2' in rawInputs ? rawInputs.frontage_m2 : (formData.frontage_m2?.toFixed(2) || '')}
                         onChange={(e) => {
                           const input = e.target.value
                           updateRawInput('frontage_m2', input)
-                          const formulaResult = evaluateFormula(input)
-                          const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
+                          const val = input ? parseFloat(input) : undefined
                           handleInputChange('frontage_m2', val)
                           if (val !== undefined && !isNaN(val)) {
                             const converted = parseFloat((val * 3.28084).toFixed(2))
                             handleInputChange('frontage_pi2', converted)
-                            setRawInputs(prev => ({ ...prev, frontage_pi2: '' }))
+                            setRawInputs(prev => {
+                              const newInputs = { ...prev }
+                              delete newInputs.frontage_pi2
+                              return newInputs
+                            })
                           } else {
                             handleInputChange('frontage_pi2', undefined)
                           }
@@ -1761,7 +1770,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           }
                         }}
                         size="small"
-                        placeholder="Ex: =10+5"
+                        placeholder="Ex: 10"
                       />
                     </Grid>
                     <Grid item xs={3}>
@@ -1769,17 +1778,20 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label={t('frontagePi')}
                         type="text"
-                        value={rawInputs.frontage_pi2 ?? (formData.frontage_pi2?.toFixed(2) || '')}
+                        value={'frontage_pi2' in rawInputs ? rawInputs.frontage_pi2 : (formData.frontage_pi2?.toFixed(2) || '')}
                         onChange={(e) => {
                           const input = e.target.value
                           updateRawInput('frontage_pi2', input)
-                          const formulaResult = evaluateFormula(input)
-                          const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
+                          const val = input ? parseFloat(input) : undefined
                           handleInputChange('frontage_pi2', val)
                           if (val !== undefined && !isNaN(val)) {
                             const converted = parseFloat((val / 3.28084).toFixed(2))
                             handleInputChange('frontage_m2', converted)
-                            setRawInputs(prev => ({ ...prev, frontage_m2: '' }))
+                            setRawInputs(prev => {
+                              const newInputs = { ...prev }
+                              delete newInputs.frontage_m2
+                              return newInputs
+                            })
                           } else {
                             handleInputChange('frontage_m2', undefined)
                           }
@@ -1790,7 +1802,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           }
                         }}
                         size="small"
-                        placeholder="Ex: =30+15"
+                        placeholder="Ex: 30"
                       />
                     </Grid>
                     <Grid item xs={3}>
@@ -1798,17 +1810,20 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label={t('depthM')}
                         type="text"
-                        value={rawInputs.profondeur_m2 ?? (formData.profondeur_m2?.toFixed(2) || '')}
+                        value={'profondeur_m2' in rawInputs ? rawInputs.profondeur_m2 : (formData.profondeur_m2?.toFixed(2) || '')}
                         onChange={(e) => {
                           const input = e.target.value
                           updateRawInput('profondeur_m2', input)
-                          const formulaResult = evaluateFormula(input)
-                          const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
+                          const val = input ? parseFloat(input) : undefined
                           handleInputChange('profondeur_m2', val)
                           if (val !== undefined && !isNaN(val)) {
                             const converted = parseFloat((val * 3.28084).toFixed(2))
                             handleInputChange('profondeur_pi2', converted)
-                            setRawInputs(prev => ({ ...prev, profondeur_pi2: '' }))
+                            setRawInputs(prev => {
+                              const newInputs = { ...prev }
+                              delete newInputs.profondeur_pi2
+                              return newInputs
+                            })
                           } else {
                             handleInputChange('profondeur_pi2', undefined)
                           }
@@ -1819,7 +1834,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           }
                         }}
                         size="small"
-                        placeholder="Ex: =20+10"
+                        placeholder="Ex: 20"
                       />
                     </Grid>
                     <Grid item xs={3}>
@@ -1827,17 +1842,20 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label={t('depthPi')}
                         type="text"
-                        value={rawInputs.profondeur_pi2 ?? (formData.profondeur_pi2?.toFixed(2) || '')}
+                        value={'profondeur_pi2' in rawInputs ? rawInputs.profondeur_pi2 : (formData.profondeur_pi2?.toFixed(2) || '')}
                         onChange={(e) => {
                           const input = e.target.value
                           updateRawInput('profondeur_pi2', input)
-                          const formulaResult = evaluateFormula(input)
-                          const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
+                          const val = input ? parseFloat(input) : undefined
                           handleInputChange('profondeur_pi2', val)
                           if (val !== undefined && !isNaN(val)) {
                             const converted = parseFloat((val / 3.28084).toFixed(2))
                             handleInputChange('profondeur_m2', converted)
-                            setRawInputs(prev => ({ ...prev, profondeur_m2: '' }))
+                            setRawInputs(prev => {
+                              const newInputs = { ...prev }
+                              delete newInputs.profondeur_m2
+                              return newInputs
+                            })
                           } else {
                             handleInputChange('profondeur_m2', undefined)
                           }
@@ -1848,7 +1866,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           }
                         }}
                         size="small"
-                        placeholder="Ex: =60+30"
+                        placeholder="Ex: 60"
                       />
                     </Grid>
                   </Grid>
@@ -1860,24 +1878,25 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label={t('buildingPerimeterM')}
                         type="text"
-                        value={rawInputs.perimetre_batiment_m2 ?? (formData.perimetre_batiment_m2?.toFixed(2) || '')}
+                        value={'perimetre_batiment_m2' in rawInputs ? rawInputs.perimetre_batiment_m2 : (formData.perimetre_batiment_m2?.toFixed(2) || '')}
                         onChange={(e) => {
                           const input = e.target.value
                           updateRawInput('perimetre_batiment_m2', input)
                           const formulaResult = evaluateFormula(input)
                           const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
                           handleInputChange('perimetre_batiment_m2', val)
-                          if (val !== undefined && !isNaN(val)) {
-                            const converted = parseFloat((val * 3.28084).toFixed(2))
-                            handleInputChange('perimetre_batiment_pi2', converted)
-                            setRawInputs(prev => ({ ...prev, perimetre_batiment_pi2: '' }))
-                          } else {
-                            handleInputChange('perimetre_batiment_pi2', undefined)
-                          }
                         }}
                         onBlur={() => {
                           if (formData.perimetre_batiment_m2 !== undefined) {
                             updateRawInput('perimetre_batiment_m2', formData.perimetre_batiment_m2.toFixed(2))
+                            // Auto-convert to pi2
+                            const converted = parseFloat((formData.perimetre_batiment_m2 * 3.28084).toFixed(2))
+                            handleInputChange('perimetre_batiment_pi2', converted)
+                            setRawInputs(prev => {
+                              const newInputs = { ...prev }
+                              delete newInputs.perimetre_batiment_pi2
+                              return newInputs
+                            })
                           }
                         }}
                         size="small"
@@ -1889,24 +1908,25 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label={t('buildingPerimeterPi')}
                         type="text"
-                        value={rawInputs.perimetre_batiment_pi2 ?? (formData.perimetre_batiment_pi2?.toFixed(2) || '')}
+                        value={'perimetre_batiment_pi2' in rawInputs ? rawInputs.perimetre_batiment_pi2 : (formData.perimetre_batiment_pi2?.toFixed(2) || '')}
                         onChange={(e) => {
                           const input = e.target.value
                           updateRawInput('perimetre_batiment_pi2', input)
                           const formulaResult = evaluateFormula(input)
                           const val = formulaResult !== undefined ? formulaResult : (input ? parseFloat(input) : undefined)
                           handleInputChange('perimetre_batiment_pi2', val)
-                          if (val !== undefined && !isNaN(val)) {
-                            const converted = parseFloat((val / 3.28084).toFixed(2))
-                            handleInputChange('perimetre_batiment_m2', converted)
-                            setRawInputs(prev => ({ ...prev, perimetre_batiment_m2: '' }))
-                          } else {
-                            handleInputChange('perimetre_batiment_m2', undefined)
-                          }
                         }}
                         onBlur={() => {
                           if (formData.perimetre_batiment_pi2 !== undefined) {
                             updateRawInput('perimetre_batiment_pi2', formData.perimetre_batiment_pi2.toFixed(2))
+                            // Auto-convert to m2
+                            const converted = parseFloat((formData.perimetre_batiment_pi2 / 3.28084).toFixed(2))
+                            handleInputChange('perimetre_batiment_m2', converted)
+                            setRawInputs(prev => {
+                              const newInputs = { ...prev }
+                              delete newInputs.perimetre_batiment_m2
+                              return newInputs
+                            })
                           }
                         }}
                         size="small"
