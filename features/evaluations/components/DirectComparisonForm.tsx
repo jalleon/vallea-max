@@ -519,10 +519,10 @@ export default function DirectComparisonForm({
         age: property.chrono_age?.toString() || '',
         condition: property.eff_age?.toString() || '',
         livingArea: livingAreaText,
-        roomsTotal: property.nbre_pieces_total || 0,
-        roomsBedrooms: property.nbre_chambres || 0,
-        roomsBathrooms: `${property.nbre_salle_bain || 0}:${property.nbre_salle_eau || 0}`,
-        basement: property.sous_sol || '',
+        roomsTotal: property.nombre_pieces || 0,
+        roomsBedrooms: property.nombre_chambres || 0,
+        roomsBathrooms: `${property.salle_bain || 0}:${property.salle_eau || 0}`,
+        basement: property.type_sous_sol || '',
         parking: property.stationnement || ''
       };
       newComparables[selectingForIndex] = calculateComparableTotals(newComparables[selectingForIndex]);
