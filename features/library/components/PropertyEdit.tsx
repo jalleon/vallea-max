@@ -1226,7 +1226,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     </Grid>
 
                     {/* Row 3 */}
-                    <Grid item xs={12} md={1.8}>
+                    <Grid item xs={12} md={1.7}>
                       <FormControl fullWidth size="small">
                         <InputLabel>{t('parking')}</InputLabel>
                         <Select
@@ -1240,19 +1240,22 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         </Select>
                       </FormControl>
                     </Grid>
-                    <Grid item xs={12} md={0.6}>
+                    <Grid item xs={12} md={0.8}>
                       <TextField
                         fullWidth
                         label="#"
                         type="number"
-                        value={formData.nombre_stationnement || ''}
-                        onChange={(e) => handleInputChange('nombre_stationnement', e.target.value ? parseInt(e.target.value) : undefined)}
+                        value={formData.nombre_stationnement ?? ''}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          handleInputChange('nombre_stationnement', value ? parseInt(value) : undefined)
+                        }}
                         variant="outlined"
                         size="small"
-                        inputProps={{ min: 0 }}
+                        inputProps={{ min: 0, max: 99 }}
                       />
                     </Grid>
-                    <Grid item xs={12} md={1.8}>
+                    <Grid item xs={12} md={1.7}>
                       <FormControl fullWidth size="small">
                         <InputLabel>{t('garageType')}</InputLabel>
                         <Select
