@@ -799,6 +799,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           value={formData.province || 'QC'}
                           {...getSelectProps(formData.province || 'QC')}
                           label={t('province')}
+                          onChange={(e) => handleInputChange('province', e.target.value)}
                         >
                           <MenuItem value="QC">Québec</MenuItem>
                           <MenuItem value="ON">Ontario</MenuItem>
