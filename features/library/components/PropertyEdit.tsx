@@ -2390,7 +2390,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                   elevation={0}
                   sx={{
                     border: `1px solid ${theme.palette.divider}`,
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    background: 'linear-gradient(135deg, #1e3a8a 0%, #60a5fa 100%)',
                   }}
                 >
                   <CardContent>
@@ -2469,7 +2469,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                                 Pièces inspectées
                               </Typography>
                               <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
-                                {property.inspection_pieces.completedRooms || 0} / {property.inspection_pieces.totalRooms || 0}
+                                {property.inspection_pieces.completedRooms || 0}
                               </Typography>
                             </Box>
                           </Grid>
@@ -2479,7 +2479,16 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                                 Étages
                               </Typography>
                               <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
-                                {Object.keys(property.inspection_pieces.floors || {}).length}
+                                {Object.keys(property.inspection_pieces.floors || {}).map((floorKey) => {
+                                  const floor = floorKey as 'basement' | 'ground' | '2nd' | '3rd'
+                                  const labels: Record<typeof floor, string> = {
+                                    basement: locale === 'en' ? 'Basement' : 'Sous-sol',
+                                    ground: locale === 'en' ? 'Ground' : 'R.D.C.',
+                                    '2nd': locale === 'en' ? '2nd Floor' : '2e étage',
+                                    '3rd': locale === 'en' ? '3rd Floor' : '3e étage'
+                                  }
+                                  return labels[floor] || floorKey
+                                }).join(', ')}
                               </Typography>
                             </Box>
                           </Grid>
@@ -2494,19 +2503,29 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           Catégories complétées
                         </Typography>
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                          {completedCategories.map((categoryId) => (
-                            <Chip
-                              key={categoryId}
-                              icon={<CheckCircle sx={{ fontSize: 16 }} />}
-                              label={t(getCategoryTranslationKey(categoryId))}
-                              size="small"
-                              sx={{
-                                backgroundColor: 'rgba(255,255,255,0.9)',
-                                color: '#667eea',
-                                fontWeight: 600
-                              }}
-                            />
-                          ))}
+                          {completedCategories.map((categoryId) => {
+                            const categoryLabels: Record<string, string> = {
+                              pieces: locale === 'en' ? 'Rooms' : 'Pièces',
+                              batiment: locale === 'en' ? 'Building' : 'Bâtiment',
+                              garage: locale === 'en' ? 'Garage' : 'Garage',
+                              mecanique: locale === 'en' ? 'Mechanical' : 'Mécanique',
+                              exterieur: locale === 'en' ? 'Exterior' : 'Extérieur',
+                              divers: locale === 'en' ? 'Services, Neighborhood, Fireplace and Misc.' : 'Services, Voisinage, Foyer et Divers'
+                            }
+                            return (
+                              <Chip
+                                key={categoryId}
+                                icon={<CheckCircle sx={{ fontSize: 16 }} />}
+                                label={categoryLabels[categoryId] || categoryId}
+                                size="small"
+                                sx={{
+                                  backgroundColor: 'rgba(255,255,255,0.9)',
+                                  color: '#1e3a8a',
+                                  fontWeight: 600
+                                }}
+                              />
+                            )
+                          })}
                         </Box>
                       </Box>
                     )}
@@ -2522,16 +2541,16 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         }
                       }}
                       sx={{
-                        backgroundColor: 'white',
-                        color: '#667eea',
+                        backgroundColor: '#1e3a8a',
+                        color: 'white',
                         fontWeight: 600,
                         '&:hover': {
-                          backgroundColor: 'rgba(255,255,255,0.9)'
+                          backgroundColor: '#1e40af'
                         }
                       }}
                     >
-                      {isInspectionComplete ? 'Voir inspection' :
-                       (property.inspection_status && property.inspection_status !== 'not_started' ? 'Continuer l\'inspection' : 'Commencer l\'inspection')}
+                      {isInspectionComplete ? (locale === 'en' ? 'View inspection' : 'Voir inspection') :
+                       (property.inspection_status && property.inspection_status !== 'not_started' ? (locale === 'en' ? 'Continue inspection' : 'Continuer l\'inspection') : (locale === 'en' ? 'Start inspection' : 'Commencer l\'inspection'))}
                     </Button>
                   </CardContent>
                 </Card>
