@@ -300,7 +300,12 @@
       "areaM2": "Area (m²)",
       "areaPi2": "Area (ft²)",
       "habitable": "Habitable",
-      "effectiveDate": "Effective Date"
+      "effectiveDate": "Effective Date",
+      "generalInformation": "General Information",
+      "buildingCharacteristics": "Building Characteristics",
+      "municipalData": "Municipal Data",
+      "areas": "Areas",
+      "areaByFloor": "Area by Floor"
     },
     "view": {
       "generalInformation": "General Information",

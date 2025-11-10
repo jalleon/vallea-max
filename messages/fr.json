@@ -300,7 +300,12 @@
       "areaM2": "Superficie (m²)",
       "areaPi2": "Superficie (pi²)",
       "habitable": "Habitable",
-      "effectiveDate": "Date effective"
+      "effectiveDate": "Date effective",
+      "generalInformation": "Information générale",
+      "buildingCharacteristics": "Caractéristiques du bâtiment",
+      "municipalData": "Données municipales",
+      "areas": "Superficies",
+      "areaByFloor": "Superficie par étage"
     },
     "view": {
       "generalInformation": "Informations générales",
