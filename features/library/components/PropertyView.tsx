@@ -341,90 +341,6 @@ export function PropertyView({
         </Box>
       </DialogTitle>
       <DialogContent sx={{ p: 0, bgcolor: '#f8fafc' }}>
-        {/* Quick Actions Bar */}
-        <Box
-          sx={{
-            p: 2,
-            borderBottom: `1px solid ${theme.palette.divider}`,
-            bgcolor: 'grey.50',
-            display: 'flex',
-            gap: 1.5,
-            flexWrap: 'wrap',
-            justifyContent: 'center'
-          }}
-        >
-          <Button
-            variant="contained"
-            startIcon={<InspectionIcon />}
-            onClick={() => {
-              router.push(`/${locale}/inspection/${property.id}`)
-              onClose()
-            }}
-            sx={{
-              borderRadius: '12px',
-              bgcolor: '#16a34a',
-              minHeight: '48px',
-              px: 3,
-              fontWeight: 600,
-              textTransform: 'none',
-              boxShadow: 2,
-              '&:hover': {
-                bgcolor: '#15803d',
-                boxShadow: 4
-              }
-            }}
-          >
-            {getInspectionButtonText()}
-          </Button>
-
-          <Button
-            variant="outlined"
-            startIcon={<Assessment />}
-            onClick={() => {
-              router.push(`/${locale}/evaluations/create?propertyId=${property.id}`)
-              onClose()
-            }}
-            sx={{
-              borderRadius: '12px',
-              minHeight: '48px',
-              px: 3,
-              borderColor: theme.palette.primary.main,
-              color: theme.palette.primary.main,
-              fontWeight: 600,
-              textTransform: 'none',
-              '&:hover': {
-                borderColor: theme.palette.primary.dark,
-                bgcolor: alpha(theme.palette.primary.main, 0.08)
-              }
-            }}
-          >
-            {t('newAppraisal')}
-          </Button>
-
-          <Button
-            variant="outlined"
-            startIcon={<Balance />}
-            onClick={() => {
-              router.push(`/${locale}/adjustments?propertyId=${property.id}`)
-              onClose()
-            }}
-            sx={{
-              borderRadius: '12px',
-              minHeight: '48px',
-              px: 3,
-              borderColor: theme.palette.secondary.main,
-              color: theme.palette.secondary.main,
-              fontWeight: 600,
-              textTransform: 'none',
-              '&:hover': {
-                borderColor: theme.palette.secondary.dark,
-                bgcolor: alpha(theme.palette.secondary.main, 0.08)
-              }
-            }}
-          >
-            {t('adjustments')}
-          </Button>
-        </Box>
 
         {/* Two-column layout: Price Banner + Google Maps */}
         <Box sx={{
@@ -1490,6 +1406,17 @@ export function PropertyView({
           </Typography>
         </Box>
 
+        <Button
+          variant="outlined"
+          startIcon={<Assessment />}
+          onClick={() => {
+            router.push(`/${locale}/evaluations/create?propertyId=${property.id}`)
+            onClose()
+          }}
+          sx={{ mr: 1 }}
+        >
+          {t('newAppraisal')}
+        </Button>
         <Button onClick={onClose} sx={{ mr: 1 }}>
           {tCommon('close')}
         </Button>
