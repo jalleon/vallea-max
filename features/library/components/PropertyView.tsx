@@ -1181,7 +1181,7 @@ export function PropertyView({
               elevation={0}
               sx={{
                 border: `1px solid ${theme.palette.divider}`,
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: 'linear-gradient(135deg, #1e3a8a 0%, #60a5fa 100%)',
                 overflow: 'visible'
               }}
             >
@@ -1210,38 +1210,7 @@ export function PropertyView({
                   />
                   </Box>
 
-                  {/* Progress Bar */}
-                  <Box sx={{ mb: 3 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.9)' }}>
-                        {t('overallProgress')}
-                      </Typography>
-                      <Typography variant="body2" sx={{ color: 'white', fontWeight: 600 }}>
-                        {inspectionProgress}%
-                      </Typography>
-                    </Box>
-                    <Box
-                      sx={{
-                        width: '100%',
-                        height: 8,
-                        backgroundColor: 'rgba(255,255,255,0.2)',
-                        borderRadius: 4,
-                        overflow: 'hidden'
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          width: `${inspectionProgress}%`,
-                          height: '100%',
-                          backgroundColor: isInspectionComplete ? '#4CAF50' : 'white',
-                          borderRadius: 4,
-                          transition: 'width 0.3s ease, background-color 0.3s ease'
-                        }}
-                      />
-                    </Box>
-                  </Box>
-
-                  <Grid container spacing={2} sx={{ mb: 2 }}>
+                  <Grid container spacing={2} sx={{ mb: 2, mt: 2 }}>
                     {/* Inspection Date */}
                     <Grid item xs={12} md={4}>
                       <Box sx={{ p: 2, borderRadius: 1, backgroundColor: 'rgba(255,255,255,0.15)' }}>
@@ -1292,11 +1261,11 @@ export function PropertyView({
                           <Chip
                             key={categoryId}
                             icon={<CheckCircle sx={{ fontSize: 16 }} />}
-                            label={t(getCategoryTranslationKey(categoryId))}
+                            label={tInspection(`categories.${categoryId}`)}
                             size="small"
                             sx={{
                               backgroundColor: 'rgba(255,255,255,0.9)',
-                              color: '#667eea',
+                              color: '#1e3a8a',
                               fontWeight: 600
                             }}
                           />
@@ -1324,8 +1293,7 @@ export function PropertyView({
                             const roomType = room.type
                             // Convert snake_case to camelCase for translation key
                             const camelCaseType = roomType.replace(/_([a-z])/g, (match: string, letter: string) => letter.toUpperCase())
-                            const translationKey = `inspection.rooms.${camelCaseType}`
-                            let roomName = t(translationKey)
+                            let roomName = tInspection(`rooms.${camelCaseType}`)
 
                             // Count occurrences for numbering
                             roomTypeCounts[roomType] = (roomTypeCounts[roomType] || 0) + 1
