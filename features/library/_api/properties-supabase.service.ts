@@ -313,6 +313,9 @@ class PropertiesSupabaseService {
       ...propertyData
     } = input
 
+    // Debug: Log nombre_stationnement value
+    console.log('Service updateProperty - input.nombre_stationnement:', (input as any).nombre_stationnement)
+
     // Prepare update data with properly typed JSONB fields
     const updateData: any = {
       ...propertyData,
@@ -323,6 +326,10 @@ class PropertiesSupabaseService {
       ...(inspection_exterieur !== undefined && { inspection_exterieur: inspection_exterieur as any }),
       ...(inspection_divers !== undefined && { inspection_divers: inspection_divers as any }),
     }
+
+    // Debug: Log updateData
+    console.log('Service updateProperty - updateData.nombre_stationnement:', updateData.nombre_stationnement)
+    console.log('Service updateProperty - Full updateData:', JSON.stringify(updateData, null, 2))
 
     // Update the property
     const { data: property, error: propertyError } = await supabase

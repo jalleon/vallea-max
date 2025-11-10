@@ -559,6 +559,9 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
         }
       })
 
+      // Debug: Log nombre_stationnement value
+      console.log('Saving property with nombre_stationnement:', sanitizedData.nombre_stationnement)
+
       await onSave(sanitizedData)
       onClose()
     } catch (error) {
@@ -595,6 +598,9 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
           sanitizedData[key] = null
         }
       })
+
+      // Debug: Log nombre_stationnement value
+      console.log('SaveAndView - nombre_stationnement:', sanitizedData.nombre_stationnement)
 
       // Use the onSaveAndView callback if provided, otherwise just save
       if (onSaveAndView) {
