@@ -136,6 +136,24 @@ export default function AppraisalEditPage() {
       sectionsDataRef.current = loadedData;
       setSectionsData(loadedData);
       setIsInitialLoad(false);
+
+      // Calculate and update completion percentage if needed
+      const sections = getSections();
+      if (sections.length > 0) {
+        const completedSections = sections.filter(
+          (section) => loadedData[section]?.completed
+        ).length;
+        const calculatedCompletion = Math.round((completedSections / sections.length) * 100);
+
+        // Update database if completion percentage differs
+        if (calculatedCompletion !== data.completion_percentage) {
+          console.log(`📊 Updating completion percentage: ${data.completion_percentage} → ${calculatedCompletion}%`);
+          await supabase
+            .from('appraisals')
+            .update({ completion_percentage: calculatedCompletion })
+            .eq('id', id);
+        }
+      }
     } catch (error) {
       console.error('Error loading appraisal:', error);
     } finally {
