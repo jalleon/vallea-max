@@ -131,8 +131,32 @@ export default function DirectComparisonForm({
 
   const isCondo = subjectPropertyType === 'condo';
 
+  // Debounced onChange to prevent triggering auto-save too frequently
+  const onChangeTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isInitialMountRef = useRef(true);
+
   useEffect(() => {
-    onChange({ subject, comparables });
+    // Skip onChange on initial mount
+    if (isInitialMountRef.current) {
+      isInitialMountRef.current = false;
+      return;
+    }
+
+    // Clear existing timer
+    if (onChangeTimerRef.current) {
+      clearTimeout(onChangeTimerRef.current);
+    }
+
+    // Debounce onChange calls - only call after 300ms of no changes
+    onChangeTimerRef.current = setTimeout(() => {
+      onChange({ subject, comparables });
+    }, 300);
+
+    return () => {
+      if (onChangeTimerRef.current) {
+        clearTimeout(onChangeTimerRef.current);
+      }
+    };
   }, [subject, comparables]);
 
   // Save to history when data changes (but not during undo/redo)

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import {
   Box,
@@ -48,8 +48,12 @@ export default function AppraisalEditPage() {
   const [appraisal, setAppraisal] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saveState, setSaveState] = useState<'saved' | 'unsaved' | 'saving'>('saved');
   const [currentTab, setCurrentTab] = useState(0);
   const [sectionsData, setSectionsData] = useState<any>({});
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const sectionsDataRef = useRef<any>({});
 
   // Restore tab from URL on load
   useEffect(() => {
@@ -106,9 +110,14 @@ export default function AppraisalEditPage() {
 
       if (error) throw error;
 
+      console.log('📥 Loading data from Supabase:', JSON.stringify(data.form_data, null, 2));
+
       setAppraisal(data);
       // Cast form_data from Json to our type
-      setSectionsData((data.form_data as any) || {});
+      const loadedData = (data.form_data as any) || {};
+      sectionsDataRef.current = loadedData;
+      setSectionsData(loadedData);
+      setIsInitialLoad(false);
     } catch (error) {
       console.error('Error loading appraisal:', error);
     } finally {
@@ -119,33 +128,78 @@ export default function AppraisalEditPage() {
   const handleSave = async () => {
     try {
       setSaving(true);
+      setSaveState('saving');
       const supabase = createClient();
+
+      // Use ref to get the latest data (avoids closure issues)
+      const dataToSave = sectionsDataRef.current;
+
+      console.log('💾 Saving data to Supabase:', JSON.stringify(dataToSave, null, 2));
 
       const { error } = await supabase
         .from('appraisals')
         .update({
-          form_data: sectionsData as any,
+          form_data: dataToSave as any,
           updated_at: new Date().toISOString()
         })
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Save error:', error);
+        throw error;
+      }
 
-      // Reload to get updated data
-      await loadAppraisal();
+      console.log('✅ Save successful');
+      setSaveState('saved');
     } catch (error) {
       console.error('Error saving appraisal:', error);
+      setSaveState('unsaved');
     } finally {
       setSaving(false);
     }
   };
 
   const handleSectionChange = (sectionId: string, data: any) => {
-    setSectionsData((prev: any) => ({
-      ...prev,
+    console.log(`📝 Section "${sectionId}" changed:`, data);
+
+    // Update both state and ref
+    const newData = {
+      ...sectionsDataRef.current,
       [sectionId]: data
-    }));
+    };
+
+    sectionsDataRef.current = newData;
+    setSectionsData(newData);
+
+    console.log('📦 Updated sectionsDataRef:', sectionsDataRef.current);
+
+    // Clear existing timer
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+    }
+
+    // Set state to unsaved
+    setSaveState('unsaved');
+
+    // Set new timer for auto-save
+    if (!isInitialLoad) {
+      console.log('⏰ Auto-save timer set for 2 seconds');
+      saveTimerRef.current = setTimeout(() => {
+        handleSave();
+      }, 2000);
+    } else {
+      console.log('⏸️  Skipping auto-save (initial load)');
+    }
   };
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setCurrentTab(newValue);
@@ -263,15 +317,44 @@ export default function AppraisalEditPage() {
             </Box>
           </Box>
 
-          <Button
-            variant="contained"
-            startIcon={saving ? <CircularProgress size={16} /> : <Save />}
-            onClick={handleSave}
-            disabled={saving}
-            sx={{ textTransform: 'none' }}
-          >
-            {saving ? t('saving') : t('save')}
-          </Button>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {saveState === 'saved' && (
+              <Chip
+                icon={<CheckCircle />}
+                label="All changes saved"
+                color="success"
+                size="small"
+                variant="outlined"
+              />
+            )}
+            {saveState === 'unsaved' && (
+              <Chip
+                label="Unsaved changes"
+                color="warning"
+                size="small"
+                variant="outlined"
+              />
+            )}
+            {saveState === 'saving' && (
+              <Chip
+                icon={<CircularProgress size={16} />}
+                label="Saving..."
+                color="info"
+                size="small"
+                variant="outlined"
+              />
+            )}
+            <Button
+              variant="outlined"
+              startIcon={<Save />}
+              onClick={handleSave}
+              disabled={saving}
+              size="small"
+              sx={{ textTransform: 'none' }}
+            >
+              Save Now
+            </Button>
+          </Box>
         </Box>
 
         {/* Tabs */}
