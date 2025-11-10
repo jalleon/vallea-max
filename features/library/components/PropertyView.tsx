@@ -43,7 +43,18 @@ import {
   ContentCopy,
   Map,
   Assessment,
-  Balance
+  Balance,
+  Kitchen,
+  Weekend,
+  DiningTable,
+  Bed,
+  Work,
+  Bathtub,
+  ViewInAr,
+  Storage,
+  Build,
+  MeetingRoom,
+  WbSunny
 } from '@mui/icons-material'
 import { Property } from '../types/property.types'
 import { formatCurrency, formatDate, formatMeasurement } from '@/lib/utils/formatting'
@@ -109,6 +120,85 @@ export function PropertyView({
   const inspectionProgress = calculateInspectionProgress(property)
   const completedCategories = getCompletedCategories(property)
   const isInspectionComplete = inspectionProgress === 100
+
+  // Helper function to get icon for room type
+  const getRoomIcon = (roomType: string) => {
+    const iconMap: Record<string, any> = {
+      cuisine: Kitchen,
+      salon: Weekend,
+      salle_a_manger: DiningTable,
+      chambre: Bed,
+      bureau: Work,
+      salle_bain: Bathtub,
+      salle_eau: Bathtub,
+      salle_sejour: Weekend,
+      salle_familiale: Weekend,
+      buanderie: Storage,
+      rangement: Storage,
+      salle_mecanique: Build,
+      vestibule: MeetingRoom,
+      solarium: WbSunny,
+      autre: ViewInAr
+    }
+    return iconMap[roomType] || ViewInAr
+  }
+
+  // Helper function to sort floors in correct order
+  const sortFloors = (floors: Record<string, any>) => {
+    const floorOrder = ['sous_sol', 'rdc', 'deuxieme', 'troisieme']
+    return Object.entries(floors).sort(([a], [b]) => {
+      const aIndex = floorOrder.indexOf(a)
+      const bIndex = floorOrder.indexOf(b)
+      if (aIndex === -1 && bIndex === -1) return 0
+      if (aIndex === -1) return 1
+      if (bIndex === -1) return -1
+      return aIndex - bIndex
+    })
+  }
+
+  // Helper function to get subcategories for completed inspection categories
+  const getCompletedSubcategories = (categoryId: string) => {
+    const subcategories: string[] = []
+
+    if (categoryId === 'batiment' && property.inspection_batiment) {
+      const data = property.inspection_batiment as Record<string, any>
+      Object.keys(data).forEach(key => {
+        if (data[key] && key !== 'completedAt') {
+          subcategories.push(key)
+        }
+      })
+    } else if (categoryId === 'garage' && property.inspection_garage) {
+      const data = property.inspection_garage as Record<string, any>
+      Object.keys(data).forEach(key => {
+        if (data[key] && key !== 'completedAt') {
+          subcategories.push(key)
+        }
+      })
+    } else if (categoryId === 'mecanique' && property.inspection_mecanique) {
+      const data = property.inspection_mecanique as Record<string, any>
+      Object.keys(data).forEach(key => {
+        if (data[key] && key !== 'completedAt') {
+          subcategories.push(key)
+        }
+      })
+    } else if (categoryId === 'exterieur' && property.inspection_exterieur) {
+      const data = property.inspection_exterieur as Record<string, any>
+      Object.keys(data).forEach(key => {
+        if (data[key] && key !== 'completedAt') {
+          subcategories.push(key)
+        }
+      })
+    } else if (categoryId === 'divers' && property.inspection_divers) {
+      const data = property.inspection_divers as Record<string, any>
+      Object.keys(data).forEach(key => {
+        if (data[key] && key !== 'completedAt') {
+          subcategories.push(key)
+        }
+      })
+    }
+
+    return subcategories
+  }
 
   // Calculate room counts from inspection data
   const calculateRoomCounts = () => {
@@ -1232,7 +1322,7 @@ export function PropertyView({
                               {t('roomsInspected')}
                             </Typography>
                             <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
-                              {property.inspection_pieces.completedRooms || 0} / {property.inspection_pieces.totalRooms || 0}
+                              {property.inspection_pieces.completedRooms || 0}
                             </Typography>
                           </Box>
                         </Grid>
@@ -1242,7 +1332,15 @@ export function PropertyView({
                               {t('floors')}
                             </Typography>
                             <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
-                              {Object.keys(property.inspection_pieces.floors || {}).length}
+                              {sortFloors(property.inspection_pieces.floors || {}).map(([floorId]) => {
+                                const floorLabels: Record<string, string> = {
+                                  sous_sol: locale === 'en' ? 'Basement' : 'Sous-sol',
+                                  rdc: locale === 'en' ? 'Ground' : 'R.D.C.',
+                                  deuxieme: locale === 'en' ? '2nd Floor' : '2e',
+                                  troisieme: locale === 'en' ? '3rd Floor' : '3e'
+                                }
+                                return floorLabels[floorId] || floorId
+                              }).join(', ')}
                             </Typography>
                           </Box>
                         </Grid>
@@ -1256,20 +1354,44 @@ export function PropertyView({
                       <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)', mb: 1, display: 'block' }}>
                         {t('completedCategories')}
                       </Typography>
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                        {completedCategories.map((categoryId) => (
-                          <Chip
-                            key={categoryId}
-                            icon={<CheckCircle sx={{ fontSize: 16 }} />}
-                            label={tInspection(`categories.${categoryId}`)}
-                            size="small"
-                            sx={{
-                              backgroundColor: 'rgba(255,255,255,0.9)',
-                              color: '#1e3a8a',
-                              fontWeight: 600
-                            }}
-                          />
-                        ))}
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                        {completedCategories.map((categoryId) => {
+                          const subcategories = getCompletedSubcategories(categoryId)
+                          return (
+                            <Box key={categoryId}>
+                              <Chip
+                                icon={<CheckCircle sx={{ fontSize: 16 }} />}
+                                label={tInspection(`categories.${categoryId}`)}
+                                size="small"
+                                sx={{
+                                  backgroundColor: 'rgba(255,255,255,0.9)',
+                                  color: '#1e3a8a',
+                                  fontWeight: 600
+                                }}
+                              />
+                              {subcategories.length > 0 && (
+                                <Box sx={{ mt: 0.5, ml: 2, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                  {subcategories.map((subcat) => (
+                                    <Typography
+                                      key={subcat}
+                                      variant="caption"
+                                      sx={{
+                                        color: 'rgba(255,255,255,0.9)',
+                                        backgroundColor: 'rgba(255,255,255,0.2)',
+                                        px: 1,
+                                        py: 0.25,
+                                        borderRadius: 1,
+                                        fontSize: '0.7rem'
+                                      }}
+                                    >
+                                      {tInspection(`subcategories.${categoryId}.${subcat}`, { defaultValue: subcat })}
+                                    </Typography>
+                                  ))}
+                                </Box>
+                              )}
+                            </Box>
+                          )
+                        })}
                       </Box>
                     </Box>
                   )}
@@ -1281,15 +1403,15 @@ export function PropertyView({
                         {t('floorDetails')}
                       </Typography>
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                        {Object.entries(property.inspection_pieces.floors).map(([floorId, floor]) => {
+                        {sortFloors(property.inspection_pieces.floors).map(([floorId, floor]) => {
                           // Get completed rooms and their types
                           const completedRooms = Object.values(floor.rooms || {}).filter(
                             (room: any) => room.completedAt
                           )
 
-                          // Get room type names with numbering for duplicates
+                          // Get room type names with icons and numbering for duplicates
                           const roomTypeCounts: Record<string, number> = {}
-                          const roomNames = completedRooms.map((room: any) => {
+                          const roomElements = completedRooms.map((room: any, index: number) => {
                             const roomType = room.type
                             // Convert snake_case to camelCase for translation key
                             const camelCaseType = roomType.replace(/_([a-z])/g, (match: string, letter: string) => letter.toUpperCase())
@@ -1301,7 +1423,16 @@ export function PropertyView({
                               roomName = `${roomName} #${roomTypeCounts[roomType]}`
                             }
 
-                            return roomName
+                            const RoomIcon = getRoomIcon(roomType)
+
+                            return (
+                              <Box key={index} sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
+                                <RoomIcon sx={{ fontSize: 14, color: 'rgba(255,255,255,0.8)' }} />
+                                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                                  {roomName}
+                                </Typography>
+                              </Box>
+                            )
                           })
 
                           return (
@@ -1319,10 +1450,10 @@ export function PropertyView({
                               <Typography variant="body2" sx={{ color: 'white', fontWeight: 600 }}>
                                 {floor.name}
                               </Typography>
-                              {roomNames.length > 0 ? (
-                                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                                  {roomNames.join(', ')}
-                                </Typography>
+                              {roomElements.length > 0 ? (
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                  {roomElements}
+                                </Box>
                               ) : (
                                 <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)', fontStyle: 'italic' }}>
                                   {t('noRoomsInspected')}
@@ -1345,10 +1476,11 @@ export function PropertyView({
                     sx={{
                       mt: 2,
                       backgroundColor: 'white',
-                      color: '#667eea',
+                      color: 'white',
+                      background: 'linear-gradient(135deg, #1e3a8a 0%, #60a5fa 100%)',
                       fontWeight: 600,
                       '&:hover': {
-                        backgroundColor: 'rgba(255,255,255,0.9)'
+                        background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)'
                       }
                     }}
                   >
