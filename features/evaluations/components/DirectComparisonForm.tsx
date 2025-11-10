@@ -666,9 +666,9 @@ export default function DirectComparisonForm({
                 return '';
               }
 
-              // Subject property doesn't have sale data - show N/A
+              // Subject property doesn't have sale data - keep empty
               if (['dataSource', 'saleDate', 'salePrice', 'daysOnMarket'].includes(params.data.rowId)) {
-                return 'N/A';
+                return '';
               }
 
               // Format bathrooms as "full:half"
