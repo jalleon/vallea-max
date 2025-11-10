@@ -786,6 +786,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label={t('postalCode')}
                         value={formData.code_postal}
+                        sx={getFieldStyling(formData.code_postal)}
                         onChange={(e) => handleInputChange('code_postal', e.target.value)}
                         variant="outlined"
                         size="small"
@@ -866,6 +867,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label={formData.status === 'Sujet' ? t('effectiveDate') : t('saleDate')}
                         type="date"
                         value={formData.date_vente || ''}
+                        sx={getFieldStyling(formData.date_vente || '')}
                         onChange={(e) => handleInputChange(
                           'date_vente',
                           e.target.value
@@ -923,6 +925,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label={t('mlsNumber')}
                         value={formData.numero_mls}
+                        sx={getFieldStyling(formData.numero_mls)}
                         onChange={(e) => handleInputChange('numero_mls', e.target.value)}
                         variant="outlined"
                         size="small"
@@ -1029,6 +1032,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                                           fullWidth
                                           label={t('unitNumber')}
                                           value={unitRent.unitNumber}
+                                          sx={getFieldStyling(unitRent.unitNumber)}
                                           onChange={(e) => {
                                             const newRents = [...unitRents]
                                             newRents[i] = {
@@ -1175,6 +1179,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                             label={t('floorNumber')}
                             type="number"
                             value={formData.floor_number ?? ''}
+                            sx={getFieldStyling(formData.floor_number ?? '')}
                             onChange={(e) => {
                               const value = e.target.value
                               handleInputChange('floor_number', value ? parseInt(value) : undefined)
@@ -1207,6 +1212,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label={t('constructionYear')}
                         type="number"
                         value={formData.annee_construction || ''}
+                        sx={getFieldStyling(formData.annee_construction || '')}
                         onChange={(e) => {
                           const year = e.target.value ? parseInt(e.target.value) : undefined
                           handleInputChange('annee_construction', year)
@@ -1239,6 +1245,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label={t('effectiveAge')}
                         type="number"
                         value={formData.eff_age || ''}
+                        sx={getFieldStyling(formData.eff_age || '')}
                         onChange={(e) => handleInputChange('eff_age', e.target.value ? parseInt(e.target.value) : undefined)}
                         variant="outlined"
                         size="small"
@@ -1253,6 +1260,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label={t('roomCount')}
                         type="number"
                         value={formData.nombre_pieces || ''}
+                        sx={getFieldStyling(formData.nombre_pieces || '')}
                         onChange={(e) => handleInputChange('nombre_pieces', e.target.value ? parseInt(e.target.value) : undefined)}
                         variant="outlined"
                         size="small"
@@ -1268,6 +1276,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label={t('bedroomCount')}
                         type="number"
                         value={formData.nombre_chambres || ''}
+                        sx={getFieldStyling(formData.nombre_chambres || '')}
                         onChange={(e) => handleInputChange('nombre_chambres', e.target.value ? parseInt(e.target.value) : undefined)}
                         variant="outlined"
                         size="small"
@@ -1283,6 +1292,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label={t('bathroomCount')}
                         type="number"
                         value={formData.salle_bain || ''}
+                        sx={getFieldStyling(formData.salle_bain || '')}
                         onChange={(e) => handleInputChange('salle_bain', e.target.value ? parseFloat(e.target.value) : undefined)}
                         variant="outlined"
                         size="small"
@@ -1300,6 +1310,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         type="number"
                         inputProps={{ step: 0.5 }}
                         value={formData.salle_eau || ''}
+                        sx={getFieldStyling(formData.salle_eau || '')}
                         onChange={(e) => handleInputChange('salle_eau', e.target.value ? parseFloat(e.target.value) : undefined)}
                         variant="outlined"
                         size="small"
@@ -1331,6 +1342,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label="#"
                         type="number"
                         value={formData.nombre_stationnement ?? ''}
+                        sx={getFieldStyling(formData.nombre_stationnement ?? '')}
                         onChange={(e) => {
                           const value = e.target.value
                           handleInputChange('nombre_stationnement', value ? parseInt(value) : undefined)
@@ -1359,6 +1371,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label={t('garageDimension')}
                         value={formData.dimension_garage}
+                        sx={getFieldStyling(formData.dimension_garage)}
                         onChange={(e) => handleInputChange('dimension_garage', e.target.value)}
                         variant="outlined"
                         size="small"
@@ -1383,6 +1396,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label={t('roofing')}
                         value={formData.toiture}
+                        sx={getFieldStyling(formData.toiture)}
                         onChange={(e) => handleInputChange('toiture', e.target.value)}
                         variant="outlined"
                         size="small"
@@ -1406,6 +1420,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label={t('improvementsAboveGround')}
                         value={formData.ameliorations_hors_sol}
+                        sx={getFieldStyling(formData.ameliorations_hors_sol)}
                         onChange={(e) => handleInputChange('ameliorations_hors_sol', e.target.value)}
                         variant="outlined"
                         size="small"
@@ -1442,6 +1457,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label={t('lotNumber')}
                         value={formData.province === 'QC' ? formatLotNumber(formData.lot_number || '') : formData.lot_number || ''}
+                        sx={getFieldStyling(formData.province === 'QC' ? formatLotNumber(formData.lot_number || '') : formData.lot_number || '')}
                         onChange={(e) => {
                           const value = formData.province === 'QC' ? parseLotNumber(e.target.value) : e.target.value
                           handleInputChange('lot_number', value)
@@ -1472,6 +1488,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                               fullWidth
                               label={t('unit')}
                               value={lot.unit_number || ''}
+                              sx={getFieldStyling(lot.unit_number || '')}
                               onChange={(e) => updateAdditionalLot(lot.id, 'unit_number', e.target.value)}
                               variant="outlined"
                               size="small"
@@ -1510,6 +1527,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                               fullWidth
                               label={t('cadastre')}
                               value={lot.matricule || ''}
+                              sx={getFieldStyling(lot.matricule || '')}
                               onChange={(e) => updateAdditionalLot(lot.id, 'matricule', e.target.value)}
                               variant="outlined"
                               size="small"
@@ -1547,6 +1565,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label={t('date')}
                         type="date"
                         value={formData.eval_municipale_annee || ''}
+                        sx={getFieldStyling(formData.eval_municipale_annee || '')}
                         onChange={(e) => handleInputChange('eval_municipale_annee', e.target.value)}
                         variant="outlined"
                         size="small"
@@ -1559,6 +1578,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label={t('land')}
                         type="text"
                         value={formatCurrencyDisplay(formData.eval_municipale_terrain)}
+                        sx={getFieldStyling(formatCurrencyDisplay(formData.eval_municipale_terrain))}
                         onChange={(e) => {
                           const terrain = parseCurrencyInput(e.target.value)
                           handleInputChange('eval_municipale_terrain', terrain)
@@ -1629,6 +1649,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label={t('year')}
                         type="number"
                         value={formData.taxes_municipales_annee || ''}
+                        sx={getFieldStyling(formData.taxes_municipales_annee || '')}
                         onChange={(e) => handleInputChange('taxes_municipales_annee', e.target.value ? parseInt(e.target.value) : undefined)}
                         variant="outlined"
                         size="small"
@@ -1640,6 +1661,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label={t('amount')}
                         type="text"
                         value={formatCurrencyDisplay(formData.taxes_municipales_montant)}
+                        sx={getFieldStyling(formatCurrencyDisplay(formData.taxes_municipales_montant))}
                         onChange={(e) => handleInputChange('taxes_municipales_montant', parseCurrencyInput(e.target.value))}
                         variant="outlined"
                         size="small"
@@ -1659,6 +1681,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label={t('year')}
                         type="number"
                         value={formData.taxes_scolaires_annee || ''}
+                        sx={getFieldStyling(formData.taxes_scolaires_annee || '')}
                         onChange={(e) => handleInputChange('taxes_scolaires_annee', e.target.value ? parseInt(e.target.value) : undefined)}
                         variant="outlined"
                         size="small"
@@ -1670,6 +1693,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label={t('amount')}
                         type="text"
                         value={formatCurrencyDisplay(formData.taxes_scolaires_montant)}
+                        sx={getFieldStyling(formatCurrencyDisplay(formData.taxes_scolaires_montant))}
                         onChange={(e) => handleInputChange('taxes_scolaires_montant', parseCurrencyInput(e.target.value))}
                         variant="outlined"
                         size="small"
@@ -1689,6 +1713,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label={t('livingAreaM2')}
                         type="number"
                         value={formData.aire_habitable_m2 || ''}
+                        sx={getFieldStyling(formData.aire_habitable_m2 || '')}
                         onChange={(e) => {
                           const value = e.target.value ? parseFloat(e.target.value) : undefined
                           setFormData(prev => ({
@@ -1707,6 +1732,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label={t('livingAreaPi2')}
                         type="number"
                         value={formData.aire_habitable_pi2 || ''}
+                        sx={getFieldStyling(formData.aire_habitable_pi2 || '')}
                         onChange={(e) => {
                           const value = e.target.value ? parseFloat(e.target.value) : undefined
                           setFormData(prev => ({
@@ -1734,6 +1760,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label={t('zoning')}
                         value={formData.zonage || ''}
+                        sx={getFieldStyling(formData.zonage || '')}
                         onChange={(e) => handleInputChange('zonage', e.target.value)}
                         variant="outlined"
                         size="small"
@@ -1744,6 +1771,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label={t('permittedUses')}
                         value={formData.zoning_usages_permis || ''}
+                        sx={getFieldStyling(formData.zoning_usages_permis || '')}
                         onChange={(e) => handleInputChange('zoning_usages_permis', e.target.value)}
                         variant="outlined"
                         size="small"
@@ -1781,6 +1809,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label={t('lotAreaM2')}
                         type="text"
                         value={'superficie_terrain_m2' in rawInputs ? rawInputs.superficie_terrain_m2 : (formData.superficie_terrain_m2?.toFixed(2) || '')}
+                        sx={getFieldStyling('superficie_terrain_m2' in rawInputs ? rawInputs.superficie_terrain_m2 : (formData.superficie_terrain_m2?.toFixed(2) || ''))}
                         onChange={(e) => {
                           const input = e.target.value
                           updateRawInput('superficie_terrain_m2', input)
@@ -1850,6 +1879,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label={t('frontageM')}
                         type="text"
                         value={'frontage_m2' in rawInputs ? rawInputs.frontage_m2 : (formData.frontage_m2?.toFixed(2) || '')}
+                        sx={getFieldStyling('frontage_m2' in rawInputs ? rawInputs.frontage_m2 : (formData.frontage_m2?.toFixed(2) || ''))}
                         onChange={(e) => {
                           const input = e.target.value
                           updateRawInput('frontage_m2', input)
@@ -1985,6 +2015,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label={t('buildingPerimeterM')}
                         type="text"
                         value={'perimetre_batiment_m2' in rawInputs ? rawInputs.perimetre_batiment_m2 : (formData.perimetre_batiment_m2?.toFixed(2) || '')}
+                        sx={getFieldStyling('perimetre_batiment_m2' in rawInputs ? rawInputs.perimetre_batiment_m2 : (formData.perimetre_batiment_m2?.toFixed(2) || ''))}
                         onChange={(e) => {
                           const input = e.target.value
                           updateRawInput('perimetre_batiment_m2', input)
@@ -2450,6 +2481,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                 fullWidth
                 label={t('notes')}
                 value={formData.notes}
+                sx={getFieldStyling(formData.notes)}
                 onChange={(e) => handleInputChange('notes', e.target.value)}
                 variant="outlined"
                 multiline
