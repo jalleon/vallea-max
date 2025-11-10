@@ -99,7 +99,6 @@ interface RowData {
   field: string;
   label: string;
   subjectData1: any;
-  subjectData2?: any;
   [key: string]: any; // For dynamic comparable columns
 }
 
@@ -522,8 +521,8 @@ export default function DirectComparisonForm({
   // Row definitions - all 29 rows
   const rowDefinitions = useMemo(() => {
     const rows = [
-      { rowId: 'address', field: 'address', label: t('address'), type: 'text', hasSecondColumn: true },
-      { rowId: 'dataSource', field: 'dataSource', label: t('dataSource'), type: 'text', hasSecondColumn: true },
+      { rowId: 'address', field: 'address', label: t('address'), type: 'text' },
+      { rowId: 'dataSource', field: 'dataSource', label: t('dataSource'), type: 'text' },
       { rowId: 'saleDate', field: 'saleDate', label: t('saleDate'), type: 'date' },
       { rowId: 'salePrice', field: 'salePrice', label: t('salePrice'), type: 'currency' },
       { rowId: 'daysOnMarket', field: 'daysOnMarket', label: t('daysOnMarket'), type: 'number' },
@@ -572,10 +571,7 @@ export default function DirectComparisonForm({
         rowId: rowDef.rowId,
         field: rowDef.field,
         label: rowDef.label,
-        subjectData1: subject[rowDef.field as keyof ComparableProperty],
-        subjectData2: rowDef.hasSecondColumn
-          ? subject[`${rowDef.field}Line2` as keyof ComparableProperty] || subject[`${rowDef.field}Alt` as keyof ComparableProperty]
-          : undefined
+        subjectData1: subject[rowDef.field as keyof ComparableProperty]
       };
 
       // Add comparable columns
@@ -656,10 +652,6 @@ export default function DirectComparisonForm({
                 borderBottom: isTotalAdjustment ? '2px solid #1976D2' : (isAdjustedValue ? '2px solid #4CAF50' : (isGrossPercent ? '2px solid #FF9800' : (isNetPercent ? '2px solid #9C27B0' : 'none')))
               };
             },
-            colSpan: (params: any) => {
-              // Merge columns for dataSource row
-              return params.data.rowId === 'dataSource' ? 2 : 1;
-            },
             cellRenderer: (params: ICellRendererParams) => {
               // Subject columns should be empty for percentage rows
               if (params.data.rowId === 'grossAdjustmentPercent' || params.data.rowId === 'netAdjustmentPercent') {
@@ -687,37 +679,6 @@ export default function DirectComparisonForm({
                 );
               }
               return params.value;
-            }
-          },
-          {
-            field: 'subjectData2',
-            headerName: '',
-            width: 160,
-            editable: (params: any) => params.data.rowId === 'address',
-            cellStyle: (params: any) => {
-              const hasData = params.data.rowId === 'address';
-              const isTotalAdjustment = params.data.rowId === 'totalAdjustment';
-              const isAdjustedValue = params.data.rowId === 'adjustedValue';
-              const isGrossPercent = params.data.rowId === 'grossAdjustmentPercent';
-              const isNetPercent = params.data.rowId === 'netAdjustmentPercent';
-              const isBoldRow = isTotalAdjustment || isAdjustedValue || isGrossPercent || isNetPercent;
-              return {
-                backgroundColor: hasData ? '#f5f9ff' : (isBoldRow ? '#e3f2fd' : '#fafafa'),
-                borderRight: '2px solid #e0e0e0',
-                fontSize: isBoldRow ? '14px' : '13px',
-                fontWeight: isBoldRow ? 700 : 400,
-                lineHeight: params.data.rowId === 'address' ? '1.4' : 'normal',
-                whiteSpace: params.data.rowId === 'address' ? 'normal' : 'nowrap',
-                padding: params.data.rowId === 'address' ? '8px' : '4px 8px',
-                display: 'flex',
-                alignItems: params.data.rowId === 'address' ? 'flex-start' : 'center',
-                borderTop: isTotalAdjustment ? '2px solid #1976D2' : (isAdjustedValue ? '2px solid #4CAF50' : (isGrossPercent ? '2px solid #FF9800' : (isNetPercent ? '2px solid #9C27B0' : 'none'))),
-                borderBottom: isTotalAdjustment ? '2px solid #1976D2' : (isAdjustedValue ? '2px solid #4CAF50' : (isGrossPercent ? '2px solid #FF9800' : (isNetPercent ? '2px solid #9C27B0' : 'none')))
-              };
-            },
-            colSpan: (params: any) => {
-              // This column is hidden when dataSource row spans it
-              return params.data.rowId === 'dataSource' ? 0 : 1;
             }
           }
         ]
