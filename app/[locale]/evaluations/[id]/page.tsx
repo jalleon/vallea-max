@@ -475,6 +475,7 @@ export default function AppraisalEditPage() {
                   data={sectionsData[sectionId] || {}}
                   onChange={(data) => handleSectionChange(sectionId, data)}
                   subjectPropertyId={appraisal.property_id}
+                  subjectPropertyType={appraisal.property_type}
                   reloadTrigger={reloadTrigger}
                 />
               </TabPanel>

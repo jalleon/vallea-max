@@ -29,6 +29,7 @@ interface AppraisalSectionFormProps {
   data: any;
   onChange: (data: any) => void;
   subjectPropertyId?: string | null;
+  subjectPropertyType?: string | null;
   reloadTrigger?: number;
 }
 
@@ -38,6 +39,7 @@ export default function AppraisalSectionForm({
   data,
   onChange,
   subjectPropertyId,
+  subjectPropertyType,
   reloadTrigger
 }: AppraisalSectionFormProps) {
   const t = useTranslations('evaluations.sections');
@@ -78,7 +80,7 @@ export default function AppraisalSectionForm({
         case 'ameliorations':
           return renderAmeliorationsSection();
         case 'technique_parite':
-          return <DirectComparisonForm data={formData} onChange={onChange} subjectPropertyId={subjectPropertyId} reloadTrigger={reloadTrigger} />;
+          return <DirectComparisonForm data={formData} onChange={onChange} subjectPropertyId={subjectPropertyId} subjectPropertyType={subjectPropertyType || undefined} reloadTrigger={reloadTrigger} />;
         default:
           return renderGenericSection();
       }
@@ -94,7 +96,7 @@ export default function AppraisalSectionForm({
         case 'identification_bien':
           return renderPropertySection();
         case 'methode_parite':
-          return <DirectComparisonForm data={formData} onChange={onChange} subjectPropertyId={subjectPropertyId} reloadTrigger={reloadTrigger} />;
+          return <DirectComparisonForm data={formData} onChange={onChange} subjectPropertyId={subjectPropertyId} subjectPropertyType={subjectPropertyType || undefined} reloadTrigger={reloadTrigger} />;
         default:
           return renderGenericSection();
       }

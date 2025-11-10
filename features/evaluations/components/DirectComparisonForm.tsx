@@ -528,9 +528,38 @@ export default function DirectComparisonForm({
     setSelectingForIndex(null);
   };
 
-  // Row definitions - all 29 rows
+  // Helper function to determine which rows should be shown based on property type
+  const shouldShowRow = (rowId: string): boolean => {
+    // Land properties - only show lot/location related fields
+    if (subjectPropertyType === 'land') {
+      const landHiddenRows = ['livingArea', 'buildingType', 'designStyle', 'age', 'condition',
+                              'roomsTotal', 'roomsBedrooms', 'roomsBathrooms', 'basement',
+                              'parking', 'aboveGradeImprovements', 'unitLocation'];
+      return !landHiddenRows.includes(rowId);
+    }
+
+    // Condo properties - hide lot size, show unit location
+    if (isCondo) {
+      if (rowId === 'lotSize') return false;
+      if (rowId === 'aboveGradeImprovements') return false;
+      return true;
+    }
+
+    // Commercial/Semi-commercial properties - show all fields
+    if (subjectPropertyType === 'commercial' || subjectPropertyType === 'semi_commercial') {
+      if (rowId === 'unitLocation') return false;
+      return true;
+    }
+
+    // Residential properties (single_family, duplex, triplex, quadriplex_plus, apartment)
+    // Show all standard fields except unit location
+    if (rowId === 'unitLocation') return false;
+    return true;
+  };
+
+  // Row definitions - filtered based on property type
   const rowDefinitions = useMemo(() => {
-    const rows = [
+    const allRows = [
       { rowId: 'address', field: 'address', label: t('address'), type: 'text' },
       { rowId: 'dataSource', field: 'dataSource', label: t('dataSource'), type: 'text' },
       { rowId: 'saleDate', field: 'saleDate', label: t('saleDate'), type: 'date' },
@@ -551,12 +580,8 @@ export default function DirectComparisonForm({
       { rowId: 'quality', field: 'quality', label: t('quality'), type: 'text' },
       { rowId: 'extras', field: 'extras', label: t('extras'), type: 'text' },
       // Conditional rows
-      ...(isCondo ? [] : [
-        { rowId: 'aboveGradeImprovements', field: 'aboveGradeImprovements', label: t('aboveGradeImprovements'), type: 'text' }
-      ]),
-      ...(isCondo ? [
-        { rowId: 'unitLocation', field: 'unitLocation', label: t('unitLocation'), type: 'text' }
-      ] : []),
+      { rowId: 'aboveGradeImprovements', field: 'aboveGradeImprovements', label: t('aboveGradeImprovements'), type: 'text' },
+      { rowId: 'unitLocation', field: 'unitLocation', label: t('unitLocation'), type: 'text' },
       { rowId: 'assessedValue', field: 'assessedValue', label: t('assessedValue'), type: 'text' },
       { rowId: 'assessedValueTotal', field: 'assessedValueTotal', label: t('assessedValueTotal'), type: 'text' },
       { rowId: 'pricePerSqFt', field: 'pricePerSqFt', label: t('pricePerSqFt'), type: 'calculated' },
@@ -564,15 +589,18 @@ export default function DirectComparisonForm({
       { rowId: 'optional2', field: 'optional2', label: t('optional2'), type: 'text' },
       { rowId: 'optional3', field: 'optional3', label: t('optional3'), type: 'text' },
       { rowId: 'optional4', field: 'optional4', label: t('optional4'), type: 'text' },
-      // Summary rows
+      // Summary rows (always shown)
       { rowId: 'distance', field: 'distance', label: t('distance'), type: 'calculated' },
       { rowId: 'totalAdjustment', field: 'totalAdjustment', label: t('totalAdjustment'), type: 'calculated' },
       { rowId: 'adjustedValue', field: 'adjustedValue', label: t('adjustedValue'), type: 'calculated' },
       { rowId: 'grossAdjustmentPercent', field: 'grossAdjustmentPercent', label: t('grossAdjustmentPercent'), type: 'calculated' },
       { rowId: 'netAdjustmentPercent', field: 'netAdjustmentPercent', label: t('netAdjustmentPercent'), type: 'calculated' }
     ];
-    return rows as any[];
-  }, [isCondo, t]);
+
+    // Filter rows based on property type
+    const filteredRows = allRows.filter(row => shouldShowRow(row.rowId));
+    return filteredRows as any[];
+  }, [isCondo, subjectPropertyType, t]);
 
   // Convert data to row format for AG Grid
   const rowData = useMemo(() => {
