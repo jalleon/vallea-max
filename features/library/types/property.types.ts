@@ -105,6 +105,7 @@ export interface Property {
   salle_bain?: number
   salle_eau?: number
   stationnement?: ParkingType
+  nombre_stationnement?: number
   type_garage?: GarageType
   dimension_garage?: string
   type_sous_sol?: BasementType
@@ -235,6 +236,7 @@ export interface PropertyCreateInput {
   salle_bain?: number
   salle_eau?: number
   stationnement?: ParkingType
+  nombre_stationnement?: number
   type_garage?: GarageType
   dimension_garage?: string
   type_sous_sol?: BasementType

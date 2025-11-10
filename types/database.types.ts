@@ -309,6 +309,7 @@ export type Database = {
           municipalite: string | null
           nombre_chambres: number | null
           nombre_pieces: number | null
+          nombre_stationnement: number | null
           notes: string | null
           numero_mls: string | null
           occupancy: string | null
@@ -395,6 +396,7 @@ export type Database = {
           municipalite?: string | null
           nombre_chambres?: number | null
           nombre_pieces?: number | null
+          nombre_stationnement?: number | null
           notes?: string | null
           numero_mls?: string | null
           occupancy?: string | null
@@ -481,6 +483,7 @@ export type Database = {
           municipalite?: string | null
           nombre_chambres?: number | null
           nombre_pieces?: number | null
+          nombre_stationnement?: number | null
           notes?: string | null
           numero_mls?: string | null
           occupancy?: string | null
