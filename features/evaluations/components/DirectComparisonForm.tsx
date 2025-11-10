@@ -11,7 +11,10 @@ import {
   DialogContent,
   DialogActions,
   Alert,
-  Paper
+  Paper,
+  TextField,
+  Grid,
+  Chip
 } from '@mui/material';
 import { Add, Delete, Search } from '@mui/icons-material';
 import { useTranslations } from 'next-intl';
@@ -131,6 +134,7 @@ export default function DirectComparisonForm({
   const [propertyDialogOpen, setPropertyDialogOpen] = useState(false);
   const [selectingForIndex, setSelectingForIndex] = useState<number | null>(null);
   const [libraryProperties, setLibraryProperties] = useState<any[]>([]);
+  const [propertySearchQuery, setPropertySearchQuery] = useState('');
 
   const isCondo = subjectPropertyType === 'condo';
 
@@ -1111,34 +1115,206 @@ export default function DirectComparisonForm({
       </Box>
 
       {/* Property Selection Dialog */}
-      <Dialog open={propertyDialogOpen} onClose={() => setPropertyDialogOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle>{t('selectFromLibrary')}</DialogTitle>
-        <DialogContent>
-          {libraryProperties.length === 0 ? (
-            <Alert severity="info">No properties available in library</Alert>
-          ) : (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 2 }}>
-              {libraryProperties.map((property) => (
-                <Paper
-                  key={property.id}
-                  sx={{
-                    p: 2,
-                    cursor: 'pointer',
-                    '&:hover': { bgcolor: 'action.hover' }
-                  }}
-                  onClick={() => handlePropertySelect(property)}
-                >
-                  <Typography variant="subtitle2">{property.adresse}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {property.ville} • {property.prix_vente ? `$${property.prix_vente.toLocaleString()}` : 'No price'}
-                  </Typography>
-                </Paper>
-              ))}
-            </Box>
-          )}
+      <Dialog
+        open={propertyDialogOpen}
+        onClose={() => {
+          setPropertyDialogOpen(false);
+          setPropertySearchQuery('');
+        }}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: { height: '80vh', maxHeight: '800px' }
+        }}
+      >
+        <DialogTitle sx={{ pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Typography variant="h6" fontWeight={700}>{t('selectFromLibrary')}</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            {libraryProperties.length} {libraryProperties.length === 1 ? 'property' : 'properties'} available
+          </Typography>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0 }}>
+          {/* Search Bar */}
+          <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'background.default' }}>
+            <TextField
+              fullWidth
+              size="small"
+              placeholder="Search by address, city, MLS number, or matricule..."
+              value={propertySearchQuery}
+              onChange={(e) => setPropertySearchQuery(e.target.value)}
+              InputProps={{
+                startAdornment: <Search sx={{ mr: 1, color: 'text.secondary' }} />,
+                sx: { bgcolor: 'background.paper' }
+              }}
+            />
+          </Box>
+
+          {/* Property List */}
+          <Box sx={{ p: 2, overflowY: 'auto', height: 'calc(80vh - 240px)' }}>
+            {libraryProperties.length === 0 ? (
+              <Alert severity="info" sx={{ mt: 2 }}>No properties available in library</Alert>
+            ) : (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {libraryProperties
+                  .filter(property => {
+                    if (!propertySearchQuery) return true;
+                    const query = propertySearchQuery.toLowerCase();
+                    return (
+                      property.adresse?.toLowerCase().includes(query) ||
+                      property.ville?.toLowerCase().includes(query) ||
+                      property.numero_mls?.toLowerCase().includes(query) ||
+                      property.matricule?.toLowerCase().includes(query)
+                    );
+                  })
+                  .map((property) => {
+                    // Format living area
+                    let livingAreaDisplay = '';
+                    if (property.aire_habitable_pi2) {
+                      livingAreaDisplay = `${property.aire_habitable_pi2.toLocaleString()} pi²`;
+                    } else if (property.superficie_habitable_pi2) {
+                      livingAreaDisplay = `${property.superficie_habitable_pi2.toLocaleString()} pi²`;
+                    }
+
+                    // Format lot size
+                    let lotSizeDisplay = '';
+                    if (property.superficie_terrain_m2) {
+                      lotSizeDisplay = `${property.superficie_terrain_m2} m²`;
+                    } else if (property.superficie_terrain_pi2) {
+                      lotSizeDisplay = `${property.superficie_terrain_pi2.toLocaleString()} pi²`;
+                    }
+
+                    return (
+                      <Paper
+                        key={property.id}
+                        elevation={0}
+                        sx={{
+                          p: 2.5,
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          '&:hover': {
+                            borderColor: 'primary.main',
+                            bgcolor: 'action.hover',
+                            transform: 'translateY(-1px)',
+                            boxShadow: 2
+                          }
+                        }}
+                        onClick={() => {
+                          handlePropertySelect(property);
+                          setPropertySearchQuery('');
+                        }}
+                      >
+                        <Grid container spacing={2}>
+                          {/* Left Column - Main Info */}
+                          <Grid item xs={12} md={6}>
+                            <Typography variant="h6" fontWeight={600} gutterBottom>
+                              {property.adresse}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" gutterBottom>
+                              {property.ville}, {property.province} {property.code_postal}
+                            </Typography>
+                            {property.numero_mls && (
+                              <Chip
+                                label={`MLS: ${property.numero_mls}`}
+                                size="small"
+                                sx={{ mt: 1, mr: 1 }}
+                              />
+                            )}
+                            {property.type_propriete && (
+                              <Chip
+                                label={property.type_propriete}
+                                size="small"
+                                color="primary"
+                                variant="outlined"
+                                sx={{ mt: 1 }}
+                              />
+                            )}
+                          </Grid>
+
+                          {/* Right Column - Details */}
+                          <Grid item xs={12} md={6}>
+                            <Grid container spacing={1.5}>
+                              {property.prix_vente && (
+                                <Grid item xs={6}>
+                                  <Typography variant="caption" color="text.secondary" display="block">
+                                    Sale Price
+                                  </Typography>
+                                  <Typography variant="body1" fontWeight={600} color="success.main">
+                                    ${property.prix_vente.toLocaleString()}
+                                  </Typography>
+                                </Grid>
+                              )}
+                              {property.date_vente && (
+                                <Grid item xs={6}>
+                                  <Typography variant="caption" color="text.secondary" display="block">
+                                    Sale Date
+                                  </Typography>
+                                  <Typography variant="body2">
+                                    {new Date(property.date_vente).toLocaleDateString()}
+                                  </Typography>
+                                </Grid>
+                              )}
+                              {livingAreaDisplay && (
+                                <Grid item xs={6}>
+                                  <Typography variant="caption" color="text.secondary" display="block">
+                                    Living Area
+                                  </Typography>
+                                  <Typography variant="body2">
+                                    {livingAreaDisplay}
+                                  </Typography>
+                                </Grid>
+                              )}
+                              {lotSizeDisplay && (
+                                <Grid item xs={6}>
+                                  <Typography variant="caption" color="text.secondary" display="block">
+                                    Lot Size
+                                  </Typography>
+                                  <Typography variant="body2">
+                                    {lotSizeDisplay}
+                                  </Typography>
+                                </Grid>
+                              )}
+                              {property.nombre_chambres !== null && property.nombre_chambres !== undefined && (
+                                <Grid item xs={6}>
+                                  <Typography variant="caption" color="text.secondary" display="block">
+                                    Bedrooms
+                                  </Typography>
+                                  <Typography variant="body2">
+                                    {property.nombre_chambres}
+                                  </Typography>
+                                </Grid>
+                              )}
+                              {(property.salle_bain || property.salle_eau) && (
+                                <Grid item xs={6}>
+                                  <Typography variant="caption" color="text.secondary" display="block">
+                                    Bathrooms
+                                  </Typography>
+                                  <Typography variant="body2">
+                                    {property.salle_bain || 0}:{property.salle_eau || 0}
+                                  </Typography>
+                                </Grid>
+                              )}
+                            </Grid>
+                          </Grid>
+                        </Grid>
+                      </Paper>
+                    );
+                  })}
+              </Box>
+            )}
+          </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setPropertyDialogOpen(false)}>{tCommon('cancel')}</Button>
+        <DialogActions sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+          <Button
+            onClick={() => {
+              setPropertyDialogOpen(false);
+              setPropertySearchQuery('');
+            }}
+            sx={{ textTransform: 'none' }}
+          >
+            {tCommon('cancel')}
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
