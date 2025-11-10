@@ -160,44 +160,89 @@ export function PropertyView({
   const getCompletedSubcategories = (categoryId: string) => {
     const subcategories: string[] = []
 
+    // Map of subcategory field keys to user-friendly labels
+    const subcategoryLabels: Record<string, Record<string, { fr: string, en: string }>> = {
+      batiment: {
+        fondation_mur_toiture: { fr: 'Fondation, mur, toiture', en: 'Foundation, wall, roof' },
+        portes_fenetres: { fr: 'Portes et fenêtres', en: 'Doors and windows' },
+        planchers_balcons: { fr: 'Planchers et balcons', en: 'Floors and balconies' },
+        parement_interieur: { fr: 'Parement intérieur', en: 'Interior cladding' }
+      },
+      garage: {
+        largeur_feet: { fr: 'Dimensions', en: 'Dimensions' },
+        largeur_meters: { fr: 'Dimensions', en: 'Dimensions' },
+        type_porte: { fr: 'Porte de garage', en: 'Garage door' },
+        notes: { fr: 'Notes', en: 'Notes' }
+      },
+      mecanique: {
+        chauffage: { fr: 'Chauffage', en: 'Heating' },
+        eau_chaude: { fr: 'Eau chaude', en: 'Hot water' },
+        electricite: { fr: 'Électricité', en: 'Electricity' },
+        plomberie: { fr: 'Plomberie', en: 'Plumbing' }
+      },
+      exterieur: {
+        terrain: { fr: 'Terrain', en: 'Land' },
+        stationnement: { fr: 'Stationnement', en: 'Parking' },
+        acces: { fr: 'Accès', en: 'Access' }
+      },
+      divers: {
+        notes: { fr: 'Notes générales', en: 'General notes' }
+      }
+    }
+
     if (categoryId === 'batiment' && property.inspection_batiment) {
       const data = property.inspection_batiment as Record<string, any>
       Object.keys(data).forEach(key => {
-        if (data[key] && key !== 'completedAt') {
-          subcategories.push(key)
+        if (data[key] && key !== 'completedAt' && key !== 'customValues') {
+          const label = subcategoryLabels.batiment[key]
+          if (label) {
+            subcategories.push(locale === 'en' ? label.en : label.fr)
+          }
         }
       })
     } else if (categoryId === 'garage' && property.inspection_garage) {
       const data = property.inspection_garage as Record<string, any>
       Object.keys(data).forEach(key => {
-        if (data[key] && key !== 'completedAt') {
-          subcategories.push(key)
+        if (data[key] && key !== 'completedAt' && key !== 'customValues') {
+          const label = subcategoryLabels.garage[key]
+          if (label) {
+            subcategories.push(locale === 'en' ? label.en : label.fr)
+          }
         }
       })
     } else if (categoryId === 'mecanique' && property.inspection_mecanique) {
       const data = property.inspection_mecanique as Record<string, any>
       Object.keys(data).forEach(key => {
-        if (data[key] && key !== 'completedAt') {
-          subcategories.push(key)
+        if (data[key] && key !== 'completedAt' && key !== 'customValues') {
+          const label = subcategoryLabels.mecanique[key]
+          if (label) {
+            subcategories.push(locale === 'en' ? label.en : label.fr)
+          }
         }
       })
     } else if (categoryId === 'exterieur' && property.inspection_exterieur) {
       const data = property.inspection_exterieur as Record<string, any>
       Object.keys(data).forEach(key => {
-        if (data[key] && key !== 'completedAt') {
-          subcategories.push(key)
+        if (data[key] && key !== 'completedAt' && key !== 'customValues') {
+          const label = subcategoryLabels.exterieur[key]
+          if (label) {
+            subcategories.push(locale === 'en' ? label.en : label.fr)
+          }
         }
       })
     } else if (categoryId === 'divers' && property.inspection_divers) {
       const data = property.inspection_divers as Record<string, any>
       Object.keys(data).forEach(key => {
-        if (data[key] && key !== 'completedAt') {
-          subcategories.push(key)
+        if (data[key] && key !== 'completedAt' && key !== 'customValues') {
+          const label = subcategoryLabels.divers[key]
+          if (label) {
+            subcategories.push(locale === 'en' ? label.en : label.fr)
+          }
         }
       })
     }
 
-    return subcategories
+    return [...new Set(subcategories)] // Remove duplicates
   }
 
   // Calculate room counts from inspection data
@@ -1371,9 +1416,9 @@ export function PropertyView({
                               />
                               {subcategories.length > 0 && (
                                 <Box sx={{ mt: 0.5, ml: 2, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                  {subcategories.map((subcat) => (
+                                  {subcategories.map((subcat, index) => (
                                     <Typography
-                                      key={subcat}
+                                      key={index}
                                       variant="caption"
                                       sx={{
                                         color: 'rgba(255,255,255,0.9)',
@@ -1384,7 +1429,7 @@ export function PropertyView({
                                         fontSize: '0.7rem'
                                       }}
                                     >
-                                      {tInspection(`subcategories.${categoryId}.${subcat}`, { defaultValue: subcat })}
+                                      {subcat}
                                     </Typography>
                                   ))}
                                 </Box>
