@@ -796,9 +796,8 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         <InputLabel sx={{ color: getLabelColor(formData.province || 'QC') }}>{t('province')}</InputLabel>
                         <Select
                           value={formData.province || 'QC'}
-          {...getSelectProps(formData.province || 'QC')}}
-                          label={t('province')}
                           {...getSelectProps(formData.province || 'QC')}
+                          label={t('province')}
                         >
                           <MenuItem value="QC">Québec</MenuItem>
                           <MenuItem value="ON">Ontario</MenuItem>
@@ -893,7 +892,8 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     )}
                     <Grid item xs={12} md={1.5}>
                       <FormControl fullWidth size="small">
-                        <InputLabel sx={{ color: getLabelColor(formData.status || '') }}>{t('status')}</InputLabel><Select value={formData.status || ''}
+                        <InputLabel sx={{ color: getLabelColor(formData.status || '') }}>{t('status')}</InputLabel><Select
+          value={formData.status || ''}
           {...getSelectProps(formData.status || '')}
                           onChange={(e) => handleInputChange('status', e.target.value as PropertyStatus)}
                           label={t('status')}
@@ -906,7 +906,8 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     </Grid>
                     <Grid item xs={12} md={2}>
                       <FormControl fullWidth size="small">
-                        <InputLabel sx={{ color: getLabelColor(formData.type_propriete || '') }}>{t('propertyType')}</InputLabel><Select value={formData.type_propriete || ''}
+                        <InputLabel sx={{ color: getLabelColor(formData.type_propriete || '') }}>{t('propertyType')}</InputLabel><Select
+          value={formData.type_propriete || ''}
           {...getSelectProps(formData.type_propriete || '')}
                           onChange={(e) => handleInputChange('type_propriete', e.target.value as PropertyType)}
                           label={t('propertyType')}
@@ -932,7 +933,8 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     {formData.status === 'Sujet' && (
                       <Grid item xs={12} md={3}>
                         <FormControl fullWidth size="small">
-                          <InputLabel sx={{ color: getLabelColor(formData.type_evaluation || '') }}>{t('appraisalType')}</InputLabel><Select value={formData.type_evaluation || ''}
+                          <InputLabel sx={{ color: getLabelColor(formData.type_evaluation || '') }}>{t('appraisalType')}</InputLabel><Select
+          value={formData.type_evaluation || ''}
           {...getSelectProps(formData.type_evaluation || '')}
                             onChange={(e) => handleInputChange('type_evaluation', e.target.value as EvaluationType)}
                             label={t('appraisalType')}
@@ -951,7 +953,8 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       <>
                         <Grid item xs={12} md={3}>
                           <FormControl fullWidth size="small">
-                            <InputLabel sx={{ color: getLabelColor(formData.occupancy || '') }}>{t('occupancy')}</InputLabel><Select value={formData.occupancy || ''}
+                            <InputLabel sx={{ color: getLabelColor(formData.occupancy || '') }}>{t('occupancy')}</InputLabel><Select
+          value={formData.occupancy || ''}
           {...getSelectProps(formData.occupancy || '')}
                               onChange={(e) => handleInputChange('occupancy', e.target.value as OccupancyType)}
                               label={t('occupancy')}
@@ -1069,8 +1072,9 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                                       </Grid>
                                       <Grid item xs={12} sm={3}>
                                         <FormControl fullWidth size="small">
-                                          <InputLabel sx={{ color: getLabelColor(unitRent.isOwnerOccupied ? 'owner' : 'tenant') }}>{t('occupant')}</InputLabel><Select value={unitRent.isOwnerOccupied ? 'owner' : 'tenant'}
-          {...getSelectProps(unitRent.isOwnerOccupied ? 'owner' : 'tenant')}}
+                                          <InputLabel sx={{ color: getLabelColor(unitRent.isOwnerOccupied ? 'owner' : 'tenant') }}>{t('occupant')}</InputLabel><Select
+          value={unitRent.isOwnerOccupied ? 'owner' : 'tenant'}
+          {...getSelectProps(unitRent.isOwnerOccupied ? 'owner' : 'tenant')}
                                             label={t('occupant')}
                                             onChange={(e) => {
                                               const newRents = [...unitRents]
@@ -1121,8 +1125,9 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     {/* Row 1 - Building characteristics */}
                     <Grid item xs={12} md={2}>
                       <FormControl fullWidth size="small">
-                        <InputLabel sx={{ color: getLabelColor(formData.genre_propriete || '') }}>{t('propertyGenre')}</InputLabel><Select value={formData.genre_propriete || ''}
-          {...getSelectProps(formData.genre_propriete || '')}}
+                        <InputLabel sx={{ color: getLabelColor(formData.genre_propriete || '') }}>{t('propertyGenre')}</InputLabel><Select
+          value={formData.genre_propriete || ''}
+          {...getSelectProps(formData.genre_propriete || '')}
                           label={t('propertyGenre')}
                           onChange={(e) => handleInputChange('genre_propriete', e.target.value)}
                         >
@@ -1134,8 +1139,9 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     </Grid>
                     <Grid item xs={12} md={2}>
                       <FormControl fullWidth size="small">
-                        <InputLabel sx={{ color: getLabelColor(formData.type_batiment || '') }}>{t('buildingType')}</InputLabel><Select value={formData.type_batiment || ''}
-          {...getSelectProps(formData.type_batiment || '')}}
+                        <InputLabel sx={{ color: getLabelColor(formData.type_batiment || '') }}>{t('buildingType')}</InputLabel><Select
+          value={formData.type_batiment || ''}
+          {...getSelectProps(formData.type_batiment || '')}
                           label={t('buildingType')}
                           onChange={(e) => handleInputChange('type_batiment', e.target.value)}
                         >
@@ -1151,8 +1157,9 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       <>
                         <Grid item xs={12} md={1.6}>
                           <FormControl fullWidth size="small">
-                            <InputLabel sx={{ color: getLabelColor(formData.localisation || '') }}>{t('location')}</InputLabel><Select value={formData.localisation || ''}
-          {...getSelectProps(formData.localisation || '')}}
+                            <InputLabel sx={{ color: getLabelColor(formData.localisation || '') }}>{t('location')}</InputLabel><Select
+          value={formData.localisation || ''}
+          {...getSelectProps(formData.localisation || '')}
                               label={t('location')}
                               onChange={(e) => handleInputChange('localisation', e.target.value)}
                             >
@@ -1179,8 +1186,9 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         </Grid>
                         <Grid item xs={12} md={1.6}>
                           <FormControl fullWidth size="small">
-                            <InputLabel sx={{ color: getLabelColor(formData.type_copropriete || 'Divise') }}>{t('condoType')}</InputLabel><Select value={formData.type_copropriete || 'Divise'}
-          {...getSelectProps(formData.type_copropriete || 'Divise')}}
+                            <InputLabel sx={{ color: getLabelColor(formData.type_copropriete || 'Divise') }}>{t('condoType')}</InputLabel><Select
+          value={formData.type_copropriete || 'Divise'}
+          {...getSelectProps(formData.type_copropriete || 'Divise')}
                               label={t('condoType')}
                               onChange={(e) => handleInputChange('type_copropriete', e.target.value)}
                             >
@@ -1305,7 +1313,8 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     {/* Row 3 */}
                     <Grid item xs={12} md={1.7}>
                       <FormControl fullWidth size="small">
-                        <InputLabel sx={{ color: getLabelColor(formData.stationnement || '') }}>{t('parking')}</InputLabel><Select value={formData.stationnement || ''}
+                        <InputLabel sx={{ color: getLabelColor(formData.stationnement || '') }}>{t('parking')}</InputLabel><Select
+          value={formData.stationnement || ''}
           {...getSelectProps(formData.stationnement || '')}
                           onChange={(e) => handleInputChange('stationnement', e.target.value as ParkingType)}
                           label={t('parking')}
@@ -1333,7 +1342,8 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     </Grid>
                     <Grid item xs={12} md={1.7}>
                       <FormControl fullWidth size="small">
-                        <InputLabel sx={{ color: getLabelColor(formData.type_garage || '') }}>{t('garageType')}</InputLabel><Select value={formData.type_garage || ''}
+                        <InputLabel sx={{ color: getLabelColor(formData.type_garage || '') }}>{t('garageType')}</InputLabel><Select
+          value={formData.type_garage || ''}
           {...getSelectProps(formData.type_garage || '')}
                           onChange={(e) => handleInputChange('type_garage', e.target.value)}
                           label={t('garageType')}
@@ -1356,7 +1366,8 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     </Grid>
                     <Grid item xs={12} md={2.4}>
                       <FormControl fullWidth size="small">
-                        <InputLabel sx={{ color: getLabelColor(formData.type_sous_sol || '') }}>{t('basementType')}</InputLabel><Select value={formData.type_sous_sol || ''}
+                        <InputLabel sx={{ color: getLabelColor(formData.type_sous_sol || '') }}>{t('basementType')}</InputLabel><Select
+          value={formData.type_sous_sol || ''}
           {...getSelectProps(formData.type_sous_sol || '')}
                           onChange={(e) => handleInputChange('type_sous_sol', e.target.value as BasementType)}
                           label={t('basementType')}
@@ -1483,7 +1494,8 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           </Grid>
                           <Grid item xs={12} md={2}>
                             <FormControl fullWidth size="small">
-                              <InputLabel sx={{ color: getLabelColor(lot.type_lot) }}>{t('lotType')}</InputLabel><Select value={lot.type_lot}
+                              <InputLabel sx={{ color: getLabelColor(lot.type_lot) }}>{t('lotType')}</InputLabel><Select
+          value={lot.type_lot}
           {...getSelectProps(lot.type_lot)}
                                 onChange={(e) => updateAdditionalLot(lot.id, 'type_lot', e.target.value)}
                                 label={t('lotType')}
@@ -2054,7 +2066,8 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     <Grid container spacing={2} alignItems="center">
                       <Grid item xs={12} md={3}>
                         <FormControl fullWidth size="small">
-                          <InputLabel sx={{ color: getLabelColor(newFloor.floor) }}>{t('floor')}</InputLabel><Select value={newFloor.floor}
+                          <InputLabel sx={{ color: getLabelColor(newFloor.floor) }}>{t('floor')}</InputLabel><Select
+          value={newFloor.floor}
           {...getSelectProps(newFloor.floor)}
                             onChange={(e) => setNewFloor(prev => ({ ...prev, floor: e.target.value as FloorType }))}
                             label={t('floor')}
