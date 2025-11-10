@@ -152,6 +152,34 @@ export default function EvaluationsPage() {
     }
   }
 
+  const getTemplateChipStyles = (templateType: string) => {
+    switch (templateType) {
+      case 'RPS':
+        return {
+          bgcolor: '#1976D2',
+          color: '#fff',
+          border: 'none',
+          fontWeight: 600
+        }
+      case 'NAS':
+        return {
+          bgcolor: '#4CAF50',
+          color: '#fff',
+          border: 'none',
+          fontWeight: 600
+        }
+      case 'CUSTOM':
+        return {
+          bgcolor: '#FF9800',
+          color: '#fff',
+          border: 'none',
+          fontWeight: 600
+        }
+      default:
+        return {}
+    }
+  }
+
   if (loading) {
     return (
       <MaterialDashboardLayout>
@@ -315,10 +343,11 @@ export default function EvaluationsPage() {
                         <Box sx={{ textAlign: 'right' }}>
                           <Chip
                             label={getTemplateLabel(appraisal.template_type)}
-                            color="primary"
-                            variant="outlined"
                             size="small"
-                            sx={{ mb: 0.5 }}
+                            sx={{
+                              mb: 0.5,
+                              ...getTemplateChipStyles(appraisal.template_type)
+                            }}
                           />
                           <Typography variant="body2" color="text.secondary">
                             {new Date(appraisal.created_at).toLocaleDateString('fr-CA')}
@@ -326,9 +355,15 @@ export default function EvaluationsPage() {
                         </Box>
                         <Chip
                           label={tDetail(`status.${appraisal.status}`)}
-                          color={getStatusColor(appraisal.status)}
+                          color={appraisal.status === 'draft' ? undefined : getStatusColor(appraisal.status)}
                           size="small"
                           variant="outlined"
+                          sx={appraisal.status === 'draft' ? {
+                            bgcolor: '#FCE4EC',
+                            color: '#C62828',
+                            border: '1px solid #C62828',
+                            fontWeight: 600
+                          } : {}}
                         />
                         <IconButton size="small" color="primary" onClick={(e) => {
                           e.stopPropagation()
