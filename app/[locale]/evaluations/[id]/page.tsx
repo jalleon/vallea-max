@@ -14,7 +14,7 @@ import {
   Chip,
   Alert
 } from '@mui/material';
-import { ArrowBack, Save, CheckCircle } from '@mui/icons-material';
+import { ArrowBack, Save, CheckCircle, Refresh } from '@mui/icons-material';
 import { MaterialDashboardLayout } from '../../../../components/layout/MaterialDashboardLayout';
 import { createClient } from '@/lib/supabase/client';
 import { TemplateType } from '@/features/evaluations/types/evaluation.types';
@@ -52,6 +52,7 @@ export default function AppraisalEditPage() {
   const [currentTab, setCurrentTab] = useState(0);
   const [sectionsData, setSectionsData] = useState<any>({});
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [reloadTrigger, setReloadTrigger] = useState(0);
   const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const sectionsDataRef = useRef<any>({});
 
@@ -273,6 +274,12 @@ export default function AppraisalEditPage() {
     localStorage.setItem(`evaluation-tab-${id}`, newValue.toString());
   };
 
+  const handleReloadSubjectProperty = () => {
+    console.log('🔄 Reloading subject property data...');
+    // Increment reload trigger to force all sections to reload subject property data
+    setReloadTrigger(prev => prev + 1);
+  };
+
   const getTemplateName = () => {
     switch (appraisal?.template_type) {
       case 'RPS':
@@ -382,6 +389,17 @@ export default function AppraisalEditPage() {
           </Box>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {appraisal.property_id && (
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<Refresh />}
+                onClick={handleReloadSubjectProperty}
+                sx={{ textTransform: 'none' }}
+              >
+                {t('reloadSubjectProperty')}
+              </Button>
+            )}
             {saveState === 'saved' && (
               <Chip
                 icon={<CheckCircle />}
@@ -457,6 +475,7 @@ export default function AppraisalEditPage() {
                   data={sectionsData[sectionId] || {}}
                   onChange={(data) => handleSectionChange(sectionId, data)}
                   subjectPropertyId={appraisal.property_id}
+                  reloadTrigger={reloadTrigger}
                 />
               </TabPanel>
             );

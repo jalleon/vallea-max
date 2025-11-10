@@ -57,49 +57,82 @@ export type Database = {
       }
       appraisals: {
         Row: {
-          appraiser_id: string | null
-          completed_at: string | null
-          created_at: string | null
-          final_value: number | null
-          form_data: Json | null
           id: string
-          organization_id: string | null
-          report_template: Json | null
-          status: string | null
+          template_type: string
+          client_name: string
+          appraisal_number: string | null
+          property_id: string | null
           subject_property_id: string | null
-          type: string | null
+          property_type: string | null
+          property_genre: string | null
+          value_type: string | null
+          evaluation_objective: string | null
+          effective_date: string | null
+          address: string | null
+          city: string | null
+          postal_code: string | null
+          sections_data: Json | null
+          form_data: Json | null
+          status: string | null
+          completion_percentage: number | null
+          organization_id: string
+          created_by: string
+          updated_by: string | null
+          created_at: string | null
           updated_at: string | null
-          valuation_method: string | null
+          completed_at: string | null
         }
         Insert: {
-          appraiser_id?: string | null
-          completed_at?: string | null
-          created_at?: string | null
-          final_value?: number | null
-          form_data?: Json | null
           id?: string
-          organization_id?: string | null
-          report_template?: Json | null
-          status?: string | null
+          template_type: string
+          client_name: string
+          appraisal_number?: string | null
+          property_id?: string | null
           subject_property_id?: string | null
-          type?: string | null
+          property_type?: string | null
+          property_genre?: string | null
+          value_type?: string | null
+          evaluation_objective?: string | null
+          effective_date?: string | null
+          address?: string | null
+          city?: string | null
+          postal_code?: string | null
+          sections_data?: Json | null
+          form_data?: Json | null
+          status?: string | null
+          completion_percentage?: number | null
+          organization_id: string
+          created_by: string
+          updated_by?: string | null
+          created_at?: string | null
           updated_at?: string | null
-          valuation_method?: string | null
+          completed_at?: string | null
         }
         Update: {
-          appraiser_id?: string | null
-          completed_at?: string | null
-          created_at?: string | null
-          final_value?: number | null
-          form_data?: Json | null
           id?: string
-          organization_id?: string | null
-          report_template?: Json | null
-          status?: string | null
+          template_type?: string
+          client_name?: string
+          appraisal_number?: string | null
+          property_id?: string | null
           subject_property_id?: string | null
-          type?: string | null
+          property_type?: string | null
+          property_genre?: string | null
+          value_type?: string | null
+          evaluation_objective?: string | null
+          effective_date?: string | null
+          address?: string | null
+          city?: string | null
+          postal_code?: string | null
+          sections_data?: Json | null
+          form_data?: Json | null
+          status?: string | null
+          completion_percentage?: number | null
+          organization_id?: string
+          created_by?: string
+          updated_by?: string | null
+          created_at?: string | null
           updated_at?: string | null
-          valuation_method?: string | null
+          completed_at?: string | null
         }
         Relationships: [
           {
@@ -107,6 +140,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisals_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
             referencedColumns: ["id"]
           },
           {

@@ -1376,7 +1376,8 @@
       "progress": "Progress",
       "save": "Save",
       "saving": "Saving...",
-      "notFound": "Appraisal not found"
+      "notFound": "Appraisal not found",
+      "reloadSubjectProperty": "Reload Property"
     },
 
     "sections": {

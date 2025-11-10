@@ -50,7 +50,11 @@
       "Bash(node:*)",
       "Bash(then grep \"SUPABASE_SERVICE_KEY\" .env.local)",
       "Bash(npm run build:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(then grep \"SUPABASE\" .env.local)",
+      "Bash(else echo \".env.local not found\")",
+      "Bash(else echo \"SUPABASE_SERVICE_KEY not found\")",
+      "Bash(types/database.types.ts)"
     ],
     "deny": [],
     "ask": []

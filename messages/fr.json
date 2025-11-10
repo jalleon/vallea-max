@@ -1498,7 +1498,8 @@
       "progress": "Progression",
       "save": "Enregistrer",
       "saving": "Enregistrement...",
-      "notFound": "Évaluation non trouvée"
+      "notFound": "Évaluation non trouvée",
+      "reloadSubjectProperty": "Recharger la propriété"
     },
 
     "sections": {

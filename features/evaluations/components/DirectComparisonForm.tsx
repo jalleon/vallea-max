@@ -92,6 +92,7 @@ interface DirectComparisonFormProps {
   onChange: (data: any) => void;
   subjectPropertyType?: string;
   subjectPropertyId?: string | null;
+  reloadTrigger?: number;
 }
 
 interface RowData {
@@ -106,7 +107,8 @@ export default function DirectComparisonForm({
   data,
   onChange,
   subjectPropertyType = 'single_family',
-  subjectPropertyId
+  subjectPropertyId,
+  reloadTrigger = 0
 }: DirectComparisonFormProps) {
   const t = useTranslations('evaluations.sections.directComparison');
   const tCommon = useTranslations('common');
@@ -177,6 +179,14 @@ export default function DirectComparisonForm({
       setHistoryIndex(prev => Math.min(prev + 1, 49));
     }
   }, [subject, comparables]);
+
+  // Clear loaded property ref when reload trigger changes
+  useEffect(() => {
+    if (reloadTrigger > 0) {
+      console.log('🔄 Reload trigger changed - clearing loadedPropertyIdRef to force reload');
+      loadedPropertyIdRef.current = null;
+    }
+  }, [reloadTrigger]);
 
   // Load subject property data if subjectPropertyId is provided
   useEffect(() => {
@@ -259,10 +269,10 @@ export default function DirectComparisonForm({
             lotSize: lotSizeText,
             buildingType: property.type_batiment || '',
             livingArea: livingAreaText,
-            roomsTotal: property.nbre_pieces_total || 0,
-            roomsBedrooms: property.nbre_chambres || 0,
-            roomsBathrooms: `${property.nbre_salle_bain || 0}:${property.nbre_salle_eau || 0}`,
-            basement: property.sous_sol || '',
+            roomsTotal: property.nombre_pieces || 0,
+            roomsBedrooms: property.nombre_chambres || 0,
+            roomsBathrooms: `${property.salle_bain || 0}:${property.salle_eau || 0}`,
+            basement: property.type_sous_sol || '',
             parking: property.stationnement || ''
           };
 
