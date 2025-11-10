@@ -762,12 +762,11 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       />
                     </Grid>
                     <Grid item xs={12} md={2}>
-                      <FormControl fullWidth size="small">
+                      <FormControl fullWidth size="small" sx={getFieldStyling(formData.province || 'QC')}>
                         <InputLabel>{t('province')}</InputLabel>
                         <Select
                           value={formData.province || 'QC'}
-                          label={t('province')}                        sx={getFieldStyling(formData.province || 'QC')}
-                          onChange={(e) => handleInputChange('province', e.target.value)}                        sx={getFieldStyling(formData.province || 'QC')}
+                          label={t('province')}
                         >
                           <MenuItem value="QC">Québec</MenuItem>
                           <MenuItem value="ON">Ontario</MenuItem>
@@ -861,7 +860,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       </Grid>
                     )}
                     <Grid item xs={12} md={1.5}>
-                      <FormControl fullWidth size="small">
+                      <FormControl fullWidth size="small" sx={getFieldStyling(formData.status || '')}>
                         <InputLabel>{t('status')}</InputLabel>
                         <Select
                           value={formData.status || ''}
@@ -875,7 +874,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       </FormControl>
                     </Grid>
                     <Grid item xs={12} md={2}>
-                      <FormControl fullWidth size="small">
+                      <FormControl fullWidth size="small" sx={getFieldStyling(formData.type_propriete || '')}>
                         <InputLabel>{t('propertyType')}</InputLabel>
                         <Select
                           value={formData.type_propriete || ''}
@@ -902,11 +901,10 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     {/* Conditional fields for Sujet status */}
                     {formData.status === 'Sujet' && (
                       <Grid item xs={12} md={3}>
-                        <FormControl fullWidth size="small">
+                        <FormControl fullWidth size="small" sx={getFieldStyling(formData.type_evaluation || '')}>
                           <InputLabel>{t('appraisalType')}</InputLabel>
                           <Select
                             value={formData.type_evaluation || ''}
-                        sx={getFieldStyling(formData.type_evaluation || '')}
                             onChange={(e) => handleInputChange('type_evaluation', e.target.value as EvaluationType)}
                             label={t('appraisalType')}
                           >                        sx={getFieldStyling(formData.type_evaluation || '')}
@@ -923,11 +921,10 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                      !(formData.type_propriete === 'Duplex' || formData.type_propriete === 'Triplex' || formData.type_propriete === 'Quadriplex+') && (
                       <>
                         <Grid item xs={12} md={3}>
-                          <FormControl fullWidth size="small">
+                          <FormControl fullWidth size="small" sx={getFieldStyling(formData.occupancy || '')}>
                             <InputLabel>{t('occupancy')}</InputLabel>
                             <Select
                               value={formData.occupancy || ''}
-                        sx={getFieldStyling(formData.occupancy || '')}
                               onChange={(e) => handleInputChange('occupancy', e.target.value as OccupancyType)}
                               label={t('occupancy')}
                             >                        sx={getFieldStyling(formData.occupancy || '')}
@@ -1043,7 +1040,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                                         />
                                       </Grid>
                                       <Grid item xs={12} sm={3}>
-                                        <FormControl fullWidth size="small">
+                                        <FormControl fullWidth size="small" sx={getFieldStyling(unitRent.isOwnerOccupied ? 'owner' : 'tenant')}>
                                           <InputLabel>{t('occupant')}</InputLabel>
                                           <Select
                                             value={unitRent.isOwnerOccupied ? 'owner' : 'tenant'}
@@ -1096,7 +1093,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                   <Grid container spacing={2}>
                     {/* Row 1 - Building characteristics */}
                     <Grid item xs={12} md={2}>
-                      <FormControl fullWidth size="small">
+                      <FormControl fullWidth size="small" sx={getFieldStyling(formData.genre_propriete || '')}>
                         <InputLabel>{t('propertyGenre')}</InputLabel>
                         <Select
                           value={formData.genre_propriete || ''}
@@ -1110,7 +1107,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       </FormControl>
                     </Grid>
                     <Grid item xs={12} md={2}>
-                      <FormControl fullWidth size="small">
+                      <FormControl fullWidth size="small" sx={getFieldStyling(formData.type_batiment || '')}>
                         <InputLabel>{t('buildingType')}</InputLabel>
                         <Select
                           value={formData.type_batiment || ''}
@@ -1128,7 +1125,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     {formData.type_propriete === 'Condo' && (
                       <>
                         <Grid item xs={12} md={1.6}>
-                          <FormControl fullWidth size="small">
+                          <FormControl fullWidth size="small" sx={getFieldStyling(formData.localisation || '')}>
                             <InputLabel>{t('location')}</InputLabel>
                             <Select
                               value={formData.localisation || ''}
@@ -1157,11 +1154,11 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           />
                         </Grid>
                         <Grid item xs={12} md={1.6}>
-                          <FormControl fullWidth size="small">
+                          <FormControl fullWidth size="small" sx={getFieldStyling(formData.type_copropriete || 'Divise')}>
                             <InputLabel>{t('condoType')}</InputLabel>
                             <Select
                               value={formData.type_copropriete || 'Divise'}
-                              label={t('condoType')}                        sx={getFieldStyling(formData.type_copropriete || 'Divise')}
+                              label={t('condoType')}
                               onChange={(e) => handleInputChange('type_copropriete', e.target.value)}
                             >                        sx={getFieldStyling(formData.type_copropriete || 'Divise')}
                               {condoTypes.map((type) => (
@@ -1284,7 +1281,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
 
                     {/* Row 3 */}
                     <Grid item xs={12} md={1.7}>
-                      <FormControl fullWidth size="small">
+                      <FormControl fullWidth size="small" sx={getFieldStyling(formData.stationnement || '')}>
                         <InputLabel>{t('parking')}</InputLabel>
                         <Select
                           value={formData.stationnement || ''}
@@ -1313,11 +1310,10 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       />
                     </Grid>
                     <Grid item xs={12} md={1.7}>
-                      <FormControl fullWidth size="small">
+                      <FormControl fullWidth size="small" sx={getFieldStyling(formData.type_garage || '')}>
                         <InputLabel>{t('garageType')}</InputLabel>
                         <Select
                           value={formData.type_garage || ''}
-                        sx={getFieldStyling(formData.type_garage || '')}
                           onChange={(e) => handleInputChange('type_garage', e.target.value)}
                           label={t('garageType')}
                         >                        sx={getFieldStyling(formData.type_garage || '')}
@@ -1338,7 +1334,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       />
                     </Grid>
                     <Grid item xs={12} md={2.4}>
-                      <FormControl fullWidth size="small">
+                      <FormControl fullWidth size="small" sx={getFieldStyling(formData.type_sous_sol || '')}>
                         <InputLabel>{t('basementType')}</InputLabel>
                         <Select
                           value={formData.type_sous_sol || ''}
@@ -1466,7 +1462,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                             />
                           </Grid>
                           <Grid item xs={12} md={2}>
-                            <FormControl fullWidth size="small">
+                            <FormControl fullWidth size="small" sx={getFieldStyling(lot.type_lot)}>
                               <InputLabel>{t('lotType')}</InputLabel>
                               <Select
                                 value={lot.type_lot}
@@ -2038,7 +2034,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     </Typography>
                     <Grid container spacing={2} alignItems="center">
                       <Grid item xs={12} md={3}>
-                        <FormControl fullWidth size="small">
+                        <FormControl fullWidth size="small" sx={getFieldStyling(newFloor.floor)}>
                           <InputLabel>{t('floor')}</InputLabel>
                           <Select
                             value={newFloor.floor}
