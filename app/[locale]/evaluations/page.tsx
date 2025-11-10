@@ -16,7 +16,12 @@ import {
   LinearProgress,
   alpha,
   CircularProgress,
-  Alert
+  Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions
 } from '@mui/material'
 import {
   Add,
@@ -29,7 +34,8 @@ import {
   Edit,
   Visibility,
   LocationOn,
-  PlayArrow
+  PlayArrow,
+  Delete
 } from '@mui/icons-material'
 import { MaterialDashboardLayout } from '../../../components/layout/MaterialDashboardLayout'
 import { appraisalsService } from '@/features/evaluations/_api/appraisals.service'
@@ -40,9 +46,12 @@ export default function EvaluationsPage() {
   const t = useTranslations('evaluations')
   const tTemplates = useTranslations('evaluations.templates')
   const tDetail = useTranslations('evaluations.detail')
+  const tCommon = useTranslations('common')
 
   const [appraisals, setAppraisals] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [appraisalToDelete, setAppraisalToDelete] = useState<any>(null)
 
   useEffect(() => {
     loadAppraisals()
@@ -57,6 +66,30 @@ export default function EvaluationsPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleDeleteClick = (appraisal: any, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setAppraisalToDelete(appraisal)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!appraisalToDelete) return
+
+    try {
+      await appraisalsService.delete(appraisalToDelete.id)
+      setAppraisals(appraisals.filter(a => a.id !== appraisalToDelete.id))
+      setDeleteDialogOpen(false)
+      setAppraisalToDelete(null)
+    } catch (error) {
+      console.error('Error deleting appraisal:', error)
+    }
+  }
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false)
+    setAppraisalToDelete(null)
   }
 
   const evaluationTypes = [
@@ -303,6 +336,9 @@ export default function EvaluationsPage() {
                         }}>
                           <Edit />
                         </IconButton>
+                        <IconButton size="small" color="error" onClick={(e) => handleDeleteClick(appraisal, e)}>
+                          <Delete />
+                        </IconButton>
                       </Box>
                     </Box>
 
@@ -329,6 +365,36 @@ export default function EvaluationsPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog
+          open={deleteDialogOpen}
+          onClose={handleDeleteCancel}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>{tCommon('confirmDelete')}</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              {t('deleteConfirmMessage', {
+                name: appraisalToDelete?.appraisal_number || appraisalToDelete?.client_name || t('untitled')
+              })}
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions sx={{ p: 2 }}>
+            <Button onClick={handleDeleteCancel} sx={{ textTransform: 'none' }}>
+              {tCommon('cancel')}
+            </Button>
+            <Button
+              onClick={handleDeleteConfirm}
+              color="error"
+              variant="contained"
+              sx={{ textTransform: 'none' }}
+            >
+              {tCommon('delete')}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </MaterialDashboardLayout>
   )

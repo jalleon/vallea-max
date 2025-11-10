@@ -1384,6 +1384,7 @@
     "noAppraisals": "Aucune évaluation pour le moment. Créez votre première évaluation pour commencer.",
     "untitled": "Sans titre",
     "noAddress": "Adresse non spécifiée",
+    "deleteConfirmMessage": "Êtes-vous sûr de vouloir supprimer l'évaluation \"{name}\"? Cette action est irréversible.",
 
     "empty": {
       "title": "Aucune évaluation",

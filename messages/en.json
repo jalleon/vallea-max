@@ -1262,6 +1262,7 @@
     "noAppraisals": "No appraisals yet. Create your first appraisal to get started.",
     "untitled": "Untitled",
     "noAddress": "Address not specified",
+    "deleteConfirmMessage": "Are you sure you want to delete the appraisal \"{name}\"? This action cannot be undone.",
 
     "empty": {
       "title": "No appraisals",
