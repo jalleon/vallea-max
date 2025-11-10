@@ -344,6 +344,7 @@
       "status": "Statut",
       "mlsNo": "#MLS",
       "condoFees": "Frais de condo",
+      "floorNumber": "Étage #",
       "unitRents": "Loyer par unité",
       "ownerOccupied": "Occupé par propriétaire",
       "lotArea": "Superficie de terrain",

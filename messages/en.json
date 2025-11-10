@@ -344,6 +344,7 @@
       "status": "Status",
       "mlsNo": "MLS#",
       "condoFees": "Condo Fees",
+      "floorNumber": "Floor #",
       "unitRents": "Rent by Unit",
       "ownerOccupied": "Owner Occupied",
       "lotArea": "Lot Area",
