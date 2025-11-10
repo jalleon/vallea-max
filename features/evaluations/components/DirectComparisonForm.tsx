@@ -91,6 +91,7 @@ interface DirectComparisonFormProps {
   data: any;
   onChange: (data: any) => void;
   subjectPropertyType?: string;
+  subjectPropertyId?: string | null;
 }
 
 interface RowData {
@@ -105,7 +106,8 @@ interface RowData {
 export default function DirectComparisonForm({
   data,
   onChange,
-  subjectPropertyType = 'single_family'
+  subjectPropertyType = 'single_family',
+  subjectPropertyId
 }: DirectComparisonFormProps) {
   const t = useTranslations('evaluations.sections.directComparison');
   const tCommon = useTranslations('common');
@@ -134,6 +136,7 @@ export default function DirectComparisonForm({
   // Debounced onChange to prevent triggering auto-save too frequently
   const onChangeTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isInitialMountRef = useRef(true);
+  const loadedPropertyIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     // Skip onChange on initial mount
@@ -175,6 +178,105 @@ export default function DirectComparisonForm({
       setHistoryIndex(prev => Math.min(prev + 1, 49));
     }
   }, [subject, comparables]);
+
+  // Load subject property data if subjectPropertyId is provided
+  useEffect(() => {
+    const loadSubjectProperty = async () => {
+      console.log('🔍 DirectComparisonForm - subjectPropertyId:', subjectPropertyId);
+      console.log('🔍 DirectComparisonForm - loadedPropertyIdRef:', loadedPropertyIdRef.current);
+
+      // Don't load if no ID provided
+      if (!subjectPropertyId) {
+        console.log('⏸️  No subjectPropertyId provided, skipping load');
+        return;
+      }
+
+      // Don't load if we've already loaded this property
+      if (loadedPropertyIdRef.current === subjectPropertyId) {
+        console.log('⏸️  This property has already been loaded, skipping');
+        return;
+      }
+
+      console.log('🚀 Loading subject property from database...');
+
+      try {
+        const supabase = createClient();
+        const { data: property, error } = await supabase
+          .from('properties')
+          .select('*')
+          .eq('id', subjectPropertyId)
+          .single();
+
+        if (error) {
+          console.error('❌ Error loading subject property:', error);
+          return;
+        }
+
+        if (property) {
+          console.log('✅ Subject property loaded:', property);
+
+          // Build full address with city, province, postal code
+          const addressParts = [];
+          if (property.adresse) addressParts.push(property.adresse);
+          if (property.ville) addressParts.push(property.ville);
+          if (property.province) addressParts.push(property.province);
+          if (property.code_postal) addressParts.push(property.code_postal);
+          const fullAddress = addressParts.join(', ');
+
+          // Build lot size with both m² and ft²
+          let lotSizeText = '';
+          if (property.superficie_terrain_m2) {
+            const m2 = property.superficie_terrain_m2;
+            const ft2 = Math.round(m2 * 10.764);
+            lotSizeText = `${m2} m² / ${ft2.toLocaleString()} ft²`;
+          } else if (property.superficie_terrain_pi2) {
+            const ft2 = property.superficie_terrain_pi2;
+            const m2 = Math.round(ft2 / 10.764);
+            lotSizeText = `${m2} m² / ${ft2.toLocaleString()} ft²`;
+          }
+
+          // Build living area with both pi² and m²
+          let livingAreaText = '';
+          if (property.aire_habitable_pi2) {
+            const pi2 = property.aire_habitable_pi2;
+            const m2 = Math.round(pi2 / 10.764);
+            livingAreaText = `${pi2.toLocaleString()} pi² / ${m2} m²`;
+          } else if (property.aire_habitable_m2) {
+            const m2 = property.aire_habitable_m2;
+            const pi2 = Math.round(m2 * 10.764);
+            livingAreaText = `${pi2.toLocaleString()} pi² / ${m2} m²`;
+          }
+
+          // Update subject with property data
+          const updatedSubject = {
+            ...subject,
+            propertyId: property.id,
+            address: fullAddress,
+            saleDate: property.date_vente || '',
+            salePrice: property.prix_vente || 0,
+            lotSize: lotSizeText,
+            buildingType: property.type_batiment || '',
+            livingArea: livingAreaText,
+            roomsTotal: property.nbre_pieces_total || 0,
+            roomsBedrooms: property.nbre_chambres || 0,
+            roomsBathrooms: `${property.nbre_salle_bain || 0}:${property.nbre_salle_eau || 0}`,
+            basement: property.sous_sol || '',
+            parking: property.stationnement || ''
+          };
+
+          console.log('📝 Updating subject with:', updatedSubject);
+          setSubject(updatedSubject);
+
+          // Mark this property as loaded
+          loadedPropertyIdRef.current = subjectPropertyId;
+        }
+      } catch (error) {
+        console.error('❌ Error loading subject property:', error);
+      }
+    };
+
+    loadSubjectProperty();
+  }, [subjectPropertyId]);
 
   // Keyboard shortcuts for undo/redo
   useEffect(() => {
@@ -359,15 +461,48 @@ export default function DirectComparisonForm({
   const handlePropertySelect = (property: any) => {
     if (selectingForIndex !== null) {
       const newComparables = [...comparables];
+
+      // Build full address with city, province, postal code
+      const addressParts = [];
+      if (property.adresse) addressParts.push(property.adresse);
+      if (property.ville) addressParts.push(property.ville);
+      if (property.province) addressParts.push(property.province);
+      if (property.code_postal) addressParts.push(property.code_postal);
+      const fullAddress = addressParts.join(', ');
+
+      // Build lot size with both m² and ft²
+      let lotSizeText = '';
+      if (property.superficie_terrain_m2) {
+        const m2 = property.superficie_terrain_m2;
+        const ft2 = Math.round(m2 * 10.764); // Convert m² to ft²
+        lotSizeText = `${m2} m² / ${ft2.toLocaleString()} ft²`;
+      } else if (property.superficie_terrain_pi2) {
+        const ft2 = property.superficie_terrain_pi2;
+        const m2 = Math.round(ft2 / 10.764);
+        lotSizeText = `${m2} m² / ${ft2.toLocaleString()} ft²`;
+      }
+
+      // Build living area with both pi² and m²
+      let livingAreaText = '';
+      if (property.aire_habitable_pi2) {
+        const pi2 = property.aire_habitable_pi2;
+        const m2 = Math.round(pi2 / 10.764);
+        livingAreaText = `${pi2.toLocaleString()} pi² / ${m2} m²`;
+      } else if (property.aire_habitable_m2) {
+        const m2 = property.aire_habitable_m2;
+        const pi2 = Math.round(m2 * 10.764);
+        livingAreaText = `${pi2.toLocaleString()} pi² / ${m2} m²`;
+      }
+
       newComparables[selectingForIndex] = {
         ...newComparables[selectingForIndex],
         propertyId: property.id,
-        address: property.adresse || '',
+        address: fullAddress,
         saleDate: property.date_vente || '',
         salePrice: property.prix_vente || 0,
-        lotSize: property.superficie_terrain_m2 ? `${property.superficie_terrain_m2} m²` : '',
+        lotSize: lotSizeText,
         buildingType: property.type_batiment || '',
-        livingArea: property.aire_habitable_pi2 ? `${property.aire_habitable_pi2} pi²` : '',
+        livingArea: livingAreaText,
         roomsTotal: property.nbre_pieces_total || 0,
         roomsBedrooms: property.nbre_chambres || 0,
         roomsBathrooms: `${property.nbre_salle_bain || 0}:${property.nbre_salle_eau || 0}`,
@@ -461,13 +596,27 @@ export default function DirectComparisonForm({
         pinned: 'left',
         width: 220,
         editable: false,
-        cellStyle: (params: any) => ({
-          fontWeight: 600,
-          backgroundColor: '#fafafa',
-          borderRight: '2px solid #e0e0e0',
-          fontSize: '13px',
-          paddingLeft: '12px'
-        }),
+        cellStyle: (params: any) => {
+          const isTotalAdjustment = params.data.rowId === 'totalAdjustment';
+          const isAdjustedValue = params.data.rowId === 'adjustedValue';
+          const isGrossPercent = params.data.rowId === 'grossAdjustmentPercent';
+          const isNetPercent = params.data.rowId === 'netAdjustmentPercent';
+          const isBoldRow = isTotalAdjustment || isAdjustedValue || isGrossPercent || isNetPercent;
+          return {
+            fontWeight: isBoldRow ? 700 : 600,
+            backgroundColor: '#fafafa',
+            borderRight: '2px solid #e0e0e0',
+            fontSize: isBoldRow ? '14px' : '13px',
+            paddingLeft: '12px',
+            lineHeight: params.data.rowId === 'address' ? '1.4' : 'normal',
+            whiteSpace: params.data.rowId === 'address' ? 'normal' : 'nowrap',
+            padding: params.data.rowId === 'address' ? '8px 12px' : '4px 8px 4px 12px',
+            display: 'flex',
+            alignItems: params.data.rowId === 'address' ? 'flex-start' : 'center',
+            borderTop: isTotalAdjustment ? '2px solid #1976D2' : (isAdjustedValue ? '2px solid #4CAF50' : (isGrossPercent ? '2px solid #FF9800' : (isNetPercent ? '2px solid #9C27B0' : 'none'))),
+            borderBottom: isTotalAdjustment ? '2px solid #1976D2' : (isAdjustedValue ? '2px solid #4CAF50' : (isGrossPercent ? '2px solid #FF9800' : (isNetPercent ? '2px solid #9C27B0' : 'none')))
+          };
+        },
         headerClass: 'label-header'
       },
       // Subject columns
@@ -485,10 +634,22 @@ export default function DirectComparisonForm({
             },
             cellStyle: (params: any) => {
               const calculated = ['distance', 'totalAdjustment', 'adjustedValue', 'grossAdjustmentPercent', 'netAdjustmentPercent', 'pricePerSqFt'];
+              const isTotalAdjustment = params.data.rowId === 'totalAdjustment';
+              const isAdjustedValue = params.data.rowId === 'adjustedValue';
+              const isGrossPercent = params.data.rowId === 'grossAdjustmentPercent';
+              const isNetPercent = params.data.rowId === 'netAdjustmentPercent';
+              const isBoldRow = isTotalAdjustment || isAdjustedValue || isGrossPercent || isNetPercent;
               return {
                 backgroundColor: calculated.includes(params.data.rowId) ? '#e3f2fd' : '#f5f9ff',
-                fontWeight: calculated.includes(params.data.rowId) ? 600 : 400,
-                fontSize: '13px'
+                fontWeight: isBoldRow ? 700 : (calculated.includes(params.data.rowId) ? 600 : 400),
+                fontSize: isBoldRow ? '14px' : '13px',
+                lineHeight: params.data.rowId === 'address' ? '1.4' : 'normal',
+                whiteSpace: params.data.rowId === 'address' ? 'normal' : 'nowrap',
+                padding: params.data.rowId === 'address' ? '8px' : '4px 8px',
+                display: 'flex',
+                alignItems: params.data.rowId === 'address' ? 'flex-start' : 'center',
+                borderTop: isTotalAdjustment ? '2px solid #1976D2' : (isAdjustedValue ? '2px solid #4CAF50' : (isGrossPercent ? '2px solid #FF9800' : (isNetPercent ? '2px solid #9C27B0' : 'none'))),
+                borderBottom: isTotalAdjustment ? '2px solid #1976D2' : (isAdjustedValue ? '2px solid #4CAF50' : (isGrossPercent ? '2px solid #FF9800' : (isNetPercent ? '2px solid #9C27B0' : 'none')))
               };
             },
             colSpan: (params: any) => {
@@ -496,6 +657,11 @@ export default function DirectComparisonForm({
               return params.data.rowId === 'dataSource' ? 2 : 1;
             },
             cellRenderer: (params: ICellRendererParams) => {
+              // Subject columns should be empty for percentage rows
+              if (params.data.rowId === 'grossAdjustmentPercent' || params.data.rowId === 'netAdjustmentPercent') {
+                return '';
+              }
+
               // Format bathrooms as "full:half"
               if (params.data.rowId === 'roomsBathrooms') {
                 const value = params.value || '';
@@ -516,15 +682,28 @@ export default function DirectComparisonForm({
           },
           {
             field: 'subjectData2',
-            headerName: 'Description 2',
+            headerName: '',
             width: 160,
             editable: (params: any) => params.data.rowId === 'address',
             cellStyle: (params: any) => {
               const hasData = params.data.rowId === 'address';
+              const isTotalAdjustment = params.data.rowId === 'totalAdjustment';
+              const isAdjustedValue = params.data.rowId === 'adjustedValue';
+              const isGrossPercent = params.data.rowId === 'grossAdjustmentPercent';
+              const isNetPercent = params.data.rowId === 'netAdjustmentPercent';
+              const isBoldRow = isTotalAdjustment || isAdjustedValue || isGrossPercent || isNetPercent;
               return {
-                backgroundColor: hasData ? '#f5f9ff' : '#fafafa',
+                backgroundColor: hasData ? '#f5f9ff' : (isBoldRow ? '#e3f2fd' : '#fafafa'),
                 borderRight: '2px solid #e0e0e0',
-                fontSize: '13px'
+                fontSize: isBoldRow ? '14px' : '13px',
+                fontWeight: isBoldRow ? 700 : 400,
+                lineHeight: params.data.rowId === 'address' ? '1.4' : 'normal',
+                whiteSpace: params.data.rowId === 'address' ? 'normal' : 'nowrap',
+                padding: params.data.rowId === 'address' ? '8px' : '4px 8px',
+                display: 'flex',
+                alignItems: params.data.rowId === 'address' ? 'flex-start' : 'center',
+                borderTop: isTotalAdjustment ? '2px solid #1976D2' : (isAdjustedValue ? '2px solid #4CAF50' : (isGrossPercent ? '2px solid #FF9800' : (isNetPercent ? '2px solid #9C27B0' : 'none'))),
+                borderBottom: isTotalAdjustment ? '2px solid #1976D2' : (isAdjustedValue ? '2px solid #4CAF50' : (isGrossPercent ? '2px solid #FF9800' : (isNetPercent ? '2px solid #9C27B0' : 'none')))
               };
             },
             colSpan: (params: any) => {
@@ -553,30 +732,112 @@ export default function DirectComparisonForm({
             },
             cellStyle: (params: any) => {
               const calculated = ['distance', 'totalAdjustment', 'adjustedValue', 'grossAdjustmentPercent', 'netAdjustmentPercent', 'pricePerSqFt'];
+              const isTotalAdjustment = params.data.rowId === 'totalAdjustment';
+              const isAdjustedValue = params.data.rowId === 'adjustedValue';
+              const isGrossPercent = params.data.rowId === 'grossAdjustmentPercent';
+              const isNetPercent = params.data.rowId === 'netAdjustmentPercent';
+              const isBoldRow = isTotalAdjustment || isAdjustedValue || isGrossPercent || isNetPercent;
               return {
                 backgroundColor: calculated.includes(params.data.rowId) ? '#e8eaf6' : '#fff9f5',
-                fontWeight: calculated.includes(params.data.rowId) ? 600 : 400,
-                fontSize: '13px'
+                fontWeight: isBoldRow ? 700 : (calculated.includes(params.data.rowId) ? 600 : 400),
+                fontSize: isBoldRow ? '14px' : '13px',
+                lineHeight: params.data.rowId === 'address' ? '1.4' : 'normal',
+                whiteSpace: params.data.rowId === 'address' ? 'normal' : 'nowrap',
+                padding: params.data.rowId === 'address' ? '8px' : '4px 8px',
+                display: 'flex',
+                alignItems: params.data.rowId === 'address' ? 'flex-start' : 'center',
+                justifyContent: isBoldRow ? 'flex-end' : 'flex-start',
+                borderTop: isTotalAdjustment ? '2px solid #1976D2' : (isAdjustedValue ? '2px solid #4CAF50' : (isGrossPercent ? '2px solid #FF9800' : (isNetPercent ? '2px solid #9C27B0' : 'none'))),
+                borderBottom: isTotalAdjustment ? '2px solid #1976D2' : (isAdjustedValue ? '2px solid #4CAF50' : (isGrossPercent ? '2px solid #FF9800' : (isNetPercent ? '2px solid #9C27B0' : 'none')))
               };
+            },
+            colSpan: (params: any) => {
+              // Merge columns for address row (no adjustment column needed)
+              if (params.data.rowId === 'address') return 2;
+              // Merge columns for totalAdjustment row to show dollar amount
+              if (params.data.rowId === 'totalAdjustment') return 2;
+              // Merge columns for adjustedValue row to show dollar amount
+              if (params.data.rowId === 'adjustedValue') return 2;
+              // Merge columns for percentage rows to show percentage
+              if (params.data.rowId === 'grossAdjustmentPercent') return 2;
+              if (params.data.rowId === 'netAdjustmentPercent') return 2;
+              return 1;
             },
             cellRenderer: (params: ICellRendererParams) => {
               // Add search icon for address row
               if (params.data.rowId === 'address') {
                 return (
-                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', width: '100%' }}>
-                    <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start', width: '100%', py: 0.5 }}>
+                    <span style={{ flex: 1, wordBreak: 'break-word', whiteSpace: 'normal', lineHeight: 1.4 }}>
                       {params.value || ''}
                     </span>
                     <IconButton
                       size="small"
                       onClick={() => handleSelectFromLibrary(index)}
                       title={t('selectFromLibrary')}
-                      sx={{ padding: '4px', color: 'primary.main' }}
+                      sx={{ padding: '4px', color: 'primary.main', mt: -0.5 }}
                     >
                       <Search fontSize="small" />
                     </IconButton>
                   </Box>
                 );
+              }
+
+              // Display dollar amount for totalAdjustment row (get from data column which has the calculated total)
+              if (params.data.rowId === 'totalAdjustment') {
+                const totalValue = params.data[`comp${index}Data`];
+                if (!totalValue || totalValue === 0) return '';
+                const val = parseFloat(totalValue);
+                const formatted = val > 0 ? `+$${val.toLocaleString()}` : `-$${Math.abs(val).toLocaleString()}`;
+                return (
+                  <span style={{ color: val > 0 ? '#2e7d32' : '#c62828', fontWeight: 700 }}>
+                    {formatted}
+                  </span>
+                );
+              }
+
+              // Display dollar amount for adjustedValue row
+              if (params.data.rowId === 'adjustedValue') {
+                const adjustedValue = params.data[`comp${index}Data`];
+                if (!adjustedValue || adjustedValue === 0) return '';
+                const val = parseFloat(adjustedValue);
+                const formatted = `$${val.toLocaleString()}`;
+                return (
+                  <span style={{ color: '#2e7d32', fontWeight: 700 }}>
+                    {formatted}
+                  </span>
+                );
+              }
+
+              // Display percentage for grossAdjustmentPercent row
+              if (params.data.rowId === 'grossAdjustmentPercent') {
+                const percentValue = params.data[`comp${index}Data`];
+                if (!percentValue || percentValue === 0) return '0.00%';
+                const val = parseFloat(percentValue);
+                return (
+                  <span style={{ color: '#FF9800', fontWeight: 700 }}>
+                    {val.toFixed(2)}%
+                  </span>
+                );
+              }
+
+              // Display percentage for netAdjustmentPercent row
+              if (params.data.rowId === 'netAdjustmentPercent') {
+                const percentValue = params.data[`comp${index}Data`];
+                if (!percentValue || percentValue === 0) return '0.00%';
+                const val = parseFloat(percentValue);
+                return (
+                  <span style={{ color: '#9C27B0', fontWeight: 700 }}>
+                    {val.toFixed(2)}%
+                  </span>
+                );
+              }
+
+              // Format sale price as currency
+              if (params.data.rowId === 'salePrice') {
+                const price = params.value;
+                if (!price || price === 0) return '';
+                return `$${parseFloat(price).toLocaleString()}`;
               }
 
               // Format bathrooms as "full:half"
@@ -611,16 +872,38 @@ export default function DirectComparisonForm({
             cellStyle: (params: any) => {
               const calculated = ['totalAdjustment', 'adjustedValue', 'grossAdjustmentPercent', 'netAdjustmentPercent'];
               const isCalculated = calculated.includes(params.data.rowId);
+              const isTotalAdjustment = params.data.rowId === 'totalAdjustment';
+              const isAdjustedValue = params.data.rowId === 'adjustedValue';
+              const isGrossPercent = params.data.rowId === 'grossAdjustmentPercent';
+              const isNetPercent = params.data.rowId === 'netAdjustmentPercent';
+              const isBoldRow = isTotalAdjustment || isAdjustedValue || isGrossPercent || isNetPercent;
               return {
                 backgroundColor: isCalculated ? '#e8eaf6' : '#fff5f8',
-                fontWeight: isCalculated ? 600 : 400,
-                fontSize: '13px',
+                fontWeight: isBoldRow ? 700 : (isCalculated ? 600 : 400),
+                fontSize: isBoldRow ? '14px' : '13px',
                 borderRight: isLast ? 'none' : '2px solid #e0e0e0',
-                color: params.value && params.value !== 0 ? (params.value > 0 ? '#2e7d32' : '#c62828') : 'inherit'
+                color: params.value && params.value !== 0 ? (params.value > 0 ? '#2e7d32' : '#c62828') : 'inherit',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-end',
+                borderTop: isTotalAdjustment ? '2px solid #1976D2' : (isAdjustedValue ? '2px solid #4CAF50' : (isGrossPercent ? '2px solid #FF9800' : (isNetPercent ? '2px solid #9C27B0' : 'none'))),
+                borderBottom: isTotalAdjustment ? '2px solid #1976D2' : (isAdjustedValue ? '2px solid #4CAF50' : (isGrossPercent ? '2px solid #FF9800' : (isNetPercent ? '2px solid #9C27B0' : 'none')))
               };
             },
+            colSpan: (params: any) => {
+              // Hide this column when address row spans it
+              if (params.data.rowId === 'address') return 0;
+              // Hide this column when totalAdjustment row spans it
+              if (params.data.rowId === 'totalAdjustment') return 0;
+              // Hide this column when adjustedValue row spans it
+              if (params.data.rowId === 'adjustedValue') return 0;
+              // Hide this column when percentage rows span it
+              if (params.data.rowId === 'grossAdjustmentPercent') return 0;
+              if (params.data.rowId === 'netAdjustmentPercent') return 0;
+              return 1;
+            },
             valueFormatter: (params: ValueFormatterParams) => {
-              if (!params.value || params.value === 0) return '$0';
+              if (!params.value || params.value === 0) return '';
               const val = parseFloat(params.value);
               return val > 0 ? `+$${val.toLocaleString()}` : `-$${Math.abs(val).toLocaleString()}`;
             }
@@ -789,7 +1072,10 @@ export default function DirectComparisonForm({
           ensureDomOrder={true}
           animateRows={false}
           suppressScrollOnNewData={true}
-          rowHeight={40}
+          getRowHeight={(params) => {
+            // Taller row for address to allow wrapping
+            return params.data.rowId === 'address' ? 80 : 40;
+          }}
           headerHeight={48}
           groupHeaderHeight={48}
         />

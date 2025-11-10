@@ -28,16 +28,21 @@ interface AppraisalSectionFormProps {
   templateType: TemplateType;
   data: any;
   onChange: (data: any) => void;
+  subjectPropertyId?: string | null;
 }
 
 export default function AppraisalSectionForm({
   sectionId,
   templateType,
   data,
-  onChange
+  onChange,
+  subjectPropertyId
 }: AppraisalSectionFormProps) {
   const t = useTranslations('evaluations.sections');
   const [formData, setFormData] = useState(data);
+
+  console.log('🔍 AppraisalSectionForm - sectionId:', sectionId);
+  console.log('🔍 AppraisalSectionForm - subjectPropertyId:', subjectPropertyId);
 
   useEffect(() => {
     setFormData(data);
@@ -71,7 +76,7 @@ export default function AppraisalSectionForm({
         case 'ameliorations':
           return renderAmeliorationsSection();
         case 'technique_parite':
-          return <DirectComparisonForm data={formData} onChange={onChange} />;
+          return <DirectComparisonForm data={formData} onChange={onChange} subjectPropertyId={subjectPropertyId} />;
         default:
           return renderGenericSection();
       }
@@ -87,7 +92,7 @@ export default function AppraisalSectionForm({
         case 'identification_bien':
           return renderPropertySection();
         case 'methode_parite':
-          return <DirectComparisonForm data={formData} onChange={onChange} />;
+          return <DirectComparisonForm data={formData} onChange={onChange} subjectPropertyId={subjectPropertyId} />;
         default:
           return renderGenericSection();
       }

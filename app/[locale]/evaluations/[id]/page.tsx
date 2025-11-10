@@ -55,19 +55,35 @@ export default function AppraisalEditPage() {
   const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const sectionsDataRef = useRef<any>({});
 
-  // Restore tab from URL on load
+  // Restore tab from URL or localStorage on load
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       const tabParam = urlParams.get('tab');
+
       if (tabParam) {
+        // Prioritize URL parameter
         const tabIndex = parseInt(tabParam, 10);
         if (!isNaN(tabIndex) && tabIndex >= 0) {
           setCurrentTab(tabIndex);
+          localStorage.setItem(`evaluation-tab-${id}`, tabIndex.toString());
+        }
+      } else {
+        // Fallback to localStorage if no URL parameter
+        const savedTab = localStorage.getItem(`evaluation-tab-${id}`);
+        if (savedTab) {
+          const tabIndex = parseInt(savedTab, 10);
+          if (!isNaN(tabIndex) && tabIndex >= 0) {
+            setCurrentTab(tabIndex);
+            // Update URL to reflect the restored tab
+            const url = new URL(window.location.href);
+            url.searchParams.set('tab', tabIndex.toString());
+            window.history.replaceState({}, '', url.toString());
+          }
         }
       }
     }
-  }, []);
+  }, [id]);
 
   const getSections = () => {
     if (!appraisal) return [];
@@ -111,6 +127,8 @@ export default function AppraisalEditPage() {
       if (error) throw error;
 
       console.log('📥 Loading data from Supabase:', JSON.stringify(data.form_data, null, 2));
+      console.log('📥 Appraisal object:', data);
+      console.log('📥 property_id:', data.property_id);
 
       setAppraisal(data);
       // Cast form_data from Json to our type
@@ -207,6 +225,8 @@ export default function AppraisalEditPage() {
     const url = new URL(window.location.href);
     url.searchParams.set('tab', newValue.toString());
     window.history.replaceState({}, '', url.toString());
+    // Save to localStorage for persistence across navigation
+    localStorage.setItem(`evaluation-tab-${id}`, newValue.toString());
   };
 
   const getTemplateName = () => {
@@ -344,16 +364,6 @@ export default function AppraisalEditPage() {
                 variant="outlined"
               />
             )}
-            <Button
-              variant="outlined"
-              startIcon={<Save />}
-              onClick={handleSave}
-              disabled={saving}
-              size="small"
-              sx={{ textTransform: 'none' }}
-            >
-              Save Now
-            </Button>
           </Box>
         </Box>
 
@@ -392,16 +402,21 @@ export default function AppraisalEditPage() {
             </Tabs>
           </Box>
 
-          {sections.map((sectionId, index) => (
-            <TabPanel key={sectionId} value={currentTab} index={index}>
-              <AppraisalSectionForm
-                sectionId={sectionId}
-                templateType={appraisal.template_type}
-                data={sectionsData[sectionId] || {}}
-                onChange={(data) => handleSectionChange(sectionId, data)}
-              />
-            </TabPanel>
-          ))}
+          {sections.map((sectionId, index) => {
+            console.log('🔍 Page.tsx - Rendering section:', sectionId);
+            console.log('🔍 Page.tsx - appraisal.property_id:', appraisal.property_id);
+            return (
+              <TabPanel key={sectionId} value={currentTab} index={index}>
+                <AppraisalSectionForm
+                  sectionId={sectionId}
+                  templateType={appraisal.template_type}
+                  data={sectionsData[sectionId] || {}}
+                  onChange={(data) => handleSectionChange(sectionId, data)}
+                  subjectPropertyId={appraisal.property_id}
+                />
+              </TabPanel>
+            );
+          })}
         </Card>
       </Box>
     </MaterialDashboardLayout>
