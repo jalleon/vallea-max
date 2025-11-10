@@ -267,7 +267,9 @@ export default function DirectComparisonForm({
             salePrice: 0, // Subject property has no sale price
             daysOnMarket: 0, // Subject property has no days on market
             lotSize: lotSizeText,
-            buildingType: property.type_batiment || '',
+            buildingType: property.type_propriete || '',
+            age: property.chrono_age?.toString() || '',
+            condition: property.eff_age?.toString() || '',
             livingArea: livingAreaText,
             roomsTotal: property.nombre_pieces || 0,
             roomsBedrooms: property.nombre_chambres || 0,
@@ -513,7 +515,9 @@ export default function DirectComparisonForm({
         saleDate: property.date_vente || '',
         salePrice: property.prix_vente || 0,
         lotSize: lotSizeText,
-        buildingType: property.type_batiment || '',
+        buildingType: property.type_propriete || '',
+        age: property.chrono_age?.toString() || '',
+        condition: property.eff_age?.toString() || '',
         livingArea: livingAreaText,
         roomsTotal: property.nbre_pieces_total || 0,
         roomsBedrooms: property.nbre_chambres || 0,
