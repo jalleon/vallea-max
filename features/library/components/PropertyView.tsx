@@ -1030,7 +1030,10 @@ export function PropertyView({
                   {/* Line 3 - Building details (5 columns) */}
                   <Grid item xs={12} md={2.4}>
                     <Typography variant="body2" color="text.secondary">{t('parking')}</Typography>
-                    <Typography variant="body1" fontWeight={600}>{property.stationnement || 'N/A'}</Typography>
+                    <Typography variant="body1" fontWeight={600}>
+                      {property.stationnement || 'N/A'}
+                      {property.nombre_stationnement ? ` (${property.nombre_stationnement})` : ''}
+                    </Typography>
                   </Grid>
                   <Grid item xs={12} md={2.4}>
                     <Typography variant="body2" color="text.secondary">{t('garageType')}</Typography>
