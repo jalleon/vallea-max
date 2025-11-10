@@ -127,6 +127,34 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
     return value.replace(/\s/g, '')
   }
 
+  // Helper function to get field styling based on whether it's filled or empty
+  const getFieldStyling = (value: any) => {
+    const hasValue = value !== undefined && value !== null && value !== '' &&
+                     (Array.isArray(value) ? value.length > 0 : true)
+
+    return {
+      '& .MuiOutlinedInput-root': {
+        '& fieldset': {
+          borderColor: hasValue ? theme.palette.primary.main : theme.palette.error.main,
+          borderWidth: hasValue ? '2px' : '1px',
+        },
+        '&:hover fieldset': {
+          borderColor: hasValue ? theme.palette.primary.dark : theme.palette.error.dark,
+        },
+        '&.Mui-focused fieldset': {
+          borderColor: hasValue ? theme.palette.primary.main : theme.palette.error.main,
+        },
+        backgroundColor: hasValue ? 'rgba(25, 118, 210, 0.04)' : 'transparent',
+      },
+      '& .MuiInputLabel-root': {
+        color: hasValue ? theme.palette.primary.main : theme.palette.error.main,
+        '&.Mui-focused': {
+          color: hasValue ? theme.palette.primary.main : theme.palette.error.main,
+        }
+      }
+    }
+  }
+
   const [formData, setFormData] = useState<PropertyCreateInput>({
     adresse: '',
     ville: '',
@@ -689,6 +717,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label={t('address')}
                         value={formData.adresse}
+                        sx={getFieldStyling(formData.adresse)}
                         onChange={(e) => handleInputChange('adresse', e.target.value)}
                         variant="outlined"
                         size="small"
@@ -702,6 +731,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label={t('city')}
                         value={formData.ville}
+                        sx={getFieldStyling(formData.ville)}
                         onChange={(e) => handleInputChange('ville', e.target.value)}
                         variant="outlined"
                         size="small"
@@ -715,6 +745,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label={t('municipality')}
                         value={formData.municipalite}
+                        sx={getFieldStyling(formData.municipalite)}
                         onChange={(e) => handleInputChange('municipalite', e.target.value)}
                         variant="outlined"
                         size="small"
@@ -735,8 +766,8 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         <InputLabel>{t('province')}</InputLabel>
                         <Select
                           value={formData.province || 'QC'}
-                          label={t('province')}
-                          onChange={(e) => handleInputChange('province', e.target.value)}
+                          label={t('province')}                        sx={getFieldStyling(formData.province || 'QC')}
+                          onChange={(e) => handleInputChange('province', e.target.value)}                        sx={getFieldStyling(formData.province || 'QC')}
                         >
                           <MenuItem value="QC">Québec</MenuItem>
                           <MenuItem value="ON">Ontario</MenuItem>
@@ -762,6 +793,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label={formData.status === 'Sujet' ? "Valeur d'évaluation" : "Prix de vente"}
                         type="text"
                         value={formatCurrencyDisplay(formData.prix_vente)}
+                        sx={getFieldStyling(formatCurrencyDisplay(formData.prix_vente))}
                         onChange={(e) => handleInputChange(
                           'prix_vente',
                           parseCurrencyInput(e.target.value)
@@ -821,6 +853,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           label={t('daysOnMarket')}
                           type="number"
                           value={formData.jours_sur_marche || ''}
+                        sx={getFieldStyling(formData.jours_sur_marche || '')}
                           onChange={(e) => handleInputChange('jours_sur_marche', e.target.value ? parseInt(e.target.value) : undefined)}
                           variant="outlined"
                           size="small"
@@ -834,7 +867,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           value={formData.status || ''}
                           onChange={(e) => handleInputChange('status', e.target.value as PropertyStatus)}
                           label={t('status')}
-                        >
+                        >                        sx={getFieldStyling(formData.status || '')}
                           {propertyStatuses.map((status) => (
                             <MenuItem key={status} value={status}>{tStatus(status)}</MenuItem>
                           ))}
@@ -848,7 +881,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           value={formData.type_propriete || ''}
                           onChange={(e) => handleInputChange('type_propriete', e.target.value as PropertyType)}
                           label={t('propertyType')}
-                        >
+                        >                        sx={getFieldStyling(formData.type_propriete || '')}
                           {propertyTypes.map((type) => (
                             <MenuItem key={type} value={type}>{tTypes(type)}</MenuItem>
                           ))}
@@ -873,9 +906,10 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           <InputLabel>{t('appraisalType')}</InputLabel>
                           <Select
                             value={formData.type_evaluation || ''}
+                        sx={getFieldStyling(formData.type_evaluation || '')}
                             onChange={(e) => handleInputChange('type_evaluation', e.target.value as EvaluationType)}
                             label={t('appraisalType')}
-                          >
+                          >                        sx={getFieldStyling(formData.type_evaluation || '')}
                             {evaluationTypes.map((type) => (
                               <MenuItem key={type} value={type}>{type}</MenuItem>
                             ))}
@@ -893,9 +927,10 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                             <InputLabel>{t('occupancy')}</InputLabel>
                             <Select
                               value={formData.occupancy || ''}
+                        sx={getFieldStyling(formData.occupancy || '')}
                               onChange={(e) => handleInputChange('occupancy', e.target.value as OccupancyType)}
                               label={t('occupancy')}
-                            >
+                            >                        sx={getFieldStyling(formData.occupancy || '')}
                               {occupancyTypes.map((type) => (
                                 <MenuItem key={type} value={type}>{type}</MenuItem>
                               ))}
@@ -985,6 +1020,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                                           label={t('monthlyRent')}
                                           type="number"
                                           value={unitRent.isOwnerOccupied ? '' : (unitRent.monthlyRent || '')}
+                        sx={getFieldStyling(unitRent.isOwnerOccupied ? '' : (unitRent.monthlyRent || ''))}
                                           onChange={(e) => {
                                             const newRents = [...unitRents]
                                             newRents[i] = {
@@ -1020,7 +1056,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                                               }
                                               setUnitRents(newRents)
                                               handleInputChange('unit_rents', newRents)
-                                            }}
+                                            }}                        sx={getFieldStyling(unitRent.isOwnerOccupied ? 'owner' : 'tenant')}
                                           >
                                             <MenuItem value="tenant">Locataire</MenuItem>
                                             <MenuItem value="owner">Propriétaire</MenuItem>
@@ -1066,7 +1102,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           value={formData.genre_propriete || ''}
                           label={t('propertyGenre')}
                           onChange={(e) => handleInputChange('genre_propriete', e.target.value)}
-                        >
+                        >                        sx={getFieldStyling(formData.genre_propriete || '')}
                           {genreTypes.map((type) => (
                             <MenuItem key={type} value={type}>{tGenre(type)}</MenuItem>
                           ))}
@@ -1080,7 +1116,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           value={formData.type_batiment || ''}
                           label={t('buildingType')}
                           onChange={(e) => handleInputChange('type_batiment', e.target.value)}
-                        >
+                        >                        sx={getFieldStyling(formData.type_batiment || '')}
                           {buildingTypes.map((type) => (
                             <MenuItem key={type} value={type}>{tBuilding(type)}</MenuItem>
                           ))}
@@ -1098,7 +1134,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                               value={formData.localisation || ''}
                               label={t('location')}
                               onChange={(e) => handleInputChange('localisation', e.target.value)}
-                            >
+                            >                        sx={getFieldStyling(formData.localisation || '')}
                               {condoLocationTypes.map((type) => (
                                 <MenuItem key={type} value={type}>{tCondoLoc(type)}</MenuItem>
                               ))}
@@ -1125,9 +1161,9 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                             <InputLabel>{t('condoType')}</InputLabel>
                             <Select
                               value={formData.type_copropriete || 'Divise'}
-                              label={t('condoType')}
+                              label={t('condoType')}                        sx={getFieldStyling(formData.type_copropriete || 'Divise')}
                               onChange={(e) => handleInputChange('type_copropriete', e.target.value)}
-                            >
+                            >                        sx={getFieldStyling(formData.type_copropriete || 'Divise')}
                               {condoTypes.map((type) => (
                                 <MenuItem key={type} value={type}>{tCondoType(type)}</MenuItem>
                               ))}
@@ -1163,6 +1199,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label={t('chronologicalAge')}
                         type="number"
                         value={formData.chrono_age || ''}
+                        sx={getFieldStyling(formData.chrono_age || '')}
                         onChange={(e) => handleInputChange('chrono_age', e.target.value ? parseInt(e.target.value) : undefined)}
                         variant="outlined"
                         size="small"
@@ -1253,7 +1290,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           value={formData.stationnement || ''}
                           onChange={(e) => handleInputChange('stationnement', e.target.value as ParkingType)}
                           label={t('parking')}
-                        >
+                        >                        sx={getFieldStyling(formData.stationnement || '')}
                           {parkingTypes.map((type) => (
                             <MenuItem key={type} value={type}>{tParking(type)}</MenuItem>
                           ))}
@@ -1280,9 +1317,10 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         <InputLabel>{t('garageType')}</InputLabel>
                         <Select
                           value={formData.type_garage || ''}
+                        sx={getFieldStyling(formData.type_garage || '')}
                           onChange={(e) => handleInputChange('type_garage', e.target.value)}
                           label={t('garageType')}
-                        >
+                        >                        sx={getFieldStyling(formData.type_garage || '')}
                           {garageTypes.map((type) => (
                             <MenuItem key={type} value={type}>{tGarage(type)}</MenuItem>
                           ))}
@@ -1306,7 +1344,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           value={formData.type_sous_sol || ''}
                           onChange={(e) => handleInputChange('type_sous_sol', e.target.value as BasementType)}
                           label={t('basementType')}
-                        >
+                        >                        sx={getFieldStyling(formData.type_sous_sol || '')}
                           {basementTypes.map((type) => (
                             <MenuItem key={type} value={type}>{tBasement(type)}</MenuItem>
                           ))}
@@ -1330,6 +1368,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label={t('extras')}
                         value={formData.extras}
+                        sx={getFieldStyling(formData.extras)}
                         onChange={(e) => handleInputChange('extras', e.target.value)}
                         variant="outlined"
                         size="small"
@@ -1390,6 +1429,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         fullWidth
                         label={t('cadastre')}
                         value={formData.matricule || ''}
+                        sx={getFieldStyling(formData.matricule || '')}
                         onChange={(e) => handleInputChange('matricule', e.target.value)}
                         variant="outlined"
                         size="small"
@@ -1415,6 +1455,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                               fullWidth
                               label={t('additionalLot')}
                               value={formData.province === 'QC' ? formatLotNumber(lot.lot_number) : lot.lot_number}
+                        sx={getFieldStyling(formData.province === 'QC' ? formatLotNumber(lot.lot_number) : lot.lot_number)}
                               onChange={(e) => {
                                 const value = formData.province === 'QC' ? parseLotNumber(e.target.value) : e.target.value
                                 updateAdditionalLot(lot.id, 'lot_number', value)
@@ -1430,7 +1471,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                               <Select
                                 value={lot.type_lot}
                                 onChange={(e) => updateAdditionalLot(lot.id, 'type_lot', e.target.value)}
-                                label={t('lotType')}
+                                label={t('lotType')}                        sx={getFieldStyling(lot.type_lot)}
                               >
                                 <MenuItem value="Exclusif">Exclusif</MenuItem>
                                 <MenuItem value="Commun">Commun</MenuItem>
@@ -1511,6 +1552,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label={t('building')}
                         type="text"
                         value={formatCurrencyDisplay(formData.eval_municipale_batiment)}
+                        sx={getFieldStyling(formatCurrencyDisplay(formData.eval_municipale_batiment))}
                         onChange={(e) => {
                           const batiment = parseCurrencyInput(e.target.value)
                           handleInputChange('eval_municipale_batiment', batiment)
@@ -1744,6 +1786,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label={t('lotAreaPi2')}
                         type="text"
                         value={'superficie_terrain_pi2' in rawInputs ? rawInputs.superficie_terrain_pi2 : (formData.superficie_terrain_pi2?.toFixed(2) || '')}
+                        sx={getFieldStyling('superficie_terrain_pi2' in rawInputs ? rawInputs.superficie_terrain_pi2 : (formData.superficie_terrain_pi2?.toFixed(2) || ''))}
                         onChange={(e) => {
                           const input = e.target.value
                           updateRawInput('superficie_terrain_pi2', input)
@@ -1812,6 +1855,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label={t('frontagePi')}
                         type="text"
                         value={'frontage_pi2' in rawInputs ? rawInputs.frontage_pi2 : (formData.frontage_pi2?.toFixed(2) || '')}
+                        sx={getFieldStyling('frontage_pi2' in rawInputs ? rawInputs.frontage_pi2 : (formData.frontage_pi2?.toFixed(2) || ''))}
                         onChange={(e) => {
                           const input = e.target.value
                           updateRawInput('frontage_pi2', input)
@@ -1844,6 +1888,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label={t('depthM')}
                         type="text"
                         value={'profondeur_m2' in rawInputs ? rawInputs.profondeur_m2 : (formData.profondeur_m2?.toFixed(2) || '')}
+                        sx={getFieldStyling('profondeur_m2' in rawInputs ? rawInputs.profondeur_m2 : (formData.profondeur_m2?.toFixed(2) || ''))}
                         onChange={(e) => {
                           const input = e.target.value
                           updateRawInput('profondeur_m2', input)
@@ -1876,6 +1921,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label={t('depthPi')}
                         type="text"
                         value={'profondeur_pi2' in rawInputs ? rawInputs.profondeur_pi2 : (formData.profondeur_pi2?.toFixed(2) || '')}
+                        sx={getFieldStyling('profondeur_pi2' in rawInputs ? rawInputs.profondeur_pi2 : (formData.profondeur_pi2?.toFixed(2) || ''))}
                         onChange={(e) => {
                           const input = e.target.value
                           updateRawInput('profondeur_pi2', input)
@@ -1942,6 +1988,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                         label={t('buildingPerimeterPi')}
                         type="text"
                         value={'perimetre_batiment_pi2' in rawInputs ? rawInputs.perimetre_batiment_pi2 : (formData.perimetre_batiment_pi2?.toFixed(2) || '')}
+                        sx={getFieldStyling('perimetre_batiment_pi2' in rawInputs ? rawInputs.perimetre_batiment_pi2 : (formData.perimetre_batiment_pi2?.toFixed(2) || ''))}
                         onChange={(e) => {
                           const input = e.target.value
                           updateRawInput('perimetre_batiment_pi2', input)
@@ -1997,7 +2044,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                             value={newFloor.floor}
                             onChange={(e) => setNewFloor(prev => ({ ...prev, floor: e.target.value as FloorType }))}
                             label={t('floor')}
-                          >
+                          >                        sx={getFieldStyling(newFloor.floor)}
                             {floorTypes.map((floor) => (
                               <MenuItem key={floor} value={floor}>{floor}</MenuItem>
                             ))}
