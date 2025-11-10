@@ -140,21 +140,21 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
     return {
       '& .MuiOutlinedInput-root': {
         '& fieldset': {
-          borderColor: hasValue ? theme.palette.primary.main : theme.palette.error.main,
-          borderWidth: hasValue ? '2px' : '1px',
+          borderColor: hasValue ? theme.palette.primary.main : undefined,
+          borderWidth: hasValue ? '2px' : undefined,
         },
         '&:hover fieldset': {
-          borderColor: hasValue ? theme.palette.primary.dark : theme.palette.error.dark,
+          borderColor: hasValue ? theme.palette.primary.dark : undefined,
         },
         '&.Mui-focused fieldset': {
-          borderColor: hasValue ? theme.palette.primary.main : theme.palette.error.main,
+          borderColor: hasValue ? theme.palette.primary.main : undefined,
         },
         backgroundColor: hasValue ? 'rgba(25, 118, 210, 0.04)' : 'transparent',
       },
       '& .MuiInputLabel-root': {
-        color: hasValue ? theme.palette.primary.main : theme.palette.error.main,
+        color: hasValue ? theme.palette.primary.main : undefined,
         '&.Mui-focused': {
-          color: hasValue ? theme.palette.primary.main : theme.palette.error.main,
+          color: hasValue ? theme.palette.primary.main : undefined,
         }
       }
     }
@@ -162,7 +162,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
 
   // Helper to get color for InputLabel in Select
   const getLabelColor = (value: any) => {
-    return hasFieldValue(value) ? theme.palette.primary.main : theme.palette.error.main
+    return hasFieldValue(value) ? theme.palette.primary.main : undefined
   }
 
   // Helper to get Select border and background props
@@ -172,14 +172,14 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
       sx: {
         bgcolor: hasValue ? 'rgba(25, 118, 210, 0.04)' : 'transparent',
         '& .MuiOutlinedInput-notchedOutline': {
-          borderColor: hasValue ? theme.palette.primary.main : theme.palette.error.main,
-          borderWidth: hasValue ? '2px' : '1px',
+          borderColor: hasValue ? theme.palette.primary.main : undefined,
+          borderWidth: hasValue ? '2px' : undefined,
         },
         '&:hover .MuiOutlinedInput-notchedOutline': {
-          borderColor: hasValue ? theme.palette.primary.dark : theme.palette.error.dark,
+          borderColor: hasValue ? theme.palette.primary.dark : undefined,
         },
         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-          borderColor: hasValue ? theme.palette.primary.main : theme.palette.error.main,
+          borderColor: hasValue ? theme.palette.primary.main : undefined,
         }
       }
     }
