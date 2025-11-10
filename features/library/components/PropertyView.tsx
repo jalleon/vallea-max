@@ -46,7 +46,7 @@ import {
   Balance,
   Kitchen,
   Weekend,
-  DiningTable,
+  Restaurant,
   Bed,
   Work,
   Bathtub,
@@ -126,7 +126,7 @@ export function PropertyView({
     const iconMap: Record<string, any> = {
       cuisine: Kitchen,
       salon: Weekend,
-      salle_a_manger: DiningTable,
+      salle_a_manger: Restaurant,
       chambre: Bed,
       bureau: Work,
       salle_bain: Bathtub,

@@ -81,7 +81,6 @@ class PropertiesSupabaseService {
       type_batiment: data.type_batiment as any,
       chrono_age: data.chrono_age || undefined,
       eff_age: data.eff_age || undefined,
-      type_garage: data.type_garage as any,
       extras: data.extras || undefined,
 
       // Municipal data
