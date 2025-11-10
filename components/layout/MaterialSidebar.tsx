@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { useTranslations, useLocale } from 'next-intl'
 import {
@@ -31,9 +31,12 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
-  FileUpload
+  FileUpload,
+  AdminPanelSettings
 } from '@mui/icons-material'
 import { usePathname, useRouter } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
+import { createClient } from '@/lib/supabase/client'
 
 interface MaterialSidebarProps {
   mobileOpen: boolean
@@ -56,6 +59,34 @@ export function MaterialSidebar({
   const router = useRouter()
   const locale = useLocale()
   const t = useTranslations('common.nav')
+  const { user } = useAuth()
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  // Check if user is admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) {
+        setIsAdmin(false)
+        return
+      }
+
+      try {
+        const supabase = createClient()
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', user.id)
+          .single() as { data: { is_admin: boolean } | null; error: any }
+
+        setIsAdmin(profile?.is_admin || false)
+      } catch (error) {
+        console.error('Error checking admin status:', error)
+        setIsAdmin(false)
+      }
+    }
+
+    checkAdminStatus()
+  }, [user])
 
   const regularMenuItems = [
     {
@@ -107,6 +138,13 @@ export function MaterialSidebar({
     label: t('inspection.label'),
     icon: Search,
     path: `/${locale}/inspection`
+  }
+
+  const adminMenuItem = {
+    id: 'admin',
+    label: locale === 'fr' ? 'Panneau Admin' : 'Admin Panel',
+    icon: AdminPanelSettings,
+    path: `/${locale}/admin`
   }
 
   const handleItemClick = (path: string) => {
@@ -337,6 +375,79 @@ export function MaterialSidebar({
                   </Tooltip>
                 ) : (
                   inspectionButton
+                )}
+              </ListItem>
+            )
+          })()}
+
+          {/* Admin Panel Menu Item - Only visible to admins */}
+          {isAdmin && (() => {
+            const isActive = pathname === adminMenuItem.path
+            const Icon = adminMenuItem.icon
+
+            const adminButton = (
+              <ListItemButton
+                onClick={() => handleItemClick(adminMenuItem.path)}
+                sx={{
+                  borderRadius: 2,
+                  mx: 1,
+                  bgcolor: isActive ? alpha('#667eea', 0.2) : alpha('#667eea', 0.08),
+                  color: isActive ? '#5a67d8' : '#667eea',
+                  border: '1px solid',
+                  borderColor: isActive ? '#667eea' : alpha('#667eea', 0.3),
+                  '&:hover': {
+                    bgcolor: alpha('#667eea', 0.15),
+                    borderColor: '#667eea'
+                  },
+                  transition: 'all 0.2s ease-in-out',
+                  justifyContent: desktopCollapsed ? 'center' : 'flex-start',
+                  px: desktopCollapsed ? 1 : 2
+                }}
+              >
+                <ListItemIcon
+                  sx={{
+                    color: isActive ? '#5a67d8' : '#667eea',
+                    minWidth: desktopCollapsed ? 'unset' : 40,
+                    justifyContent: 'center'
+                  }}
+                >
+                  <Icon />
+                </ListItemIcon>
+                {!desktopCollapsed && (
+                  <>
+                    <ListItemText
+                      primary={
+                        <Typography
+                          variant="body2"
+                          fontWeight={600}
+                        >
+                          {adminMenuItem.label}
+                        </Typography>
+                      }
+                    />
+                    {isActive && (
+                      <Box
+                        sx={{
+                          width: 3,
+                          height: 20,
+                          bgcolor: '#667eea',
+                          borderRadius: 1.5
+                        }}
+                      />
+                    )}
+                  </>
+                )}
+              </ListItemButton>
+            )
+
+            return (
+              <ListItem disablePadding sx={{ mb: 0.5 }}>
+                {desktopCollapsed ? (
+                  <Tooltip title={adminMenuItem.label} placement="right">
+                    {adminButton}
+                  </Tooltip>
+                ) : (
+                  adminButton
                 )}
               </ListItem>
             )

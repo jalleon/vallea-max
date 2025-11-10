@@ -65,10 +65,8 @@ export default function LoginPage() {
         setError(t('error'))
         setLoading(false)
       } else {
-        // Wait a bit for session to be established
-        await new Promise(resolve => setTimeout(resolve, 500))
+        // Navigate directly to dashboard
         router.push(`/${locale}/dashboard`)
-        router.refresh()
       }
     } catch (err: any) {
       console.error('Login exception:', err)

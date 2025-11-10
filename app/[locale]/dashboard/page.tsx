@@ -33,7 +33,7 @@ import { useTranslation } from '@/hooks/useTranslation'
 import { dashboardService, UserDashboardStats } from '@/features/dashboard/services/dashboard.service'
 
 export default function DashboardPage() {
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const { t } = useTranslation('dashboard')
   const { t: tCommon } = useTranslation('common')
   const [stats, setStats] = useState<UserDashboardStats | null>(null)
@@ -46,7 +46,7 @@ export default function DashboardPage() {
       setLoading(true)
       const data = await dashboardService.getUserDashboardStats(
         user.id,
-        user.user_metadata.organization_id
+        profile?.organization_id || user.user_metadata.organization_id
       )
       setStats(data)
     } catch (error) {
@@ -58,7 +58,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (user) {
-      if (user.user_metadata?.organization_id) {
+      if (profile?.organization_id || user.user_metadata?.organization_id) {
         loadDashboardData()
       } else {
         // No organization ID, stop loading
@@ -66,7 +66,7 @@ export default function DashboardPage() {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id])
+  }, [user?.id, profile?.organization_id])
 
   if (loading) {
     return (
@@ -116,7 +116,7 @@ export default function DashboardPage() {
                 {t('title')}
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                {t('welcome', { name: user?.user_metadata?.full_name || user?.email || '' })}
+                {t('welcome', { name: profile?.full_name || user?.user_metadata?.full_name || user?.email || '' })}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', gap: 2 }}>

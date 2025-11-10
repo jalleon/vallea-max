@@ -42,7 +42,15 @@
       "Bash(node scripts/create-demo-user.mjs:*)",
       "Bash(node scripts/setup-demo-account.mjs:*)",
       "Bash(node scripts/link-demo-user.mjs:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(python /tmp/add_insurance_i18n.py:*)",
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(node -e:*)",
+      "Bash(node:*)",
+      "Bash(then grep \"SUPABASE_SERVICE_KEY\" .env.local)",
+      "Bash(npm run build:*)",
+      "Bash(cp:*)"
     ],
     "deny": [],
     "ask": []

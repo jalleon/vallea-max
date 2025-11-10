@@ -12,15 +12,22 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
 
+  // Extract locale from pathname (e.g., /en/dashboard -> en)
+  const locale = pathname.split('/')[1] || 'en'
+
+  // Check if current path (without locale) is a public route
+  const pathWithoutLocale = pathname.replace(`/${locale}`, '') || '/'
+  const isPublicRoute = PUBLIC_ROUTES.includes(pathWithoutLocale)
+
   useEffect(() => {
     // Only redirect if not on a public route
-    if (!loading && !user && !PUBLIC_ROUTES.includes(pathname)) {
-      router.push('/login')
+    if (!loading && !user && !isPublicRoute) {
+      router.push(`/${locale}/login`)
     }
-  }, [user, loading, pathname, router])
+  }, [user, loading, isPublicRoute, locale, router])
 
   // Show loading spinner while checking auth (but not on public routes)
-  if (loading && !PUBLIC_ROUTES.includes(pathname)) {
+  if (loading && !isPublicRoute) {
     return (
       <Box
         sx={{
@@ -41,7 +48,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   // If no user and not on public route, don't render (will redirect)
-  if (!user && !PUBLIC_ROUTES.includes(pathname)) {
+  if (!user && !isPublicRoute) {
     return null
   }
 

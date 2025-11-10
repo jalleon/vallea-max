@@ -6,7 +6,10 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+export type Database = {
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5"
+  }
   public: {
     Tables: {
       organizations: {
@@ -94,6 +97,61 @@ export interface Database {
           is_admin?: boolean
           created_at?: string
           updated_at?: string
+        }
+      }
+      demo_requests: {
+        Row: {
+          id: string
+          email: string
+          name: string
+          company: string | null
+          phone: string | null
+          message: string | null
+          locale: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          name: string
+          company?: string | null
+          phone?: string | null
+          message?: string | null
+          locale?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          name?: string
+          company?: string | null
+          phone?: string | null
+          message?: string | null
+          locale?: string
+          created_at?: string
+        }
+      }
+      waitlist: {
+        Row: {
+          id: string
+          email: string
+          name: string
+          locale: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          name: string
+          locale?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          name?: string
+          locale?: string
+          created_at?: string
         }
       }
       email_verifications: {
@@ -379,6 +437,35 @@ export interface Database {
           created_at?: string
         }
       }
+      floor_areas: {
+        Row: {
+          id: string
+          property_id: string | null
+          floor: string
+          type: string
+          area_m2: number
+          area_ft2: number
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          property_id?: string | null
+          floor: string
+          type: string
+          area_m2: number
+          area_ft2: number
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          property_id?: string | null
+          floor?: string
+          type?: string
+          area_m2?: number
+          area_ft2?: number
+          created_at?: string | null
+        }
+      }
       activity_log: {
         Row: {
           id: string
@@ -411,14 +498,137 @@ export interface Database {
           created_at?: string
         }
       }
+      admin_api_keys: {
+        Row: {
+          id: string
+          provider: string
+          api_key: string
+          model: string
+          is_active: boolean
+          priority: number
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          provider: string
+          api_key: string
+          model: string
+          is_active?: boolean
+          priority?: number
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          provider?: string
+          api_key?: string
+          model?: string
+          is_active?: boolean
+          priority?: number
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      usage_tracking: {
+        Row: {
+          id: string
+          organization_id: string | null
+          user_id: string | null
+          entity_type: string
+          entity_id: string | null
+          action: string
+          tokens_used: number | null
+          cost: number | null
+          metadata: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id?: string | null
+          user_id?: string | null
+          entity_type: string
+          entity_id?: string | null
+          action: string
+          tokens_used?: number | null
+          cost?: number | null
+          metadata?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string | null
+          user_id?: string | null
+          entity_type?: string
+          entity_id?: string | null
+          action?: string
+          tokens_used?: number | null
+          cost?: number | null
+          metadata?: Json | null
+          created_at?: string
+        }
+      }
+      user_subscriptions: {
+        Row: {
+          id: string
+          user_id: string
+          stripe_subscription_id: string | null
+          stripe_customer_id: string | null
+          subscription_plan: string
+          status: string
+          trial_end: string | null
+          current_period_start: string | null
+          current_period_end: string | null
+          canceled_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          stripe_subscription_id?: string | null
+          stripe_customer_id?: string | null
+          subscription_plan?: string
+          status?: string
+          trial_end?: string | null
+          current_period_start?: string | null
+          current_period_end?: string | null
+          canceled_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          stripe_subscription_id?: string | null
+          stripe_customer_id?: string | null
+          subscription_plan?: string
+          status?: string
+          trial_end?: string | null
+          current_period_start?: string | null
+          current_period_end?: string | null
+          canceled_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_organization_and_admin: {
+        Args: { admin_email: string; admin_name?: string; org_name: string }
+        Returns: string
+      }
     }
     Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
       [_ in never]: never
     }
   }
