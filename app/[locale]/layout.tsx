@@ -17,9 +17,6 @@ const fraunces = Fraunces({ subsets: ['latin'], variable: '--font-fraunces' })
 export const metadata: Metadata = {
   title: 'Valea Max',
   description: 'Real Estate Appraisal Application',
-  icons: {
-    icon: '/icon.png',
-  },
 }
 
 export function generateStaticParams() {
