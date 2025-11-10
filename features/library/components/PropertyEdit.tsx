@@ -266,6 +266,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
         occupancy: property.occupancy,
         loyer_en_place: property.loyer_en_place,
         frais_condo: property.frais_condo,
+        floor_number: property.floor_number,
         localisation: property.localisation,
         type_copropriete: property.type_copropriete || 'Divise',
         unit_rents: property.unit_rents,
@@ -1090,7 +1091,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     {/* Conditional Condo fields between Type de bâtiment and Année de construction */}
                     {formData.type_propriete === 'Condo' && (
                       <>
-                        <Grid item xs={12} md={2}>
+                        <Grid item xs={12} md={1.6}>
                           <FormControl fullWidth size="small">
                             <InputLabel>{t('location')}</InputLabel>
                             <Select
@@ -1104,7 +1105,22 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                             </Select>
                           </FormControl>
                         </Grid>
-                        <Grid item xs={12} md={2}>
+                        <Grid item xs={12} md={0.8}>
+                          <TextField
+                            fullWidth
+                            label={t('floorNumber')}
+                            type="number"
+                            value={formData.floor_number ?? ''}
+                            onChange={(e) => {
+                              const value = e.target.value
+                              handleInputChange('floor_number', value ? parseInt(value) : undefined)
+                            }}
+                            variant="outlined"
+                            size="small"
+                            inputProps={{ min: 0, max: 99 }}
+                          />
+                        </Grid>
+                        <Grid item xs={12} md={1.6}>
                           <FormControl fullWidth size="small">
                             <InputLabel>{t('condoType')}</InputLabel>
                             <Select

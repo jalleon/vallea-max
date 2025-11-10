@@ -283,6 +283,7 @@ export type Database = {
           eval_municipale_total: number | null
           extras: string | null
           field_sources: Json | null
+          floor_number: number | null
           frais_condo: number | null
           frontage_m2: number | null
           frontage_pi2: number | null
@@ -370,6 +371,7 @@ export type Database = {
           eval_municipale_total?: number | null
           extras?: string | null
           field_sources?: Json | null
+          floor_number?: number | null
           frais_condo?: number | null
           frontage_m2?: number | null
           frontage_pi2?: number | null
@@ -457,6 +459,7 @@ export type Database = {
           eval_municipale_total?: number | null
           extras?: string | null
           field_sources?: Json | null
+          floor_number?: number | null
           frais_condo?: number | null
           frontage_m2?: number | null
           frontage_pi2?: number | null

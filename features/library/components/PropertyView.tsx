@@ -762,12 +762,20 @@ export function PropertyView({
                         </Box>
                       </Grid>
                       {property.type_propriete === 'Condo' && (
-                        <Grid item xs={12} md={1.5}>
-                          <Typography variant="body2" color="text.secondary">{t('condoFees')}</Typography>
-                          <Typography variant="body1" fontWeight={600}>
-                            {property.frais_condo ? formatCurrency(property.frais_condo) : 'N/A'}
-                          </Typography>
-                        </Grid>
+                        <>
+                          <Grid item xs={12} md={1.5}>
+                            <Typography variant="body2" color="text.secondary">{t('condoFees')}</Typography>
+                            <Typography variant="body1" fontWeight={600}>
+                              {property.frais_condo ? formatCurrency(property.frais_condo) : 'N/A'}
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={12} md={1.5}>
+                            <Typography variant="body2" color="text.secondary">{t('floorNumber')}</Typography>
+                            <Typography variant="body1" fontWeight={600}>
+                              {property.floor_number ?? 'N/A'}
+                            </Typography>
+                          </Grid>
+                        </>
                       )}
                     </>
                   )}

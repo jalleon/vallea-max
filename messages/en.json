@@ -271,6 +271,7 @@
       "occupancy": "Occupancy",
       "rentInPlace": "Rent in Place",
       "condoFees": "Condo Fees",
+      "floorNumber": "Floor #",
       "unitNumber": "Unit No.",
       "monthlyRent": "Monthly Rent",
       "occupant": "Occupant",

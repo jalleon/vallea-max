@@ -71,6 +71,7 @@ class PropertiesSupabaseService {
       is_shared: data.is_shared || false,
       // Rental/evaluation fields
       frais_condo: data.frais_condo || undefined,
+      floor_number: data.floor_number || undefined,
       loyer_en_place: data.loyer_en_place || undefined,
       unit_rents: data.unit_rents as any,
       type_evaluation: data.type_evaluation as any,
