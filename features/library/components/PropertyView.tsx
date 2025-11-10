@@ -769,12 +769,14 @@ export function PropertyView({
                               {property.frais_condo ? formatCurrency(property.frais_condo) : 'N/A'}
                             </Typography>
                           </Grid>
-                          <Grid item xs={12} md={1.75}>
-                            <Typography variant="body2" color="text.secondary">{t('floorNumber')}</Typography>
-                            <Typography variant="body1" fontWeight={600}>
-                              {property.floor_number ?? 'N/A'}
-                            </Typography>
-                          </Grid>
+                          {property.floor_number != null && (
+                            <Grid item xs={12} md={1.75}>
+                              <Typography variant="body2" color="text.secondary">{t('floorNumber')}</Typography>
+                              <Typography variant="body1" fontWeight={600}>
+                                {property.floor_number}
+                              </Typography>
+                            </Grid>
+                          )}
                         </>
                       )}
                     </>
