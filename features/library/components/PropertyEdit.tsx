@@ -127,10 +127,15 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
     return value.replace(/\s/g, '')
   }
 
+  // Helper function to check if field has value
+  const hasFieldValue = (value: any) => {
+    return value !== undefined && value !== null && value !== '' &&
+           (Array.isArray(value) ? value.length > 0 : true)
+  }
+
   // Helper function to get field styling based on whether it's filled or empty
   const getFieldStyling = (value: any) => {
-    const hasValue = value !== undefined && value !== null && value !== '' &&
-                     (Array.isArray(value) ? value.length > 0 : true)
+    const hasValue = hasFieldValue(value)
 
     return {
       '& .MuiOutlinedInput-root': {
@@ -155,32 +160,27 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
     }
   }
 
-  // Helper function for FormControl/Select styling
-  const getSelectStyling = (value: any) => {
-    const hasValue = value !== undefined && value !== null && value !== '' &&
-                     (Array.isArray(value) ? value.length > 0 : true)
+  // Helper to get color for InputLabel in Select
+  const getLabelColor = (value: any) => {
+    return hasFieldValue(value) ? theme.palette.primary.main : theme.palette.error.main
+  }
 
+  // Helper to get Select border and background props
+  const getSelectProps = (value: any) => {
+    const hasValue = hasFieldValue(value)
     return {
-      '& .MuiOutlinedInput-root': {
-        '& fieldset': {
+      sx: {
+        bgcolor: hasValue ? 'rgba(25, 118, 210, 0.04)' : 'transparent',
+        '& .MuiOutlinedInput-notchedOutline': {
           borderColor: hasValue ? theme.palette.primary.main : theme.palette.error.main,
           borderWidth: hasValue ? '2px' : '1px',
         },
-        '&:hover fieldset': {
+        '&:hover .MuiOutlinedInput-notchedOutline': {
           borderColor: hasValue ? theme.palette.primary.dark : theme.palette.error.dark,
         },
-        '&.Mui-focused fieldset': {
+        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
           borderColor: hasValue ? theme.palette.primary.main : theme.palette.error.main,
-        },
-      },
-      '& .MuiInputLabel-root': {
-        color: hasValue ? theme.palette.primary.main : theme.palette.error.main,
-        '&.Mui-focused': {
-          color: hasValue ? theme.palette.primary.main : theme.palette.error.main,
         }
-      },
-      '& .MuiSelect-select': {
-        backgroundColor: hasValue ? 'rgba(25, 118, 210, 0.04)' : 'transparent',
       }
     }
   }
@@ -792,11 +792,13 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       />
                     </Grid>
                     <Grid item xs={12} md={2}>
-                      <FormControl fullWidth size="small" sx={getSelectStyling(formData.province || 'QC')}>
-                        <InputLabel>{t('province')}</InputLabel>
+                      <FormControl fullWidth size="small">
+                        <InputLabel sx={{ color: getLabelColor(formData.province || 'QC') }}>{t('province')}</InputLabel>
                         <Select
                           value={formData.province || 'QC'}
+          {...getSelectProps(formData.province || 'QC')}}
                           label={t('province')}
+                          {...getSelectProps(formData.province || 'QC')}
                         >
                           <MenuItem value="QC">Québec</MenuItem>
                           <MenuItem value="ON">Ontario</MenuItem>
@@ -890,13 +892,12 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       </Grid>
                     )}
                     <Grid item xs={12} md={1.5}>
-                      <FormControl fullWidth size="small" sx={getSelectStyling(formData.status || '')}>
-                        <InputLabel>{t('status')}</InputLabel>
-                        <Select
-                          value={formData.status || ''}
+                      <FormControl fullWidth size="small">
+                        <InputLabel sx={{ color: getLabelColor(formData.status || '') }}>{t('status')}</InputLabel><Select value={formData.status || ''}
+          {...getSelectProps(formData.status || '')}
                           onChange={(e) => handleInputChange('status', e.target.value as PropertyStatus)}
                           label={t('status')}
-                        >                        sx={getFieldStyling(formData.status || '')}
+                        >
                           {propertyStatuses.map((status) => (
                             <MenuItem key={status} value={status}>{tStatus(status)}</MenuItem>
                           ))}
@@ -904,13 +905,12 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       </FormControl>
                     </Grid>
                     <Grid item xs={12} md={2}>
-                      <FormControl fullWidth size="small" sx={getSelectStyling(formData.type_propriete || '')}>
-                        <InputLabel>{t('propertyType')}</InputLabel>
-                        <Select
-                          value={formData.type_propriete || ''}
+                      <FormControl fullWidth size="small">
+                        <InputLabel sx={{ color: getLabelColor(formData.type_propriete || '') }}>{t('propertyType')}</InputLabel><Select value={formData.type_propriete || ''}
+          {...getSelectProps(formData.type_propriete || '')}
                           onChange={(e) => handleInputChange('type_propriete', e.target.value as PropertyType)}
                           label={t('propertyType')}
-                        >                        sx={getFieldStyling(formData.type_propriete || '')}
+                        >
                           {propertyTypes.map((type) => (
                             <MenuItem key={type} value={type}>{tTypes(type)}</MenuItem>
                           ))}
@@ -931,13 +931,12 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     {/* Conditional fields for Sujet status */}
                     {formData.status === 'Sujet' && (
                       <Grid item xs={12} md={3}>
-                        <FormControl fullWidth size="small" sx={getSelectStyling(formData.type_evaluation || '')}>
-                          <InputLabel>{t('appraisalType')}</InputLabel>
-                          <Select
-                            value={formData.type_evaluation || ''}
+                        <FormControl fullWidth size="small">
+                          <InputLabel sx={{ color: getLabelColor(formData.type_evaluation || '') }}>{t('appraisalType')}</InputLabel><Select value={formData.type_evaluation || ''}
+          {...getSelectProps(formData.type_evaluation || '')}
                             onChange={(e) => handleInputChange('type_evaluation', e.target.value as EvaluationType)}
                             label={t('appraisalType')}
-                          >                        sx={getFieldStyling(formData.type_evaluation || '')}
+                          >
                             {evaluationTypes.map((type) => (
                               <MenuItem key={type} value={type}>{type}</MenuItem>
                             ))}
@@ -951,13 +950,12 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                      !(formData.type_propriete === 'Duplex' || formData.type_propriete === 'Triplex' || formData.type_propriete === 'Quadriplex+') && (
                       <>
                         <Grid item xs={12} md={3}>
-                          <FormControl fullWidth size="small" sx={getSelectStyling(formData.occupancy || '')}>
-                            <InputLabel>{t('occupancy')}</InputLabel>
-                            <Select
-                              value={formData.occupancy || ''}
+                          <FormControl fullWidth size="small">
+                            <InputLabel sx={{ color: getLabelColor(formData.occupancy || '') }}>{t('occupancy')}</InputLabel><Select value={formData.occupancy || ''}
+          {...getSelectProps(formData.occupancy || '')}
                               onChange={(e) => handleInputChange('occupancy', e.target.value as OccupancyType)}
                               label={t('occupancy')}
-                            >                        sx={getFieldStyling(formData.occupancy || '')}
+                            >
                               {occupancyTypes.map((type) => (
                                 <MenuItem key={type} value={type}>{type}</MenuItem>
                               ))}
@@ -1070,10 +1068,9 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                                         />
                                       </Grid>
                                       <Grid item xs={12} sm={3}>
-                                        <FormControl fullWidth size="small" sx={getSelectStyling(unitRent.isOwnerOccupied ? 'owner' : 'tenant')}>
-                                          <InputLabel>{t('occupant')}</InputLabel>
-                                          <Select
-                                            value={unitRent.isOwnerOccupied ? 'owner' : 'tenant'}
+                                        <FormControl fullWidth size="small">
+                                          <InputLabel sx={{ color: getLabelColor(unitRent.isOwnerOccupied ? 'owner' : 'tenant') }}>{t('occupant')}</InputLabel><Select value={unitRent.isOwnerOccupied ? 'owner' : 'tenant'}
+          {...getSelectProps(unitRent.isOwnerOccupied ? 'owner' : 'tenant')}}
                                             label={t('occupant')}
                                             onChange={(e) => {
                                               const newRents = [...unitRents]
@@ -1083,7 +1080,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                                               }
                                               setUnitRents(newRents)
                                               handleInputChange('unit_rents', newRents)
-                                            }}                        sx={getFieldStyling(unitRent.isOwnerOccupied ? 'owner' : 'tenant')}
+                                            }}
                                           >
                                             <MenuItem value="tenant">Locataire</MenuItem>
                                             <MenuItem value="owner">Propriétaire</MenuItem>
@@ -1123,13 +1120,12 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                   <Grid container spacing={2}>
                     {/* Row 1 - Building characteristics */}
                     <Grid item xs={12} md={2}>
-                      <FormControl fullWidth size="small" sx={getSelectStyling(formData.genre_propriete || '')}>
-                        <InputLabel>{t('propertyGenre')}</InputLabel>
-                        <Select
-                          value={formData.genre_propriete || ''}
+                      <FormControl fullWidth size="small">
+                        <InputLabel sx={{ color: getLabelColor(formData.genre_propriete || '') }}>{t('propertyGenre')}</InputLabel><Select value={formData.genre_propriete || ''}
+          {...getSelectProps(formData.genre_propriete || '')}}
                           label={t('propertyGenre')}
                           onChange={(e) => handleInputChange('genre_propriete', e.target.value)}
-                        >                        sx={getFieldStyling(formData.genre_propriete || '')}
+                        >
                           {genreTypes.map((type) => (
                             <MenuItem key={type} value={type}>{tGenre(type)}</MenuItem>
                           ))}
@@ -1137,13 +1133,12 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       </FormControl>
                     </Grid>
                     <Grid item xs={12} md={2}>
-                      <FormControl fullWidth size="small" sx={getSelectStyling(formData.type_batiment || '')}>
-                        <InputLabel>{t('buildingType')}</InputLabel>
-                        <Select
-                          value={formData.type_batiment || ''}
+                      <FormControl fullWidth size="small">
+                        <InputLabel sx={{ color: getLabelColor(formData.type_batiment || '') }}>{t('buildingType')}</InputLabel><Select value={formData.type_batiment || ''}
+          {...getSelectProps(formData.type_batiment || '')}}
                           label={t('buildingType')}
                           onChange={(e) => handleInputChange('type_batiment', e.target.value)}
-                        >                        sx={getFieldStyling(formData.type_batiment || '')}
+                        >
                           {buildingTypes.map((type) => (
                             <MenuItem key={type} value={type}>{tBuilding(type)}</MenuItem>
                           ))}
@@ -1155,13 +1150,12 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     {formData.type_propriete === 'Condo' && (
                       <>
                         <Grid item xs={12} md={1.6}>
-                          <FormControl fullWidth size="small" sx={getSelectStyling(formData.localisation || '')}>
-                            <InputLabel>{t('location')}</InputLabel>
-                            <Select
-                              value={formData.localisation || ''}
+                          <FormControl fullWidth size="small">
+                            <InputLabel sx={{ color: getLabelColor(formData.localisation || '') }}>{t('location')}</InputLabel><Select value={formData.localisation || ''}
+          {...getSelectProps(formData.localisation || '')}}
                               label={t('location')}
                               onChange={(e) => handleInputChange('localisation', e.target.value)}
-                            >                        sx={getFieldStyling(formData.localisation || '')}
+                            >
                               {condoLocationTypes.map((type) => (
                                 <MenuItem key={type} value={type}>{tCondoLoc(type)}</MenuItem>
                               ))}
@@ -1184,13 +1178,12 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           />
                         </Grid>
                         <Grid item xs={12} md={1.6}>
-                          <FormControl fullWidth size="small" sx={getSelectStyling(formData.type_copropriete || 'Divise')}>
-                            <InputLabel>{t('condoType')}</InputLabel>
-                            <Select
-                              value={formData.type_copropriete || 'Divise'}
+                          <FormControl fullWidth size="small">
+                            <InputLabel sx={{ color: getLabelColor(formData.type_copropriete || 'Divise') }}>{t('condoType')}</InputLabel><Select value={formData.type_copropriete || 'Divise'}
+          {...getSelectProps(formData.type_copropriete || 'Divise')}}
                               label={t('condoType')}
                               onChange={(e) => handleInputChange('type_copropriete', e.target.value)}
-                            >                        sx={getFieldStyling(formData.type_copropriete || 'Divise')}
+                            >
                               {condoTypes.map((type) => (
                                 <MenuItem key={type} value={type}>{tCondoType(type)}</MenuItem>
                               ))}
@@ -1311,13 +1304,12 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
 
                     {/* Row 3 */}
                     <Grid item xs={12} md={1.7}>
-                      <FormControl fullWidth size="small" sx={getSelectStyling(formData.stationnement || '')}>
-                        <InputLabel>{t('parking')}</InputLabel>
-                        <Select
-                          value={formData.stationnement || ''}
+                      <FormControl fullWidth size="small">
+                        <InputLabel sx={{ color: getLabelColor(formData.stationnement || '') }}>{t('parking')}</InputLabel><Select value={formData.stationnement || ''}
+          {...getSelectProps(formData.stationnement || '')}
                           onChange={(e) => handleInputChange('stationnement', e.target.value as ParkingType)}
                           label={t('parking')}
-                        >                        sx={getFieldStyling(formData.stationnement || '')}
+                        >
                           {parkingTypes.map((type) => (
                             <MenuItem key={type} value={type}>{tParking(type)}</MenuItem>
                           ))}
@@ -1340,13 +1332,12 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       />
                     </Grid>
                     <Grid item xs={12} md={1.7}>
-                      <FormControl fullWidth size="small" sx={getSelectStyling(formData.type_garage || '')}>
-                        <InputLabel>{t('garageType')}</InputLabel>
-                        <Select
-                          value={formData.type_garage || ''}
+                      <FormControl fullWidth size="small">
+                        <InputLabel sx={{ color: getLabelColor(formData.type_garage || '') }}>{t('garageType')}</InputLabel><Select value={formData.type_garage || ''}
+          {...getSelectProps(formData.type_garage || '')}
                           onChange={(e) => handleInputChange('type_garage', e.target.value)}
                           label={t('garageType')}
-                        >                        sx={getFieldStyling(formData.type_garage || '')}
+                        >
                           {garageTypes.map((type) => (
                             <MenuItem key={type} value={type}>{tGarage(type)}</MenuItem>
                           ))}
@@ -1364,13 +1355,12 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       />
                     </Grid>
                     <Grid item xs={12} md={2.4}>
-                      <FormControl fullWidth size="small" sx={getSelectStyling(formData.type_sous_sol || '')}>
-                        <InputLabel>{t('basementType')}</InputLabel>
-                        <Select
-                          value={formData.type_sous_sol || ''}
+                      <FormControl fullWidth size="small">
+                        <InputLabel sx={{ color: getLabelColor(formData.type_sous_sol || '') }}>{t('basementType')}</InputLabel><Select value={formData.type_sous_sol || ''}
+          {...getSelectProps(formData.type_sous_sol || '')}
                           onChange={(e) => handleInputChange('type_sous_sol', e.target.value as BasementType)}
                           label={t('basementType')}
-                        >                        sx={getFieldStyling(formData.type_sous_sol || '')}
+                        >
                           {basementTypes.map((type) => (
                             <MenuItem key={type} value={type}>{tBasement(type)}</MenuItem>
                           ))}
@@ -1492,12 +1482,11 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                             />
                           </Grid>
                           <Grid item xs={12} md={2}>
-                            <FormControl fullWidth size="small" sx={getSelectStyling(lot.type_lot)}>
-                              <InputLabel>{t('lotType')}</InputLabel>
-                              <Select
-                                value={lot.type_lot}
+                            <FormControl fullWidth size="small">
+                              <InputLabel sx={{ color: getLabelColor(lot.type_lot) }}>{t('lotType')}</InputLabel><Select value={lot.type_lot}
+          {...getSelectProps(lot.type_lot)}
                                 onChange={(e) => updateAdditionalLot(lot.id, 'type_lot', e.target.value)}
-                                label={t('lotType')}                        sx={getFieldStyling(lot.type_lot)}
+                                label={t('lotType')}
                               >
                                 <MenuItem value="Exclusif">Exclusif</MenuItem>
                                 <MenuItem value="Commun">Commun</MenuItem>
@@ -2064,13 +2053,12 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     </Typography>
                     <Grid container spacing={2} alignItems="center">
                       <Grid item xs={12} md={3}>
-                        <FormControl fullWidth size="small" sx={getSelectStyling(newFloor.floor)}>
-                          <InputLabel>{t('floor')}</InputLabel>
-                          <Select
-                            value={newFloor.floor}
+                        <FormControl fullWidth size="small">
+                          <InputLabel sx={{ color: getLabelColor(newFloor.floor) }}>{t('floor')}</InputLabel><Select value={newFloor.floor}
+          {...getSelectProps(newFloor.floor)}
                             onChange={(e) => setNewFloor(prev => ({ ...prev, floor: e.target.value as FloorType }))}
                             label={t('floor')}
-                          >                        sx={getFieldStyling(newFloor.floor)}
+                          >
                             {floorTypes.map((floor) => (
                               <MenuItem key={floor} value={floor}>{floor}</MenuItem>
                             ))}
