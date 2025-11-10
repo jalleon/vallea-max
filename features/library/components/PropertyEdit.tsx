@@ -70,6 +70,12 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
   const tTypes = useTranslations('library.propertyTypes')
   const tStatus = useTranslations('library.propertyStatus')
   const tBasement = useTranslations('library.basementTypes')
+  const tGenre = useTranslations('library.propertyGenre')
+  const tBuilding = useTranslations('library.buildingType')
+  const tParking = useTranslations('library.parkingTypes')
+  const tGarage = useTranslations('library.garageTypes')
+  const tCondoLoc = useTranslations('library.condoLocation')
+  const tCondoType = useTranslations('library.condoType')
 
   // Helper functions for currency formatting
   const formatCurrencyDisplay = (value: number | undefined): string => {
@@ -614,6 +620,11 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
   const propertyStatuses: PropertyStatus[] = ['Vendu', 'Sujet', 'Actif']
   const basementTypes: BasementType[] = ['Aucun', 'Complet aménagé', 'Complet non-aménagé', 'Partiel aménagé', 'Partiel non-aménagé', 'Vide sanitaire', 'Dalle de béton']
   const parkingTypes: ParkingType[] = ['Allée', 'Garage', 'Abri d\'auto', 'Rue', 'Aucun']
+  const genreTypes = ['Plain-pied', 'À étages', '1 Étage', 'Un étage et demi', 'Deux étages', 'Deux étages et demi', 'Trois étages', 'Paliers multiples', 'Mobile', 'Maison de ville', 'Tour d\'appartement', 'Terrain vacant']
+  const buildingTypes = ['Isolé', 'Semi-détaché', 'En rangée', 'En rangée sur coin']
+  const garageTypes = ['Attaché', 'Détaché', 'Intégré', 'Au sous-sol', 'Abri d\'auto']
+  const condoLocationTypes = ['Coin', 'Centre']
+  const condoTypes = ['Divise', 'Indivise']
   const occupancyTypes: OccupancyType[] = ['Propriétaire', 'Locataire']
   const evaluationTypes: EvaluationType[] = ['Valeur marchande', 'Assurable']
   const floorTypes: FloorType[] = ['Sous-sol', 'Rez-de-chaussée', '2e étage', '3e étage', 'Comble', 'Mezzanine']
@@ -1055,18 +1066,9 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           label={t('propertyGenre')}
                           onChange={(e) => handleInputChange('genre_propriete', e.target.value)}
                         >
-                          <MenuItem value="Plain-pied">Plain-pied</MenuItem>
-                          <MenuItem value="À étages">À étages</MenuItem>
-                          <MenuItem value="1 Étage">1 Étage</MenuItem>
-                          <MenuItem value="Un étage et demi">Un étage et demi</MenuItem>
-                          <MenuItem value="Deux étages">Deux étages</MenuItem>
-                          <MenuItem value="Deux étages et demi">Deux étages et demi</MenuItem>
-                          <MenuItem value="Trois étages">Trois étages</MenuItem>
-                          <MenuItem value="Paliers multiples">Paliers multiples</MenuItem>
-                          <MenuItem value="Mobile">Mobile</MenuItem>
-                          <MenuItem value="Maison de ville">Maison de ville</MenuItem>
-                          <MenuItem value="Tour d'appartement">Tour d'appartement</MenuItem>
-                          <MenuItem value="Terrain vacant">Terrain vacant</MenuItem>
+                          {genreTypes.map((type) => (
+                            <MenuItem key={type} value={type}>{tGenre(type)}</MenuItem>
+                          ))}
                         </Select>
                       </FormControl>
                     </Grid>
@@ -1078,10 +1080,9 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           label={t('buildingType')}
                           onChange={(e) => handleInputChange('type_batiment', e.target.value)}
                         >
-                          <MenuItem value="Isolé">Isolé</MenuItem>
-                          <MenuItem value="Semi-détaché">Semi-détaché</MenuItem>
-                          <MenuItem value="En rangée">En rangée</MenuItem>
-                          <MenuItem value="En rangée sur coin">En rangée sur coin</MenuItem>
+                          {buildingTypes.map((type) => (
+                            <MenuItem key={type} value={type}>{tBuilding(type)}</MenuItem>
+                          ))}
                         </Select>
                       </FormControl>
                     </Grid>
@@ -1097,8 +1098,9 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                               label={t('location')}
                               onChange={(e) => handleInputChange('localisation', e.target.value)}
                             >
-                              <MenuItem value="Coin">Coin</MenuItem>
-                              <MenuItem value="Centre">Centre</MenuItem>
+                              {condoLocationTypes.map((type) => (
+                                <MenuItem key={type} value={type}>{tCondoLoc(type)}</MenuItem>
+                              ))}
                             </Select>
                           </FormControl>
                         </Grid>
@@ -1110,8 +1112,9 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                               label={t('condoType')}
                               onChange={(e) => handleInputChange('type_copropriete', e.target.value)}
                             >
-                              <MenuItem value="Divise">Divise</MenuItem>
-                              <MenuItem value="Indivise">Indivise</MenuItem>
+                              {condoTypes.map((type) => (
+                                <MenuItem key={type} value={type}>{tCondoType(type)}</MenuItem>
+                              ))}
                             </Select>
                           </FormControl>
                         </Grid>
@@ -1236,7 +1239,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           label={t('parking')}
                         >
                           {parkingTypes.map((type) => (
-                            <MenuItem key={type} value={type}>{type}</MenuItem>
+                            <MenuItem key={type} value={type}>{tParking(type)}</MenuItem>
                           ))}
                         </Select>
                       </FormControl>
@@ -1264,11 +1267,9 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                           onChange={(e) => handleInputChange('type_garage', e.target.value)}
                           label={t('garageType')}
                         >
-                          <MenuItem value="Attaché">Attaché</MenuItem>
-                          <MenuItem value="Détaché">Détaché</MenuItem>
-                          <MenuItem value="Intégré">Intégré</MenuItem>
-                          <MenuItem value="Au sous-sol">Au sous-sol</MenuItem>
-                          <MenuItem value="Abri d'auto">Abri d'auto</MenuItem>
+                          {garageTypes.map((type) => (
+                            <MenuItem key={type} value={type}>{tGarage(type)}</MenuItem>
+                          ))}
                         </Select>
                       </FormControl>
                     </Grid>

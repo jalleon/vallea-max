@@ -439,6 +439,54 @@
       "Dalle de béton": "Concrete Slab"
     },
 
+    "propertyGenre": {
+      "Plain-pied": "Bungalow",
+      "À étages": "Multi-level",
+      "1 Étage": "1 Storey",
+      "Un étage et demi": "One and a Half Storey",
+      "Deux étages": "Two Storey",
+      "Deux étages et demi": "Two and a Half Storey",
+      "Trois étages": "Three Storey",
+      "Paliers multiples": "Split-level",
+      "Mobile": "Mobile",
+      "Maison de ville": "Townhouse",
+      "Tour d'appartement": "Apartment Tower",
+      "Terrain vacant": "Vacant Land"
+    },
+
+    "buildingType": {
+      "Isolé": "Detached",
+      "Semi-détaché": "Semi-detached",
+      "En rangée": "Row House",
+      "En rangée sur coin": "End Unit Row"
+    },
+
+    "parkingTypes": {
+      "Allée": "Driveway",
+      "Garage": "Garage",
+      "Abri d'auto": "Carport",
+      "Rue": "Street",
+      "Aucun": "None"
+    },
+
+    "garageTypes": {
+      "Attaché": "Attached",
+      "Détaché": "Detached",
+      "Intégré": "Integrated",
+      "Au sous-sol": "In Basement",
+      "Abri d'auto": "Carport"
+    },
+
+    "condoLocation": {
+      "Coin": "Corner",
+      "Centre": "Center"
+    },
+
+    "condoType": {
+      "Divise": "Divided",
+      "Indivise": "Undivided"
+    },
+
     "notifications": {
       "created": "Property created successfully",
       "updated": "Property updated successfully",
