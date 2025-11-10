@@ -152,12 +152,23 @@ export default function AppraisalEditPage() {
       // Use ref to get the latest data (avoids closure issues)
       const dataToSave = sectionsDataRef.current;
 
+      // Calculate completion percentage
+      const sections = getSections();
+      const completedSections = sections.filter(
+        (section) => dataToSave[section]?.completed
+      ).length;
+      const calculatedCompletion = sections.length > 0
+        ? Math.round((completedSections / sections.length) * 100)
+        : 0;
+
       console.log('💾 Saving data to Supabase:', JSON.stringify(dataToSave, null, 2));
+      console.log('📊 Completion percentage:', calculatedCompletion);
 
       const { error } = await supabase
         .from('appraisals')
         .update({
           form_data: dataToSave as any,
+          completion_percentage: calculatedCompletion,
           updated_at: new Date().toISOString()
         })
         .eq('id', id);
