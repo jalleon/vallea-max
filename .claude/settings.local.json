@@ -51,7 +51,9 @@
       "Bash(then grep \"SUPABASE_SERVICE_KEY\" .env.local)",
       "Bash(npm run build:*)",
       "Bash(cp:*)",
-      "Bash(git revert:*)"
+      "Bash(git revert:*)",
+      "Bash(nul)",
+      "Bash(del nul 2)"
     ],
     "deny": [],
     "ask": []

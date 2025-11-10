@@ -1249,36 +1249,40 @@ export function PropertyView({
                     <Divider sx={{ my: 1 }} />
                   </Grid>
 
-                  <Grid item xs={12} md={2}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
                       {t('municipalTaxes')}
                     </Typography>
-                  </Grid>
-                  <Grid item xs={12} md={2}>
-                    <Typography variant="body2" color="text.secondary">{t('year')}</Typography>
-                    <Typography variant="body1" fontWeight={600}>{property.taxes_municipales_annee || 'N/A'}</Typography>
-                  </Grid>
-                  <Grid item xs={12} md={2}>
-                    <Typography variant="body2" color="text.secondary">{t('amount')}</Typography>
-                    <Typography variant="body1" fontWeight={700} sx={{ color: '#4CAF50' }}>
-                      {property.taxes_municipales_montant ? formatCurrency(property.taxes_municipales_montant) : 'N/A'}
-                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="text.secondary">{t('year')}</Typography>
+                        <Typography variant="body1" fontWeight={600}>{property.taxes_municipales_annee || 'N/A'}</Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="text.secondary">{t('amount')}</Typography>
+                        <Typography variant="body1" fontWeight={700} sx={{ color: '#4CAF50' }}>
+                          {property.taxes_municipales_montant ? formatCurrency(property.taxes_municipales_montant) : 'N/A'}
+                        </Typography>
+                      </Grid>
+                    </Grid>
                   </Grid>
 
-                  <Grid item xs={12} md={2}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
                       {t('schoolTaxes')}
                     </Typography>
-                  </Grid>
-                  <Grid item xs={12} md={2}>
-                    <Typography variant="body2" color="text.secondary">{t('year')}</Typography>
-                    <Typography variant="body1" fontWeight={600}>{property.taxes_scolaires_annee || 'N/A'}</Typography>
-                  </Grid>
-                  <Grid item xs={12} md={2}>
-                    <Typography variant="body2" color="text.secondary">{t('amount')}</Typography>
-                    <Typography variant="body1" fontWeight={700} sx={{ color: '#4CAF50' }}>
-                      {property.taxes_scolaires_montant ? formatCurrency(property.taxes_scolaires_montant) : 'N/A'}
-                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="text.secondary">{t('year')}</Typography>
+                        <Typography variant="body1" fontWeight={600}>{property.taxes_scolaires_annee || 'N/A'}</Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="text.secondary">{t('amount')}</Typography>
+                        <Typography variant="body1" fontWeight={700} sx={{ color: '#4CAF50' }}>
+                          {property.taxes_scolaires_montant ? formatCurrency(property.taxes_scolaires_montant) : 'N/A'}
+                        </Typography>
+                      </Grid>
+                    </Grid>
                   </Grid>
 
                   <Grid item xs={12}>
