@@ -206,7 +206,12 @@
       "cancel": "Annuler",
       "delete": "Supprimer",
       "mergeOrCreateQuestion": "Fusionner ou créer ?",
-      "mergeButton": "Fusionner"
+      "mergeButton": "Fusionner",
+      "mergeOption": "Fusionner",
+      "mergeDescription": "Les nouvelles valeurs remplaceront les champs vides de la propriété existante.",
+      "createDuplicateOption": "Créer un doublon",
+      "createDuplicateDescription": "Une nouvelle propriété distincte sera créée avec les mêmes informations.",
+      "createDuplicateButton": "Créer un doublon"
     },
 
     "form": {

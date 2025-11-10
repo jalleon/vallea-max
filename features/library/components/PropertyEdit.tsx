@@ -285,6 +285,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
         salle_bain: property.salle_bain ?? (hasInspectionData ? calculatedRoomCounts.bathrooms : undefined),
         salle_eau: property.salle_eau ?? (hasInspectionData ? calculatedRoomCounts.powderRooms : undefined),
         stationnement: property.stationnement,
+        nombre_stationnement: property.nombre_stationnement,
         type_garage: property.type_garage,
         dimension_garage: property.dimension_garage || '',
         type_sous_sol: property.type_sous_sol,
@@ -559,9 +560,6 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
         }
       })
 
-      // Debug: Log nombre_stationnement value
-      console.log('Saving property with nombre_stationnement:', sanitizedData.nombre_stationnement)
-
       await onSave(sanitizedData)
       onClose()
     } catch (error) {
@@ -598,9 +596,6 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
           sanitizedData[key] = null
         }
       })
-
-      // Debug: Log nombre_stationnement value
-      console.log('SaveAndView - nombre_stationnement:', sanitizedData.nombre_stationnement)
 
       // Use the onSaveAndView callback if provided, otherwise just save
       if (onSaveAndView) {

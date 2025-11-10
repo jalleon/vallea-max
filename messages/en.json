@@ -206,7 +206,12 @@
       "cancel": "Cancel",
       "delete": "Delete",
       "mergeOrCreateQuestion": "Merge or Create?",
-      "mergeButton": "Merge"
+      "mergeButton": "Merge",
+      "mergeOption": "Merge",
+      "mergeDescription": "New values will fill empty fields in the existing property.",
+      "createDuplicateOption": "Create Duplicate",
+      "createDuplicateDescription": "A new separate property will be created with the same information.",
+      "createDuplicateButton": "Create Duplicate"
     },
 
     "form": {
