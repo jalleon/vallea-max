@@ -323,6 +323,7 @@ export type Database = {
           eval_municipale_total: number | null
           extras: string | null
           field_sources: Json | null
+          floor_number: number | null
           frais_condo: number | null
           frontage_m2: number | null
           frontage_pi2: number | null
@@ -349,6 +350,7 @@ export type Database = {
           municipalite: string | null
           nombre_chambres: number | null
           nombre_pieces: number | null
+          nombre_stationnement: number | null
           notes: string | null
           numero_mls: string | null
           occupancy: string | null
@@ -409,6 +411,7 @@ export type Database = {
           eval_municipale_total?: number | null
           extras?: string | null
           field_sources?: Json | null
+          floor_number?: number | null
           frais_condo?: number | null
           frontage_m2?: number | null
           frontage_pi2?: number | null
@@ -435,6 +438,7 @@ export type Database = {
           municipalite?: string | null
           nombre_chambres?: number | null
           nombre_pieces?: number | null
+          nombre_stationnement?: number | null
           notes?: string | null
           numero_mls?: string | null
           occupancy?: string | null
@@ -495,6 +499,7 @@ export type Database = {
           eval_municipale_total?: number | null
           extras?: string | null
           field_sources?: Json | null
+          floor_number?: number | null
           frais_condo?: number | null
           frontage_m2?: number | null
           frontage_pi2?: number | null
@@ -521,6 +526,7 @@ export type Database = {
           municipalite?: string | null
           nombre_chambres?: number | null
           nombre_pieces?: number | null
+          nombre_stationnement?: number | null
           notes?: string | null
           numero_mls?: string | null
           occupancy?: string | null

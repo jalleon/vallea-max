@@ -79,6 +79,7 @@ export interface Property {
 
   // Condo-specific fields
   frais_condo?: number  // Condo fees when type is Condo
+  floor_number?: number  // Floor number for condo units
   localisation?: CondoLocationType  // Coin or Centre
   type_copropriete?: CoproprieteType  // Divise or Indivise
 
@@ -105,6 +106,7 @@ export interface Property {
   salle_bain?: number
   salle_eau?: number
   stationnement?: ParkingType
+  nombre_stationnement?: number
   type_garage?: GarageType
   dimension_garage?: string
   type_sous_sol?: BasementType
@@ -208,6 +210,7 @@ export interface PropertyCreateInput {
 
   // Condo-specific fields
   frais_condo?: number
+  floor_number?: number
   localisation?: CondoLocationType
   type_copropriete?: CoproprieteType
 
@@ -235,6 +238,7 @@ export interface PropertyCreateInput {
   salle_bain?: number
   salle_eau?: number
   stationnement?: ParkingType
+  nombre_stationnement?: number
   type_garage?: GarageType
   dimension_garage?: string
   type_sous_sol?: BasementType
