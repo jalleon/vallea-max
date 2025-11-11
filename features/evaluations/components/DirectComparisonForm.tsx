@@ -126,6 +126,14 @@ export default function DirectComparisonForm({
     ]
   );
 
+  // Custom labels for optional fields
+  const [customLabels, setCustomLabels] = useState<{
+    optional1?: string;
+    optional2?: string;
+    optional3?: string;
+    optional4?: string;
+  }>(data.customLabels || {});
+
   // Undo/Redo state
   const [history, setHistory] = useState<Array<{ subject: ComparableProperty; comparables: ComparableProperty[] }>>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -157,7 +165,7 @@ export default function DirectComparisonForm({
 
     // Debounce onChange calls - only call after 300ms of no changes
     onChangeTimerRef.current = setTimeout(() => {
-      onChange({ subject, comparables });
+      onChange({ subject, comparables, customLabels });
     }, 300);
 
     return () => {
@@ -165,7 +173,7 @@ export default function DirectComparisonForm({
         clearTimeout(onChangeTimerRef.current);
       }
     };
-  }, [subject, comparables]);
+  }, [subject, comparables, customLabels]);
 
   // Save to history when data changes (but not during undo/redo)
   useEffect(() => {
@@ -610,10 +618,10 @@ export default function DirectComparisonForm({
       { rowId: 'assessedValue', field: 'assessedValue', label: t('assessedValue'), type: 'text' },
       { rowId: 'assessedValueTotal', field: 'assessedValueTotal', label: t('assessedValueTotal'), type: 'text' },
       { rowId: 'pricePerSqFt', field: 'pricePerSqFt', label: t('pricePerSqFt'), type: 'calculated' },
-      { rowId: 'optional1', field: 'optional1', label: t('optional1'), type: 'text' },
-      { rowId: 'optional2', field: 'optional2', label: t('optional2'), type: 'text' },
-      { rowId: 'optional3', field: 'optional3', label: t('optional3'), type: 'text' },
-      { rowId: 'optional4', field: 'optional4', label: t('optional4'), type: 'text' },
+      { rowId: 'optional1', field: 'optional1', label: customLabels.optional1 || t('optional1'), type: 'text' },
+      { rowId: 'optional2', field: 'optional2', label: customLabels.optional2 || t('optional2'), type: 'text' },
+      { rowId: 'optional3', field: 'optional3', label: customLabels.optional3 || t('optional3'), type: 'text' },
+      { rowId: 'optional4', field: 'optional4', label: customLabels.optional4 || t('optional4'), type: 'text' },
       // Summary rows (always shown)
       { rowId: 'distance', field: 'distance', label: t('distance'), type: 'calculated' },
       { rowId: 'totalAdjustment', field: 'totalAdjustment', label: t('totalAdjustment'), type: 'calculated' },
@@ -625,7 +633,7 @@ export default function DirectComparisonForm({
     // Filter rows based on property type
     const filteredRows = allRows.filter(row => shouldShowRow(row.rowId));
     return filteredRows as any[];
-  }, [isCondo, subjectPropertyType, t]);
+  }, [isCondo, subjectPropertyType, t, customLabels]);
 
   // Convert data to row format for AG Grid
   const rowData = useMemo(() => {
@@ -657,7 +665,10 @@ export default function DirectComparisonForm({
         headerName: t('elementsComparison'),
         pinned: 'left',
         width: 220,
-        editable: false,
+        editable: (params: any) => {
+          // Make label editable for optional fields
+          return ['optional1', 'optional2', 'optional3', 'optional4'].includes(params.data.rowId);
+        },
         cellStyle: (params: any) => {
           const isTotalAdjustment = params.data.rowId === 'totalAdjustment';
           const isAdjustedValue = params.data.rowId === 'adjustedValue';
@@ -952,6 +963,15 @@ export default function DirectComparisonForm({
   const onCellValueChanged = useCallback((event: CellValueChangedEvent) => {
     const { data, colDef, newValue } = event;
     const field = data.field;
+
+    // Update custom labels for optional fields
+    if (colDef.field === 'label' && ['optional1', 'optional2', 'optional3', 'optional4'].includes(data.rowId)) {
+      setCustomLabels(prev => ({
+        ...prev,
+        [data.rowId]: newValue || undefined
+      }));
+      return;
+    }
 
     // Update subject
     if (colDef.field === 'subjectData1') {

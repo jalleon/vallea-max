@@ -20,6 +20,7 @@ import { createClient } from '@/lib/supabase/client';
 import { TemplateType } from '@/features/evaluations/types/evaluation.types';
 import { NAS_SECTIONS, RPS_SECTIONS, CUSTOM_SECTIONS } from '@/features/evaluations/constants/evaluation.constants';
 import AppraisalSectionForm from '@/features/evaluations/components/AppraisalSectionForm';
+import AdjustmentsForm from '@/features/evaluations/components/AdjustmentsForm';
 import { useTranslations } from 'next-intl';
 
 interface TabPanelProps {
@@ -50,7 +51,9 @@ export default function AppraisalEditPage() {
   const [saving, setSaving] = useState(false);
   const [saveState, setSaveState] = useState<'saved' | 'unsaved' | 'saving'>('saved');
   const [currentTab, setCurrentTab] = useState(0);
+  const [currentToolTab, setCurrentToolTab] = useState(-1); // -1 = no tool tab selected
   const [sectionsData, setSectionsData] = useState<any>({});
+  const [adjustmentsData, setAdjustmentsData] = useState<any>(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [reloadTrigger, setReloadTrigger] = useState(0);
   const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -266,12 +269,62 @@ export default function AppraisalEditPage() {
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setCurrentTab(newValue);
+    setCurrentToolTab(-1); // Reset tool tab when changing main tab
     // Update URL with tab parameter
     const url = new URL(window.location.href);
     url.searchParams.set('tab', newValue.toString());
     window.history.replaceState({}, '', url.toString());
     // Save to localStorage for persistence across navigation
     localStorage.setItem(`evaluation-tab-${id}`, newValue.toString());
+  };
+
+  const handleToolTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setCurrentToolTab(newValue);
+  };
+
+  const handleAdjustmentsChange = (data: any) => {
+    setAdjustmentsData(data);
+    // Auto-save adjustments data
+    handleSectionChange('adjustments_calculator', data);
+  };
+
+  const handleSyncToDirectComparison = () => {
+    if (!adjustmentsData || !adjustmentsData.comparables) return;
+
+    // Find the Direct Comparison section in sectionsData
+    const directComparisonSection = sectionsData.direct_comparison;
+    if (!directComparisonSection) return;
+
+    // Update comparables with adjustment amounts
+    const updatedComparables = directComparisonSection.comparables.map((comp: any, index: number) => {
+      const adjustmentData = adjustmentsData.comparables[index];
+      if (!adjustmentData) return comp;
+
+      // Map adjustments to Direct Comparison fields
+      const newComp = { ...comp };
+      const adjustments = adjustmentData.adjustments;
+
+      if (adjustments.timing) newComp.adjustmentDataSource = adjustments.timing.calculatedAmount;
+      if (adjustments.livingArea) newComp.adjustmentLivingArea = adjustments.livingArea.calculatedAmount;
+      if (adjustments.lotSize) newComp.adjustmentLotSize = adjustments.lotSize.calculatedAmount;
+      if (adjustments.quality) newComp.adjustmentQuality = adjustments.quality.calculatedAmount;
+      if (adjustments.effectiveAge) newComp.adjustmentAge = adjustments.effectiveAge.calculatedAmount;
+      if (adjustments.basement) newComp.adjustmentBasement = adjustments.basement.calculatedAmount;
+      if (adjustments.bathrooms) newComp.adjustmentRooms = adjustments.bathrooms.calculatedAmount;
+      if (adjustments.garage) newComp.adjustmentParking = adjustments.garage.calculatedAmount;
+      if (adjustments.extras) newComp.adjustmentExtras = adjustments.extras.calculatedAmount;
+      if (adjustments.unitLocation) newComp.adjustmentUnitLocation = adjustments.unitLocation.calculatedAmount;
+
+      return newComp;
+    });
+
+    // Update sections data with new comparables
+    handleSectionChange('direct_comparison', {
+      ...directComparisonSection,
+      comparables: updatedComparables
+    });
+
+    alert('Adjustments synced to Direct Comparison table!');
   };
 
   const handleReloadSubjectProperty = () => {
@@ -431,6 +484,7 @@ export default function AppraisalEditPage() {
 
         {/* Tabs */}
         <Card sx={{ minHeight: 'calc(100vh - 300px)' }}>
+          {/* Main Section Tabs - First Row */}
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs
               value={currentTab}
@@ -464,23 +518,86 @@ export default function AppraisalEditPage() {
             </Tabs>
           </Box>
 
-          {sections.map((sectionId, index) => {
-            console.log('🔍 Page.tsx - Rendering section:', sectionId);
-            console.log('🔍 Page.tsx - appraisal.property_id:', appraisal.property_id);
-            return (
-              <TabPanel key={sectionId} value={currentTab} index={index}>
-                <AppraisalSectionForm
-                  sectionId={sectionId}
-                  templateType={appraisal.template_type}
-                  data={sectionsData[sectionId] || {}}
-                  onChange={(data) => handleSectionChange(sectionId, data)}
-                  subjectPropertyId={appraisal.property_id}
-                  subjectPropertyType={appraisal.property_type}
-                  reloadTrigger={reloadTrigger}
-                />
-              </TabPanel>
-            );
-          })}
+          {/* Tools/Calculators Tabs - Second Row */}
+          <Box sx={{ borderBottom: 2, borderColor: 'warning.light', bgcolor: 'grey.50' }}>
+            <Tabs
+              value={currentToolTab}
+              onChange={handleToolTabChange}
+              variant="scrollable"
+              scrollButtons="auto"
+              sx={{
+                minHeight: 42,
+                '& .MuiTab-root': {
+                  textTransform: 'none',
+                  minHeight: 42,
+                  fontSize: '13px',
+                  color: 'text.secondary',
+                  '&.Mui-selected': {
+                    color: 'warning.dark',
+                    fontWeight: 600
+                  }
+                },
+                '& .MuiTabs-indicator': {
+                  backgroundColor: 'warning.main',
+                  height: 3
+                }
+              }}
+            >
+              <Tab
+                value={0}
+                label={
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    ⚙️ {t('adjustmentsCalculator')}
+                  </Box>
+                }
+              />
+              {/* Add more tool tabs here in the future */}
+            </Tabs>
+          </Box>
+
+          {/* Render Main Section Tabs or Tool Tabs */}
+          {currentToolTab === -1 ? (
+            // Show normal section tabs
+            sections.map((sectionId, index) => {
+              console.log('🔍 Page.tsx - Rendering section:', sectionId);
+              console.log('🔍 Page.tsx - appraisal.property_id:', appraisal.property_id);
+              return (
+                <TabPanel key={sectionId} value={currentTab} index={index}>
+                  <AppraisalSectionForm
+                    sectionId={sectionId}
+                    templateType={appraisal.template_type}
+                    data={sectionsData[sectionId] || {}}
+                    onChange={(data) => handleSectionChange(sectionId, data)}
+                    subjectPropertyId={appraisal.property_id}
+                    subjectPropertyType={appraisal.property_type}
+                    reloadTrigger={reloadTrigger}
+                  />
+                </TabPanel>
+              );
+            })
+          ) : (
+            // Show tool tabs
+            <>
+              {currentToolTab === 0 && (
+                <Box sx={{ p: 0 }}>
+                  <AdjustmentsForm
+                    data={adjustmentsData || {
+                      subjectPropertyId: appraisal.property_id,
+                      propertyType: appraisal.property_type,
+                      defaultRates: {},
+                      comparables: [],
+                      autoSyncToDirectComparison: true
+                    }}
+                    onChange={handleAdjustmentsChange}
+                    directComparisonData={sectionsDataRef.current.methode_parite || {}}
+                    propertyType={appraisal.property_type}
+                    onSyncToDirectComparison={handleSyncToDirectComparison}
+                    onClose={() => setCurrentToolTab(-1)}
+                  />
+                </Box>
+              )}
+            </>
+          )}
         </Card>
       </Box>
     </MaterialDashboardLayout>

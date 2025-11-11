@@ -356,7 +356,61 @@ export default function InspectionPage() {
 
 ---
 
-## 🎯 Current Project: Inspection Module
+## 📋 Appraisal Sections & Data Access
+
+### Section IDs and Data Structure
+
+**IMPORTANT**: When accessing appraisal section data, use the correct section ID keys.
+
+The `appraisals` table stores all section data in the `form_data` JSONB column:
+```typescript
+// appraisals.form_data structure:
+{
+  "sujet": { subject: {...}, completed: true },
+  "exec_summary": { ... },
+  "methode_parite": { subject: {...}, comparables: [...], customLabels: {} },
+  "adjustments_calculator": { comparables: [...], defaultRates: {...} },
+  // ... other sections
+}
+```
+
+### Common Section IDs
+- `sujet` - Subject property (Page 1)
+- `exec_summary` - Executive summary
+- `methode_parite` - Direct Comparison / Parity Method (NOT `direct_comparison`)
+- `adjustments_calculator` - Adjustments Calculator tool
+- `voisinage` - Neighborhood
+- `emplacement` - Location
+- `ameliorations` - Improvements
+- `utilisation_optimale` - Highest and Best Use
+- `historique_ventes` - Sales History
+
+### Accessing Section Data in Parent Components
+
+In `app/[locale]/evaluations/[id]/page.tsx`:
+
+```typescript
+// ✅ CORRECT - Use sectionsDataRef for most up-to-date data
+const directComparisonData = sectionsDataRef.current.methode_parite || {};
+
+// ❌ WRONG - Using wrong key name
+const directComparisonData = sectionsDataRef.current.direct_comparison || {};
+
+// ✅ CORRECT - sectionsDataRef.current is more up-to-date than sectionsData state
+directComparisonData={sectionsDataRef.current.methode_parite || {}}
+
+// ⚠️ May be stale - sectionsData state might not have latest changes
+directComparisonData={sectionsData.methode_parite || {}}
+```
+
+**Why use `sectionsDataRef.current`?**
+- React state (`sectionsData`) may be stale due to batching
+- The ref (`sectionsDataRef.current`) is updated immediately in `handleSectionChange()`
+- Tool tabs and cross-section data access should use the ref for real-time data
+
+---
+
+## 🎯 Current Project: Évaluations (Appraisals) Module
 
 ### Key Features
 - **Tablet-optimized** UI for field inspections

@@ -53,7 +53,9 @@
       "Bash(cp:*)",
       "Bash(git revert:*)",
       "Bash(nul)",
-      "Bash(del nul 2)"
+      "Bash(del nul 2)",
+      "Bash(echo:*)",
+      "Bash(\"D:\\@github\\vallea_immobilier\\vallea-eval-projet.2.0\\vallea-max\\supabase\\migrations\\20251111043547_add_adjustments_data_field.sql\")"
     ],
     "deny": [],
     "ask": []

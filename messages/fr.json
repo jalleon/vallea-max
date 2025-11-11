@@ -18,6 +18,7 @@
     "filter": "Filtrer",
     "clear": "Effacer",
     "close": "Fermer",
+    "reset": "Réinitialiser",
     "back": "Retour",
     "next": "Suivant",
     "previous": "Précédent",
@@ -1499,7 +1500,8 @@
       "save": "Enregistrer",
       "saving": "Enregistrement...",
       "notFound": "Évaluation non trouvée",
-      "reloadSubjectProperty": "Recharger la propriété"
+      "reloadSubjectProperty": "Recharger la propriété",
+      "adjustmentsCalculator": "Calculateur d'ajustements"
     },
 
     "sections": {
@@ -1746,6 +1748,67 @@
 
         "defaultQuality": "Bonne",
         "defaultExtras": "Standard"
+      },
+
+      "adjustments": {
+        "title": "Calculateur d'ajustements",
+        "subtitle": "Calcul détaillé des ajustements pour la méthode de comparaison directe",
+        "calculate": "Calculer",
+        "syncToTable": "Synchroniser au tableau",
+        "unsavedChanges": "Vous avez des modifications non enregistrées aux taux d'ajustement",
+
+        "defaultRates": "Taux par défaut",
+        "adjustmentsGrid": "Grille d'ajustements",
+        "category": "Catégorie",
+        "subject": "Sujet",
+        "comparable": "Comparable",
+        "total": "Total",
+        "adjustedValue": "Valeur ajustée",
+
+        "marketAppreciationRate": "Taux d'appréciation du marché",
+        "livingAreaRate": "Taux d'aire habitable",
+        "landRate": "Taux du terrain",
+        "landDepreciationRate": "Taux de dépréciation du terrain",
+        "basementFinishRate": "Taux de finition du sous-sol",
+        "basementDepreciationRate": "Taux de dépréciation du sous-sol",
+        "qualityAdjustmentMethod": "Méthode d'ajustement qualité",
+        "qualityAdjustmentValue": "Valeur d'ajustement qualité",
+        "ageAdjustmentRate": "Taux d'ajustement d'âge",
+        "ageAdjustmentMethod": "Méthode d'ajustement d'âge",
+        "bathroomValue": "Valeur par salle de bain",
+        "bathroomDepreciationRate": "Taux de dépréciation salle de bain",
+        "garageValue": "Valeur du garage",
+        "floorValue": "Valeur par étage",
+        "landscapingDepreciationRate": "Taux de dépréciation aménagement",
+        "extrasDepreciationRate": "Taux de dépréciation extras",
+        "cornerUnitPremium": "Prime unité de coin",
+
+        "categories": {
+          "timing": "Ajustement de temps",
+          "timingDescription": "Date effective - date de vente × % d'appréciation annuelle du marché",
+          "livingArea": "Aire habitable",
+          "livingAreaDescription": "Différence de superficie × $/pi²",
+          "lotSize": "Grandeur de terrain",
+          "lotSizeDescription": "Différence de superficie × $/pi² × (1 - % dépréciation)",
+          "quality": "Qualité",
+          "qualityDescription": "Ajustement basé sur la qualité de construction",
+          "effectiveAge": "Âge effectif/apparent",
+          "effectiveAgeDescription": "Différence d'âge × $/année ou %",
+          "basement": "Finition du sous-sol",
+          "basementDescription": "Différence de finition × $/pi² × (1 - % dépréciation)",
+          "bathrooms": "Salles de bain",
+          "bathroomsDescription": "Différence de salles de bain × $ par salle × (1 - % dépréciation)",
+          "garage": "Garage/Stationnement",
+          "garageDescription": "Valeur sujet - valeur comparable",
+          "floor": "Étage",
+          "floorDescription": "Différence d'étage × $ par étage (condos)",
+          "landscaping": "Aménagement extérieur",
+          "landscapingDescription": "Valeur × (1 - % dépréciation)",
+          "extras": "Extras",
+          "extrasDescription": "Valeur × (1 - % dépréciation)",
+          "unitLocation": "Localisation de l'unité",
+          "unitLocationDescription": "Prime pour unité de coin (condos)"
+        }
       }
     },
 
