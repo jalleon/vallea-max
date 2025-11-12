@@ -29,6 +29,8 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material'
 import {
   Assessment,
@@ -62,6 +64,10 @@ export default function LandingPage() {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [langMenuAnchor, setLangMenuAnchor] = useState<null | HTMLElement>(null)
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'annual'>('annual')
+
+  // Toggle to show/hide pricing section (set to true when ready to launch pricing)
+  const SHOW_PRICING = false
 
   const features = [
     {
@@ -215,7 +221,7 @@ export default function LandingPage() {
                 </Button>
                 <Button
                   color="inherit"
-                  onClick={() => handleScroll('pricing')}
+                  onClick={() => handleScroll('demo')}
                   sx={{ color: 'text.primary', lineHeight: 1.2 }}
                 >
                   {t('nav.pricing')}
@@ -291,7 +297,7 @@ export default function LandingPage() {
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
-              <ListItemButton onClick={() => handleScroll('pricing')}>
+              <ListItemButton onClick={() => handleScroll('demo')}>
                 <ListItemText primary={t('nav.pricing')} />
               </ListItemButton>
             </ListItem>
@@ -1061,14 +1067,80 @@ export default function LandingPage() {
         </Container>
       </Box>
 
-      {/* Pricing Section */}
+      {/* Demo Request Section */}
       <Box
-        id="pricing"
+        id="demo"
         sx={{
-          background: 'linear-gradient(to bottom, #E8E2D5 0%, #F5F3EE 50%, #E8E2D5 100%)',
-          py: { xs: 8, md: 14 },
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          py: { xs: 10, md: 14 },
           position: 'relative',
           overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: `
+              radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+              radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+              repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 40px,
+                rgba(255, 255, 255, 0.03) 40px,
+                rgba(255, 255, 255, 0.03) 80px
+              )
+            `,
+            pointerEvents: 'none',
+          },
+        }}
+      >
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
+          <Box sx={{ textAlign: 'center', mb: 6 }}>
+            <Typography
+              variant="h2"
+              sx={{
+                fontSize: { xs: '2rem', md: '3rem' },
+                fontWeight: 400,
+                mb: 2,
+                color: 'white',
+                fontFamily: 'var(--font-fraunces)',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {t('demo.title')}
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{
+                maxWidth: 600,
+                mx: 'auto',
+                color: 'rgba(255, 255, 255, 0.95)',
+                fontWeight: 300,
+                fontSize: '1.15rem',
+                lineHeight: 1.7,
+                mb: 4,
+              }}
+            >
+              {t('demo.subtitle')}
+            </Typography>
+          </Box>
+
+          <DemoRequestForm />
+        </Container>
+      </Box>
+
+      {/* Pricing Section - Hidden during development, set SHOW_PRICING to true when ready */}
+      {SHOW_PRICING && (
+        <Box
+          id="pricing"
+          sx={{
+            background: 'linear-gradient(to bottom, #E8E2D5 0%, #F5F3EE 50%, #E8E2D5 100%)',
+            py: { xs: 8, md: 14 },
+            position: 'relative',
+            overflow: 'hidden',
           '&::before': {
             content: '""',
             position: 'absolute',
@@ -1118,86 +1190,72 @@ export default function LandingPage() {
             </Typography>
           </Box>
 
-          <Grid container spacing={4} justifyContent="center">
-            {/* Monthly Plan */}
-            <Grid item xs={12} md={5}>
-              <Card
-                sx={{
-                  height: '100%',
-                  position: 'relative',
-                  background: 'rgba(255, 255, 255, 0.7)',
-                  backdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(26, 31, 54, 0.08)',
-                  borderRadius: '16px',
-                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                  '&:hover': {
-                    transform: 'translateY(-8px)',
-                    boxShadow: '0 20px 48px rgba(0, 0, 0, 0.12)',
-                    border: '1px solid rgba(26, 31, 54, 0.15)',
+          {/* Billing Period Toggle */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 6 }}>
+            <ToggleButtonGroup
+              value={billingPeriod}
+              exclusive
+              onChange={(_, value) => value && setBillingPeriod(value)}
+              sx={{
+                bgcolor: 'rgba(255, 255, 255, 0.7)',
+                backdropFilter: 'blur(12px)',
+                borderRadius: '12px',
+                p: 0.5,
+                border: '1px solid rgba(26, 31, 54, 0.08)',
+                '& .MuiToggleButton-root': {
+                  border: 'none',
+                  borderRadius: '10px',
+                  px: 4,
+                  py: 1.5,
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                  fontWeight: 500,
+                  color: '#4A5568',
+                  '&.Mui-selected': {
+                    background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                    color: 'white',
+                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #0ea570 0%, #047857 100%)',
+                    },
                   },
-                }}
-              >
-                <CardContent sx={{ p: 5 }}>
-                  <Typography
-                    variant="h5"
-                    fontWeight={600}
-                    gutterBottom
-                    align="center"
-                    sx={{ color: '#1A1F36', mb: 3 }}
-                  >
-                    {tPricing('monthly')}
-                  </Typography>
-                  <Box sx={{ textAlign: 'center', my: 4 }}>
-                    <Typography variant="h2" fontWeight={600} component="span" sx={{ color: '#1A1F36' }}>
-                      99$
-                    </Typography>
-                    <Typography variant="h6" sx={{ color: '#4A5568' }} component="span">
-                      {' '}/ {tPricing('month')}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: '#6B7280', mt: 1 }}>
-                      CAD
-                    </Typography>
-                  </Box>
-                  <Stack spacing={2.5} sx={{ my: 4 }}>
-                    {benefits.map((benefit, index) => (
-                      <Stack direction="row" spacing={2} key={index}>
-                        <CheckCircle sx={{ fontSize: 20, mt: 0.2, color: '#10B981' }} />
-                        <Typography variant="body2" sx={{ color: '#4A5568', lineHeight: 1.7 }}>
-                          {benefit}
-                        </Typography>
-                      </Stack>
-                    ))}
-                  </Stack>
-                  <Button
-                    variant="outlined"
-                    size="large"
-                    fullWidth
-                    onClick={() => router.push('/login')}
+                  '&:hover': {
+                    bgcolor: 'rgba(16, 185, 129, 0.05)',
+                  },
+                },
+              }}
+            >
+              <ToggleButton value="monthly">
+                {tPricing('monthly')}
+              </ToggleButton>
+              <ToggleButton value="annual">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {tPricing('annual')}
+                  <Box
                     sx={{
-                      mt: 2,
-                      py: 1.5,
-                      fontSize: '1rem',
-                      fontWeight: 500,
-                      borderRadius: '8px',
-                      borderColor: '#1A1F36',
-                      color: '#1A1F36',
-                      '&:hover': {
-                        borderColor: '#10B981',
-                        bgcolor: 'rgba(16, 185, 129, 0.05)',
-                      },
+                      bgcolor: billingPeriod === 'annual' ? 'rgba(255, 255, 255, 0.2)' : '#10B981',
+                      color: billingPeriod === 'annual' ? 'white' : 'white',
+                      px: 1.5,
+                      py: 0.25,
+                      borderRadius: '6px',
+                      fontSize: '0.7rem',
+                      fontWeight: 600,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.03em',
                     }}
                   >
-                    {tPricing('getStarted')}
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
+                    {locale === 'fr' ? 'Économie 20%' : 'Save 20%'}
+                  </Box>
+                </Box>
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
 
-            {/* Annual Plan */}
-            <Grid item xs={12} md={5}>
+          {/* Single Pricing Card */}
+          <Grid container justifyContent="center">
+            <Grid item xs={12} md={6} lg={5}>
               <Card
                 sx={{
-                  height: '100%',
                   position: 'relative',
                   background: 'rgba(255, 255, 255, 0.9)',
                   backdropFilter: 'blur(12px)',
@@ -1212,26 +1270,28 @@ export default function LandingPage() {
                   },
                 }}
               >
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: 16,
-                    right: 16,
-                    background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-                    color: 'white',
-                    px: 3,
-                    py: 0.75,
-                    borderRadius: '8px',
-                    fontSize: '0.7rem',
-                    fontWeight: 600,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    zIndex: 1,
-                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
-                  }}
-                >
-                  {tPricing('popular')}
-                </Box>
+                {billingPeriod === 'annual' && (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 16,
+                      right: 16,
+                      background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                      color: 'white',
+                      px: 3,
+                      py: 0.75,
+                      borderRadius: '8px',
+                      fontSize: '0.7rem',
+                      fontWeight: 600,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      zIndex: 1,
+                      boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                    }}
+                  >
+                    {tPricing('popular')}
+                  </Box>
+                )}
                 <CardContent sx={{ p: 5 }}>
                   <Typography
                     variant="h5"
@@ -1240,18 +1300,25 @@ export default function LandingPage() {
                     align="center"
                     sx={{ color: '#1A1F36', mb: 3 }}
                   >
-                    {tPricing('annual')}
+                    {locale === 'fr' ? 'Plan Professionnel' : 'Professional Plan'}
                   </Typography>
                   <Box sx={{ textAlign: 'center', my: 4 }}>
-                    <Typography variant="h2" fontWeight={600} component="span" sx={{ color: '#10B981' }}>
-                      79$
+                    <Typography
+                      variant="h2"
+                      fontWeight={600}
+                      component="span"
+                      sx={{ color: billingPeriod === 'annual' ? '#10B981' : '#1A1F36' }}
+                    >
+                      {billingPeriod === 'monthly' ? '99$' : '79$'}
                     </Typography>
                     <Typography variant="h6" sx={{ color: '#4A5568' }} component="span">
                       {' '}/ {tPricing('month')}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: '#10B981', fontWeight: 600, mt: 1 }}>
-                      948$ {tPricing('billedAnnually')}
-                    </Typography>
+                    {billingPeriod === 'annual' && (
+                      <Typography variant="body2" sx={{ color: '#10B981', fontWeight: 600, mt: 1 }}>
+                        948$ {tPricing('billedAnnually')}
+                      </Typography>
+                    )}
                     <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       CAD
                     </Typography>
@@ -1265,12 +1332,14 @@ export default function LandingPage() {
                         </Typography>
                       </Stack>
                     ))}
-                    <Stack direction="row" spacing={2}>
-                      <CheckCircle sx={{ fontSize: 20, mt: 0.2, color: '#10B981' }} />
-                      <Typography variant="body2" fontWeight={600} sx={{ color: '#10B981', lineHeight: 1.7 }}>
-                        {tPricing('save240')}
-                      </Typography>
-                    </Stack>
+                    {billingPeriod === 'annual' && (
+                      <Stack direction="row" spacing={2}>
+                        <CheckCircle sx={{ fontSize: 20, mt: 0.2, color: '#10B981' }} />
+                        <Typography variant="body2" fontWeight={600} sx={{ color: '#10B981', lineHeight: 1.7 }}>
+                          {tPricing('save240')}
+                        </Typography>
+                      </Stack>
+                    )}
                   </Stack>
                   <Button
                     variant="contained"
@@ -1308,6 +1377,7 @@ export default function LandingPage() {
           </Typography>
         </Container>
       </Box>
+      )}
 
       {/* FAQ Section */}
       <Box
@@ -1430,71 +1500,6 @@ export default function LandingPage() {
               </Accordion>
             ))}
           </Stack>
-        </Container>
-      </Box>
-
-      {/* Demo Request Section */}
-      <Box
-        id="demo"
-        sx={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          py: { xs: 10, md: 14 },
-          position: 'relative',
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundImage: `
-              radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
-              radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-              repeating-linear-gradient(
-                45deg,
-                transparent,
-                transparent 40px,
-                rgba(255, 255, 255, 0.03) 40px,
-                rgba(255, 255, 255, 0.03) 80px
-              )
-            `,
-            pointerEvents: 'none',
-          },
-        }}
-      >
-        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
-          <Box sx={{ textAlign: 'center', mb: 6 }}>
-            <Typography
-              variant="h2"
-              sx={{
-                fontSize: { xs: '2rem', md: '3rem' },
-                fontWeight: 400,
-                mb: 2,
-                color: 'white',
-                fontFamily: 'var(--font-fraunces)',
-                letterSpacing: '-0.01em',
-              }}
-            >
-              {t('demo.title')}
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                maxWidth: 600,
-                mx: 'auto',
-                color: 'rgba(255, 255, 255, 0.95)',
-                fontWeight: 300,
-                fontSize: '1.15rem',
-                lineHeight: 1.7,
-                mb: 4,
-              }}
-            >
-              {t('demo.subtitle')}
-            </Typography>
-          </Box>
-
-          <DemoRequestForm />
         </Container>
       </Box>
 
@@ -1711,7 +1716,7 @@ export default function LandingPage() {
                   {t('nav.screenshots')}
                 </Button>
                 <Button
-                  onClick={() => handleScroll('pricing')}
+                  onClick={() => handleScroll('demo')}
                   sx={{
                     justifyContent: 'flex-start',
                     color: 'rgba(232, 226, 213, 0.6)',
