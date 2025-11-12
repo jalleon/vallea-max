@@ -11,13 +11,22 @@ import { BackgroundImportProvider } from '@/contexts/BackgroundImportContext'
 import { PostHogProvider } from '@/lib/analytics/posthog'
 import '../globals.css'
 
+export const dynamic = 'force-dynamic'
+
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const montserrat = Montserrat({ subsets: ['latin'], variable: '--font-montserrat' })
 const fraunces = Fraunces({ subsets: ['latin'], variable: '--font-fraunces' })
 
 export const metadata: Metadata = {
-  title: 'Valea Max',
-  description: 'Real Estate Appraisal Application',
+  title: {
+    default: 'Valea Max - Real Estate Appraisal',
+    template: '%s | Valea Max'
+  },
+  description: 'Professional real estate appraisal and inspection platform',
+  icons: {
+    icon: '/icon.png',
+    apple: '/apple-icon.png',
+  }
 }
 
 export function generateStaticParams() {

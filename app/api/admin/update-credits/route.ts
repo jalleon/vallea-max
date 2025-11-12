@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+export const dynamic = 'force-dynamic'
+
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '@/lib/supabase/types'
 
@@ -47,14 +49,14 @@ export async function POST(request: Request) {
     }
 
     // Use service role to update credits
-    const supabaseAdmin = createClient<Database>(supabaseUrl, supabaseServiceKey)
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
 
     // Get current credits
     const { data: currentUser } = await supabaseAdmin
       .from('profiles')
       .select('ai_credits_balance')
       .eq('id', userId)
-      .single()
+      .single() as { data: { ai_credits_balance: number } | null; error: any }
 
     if (!currentUser) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
@@ -72,12 +74,14 @@ export async function POST(request: Request) {
     }
 
     // Update credits
+    const creditsData: any = {
+      ai_credits_balance: newCredits,
+      updated_at: new Date().toISOString()
+    }
+
     const { error: updateError } = await supabaseAdmin
       .from('profiles')
-      .update({
-        ai_credits_balance: newCredits,
-        updated_at: new Date().toISOString()
-      })
+      .update(creditsData)
       .eq('id', userId)
 
     if (updateError) {

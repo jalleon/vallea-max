@@ -283,6 +283,7 @@ export type Database = {
           eval_municipale_total: number | null
           extras: string | null
           field_sources: Json | null
+          floor_number: number | null
           frais_condo: number | null
           frontage_m2: number | null
           frontage_pi2: number | null
@@ -309,6 +310,7 @@ export type Database = {
           municipalite: string | null
           nombre_chambres: number | null
           nombre_pieces: number | null
+          nombre_stationnement: number | null
           notes: string | null
           numero_mls: string | null
           occupancy: string | null
@@ -369,6 +371,7 @@ export type Database = {
           eval_municipale_total?: number | null
           extras?: string | null
           field_sources?: Json | null
+          floor_number?: number | null
           frais_condo?: number | null
           frontage_m2?: number | null
           frontage_pi2?: number | null
@@ -395,6 +398,7 @@ export type Database = {
           municipalite?: string | null
           nombre_chambres?: number | null
           nombre_pieces?: number | null
+          nombre_stationnement?: number | null
           notes?: string | null
           numero_mls?: string | null
           occupancy?: string | null
@@ -455,6 +459,7 @@ export type Database = {
           eval_municipale_total?: number | null
           extras?: string | null
           field_sources?: Json | null
+          floor_number?: number | null
           frais_condo?: number | null
           frontage_m2?: number | null
           frontage_pi2?: number | null
@@ -481,6 +486,7 @@ export type Database = {
           municipalite?: string | null
           nombre_chambres?: number | null
           nombre_pieces?: number | null
+          nombre_stationnement?: number | null
           notes?: string | null
           numero_mls?: string | null
           occupancy?: string | null
@@ -674,6 +680,78 @@ export type Database = {
           current_period_end?: string | null
           cancel_at_period_end?: boolean
           cancelled_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      email_verifications: {
+        Row: {
+          id: string
+          email: string
+          full_name: string
+          organization_name: string | null
+          temp_password: string
+          verification_token: string
+          locale: string
+          expires_at: string
+          verified: boolean
+          verified_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          full_name: string
+          organization_name?: string | null
+          temp_password: string
+          verification_token: string
+          locale: string
+          expires_at: string
+          verified?: boolean
+          verified_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          full_name?: string
+          organization_name?: string | null
+          temp_password?: string
+          verification_token?: string
+          locale?: string
+          expires_at?: string
+          verified?: boolean
+          verified_at?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          id: string
+          email: string
+          full_name: string | null
+          organization_id: string | null
+          is_admin: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          email: string
+          full_name?: string | null
+          organization_id?: string | null
+          is_admin?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          full_name?: string | null
+          organization_id?: string | null
+          is_admin?: boolean
           created_at?: string
           updated_at?: string
         }

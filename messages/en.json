@@ -79,7 +79,6 @@
       "tagline": "Real Estate Appraisal"
     }
   },
-
   "auth": {
     "login": {
       "title": "Login",
@@ -115,7 +114,6 @@
     },
     "logout": "Logout"
   },
-
   "navigation": {
     "dashboard": "Dashboard",
     "library": "Library",
@@ -126,7 +124,6 @@
     "reports": "Reports",
     "settings": "Settings"
   },
-
   "library": {
     "title": "Property Library",
     "subtitle": "Manage your real estate portfolio and create new property records",
@@ -137,14 +134,12 @@
     "deleteMessage": "This action cannot be undone.",
     "loadingProperties": "Loading properties...",
     "retry": "Retry",
-
     "stats": {
       "totalProperties": "Total Properties",
       "portfolioValue": "Portfolio Value",
       "evaluationsThisMonth": "Appraisals this month",
       "newProperties": "New properties"
     },
-
     "search": {
       "placeholder": "Search by address, city, MLS, ID...",
       "advancedFilters": "Advanced Filters",
@@ -163,7 +158,6 @@
       "resultsFound": "{count} result{count, plural, =0 {s} =1 {} other {s}} found",
       "loadingProperties": "Loading properties..."
     },
-
     "table": {
       "idNo": "ID No",
       "address": "Address",
@@ -190,7 +184,6 @@
       "status": "Status",
       "listPrice": "List"
     },
-
     "dialogs": {
       "confirmDeleteTitle": "Confirm Deletion",
       "confirmDeleteMessage": "Are you sure you want to delete {count} selected property(ies)?",
@@ -205,9 +198,14 @@
       "duplicateCreate": "Create Duplicate",
       "cancel": "Cancel",
       "delete": "Delete",
-      "mergeOrCreateQuestion": "Merge or Create?"
+      "mergeOrCreateQuestion": "Merge or Create?",
+      "mergeButton": "Merge",
+      "mergeOption": "Merge",
+      "mergeDescription": "New values will fill empty fields in the existing property.",
+      "createDuplicateOption": "Create Duplicate",
+      "createDuplicateDescription": "A new separate property will be created with the same information.",
+      "createDuplicateButton": "Create Duplicate"
     },
-
     "form": {
       "basicInformation": "Basic Information",
       "propertyDetails": "Property Details",
@@ -265,6 +263,7 @@
       "occupancy": "Occupancy",
       "rentInPlace": "Rent in Place",
       "condoFees": "Condo Fees",
+      "floorNumber": "Floor #",
       "unitNumber": "Unit No.",
       "monthlyRent": "Monthly Rent",
       "occupant": "Occupant",
@@ -300,9 +299,15 @@
       "floor": "Floor",
       "areaM2": "Area (m²)",
       "areaPi2": "Area (ft²)",
-      "habitable": "Habitable"
+      "habitable": "Habitable",
+      "effectiveDate": "Effective Date",
+      "generalInformation": "General Information",
+      "buildingCharacteristics": "Building Characteristics",
+      "municipalData": "Municipal Data",
+      "areas": "Areas",
+      "areaByFloor": "Area by Floor",
+      "addAdditionalLot": "Add additional lot"
     },
-
     "view": {
       "generalInformation": "General Information",
       "areas": "Areas",
@@ -337,6 +342,7 @@
       "status": "Status",
       "mlsNo": "MLS#",
       "condoFees": "Condo Fees",
+      "floorNumber": "Floor #",
       "unitRents": "Rent by Unit",
       "ownerOccupied": "Owner Occupied",
       "lotArea": "Lot Area",
@@ -396,7 +402,6 @@
       "lot": "Lot",
       "lotType": "Type"
     },
-
     "propertyTypes": {
       "Condo": "Condo",
       "Unifamiliale": "Single Family",
@@ -410,7 +415,6 @@
       "Terrain": "Land",
       "Autre": "Other"
     },
-
     "propertyStatus": {
       "Vendu": "Sold",
       "À vendre": "For Sale",
@@ -420,7 +424,6 @@
       "Conditionnel": "Conditional",
       "Expiré": "Expired"
     },
-
     "basementTypes": {
       "Aucun": "None",
       "Complet": "Full",
@@ -432,7 +435,48 @@
       "Vide sanitaire": "Crawl Space",
       "Dalle de béton": "Concrete Slab"
     },
-
+    "propertyGenre": {
+      "Plain-pied": "Bungalow",
+      "À étages": "Multi-level",
+      "1 Étage": "1 Storey",
+      "Un étage et demi": "One and a Half Storey",
+      "Deux étages": "Two Storey",
+      "Deux étages et demi": "Two and a Half Storey",
+      "Trois étages": "Three Storey",
+      "Paliers multiples": "Split-level",
+      "Mobile": "Mobile",
+      "Maison de ville": "Townhouse",
+      "Tour d'appartement": "Apartment Tower",
+      "Terrain vacant": "Vacant Land"
+    },
+    "buildingType": {
+      "Isolé": "Detached",
+      "Semi-détaché": "Semi-detached",
+      "En rangée": "Row House",
+      "En rangée sur coin": "End Unit Row"
+    },
+    "parkingTypes": {
+      "Allée": "Driveway",
+      "Garage": "Garage",
+      "Abri d'auto": "Carport",
+      "Rue": "Street",
+      "Aucun": "None"
+    },
+    "garageTypes": {
+      "Attaché": "Attached",
+      "Détaché": "Detached",
+      "Intégré": "Integrated",
+      "Au sous-sol": "In Basement",
+      "Abri d'auto": "Carport"
+    },
+    "condoLocation": {
+      "Coin": "Corner",
+      "Centre": "Center"
+    },
+    "condoType": {
+      "Divise": "Divided",
+      "Indivise": "Undivided"
+    },
     "notifications": {
       "created": "Property created successfully",
       "updated": "Property updated successfully",
@@ -443,13 +487,11 @@
       "deletedCount": "Deleted {count} properties successfully",
       "saveFailed": "Failed to save property"
     },
-
     "empty": {
       "noProperties": "No properties found",
       "addFirstProperty": "Add your first property to get started."
     }
   },
-
   "dashboard": {
     "title": "My Dashboard",
     "welcome": "Hello {name} - Your personal activity view",
@@ -480,7 +522,6 @@
       "aheadOfGoals": "You are ahead of your goals"
     }
   },
-
   "settings": {
     "title": "Settings",
     "language": "Language",
@@ -579,7 +620,6 @@
       }
     }
   },
-
   "inspection": {
     "title": "Inspections",
     "createNew": "Create New Inspection",
@@ -1042,7 +1082,6 @@
       "notes": "Notes"
     }
   },
-
   "errors": {
     "404": "Page not found",
     "500": "Server error",
@@ -1051,7 +1090,6 @@
     "unauthorized": "Unauthorized",
     "forbidden": "Access forbidden"
   },
-
   "pricing": {
     "title": "Choose Your Plan",
     "subtitle": "Select the perfect plan for your real estate appraisal needs",
@@ -1074,7 +1112,6 @@
       "updates": "Updates and new features"
     }
   },
-
   "landing": {
     "nav": {
       "features": "Features",
@@ -1247,18 +1284,15 @@
       }
     }
   },
-
   "import": {
     "title": "Import Wizard",
     "subtitle": "Import properties from PDFs or listing websites",
-
     "steps": {
       "source": "Choose Source",
       "upload": "Upload Document",
       "review": "Review Data",
       "confirmation": "Confirmation"
     },
-
     "source": {
       "title": "Choose import source",
       "pdf": {
@@ -1273,7 +1307,6 @@
         "requirement": "Requires Valea Browser Helper extension"
       }
     },
-
     "upload": {
       "title": "Upload and analyze document",
       "dropzone": {
@@ -1300,7 +1333,6 @@
         "priority": "{priority} priority provider. Change in Settings → AI API Keys."
       }
     },
-
     "review": {
       "title": "Review and adjust extracted data",
       "titleMultiple": "{count} properties found",
@@ -1330,7 +1362,6 @@
         "importAll": "Import ({count})"
       }
     },
-
     "duplicate": {
       "title": "Address Already Exists",
       "message": "A property with the address '{address}' already exists in your library.",
@@ -1341,7 +1372,6 @@
         "createDuplicate": "Create Duplicate"
       }
     },
-
     "success": {
       "title": "Property created successfully!",
       "summary": "Import Summary",
@@ -1354,7 +1384,6 @@
         "viewProperty": "View Property"
       }
     },
-
     "errors": {
       "fileTooBig": "File is too large (max 10MB)",
       "invalidType": "Unsupported file type",
@@ -1362,7 +1391,6 @@
       "noText": "No text found in document",
       "aiError": "AI analysis error"
     },
-
     "batch": {
       "title": "Multiple Documents Import",
       "subtitle": "Upload multiple PDFs and assign document types",

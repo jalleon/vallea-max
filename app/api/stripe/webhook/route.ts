@@ -158,12 +158,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     console.log(`User account created: ${userId}`)
 
     // Update profile with full name and organization
-    // @ts-expect-error - Type assertion at database boundary for profiles table
     const { error: profileError } = await supabaseAdmin.from('profiles').update({
       full_name: fullName,
       organization_name: organizationName || null,
       updated_at: new Date().toISOString()
-    } as any).eq('id', userId)
+    }).eq('id', userId)
 
     if (profileError) {
       console.error('Error updating profile:', profileError)

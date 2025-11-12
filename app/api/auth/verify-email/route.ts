@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+export const dynamic = 'force-dynamic'
+
 import { createRouteClient } from '@/lib/supabase/server'
 
 export async function GET(request: Request) {
@@ -48,13 +50,11 @@ export async function GET(request: Request) {
     }
 
     // Mark as verified
-    const updateData: any = {
+    const updateData = {
       verified: true,
       verified_at: new Date().toISOString(),
     }
-    // @ts-expect-error - Type assertion at database boundary for email_verifications table
-    const result: any = await supabase.from('email_verifications').update(updateData).eq('verification_token', token)
-    const updateError = result.error
+    const { error: updateError } = await supabase.from('email_verifications').update(updateData).eq('verification_token', token)
 
     if (updateError) {
       console.error('Update verification error:', updateError)

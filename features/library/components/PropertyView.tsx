@@ -43,7 +43,18 @@ import {
   ContentCopy,
   Map,
   Assessment,
-  Balance
+  Balance,
+  Kitchen,
+  Weekend,
+  Restaurant,
+  Bed,
+  Work,
+  Bathtub,
+  ViewInAr,
+  Storage,
+  Build,
+  MeetingRoom,
+  WbSunny
 } from '@mui/icons-material'
 import { Property } from '../types/property.types'
 import { formatCurrency, formatDate, formatMeasurement } from '@/lib/utils/formatting'
@@ -109,6 +120,130 @@ export function PropertyView({
   const inspectionProgress = calculateInspectionProgress(property)
   const completedCategories = getCompletedCategories(property)
   const isInspectionComplete = inspectionProgress === 100
+
+  // Helper function to get icon for room type
+  const getRoomIcon = (roomType: string) => {
+    const iconMap: Record<string, any> = {
+      cuisine: Kitchen,
+      salon: Weekend,
+      salle_a_manger: Restaurant,
+      chambre: Bed,
+      bureau: Work,
+      salle_bain: Bathtub,
+      salle_eau: Bathtub,
+      salle_sejour: Weekend,
+      salle_familiale: Weekend,
+      buanderie: Storage,
+      rangement: Storage,
+      salle_mecanique: Build,
+      vestibule: MeetingRoom,
+      solarium: WbSunny,
+      autre: ViewInAr
+    }
+    return iconMap[roomType] || ViewInAr
+  }
+
+  // Helper function to sort floors in correct order
+  const sortFloors = (floors: Record<string, any>) => {
+    const floorOrder = ['sous_sol', 'rdc', 'deuxieme', 'troisieme']
+    return Object.entries(floors).sort(([a], [b]) => {
+      const aIndex = floorOrder.indexOf(a)
+      const bIndex = floorOrder.indexOf(b)
+      if (aIndex === -1 && bIndex === -1) return 0
+      if (aIndex === -1) return 1
+      if (bIndex === -1) return -1
+      return aIndex - bIndex
+    })
+  }
+
+  // Helper function to get subcategories for completed inspection categories
+  const getCompletedSubcategories = (categoryId: string) => {
+    const subcategories: string[] = []
+
+    // Map of subcategory field keys to user-friendly labels
+    const subcategoryLabels: Record<string, Record<string, { fr: string, en: string }>> = {
+      batiment: {
+        fondation_mur_toiture: { fr: 'Fondation, mur, toiture', en: 'Foundation, wall, roof' },
+        portes_fenetres: { fr: 'Portes et fenêtres', en: 'Doors and windows' },
+        planchers_balcons: { fr: 'Planchers et balcons', en: 'Floors and balconies' },
+        parement_interieur: { fr: 'Parement intérieur', en: 'Interior cladding' }
+      },
+      garage: {
+        largeur_feet: { fr: 'Dimensions', en: 'Dimensions' },
+        largeur_meters: { fr: 'Dimensions', en: 'Dimensions' },
+        type_porte: { fr: 'Porte de garage', en: 'Garage door' },
+        notes: { fr: 'Notes', en: 'Notes' }
+      },
+      mecanique: {
+        chauffage: { fr: 'Chauffage', en: 'Heating' },
+        eau_chaude: { fr: 'Eau chaude', en: 'Hot water' },
+        electricite: { fr: 'Électricité', en: 'Electricity' },
+        plomberie: { fr: 'Plomberie', en: 'Plumbing' }
+      },
+      exterieur: {
+        terrain: { fr: 'Terrain', en: 'Land' },
+        stationnement: { fr: 'Stationnement', en: 'Parking' },
+        acces: { fr: 'Accès', en: 'Access' }
+      },
+      divers: {
+        notes: { fr: 'Notes générales', en: 'General notes' }
+      }
+    }
+
+    if (categoryId === 'batiment' && property.inspection_batiment) {
+      const data = property.inspection_batiment as Record<string, any>
+      Object.keys(data).forEach(key => {
+        if (data[key] && key !== 'completedAt' && key !== 'customValues') {
+          const label = subcategoryLabels.batiment[key]
+          if (label) {
+            subcategories.push(locale === 'en' ? label.en : label.fr)
+          }
+        }
+      })
+    } else if (categoryId === 'garage' && property.inspection_garage) {
+      const data = property.inspection_garage as Record<string, any>
+      Object.keys(data).forEach(key => {
+        if (data[key] && key !== 'completedAt' && key !== 'customValues') {
+          const label = subcategoryLabels.garage[key]
+          if (label) {
+            subcategories.push(locale === 'en' ? label.en : label.fr)
+          }
+        }
+      })
+    } else if (categoryId === 'mecanique' && property.inspection_mecanique) {
+      const data = property.inspection_mecanique as Record<string, any>
+      Object.keys(data).forEach(key => {
+        if (data[key] && key !== 'completedAt' && key !== 'customValues') {
+          const label = subcategoryLabels.mecanique[key]
+          if (label) {
+            subcategories.push(locale === 'en' ? label.en : label.fr)
+          }
+        }
+      })
+    } else if (categoryId === 'exterieur' && property.inspection_exterieur) {
+      const data = property.inspection_exterieur as Record<string, any>
+      Object.keys(data).forEach(key => {
+        if (data[key] && key !== 'completedAt' && key !== 'customValues') {
+          const label = subcategoryLabels.exterieur[key]
+          if (label) {
+            subcategories.push(locale === 'en' ? label.en : label.fr)
+          }
+        }
+      })
+    } else if (categoryId === 'divers' && property.inspection_divers) {
+      const data = property.inspection_divers as Record<string, any>
+      Object.keys(data).forEach(key => {
+        if (data[key] && key !== 'completedAt' && key !== 'customValues') {
+          const label = subcategoryLabels.divers[key]
+          if (label) {
+            subcategories.push(locale === 'en' ? label.en : label.fr)
+          }
+        }
+      })
+    }
+
+    return [...new Set(subcategories)] // Remove duplicates
+  }
 
   // Calculate room counts from inspection data
   const calculateRoomCounts = () => {
@@ -341,90 +476,6 @@ export function PropertyView({
         </Box>
       </DialogTitle>
       <DialogContent sx={{ p: 0, bgcolor: '#f8fafc' }}>
-        {/* Quick Actions Bar */}
-        <Box
-          sx={{
-            p: 2,
-            borderBottom: `1px solid ${theme.palette.divider}`,
-            bgcolor: 'grey.50',
-            display: 'flex',
-            gap: 1.5,
-            flexWrap: 'wrap',
-            justifyContent: 'center'
-          }}
-        >
-          <Button
-            variant="contained"
-            startIcon={<InspectionIcon />}
-            onClick={() => {
-              router.push(`/${locale}/inspection/${property.id}`)
-              onClose()
-            }}
-            sx={{
-              borderRadius: '12px',
-              bgcolor: '#16a34a',
-              minHeight: '48px',
-              px: 3,
-              fontWeight: 600,
-              textTransform: 'none',
-              boxShadow: 2,
-              '&:hover': {
-                bgcolor: '#15803d',
-                boxShadow: 4
-              }
-            }}
-          >
-            {getInspectionButtonText()}
-          </Button>
-
-          <Button
-            variant="outlined"
-            startIcon={<Assessment />}
-            onClick={() => {
-              router.push(`/${locale}/evaluations/create?propertyId=${property.id}`)
-              onClose()
-            }}
-            sx={{
-              borderRadius: '12px',
-              minHeight: '48px',
-              px: 3,
-              borderColor: theme.palette.primary.main,
-              color: theme.palette.primary.main,
-              fontWeight: 600,
-              textTransform: 'none',
-              '&:hover': {
-                borderColor: theme.palette.primary.dark,
-                bgcolor: alpha(theme.palette.primary.main, 0.08)
-              }
-            }}
-          >
-            {t('newAppraisal')}
-          </Button>
-
-          <Button
-            variant="outlined"
-            startIcon={<Balance />}
-            onClick={() => {
-              router.push(`/${locale}/adjustments?propertyId=${property.id}`)
-              onClose()
-            }}
-            sx={{
-              borderRadius: '12px',
-              minHeight: '48px',
-              px: 3,
-              borderColor: theme.palette.secondary.main,
-              color: theme.palette.secondary.main,
-              fontWeight: 600,
-              textTransform: 'none',
-              '&:hover': {
-                borderColor: theme.palette.secondary.dark,
-                bgcolor: alpha(theme.palette.secondary.main, 0.08)
-              }
-            }}
-          >
-            {t('adjustments')}
-          </Button>
-        </Box>
 
         {/* Two-column layout: Price Banner + Google Maps */}
         <Box sx={{
@@ -762,12 +813,22 @@ export function PropertyView({
                         </Box>
                       </Grid>
                       {property.type_propriete === 'Condo' && (
-                        <Grid item xs={12} md={1.5}>
-                          <Typography variant="body2" color="text.secondary">{t('condoFees')}</Typography>
-                          <Typography variant="body1" fontWeight={600}>
-                            {property.frais_condo ? formatCurrency(property.frais_condo) : 'N/A'}
-                          </Typography>
-                        </Grid>
+                        <>
+                          <Grid item xs={12} md={2}>
+                            <Typography variant="body2" color="text.secondary">{t('condoFees')}</Typography>
+                            <Typography variant="body1" fontWeight={600}>
+                              {property.frais_condo ? formatCurrency(property.frais_condo) : 'N/A'}
+                            </Typography>
+                          </Grid>
+                          {property.floor_number != null && (
+                            <Grid item xs={12} md={1.75}>
+                              <Typography variant="body2" color="text.secondary">{t('floorNumber')}</Typography>
+                              <Typography variant="body1" fontWeight={600}>
+                                {property.floor_number}
+                              </Typography>
+                            </Grid>
+                          )}
+                        </>
                       )}
                     </>
                   )}
@@ -1030,7 +1091,10 @@ export function PropertyView({
                   {/* Line 3 - Building details (5 columns) */}
                   <Grid item xs={12} md={2.4}>
                     <Typography variant="body2" color="text.secondary">{t('parking')}</Typography>
-                    <Typography variant="body1" fontWeight={600}>{property.stationnement || 'N/A'}</Typography>
+                    <Typography variant="body1" fontWeight={600}>
+                      {property.stationnement || 'N/A'}
+                      {property.nombre_stationnement ? ` (${property.nombre_stationnement})` : ''}
+                    </Typography>
                   </Grid>
                   <Grid item xs={12} md={2.4}>
                     <Typography variant="body2" color="text.secondary">{t('garageType')}</Typography>
@@ -1185,36 +1249,40 @@ export function PropertyView({
                     <Divider sx={{ my: 1 }} />
                   </Grid>
 
-                  <Grid item xs={12} md={2}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
                       {t('municipalTaxes')}
                     </Typography>
-                  </Grid>
-                  <Grid item xs={12} md={2}>
-                    <Typography variant="body2" color="text.secondary">{t('year')}</Typography>
-                    <Typography variant="body1" fontWeight={600}>{property.taxes_municipales_annee || 'N/A'}</Typography>
-                  </Grid>
-                  <Grid item xs={12} md={2}>
-                    <Typography variant="body2" color="text.secondary">{t('amount')}</Typography>
-                    <Typography variant="body1" fontWeight={700} sx={{ color: '#4CAF50' }}>
-                      {property.taxes_municipales_montant ? formatCurrency(property.taxes_municipales_montant) : 'N/A'}
-                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="text.secondary">{t('year')}</Typography>
+                        <Typography variant="body1" fontWeight={600}>{property.taxes_municipales_annee || 'N/A'}</Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="text.secondary">{t('amount')}</Typography>
+                        <Typography variant="body1" fontWeight={700} sx={{ color: '#4CAF50' }}>
+                          {property.taxes_municipales_montant ? formatCurrency(property.taxes_municipales_montant) : 'N/A'}
+                        </Typography>
+                      </Grid>
+                    </Grid>
                   </Grid>
 
-                  <Grid item xs={12} md={2}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
                       {t('schoolTaxes')}
                     </Typography>
-                  </Grid>
-                  <Grid item xs={12} md={2}>
-                    <Typography variant="body2" color="text.secondary">{t('year')}</Typography>
-                    <Typography variant="body1" fontWeight={600}>{property.taxes_scolaires_annee || 'N/A'}</Typography>
-                  </Grid>
-                  <Grid item xs={12} md={2}>
-                    <Typography variant="body2" color="text.secondary">{t('amount')}</Typography>
-                    <Typography variant="body1" fontWeight={700} sx={{ color: '#4CAF50' }}>
-                      {property.taxes_scolaires_montant ? formatCurrency(property.taxes_scolaires_montant) : 'N/A'}
-                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="text.secondary">{t('year')}</Typography>
+                        <Typography variant="body1" fontWeight={600}>{property.taxes_scolaires_annee || 'N/A'}</Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="text.secondary">{t('amount')}</Typography>
+                        <Typography variant="body1" fontWeight={700} sx={{ color: '#4CAF50' }}>
+                          {property.taxes_scolaires_montant ? formatCurrency(property.taxes_scolaires_montant) : 'N/A'}
+                        </Typography>
+                      </Grid>
+                    </Grid>
                   </Grid>
 
                   <Grid item xs={12}>
@@ -1252,7 +1320,7 @@ export function PropertyView({
               elevation={0}
               sx={{
                 border: `1px solid ${theme.palette.divider}`,
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: 'linear-gradient(135deg, #1e3a8a 0%, #60a5fa 100%)',
                 overflow: 'visible'
               }}
             >
@@ -1281,38 +1349,7 @@ export function PropertyView({
                   />
                   </Box>
 
-                  {/* Progress Bar */}
-                  <Box sx={{ mb: 3 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.9)' }}>
-                        {t('overallProgress')}
-                      </Typography>
-                      <Typography variant="body2" sx={{ color: 'white', fontWeight: 600 }}>
-                        {inspectionProgress}%
-                      </Typography>
-                    </Box>
-                    <Box
-                      sx={{
-                        width: '100%',
-                        height: 8,
-                        backgroundColor: 'rgba(255,255,255,0.2)',
-                        borderRadius: 4,
-                        overflow: 'hidden'
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          width: `${inspectionProgress}%`,
-                          height: '100%',
-                          backgroundColor: isInspectionComplete ? '#4CAF50' : 'white',
-                          borderRadius: 4,
-                          transition: 'width 0.3s ease, background-color 0.3s ease'
-                        }}
-                      />
-                    </Box>
-                  </Box>
-
-                  <Grid container spacing={2} sx={{ mb: 2 }}>
+                  <Grid container spacing={2} sx={{ mb: 2, mt: 2 }}>
                     {/* Inspection Date */}
                     <Grid item xs={12} md={4}>
                       <Box sx={{ p: 2, borderRadius: 1, backgroundColor: 'rgba(255,255,255,0.15)' }}>
@@ -1334,7 +1371,7 @@ export function PropertyView({
                               {t('roomsInspected')}
                             </Typography>
                             <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
-                              {property.inspection_pieces.completedRooms || 0} / {property.inspection_pieces.totalRooms || 0}
+                              {property.inspection_pieces.completedRooms || 0}
                             </Typography>
                           </Box>
                         </Grid>
@@ -1344,7 +1381,15 @@ export function PropertyView({
                               {t('floors')}
                             </Typography>
                             <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
-                              {Object.keys(property.inspection_pieces.floors || {}).length}
+                              {sortFloors(property.inspection_pieces.floors || {}).map(([floorId]) => {
+                                const floorLabels: Record<string, string> = {
+                                  sous_sol: locale === 'en' ? 'Basement' : 'Sous-sol',
+                                  rdc: locale === 'en' ? 'Ground' : 'R.D.C.',
+                                  deuxieme: locale === 'en' ? '2nd Floor' : '2e',
+                                  troisieme: locale === 'en' ? '3rd Floor' : '3e'
+                                }
+                                return floorLabels[floorId] || floorId
+                              }).join(', ')}
                             </Typography>
                           </Box>
                         </Grid>
@@ -1358,20 +1403,44 @@ export function PropertyView({
                       <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)', mb: 1, display: 'block' }}>
                         {t('completedCategories')}
                       </Typography>
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                        {completedCategories.map((categoryId) => (
-                          <Chip
-                            key={categoryId}
-                            icon={<CheckCircle sx={{ fontSize: 16 }} />}
-                            label={t(getCategoryTranslationKey(categoryId))}
-                            size="small"
-                            sx={{
-                              backgroundColor: 'rgba(255,255,255,0.9)',
-                              color: '#667eea',
-                              fontWeight: 600
-                            }}
-                          />
-                        ))}
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                        {completedCategories.map((categoryId) => {
+                          const subcategories = getCompletedSubcategories(categoryId)
+                          return (
+                            <Box key={categoryId}>
+                              <Chip
+                                icon={<CheckCircle sx={{ fontSize: 16 }} />}
+                                label={tInspection(`categories.${categoryId}`)}
+                                size="small"
+                                sx={{
+                                  backgroundColor: 'rgba(255,255,255,0.9)',
+                                  color: '#1e3a8a',
+                                  fontWeight: 600
+                                }}
+                              />
+                              {subcategories.length > 0 && (
+                                <Box sx={{ mt: 0.5, ml: 2, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                  {subcategories.map((subcat, index) => (
+                                    <Typography
+                                      key={index}
+                                      variant="caption"
+                                      sx={{
+                                        color: 'rgba(255,255,255,0.9)',
+                                        backgroundColor: 'rgba(255,255,255,0.2)',
+                                        px: 1,
+                                        py: 0.25,
+                                        borderRadius: 1,
+                                        fontSize: '0.7rem'
+                                      }}
+                                    >
+                                      {subcat}
+                                    </Typography>
+                                  ))}
+                                </Box>
+                              )}
+                            </Box>
+                          )
+                        })}
                       </Box>
                     </Box>
                   )}
@@ -1383,20 +1452,19 @@ export function PropertyView({
                         {t('floorDetails')}
                       </Typography>
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                        {Object.entries(property.inspection_pieces.floors).map(([floorId, floor]) => {
+                        {sortFloors(property.inspection_pieces.floors).map(([floorId, floor]) => {
                           // Get completed rooms and their types
                           const completedRooms = Object.values(floor.rooms || {}).filter(
                             (room: any) => room.completedAt
                           )
 
-                          // Get room type names with numbering for duplicates
+                          // Get room type names with icons and numbering for duplicates
                           const roomTypeCounts: Record<string, number> = {}
-                          const roomNames = completedRooms.map((room: any) => {
+                          const roomElements = completedRooms.map((room: any, index: number) => {
                             const roomType = room.type
                             // Convert snake_case to camelCase for translation key
                             const camelCaseType = roomType.replace(/_([a-z])/g, (match: string, letter: string) => letter.toUpperCase())
-                            const translationKey = `inspection.rooms.${camelCaseType}`
-                            let roomName = t(translationKey)
+                            let roomName = tInspection(`rooms.${camelCaseType}`)
 
                             // Count occurrences for numbering
                             roomTypeCounts[roomType] = (roomTypeCounts[roomType] || 0) + 1
@@ -1404,7 +1472,16 @@ export function PropertyView({
                               roomName = `${roomName} #${roomTypeCounts[roomType]}`
                             }
 
-                            return roomName
+                            const RoomIcon = getRoomIcon(roomType)
+
+                            return (
+                              <Box key={index} sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
+                                <RoomIcon sx={{ fontSize: 14, color: 'rgba(255,255,255,0.8)' }} />
+                                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                                  {roomName}
+                                </Typography>
+                              </Box>
+                            )
                           })
 
                           return (
@@ -1422,10 +1499,10 @@ export function PropertyView({
                               <Typography variant="body2" sx={{ color: 'white', fontWeight: 600 }}>
                                 {floor.name}
                               </Typography>
-                              {roomNames.length > 0 ? (
-                                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                                  {roomNames.join(', ')}
-                                </Typography>
+                              {roomElements.length > 0 ? (
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                  {roomElements}
+                                </Box>
                               ) : (
                                 <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)', fontStyle: 'italic' }}>
                                   {t('noRoomsInspected')}
@@ -1448,10 +1525,11 @@ export function PropertyView({
                     sx={{
                       mt: 2,
                       backgroundColor: 'white',
-                      color: '#667eea',
+                      color: 'white',
+                      background: 'linear-gradient(135deg, #1e3a8a 0%, #60a5fa 100%)',
                       fontWeight: 600,
                       '&:hover': {
-                        backgroundColor: 'rgba(255,255,255,0.9)'
+                        background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)'
                       }
                     }}
                   >
@@ -1477,6 +1555,17 @@ export function PropertyView({
           </Typography>
         </Box>
 
+        <Button
+          variant="outlined"
+          startIcon={<Assessment />}
+          onClick={() => {
+            router.push(`/${locale}/evaluations/create?propertyId=${property.id}`)
+            onClose()
+          }}
+          sx={{ mr: 1 }}
+        >
+          {t('newAppraisal')}
+        </Button>
         <Button onClick={onClose} sx={{ mr: 1 }}>
           {tCommon('close')}
         </Button>

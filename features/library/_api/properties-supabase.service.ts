@@ -56,6 +56,8 @@ class PropertiesSupabaseService {
       salle_bain: data.salle_bain || undefined,
       salle_eau: data.salle_eau || undefined,
       stationnement: data.stationnement as any,
+      nombre_stationnement: data.nombre_stationnement || undefined,
+      type_garage: data.type_garage as any,
       dimension_garage: data.dimension_garage || undefined,
       type_sous_sol: data.type_sous_sol as any,
       toiture: data.toiture || undefined,
@@ -69,6 +71,7 @@ class PropertiesSupabaseService {
       is_shared: data.is_shared || false,
       // Rental/evaluation fields
       frais_condo: data.frais_condo || undefined,
+      floor_number: data.floor_number || undefined,
       loyer_en_place: data.loyer_en_place || undefined,
       unit_rents: data.unit_rents as any,
       type_evaluation: data.type_evaluation as any,
@@ -78,7 +81,6 @@ class PropertiesSupabaseService {
       type_batiment: data.type_batiment as any,
       chrono_age: data.chrono_age || undefined,
       eff_age: data.eff_age || undefined,
-      type_garage: data.type_garage as any,
       extras: data.extras || undefined,
 
       // Municipal data

@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+export const dynamic = 'force-dynamic'
+
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '@/lib/supabase/types'
 
@@ -34,9 +36,9 @@ export async function GET(request: Request) {
     }
 
     // Get all data
-    const { data: users } = await supabase.from('profiles').select('*')
-    const { data: subscriptions } = await supabase.from('user_subscriptions').select('*')
-    const { data: usageData } = await supabase.from('usage_tracking').select('*')
+    const { data: users } = await supabase.from('profiles').select('*') as { data: any[] | null; error: any }
+    const { data: subscriptions } = await supabase.from('user_subscriptions').select('*') as { data: any[] | null; error: any }
+    const { data: usageData } = await supabase.from('usage_tracking').select('*') as { data: any[] | null; error: any }
 
     // Generate last 12 months of data
     const now = new Date()

@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+export const dynamic = 'force-dynamic'
+
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '@/lib/supabase/types'
 
@@ -47,13 +49,15 @@ export async function POST(request: Request) {
 
     if (action === 'notify') {
       // Mark as notified
-      const { error: updateError } = await supabaseAdmin
-        .from('waitlist')
-        .update({
-          notified: true,
-          notified_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
+      const notifyData: any = {
+        notified: true,
+        notified_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+
+      const { error: updateError } = await (supabaseAdmin
+        .from('waitlist') as any)
+        .update(notifyData)
         .eq('id', waitlistId)
 
       if (updateError) {
@@ -70,11 +74,11 @@ export async function POST(request: Request) {
       })
     } else if (action === 'promote') {
       // Get waitlist entry
-      const { data: waitlistEntry } = await supabaseAdmin
-        .from('waitlist')
+      const { data: waitlistEntry } = await (supabaseAdmin
+        .from('waitlist') as any)
         .select('*')
         .eq('id', waitlistId)
-        .single()
+        .single() as { data: any | null; error: any }
 
       if (!waitlistEntry) {
         return NextResponse.json({ error: 'Waitlist entry not found' }, { status: 404 })
@@ -85,7 +89,7 @@ export async function POST(request: Request) {
         .from('profiles')
         .select('id')
         .eq('email', waitlistEntry.email)
-        .single()
+        .single() as { data: any | null; error: any }
 
       if (existingUser) {
         return NextResponse.json({ error: 'User already exists with this email' }, { status: 400 })
@@ -107,14 +111,16 @@ export async function POST(request: Request) {
       }
 
       // Update waitlist entry
-      await supabaseAdmin
-        .from('waitlist')
-        .update({
-          promoted: true,
-          promoted_at: new Date().toISOString(),
-          promoted_user_id: newUser.user.id,
-          updated_at: new Date().toISOString()
-        })
+      const promoteData: any = {
+        promoted: true,
+        promoted_at: new Date().toISOString(),
+        promoted_user_id: newUser.user.id,
+        updated_at: new Date().toISOString()
+      }
+
+      await (supabaseAdmin
+        .from('waitlist') as any)
+        .update(promoteData)
         .eq('id', waitlistId)
 
       // TODO: Send welcome email with password setup link

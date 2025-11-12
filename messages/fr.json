@@ -79,7 +79,6 @@
       "tagline": "Évaluation Immobilière"
     }
   },
-
   "auth": {
     "login": {
       "title": "Connexion",
@@ -115,7 +114,6 @@
     },
     "logout": "Déconnexion"
   },
-
   "navigation": {
     "dashboard": "Tableau de bord",
     "library": "Bibliothèque",
@@ -126,7 +124,6 @@
     "reports": "Rapports",
     "settings": "Paramètres"
   },
-
   "library": {
     "title": "Bibliothèque de Propriétés",
     "subtitle": "Gérez votre portefeuille immobilier et créez de nouvelles fiches",
@@ -137,14 +134,12 @@
     "deleteMessage": "Cette action est irréversible.",
     "loadingProperties": "Chargement des propriétés...",
     "retry": "Réessayer",
-
     "stats": {
       "totalProperties": "Total Propriétés",
       "portfolioValue": "Valeur Portfolio",
       "evaluationsThisMonth": "Évaluations ce mois",
       "newProperties": "Nouvelles propriétés"
     },
-
     "search": {
       "placeholder": "Rechercher par adresse, ville, MLS, ID...",
       "advancedFilters": "Filtres Avancés",
@@ -163,7 +158,6 @@
       "resultsFound": "{count} résultat{count, plural, =0 {} =1 {} other {s}} trouvé{count, plural, =0 {} =1 {} other {s}}",
       "loadingProperties": "Chargement des propriétés..."
     },
-
     "table": {
       "idNo": "ID No",
       "address": "Adresse",
@@ -190,7 +184,6 @@
       "status": "Statut",
       "listPrice": "Liste"
     },
-
     "dialogs": {
       "confirmDeleteTitle": "Confirmer la suppression",
       "confirmDeleteMessage": "Êtes-vous sûr de vouloir supprimer {count} propriété(s) sélectionnée(s) ?",
@@ -205,9 +198,14 @@
       "duplicateCreate": "Créer un doublon",
       "cancel": "Annuler",
       "delete": "Supprimer",
-      "mergeOrCreateQuestion": "Fusionner ou créer ?"
+      "mergeOrCreateQuestion": "Fusionner ou créer ?",
+      "mergeButton": "Fusionner",
+      "mergeOption": "Fusionner",
+      "mergeDescription": "Les nouvelles valeurs remplaceront les champs vides de la propriété existante.",
+      "createDuplicateOption": "Créer un doublon",
+      "createDuplicateDescription": "Une nouvelle propriété distincte sera créée avec les mêmes informations.",
+      "createDuplicateButton": "Créer un doublon"
     },
-
     "form": {
       "basicInformation": "Informations de base",
       "propertyDetails": "Détails de la propriété",
@@ -265,6 +263,7 @@
       "occupancy": "Occupancy",
       "rentInPlace": "Loyer en place",
       "condoFees": "Frais de condo",
+      "floorNumber": "Étage #",
       "unitNumber": "No. d'unité",
       "monthlyRent": "Loyer mensuel",
       "occupant": "Occupant",
@@ -300,9 +299,15 @@
       "floor": "Étage",
       "areaM2": "Superficie (m²)",
       "areaPi2": "Superficie (pi²)",
-      "habitable": "Habitable"
+      "habitable": "Habitable",
+      "effectiveDate": "Date effective",
+      "generalInformation": "Information générale",
+      "buildingCharacteristics": "Caractéristiques du bâtiment",
+      "municipalData": "Données municipales",
+      "areas": "Superficies",
+      "areaByFloor": "Superficie par étage",
+      "addAdditionalLot": "Ajouter un lot additionnel"
     },
-
     "view": {
       "generalInformation": "Informations générales",
       "areas": "Superficies",
@@ -337,6 +342,7 @@
       "status": "Statut",
       "mlsNo": "#MLS",
       "condoFees": "Frais de condo",
+      "floorNumber": "Étage #",
       "unitRents": "Loyer par unité",
       "ownerOccupied": "Occupé par propriétaire",
       "lotArea": "Superficie de terrain",
@@ -396,7 +402,6 @@
       "lot": "Lot",
       "lotType": "Type"
     },
-
     "propertyTypes": {
       "Condo": "Condo",
       "Unifamiliale": "Unifamiliale",
@@ -410,7 +415,6 @@
       "Terrain": "Terrain",
       "Autre": "Autre"
     },
-
     "propertyStatus": {
       "Vendu": "Vendu",
       "À vendre": "À vendre",
@@ -420,7 +424,6 @@
       "Conditionnel": "Conditionnel",
       "Expiré": "Expiré"
     },
-
     "basementTypes": {
       "Aucun": "Aucun",
       "Complet": "Complet",
@@ -432,7 +435,48 @@
       "Vide sanitaire": "Vide sanitaire",
       "Dalle de béton": "Dalle de béton"
     },
-
+    "propertyGenre": {
+      "Plain-pied": "Plain-pied",
+      "À étages": "À étages",
+      "1 Étage": "1 Étage",
+      "Un étage et demi": "Un étage et demi",
+      "Deux étages": "Deux étages",
+      "Deux étages et demi": "Deux étages et demi",
+      "Trois étages": "Trois étages",
+      "Paliers multiples": "Paliers multiples",
+      "Mobile": "Mobile",
+      "Maison de ville": "Maison de ville",
+      "Tour d'appartement": "Tour d'appartement",
+      "Terrain vacant": "Terrain vacant"
+    },
+    "buildingType": {
+      "Isolé": "Isolé",
+      "Semi-détaché": "Semi-détaché",
+      "En rangée": "En rangée",
+      "En rangée sur coin": "En rangée sur coin"
+    },
+    "parkingTypes": {
+      "Allée": "Allée",
+      "Garage": "Garage",
+      "Abri d'auto": "Abri d'auto",
+      "Rue": "Rue",
+      "Aucun": "Aucun"
+    },
+    "garageTypes": {
+      "Attaché": "Attaché",
+      "Détaché": "Détaché",
+      "Intégré": "Intégré",
+      "Au sous-sol": "Au sous-sol",
+      "Abri d'auto": "Abri d'auto"
+    },
+    "condoLocation": {
+      "Coin": "Coin",
+      "Centre": "Centre"
+    },
+    "condoType": {
+      "Divise": "Divise",
+      "Indivise": "Indivise"
+    },
     "notifications": {
       "created": "Propriété créée avec succès",
       "updated": "Propriété mise à jour avec succès",
@@ -443,13 +487,11 @@
       "deletedCount": "Supprimé {count} propriétés avec succès",
       "saveFailed": "Échec de l'enregistrement de la propriété"
     },
-
     "empty": {
       "noProperties": "Aucune propriété trouvée",
       "addFirstProperty": "Ajoutez votre première propriété pour commencer."
     }
   },
-
   "dashboard": {
     "title": "Mon Tableau de bord",
     "welcome": "Bonjour {name} - Vue de votre activité personnelle",
@@ -480,7 +522,6 @@
       "aheadOfGoals": "Vous êtes en avance sur vos objectifs"
     }
   },
-
   "settings": {
     "title": "Paramètres",
     "language": "Langue",
@@ -579,7 +620,6 @@
       }
     }
   },
-
   "inspection": {
     "title": "Inspections",
     "createNew": "Créer nouvelle inspection",
@@ -1164,7 +1204,6 @@
       "notes": "Notes"
     }
   },
-
   "errors": {
     "404": "Page non trouvée",
     "500": "Erreur du serveur",
@@ -1173,7 +1212,6 @@
     "unauthorized": "Non autorisé",
     "forbidden": "Accès interdit"
   },
-
   "pricing": {
     "title": "Choisissez votre forfait",
     "subtitle": "Sélectionnez le forfait parfait pour vos besoins d'évaluation immobilière",
@@ -1196,7 +1234,6 @@
       "updates": "Mises à jour et nouvelles fonctionnalités"
     }
   },
-
   "landing": {
     "nav": {
       "features": "Fonctionnalités",
@@ -1369,18 +1406,15 @@
       }
     }
   },
-
   "import": {
     "title": "Assistant d'importation",
     "subtitle": "Importez des propriétés depuis des PDF ou des sites d'annonces",
-
     "steps": {
       "source": "Choisir la source",
       "upload": "Téléverser le document",
       "review": "Réviser les données",
       "confirmation": "Confirmation"
     },
-
     "source": {
       "title": "Choisir la source d'importation",
       "pdf": {
@@ -1395,7 +1429,6 @@
         "requirement": "Nécessite l'extension Valea Browser Helper"
       }
     },
-
     "upload": {
       "title": "Téléverser et analyser le document",
       "dropzone": {
@@ -1422,7 +1455,6 @@
         "priority": "Fournisseur de {priority} priorité. Modifiez dans Paramètres → Clés API IA."
       }
     },
-
     "review": {
       "title": "Réviser et ajuster les données extraites",
       "titleMultiple": "{count} propriétés trouvées",
@@ -1452,7 +1484,6 @@
         "importAll": "Importer ({count})"
       }
     },
-
     "duplicate": {
       "title": "Adresse déjà existante",
       "message": "Une propriété avec l'adresse '{address}' existe déjà dans votre bibliothèque.",
@@ -1463,7 +1494,6 @@
         "createDuplicate": "Créer un doublon"
       }
     },
-
     "success": {
       "title": "Propriété créée avec succès!",
       "summary": "Résumé de l'importation",
@@ -1476,7 +1506,6 @@
         "viewProperty": "Voir la propriété"
       }
     },
-
     "errors": {
       "fileTooBig": "Le fichier est trop volumineux (max 10MB)",
       "invalidType": "Type de fichier non supporté",
@@ -1484,7 +1513,6 @@
       "noText": "Aucun texte trouvé dans le document",
       "aiError": "Erreur lors de l'analyse IA"
     },
-
     "batch": {
       "title": "Import de documents multiples",
       "subtitle": "Téléversez plusieurs PDFs et assignez les types de documents",

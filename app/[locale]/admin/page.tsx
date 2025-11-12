@@ -34,7 +34,10 @@ import {
   InputLabel,
   TablePagination,
   TableSortLabel,
-  Checkbox
+  Checkbox,
+  Menu,
+  Avatar,
+  Divider
 } from '@mui/material'
 import {
   People,
@@ -67,15 +70,21 @@ import {
   Analytics as AnalyticsIcon,
   OpenInNew,
   CheckCircleOutline,
-  ErrorOutline
+  ErrorOutline,
+  Logout,
+  ExitToApp,
+  AccountCircle,
+  Person
 } from '@mui/icons-material'
 import { useAuth } from '@/contexts/AuthContext'
 import AdminSidebar from './components/AdminSidebar'
 import MetricCard from './components/MetricCard'
 import UserDetailsModal from './components/UserDetailsModal'
 import EditCreditsModal from './components/EditCreditsModal'
+import EditUserModal from './components/EditUserModal'
 import DemoNotesModal from './components/DemoNotesModal'
 import BulkActionToolbar from './components/BulkActionToolbar'
+import OrganizationStats from './components/OrganizationStats'
 import { LineChart, Line, PieChart, Pie, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts'
 import * as Sentry from '@sentry/nextjs'
 import { captureEvent } from '@/lib/analytics/posthog'
@@ -128,8 +137,12 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
   const [selectedUser, setSelectedUser] = useState<any>(null)
   const [userDetailsOpen, setUserDetailsOpen] = useState(false)
   const [editCreditsOpen, setEditCreditsOpen] = useState(false)
+  const [editUserOpen, setEditUserOpen] = useState(false)
   const [selectedDemo, setSelectedDemo] = useState<any>(null)
   const [demoNotesOpen, setDemoNotesOpen] = useState(false)
+
+  // Profile menu state
+  const [profileMenuAnchor, setProfileMenuAnchor] = useState<null | HTMLElement>(null)
 
   // Bulk selection state
   const [selectedUsers, setSelectedUsers] = useState<string[]>([])
@@ -310,9 +323,19 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
     setEditCreditsOpen(true)
   }
 
+  const handleEditUser = (user: any) => {
+    setSelectedUser(user)
+    setEditUserOpen(true)
+  }
+
   const handleCreditsUpdated = (message: string) => {
     showSnackbar(message, 'success')
     fetchAllData() // Refresh data
+  }
+
+  const handleUserUpdated = async () => {
+    await fetchAllData() // Refresh data first
+    showSnackbar(locale === 'fr' ? 'Utilisateur mis à jour avec succès' : 'User updated successfully', 'success')
   }
 
   const handleDemoNotes = (demo: any) => {
@@ -435,52 +458,6 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
     }
   }
 
-  // Integration test handlers
-  const handleTestSentry = () => {
-    try {
-      // Capture a test message
-      Sentry.captureMessage('Sentry test from Valea Max admin panel', 'info')
-
-      showSnackbar(
-        locale === 'fr'
-          ? 'Test envoyé à Sentry! Vérifiez votre tableau de bord.'
-          : 'Test sent to Sentry! Check your dashboard.',
-        'success'
-      )
-    } catch (error) {
-      showSnackbar(
-        locale === 'fr'
-          ? 'Erreur lors du test Sentry'
-          : 'Error testing Sentry',
-        'error'
-      )
-    }
-  }
-
-  const handleTestPostHog = () => {
-    try {
-      // Capture a test event
-      captureEvent('admin_test_event', {
-        source: 'admin_panel',
-        timestamp: new Date().toISOString(),
-        user_email: user?.email
-      })
-
-      showSnackbar(
-        locale === 'fr'
-          ? 'Événement test envoyé à PostHog! Vérifiez votre tableau de bord.'
-          : 'Test event sent to PostHog! Check your dashboard.',
-        'success'
-      )
-    } catch (error) {
-      showSnackbar(
-        locale === 'fr'
-          ? 'Erreur lors du test PostHog'
-          : 'Error testing PostHog',
-        'error'
-      )
-    }
-  }
 
   // Bulk selection handlers
   const handleSelectAllUsers = (checked: boolean) => {
@@ -725,6 +702,20 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
   // Paginated waitlist
   const paginatedWaitlist = filteredWaitlist.slice(waitlistPage * waitlistRowsPerPage, waitlistPage * waitlistRowsPerPage + waitlistRowsPerPage)
 
+  // Get section title based on activeSection
+  const sectionTitles: Record<string, { fr: string; en: string }> = {
+    dashboard: { fr: 'Vue d\'ensemble', en: 'Dashboard Overview' },
+    users: { fr: 'Utilisateurs', en: 'Users' },
+    demos: { fr: 'Demandes de démo', en: 'Demo Requests' },
+    waitlist: { fr: 'Liste d\'attente', en: 'Waitlist' },
+    subscriptions: { fr: 'Abonnements', en: 'Subscriptions' },
+    analytics: { fr: 'Analytique', en: 'Analytics' },
+    health: { fr: 'Santé du système', en: 'System Health' },
+    settings: { fr: 'Paramètres', en: 'Settings' },
+    integrations: { fr: 'Intégrations', en: 'Integrations' }
+  }
+  const currentSectionTitle = sectionTitles[activeSection]?.[locale as 'fr' | 'en'] || sectionTitles.dashboard[locale as 'fr' | 'en'] || ''
+
   if (loading) {
     return (
       <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -773,15 +764,131 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
     }}>
       <AdminSidebar activeSection={activeSection} onSectionChange={setActiveSection} locale={locale} />
 
-      <Box sx={{ flexGrow: 1, p: 4 }}>
-        {/* Dashboard Overview Section */}
-        {activeSection === 'dashboard' && (
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
-              {locale === 'fr' ? 'Vue d\'ensemble' : 'Dashboard Overview'}
-            </Typography>
+      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+        {/* Header with Section Title */}
+        <Box sx={{
+          backgroundImage: `
+            linear-gradient(160deg, rgba(59, 130, 246, 0.96) 0%, rgba(37, 99, 235, 0.96) 52%, rgba(30, 64, 175, 0.94) 100%),
+            repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0px, rgba(255, 255, 255, 0.08) 2px, transparent 2px, transparent 12px),
+            radial-gradient(125% 145% at 100% 110%, rgba(14, 82, 200, 0.45) 0%, rgba(14, 82, 200, 0) 65%),
+            radial-gradient(rgba(148, 163, 184, 0.18) 1px, transparent 1px)
+          `,
+          backgroundSize: 'cover, 260px 260px, 120% 120%, 60px 60px',
+          backgroundPosition: 'center, 0 0, 100% 100%, 14px 14px',
+          backgroundBlendMode: 'overlay, overlay, normal, overlay',
+          backdropFilter: 'blur(4px)',
+          borderBottom: '1px solid rgba(15, 23, 42, 0.35)',
+          boxShadow: '0 10px 30px rgba(15, 23, 42, 0.35)',
+          px: 4,
+          py: 2.5,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          position: 'sticky',
+          top: 0,
+          zIndex: 100
+        }}>
+          {/* Section Title */}
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 700,
+              color: '#F8FAFC',
+              textShadow: '0 4px 14px rgba(15, 23, 42, 0.45)',
+              fontFamily: 'var(--font-montserrat)',
+            }}
+          >
+            {currentSectionTitle}
+          </Typography>
 
-            {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
+          {/* Right Side: Back to App + Profile Menu */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {/* Back to App Button */}
+            <Button
+              startIcon={<ExitToApp />}
+              onClick={() => router.push(`/${locale}/dashboard`)}
+              sx={{
+                textTransform: 'none',
+                color: '#E0F2FE',
+                border: '1px solid rgba(191, 219, 254, 0.35)',
+                borderRadius: '10px',
+                px: 2.5,
+                py: 1,
+                boxShadow: '0 6px 18px rgba(15, 23, 42, 0.3)',
+                '&:hover': {
+                  bgcolor: 'rgba(15, 23, 42, 0.2)',
+                  borderColor: 'rgba(191, 219, 254, 0.55)'
+                }
+              }}
+            >
+              {locale === 'fr' ? 'Retour à l\'app' : 'Back to App'}
+            </Button>
+
+            {/* Profile Menu */}
+            <IconButton
+              onClick={(e) => setProfileMenuAnchor(e.currentTarget)}
+              sx={{
+                bgcolor: 'rgba(15, 23, 42, 0.3)',
+                border: '1px solid rgba(191, 219, 254, 0.4)',
+                '&:hover': {
+                  bgcolor: 'rgba(15, 23, 42, 0.45)'
+                }
+              }}
+            >
+              <AccountCircle sx={{ color: '#F1F5F9' }} />
+            </IconButton>
+
+            <Menu
+              anchorEl={profileMenuAnchor}
+              open={Boolean(profileMenuAnchor)}
+              onClose={() => setProfileMenuAnchor(null)}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              sx={{
+                mt: 1,
+                '& .MuiPaper-root': {
+                  minWidth: 200,
+                  borderRadius: '12px',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                }
+              }}
+            >
+              <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: '#1A1F36' }}>
+                  {user?.email || 'Admin User'}
+                </Typography>
+                <Typography variant="caption" sx={{ color: '#6B7280' }}>
+                  {locale === 'fr' ? 'Administrateur' : 'Administrator'}
+                </Typography>
+              </Box>
+              <MenuItem
+                onClick={() => {
+                  setProfileMenuAnchor(null)
+                  router.push(`/${locale}/logout`)
+                }}
+                sx={{ py: 1.5, gap: 1.5 }}
+              >
+                <Logout fontSize="small" sx={{ color: '#6B7280' }} />
+                <Typography variant="body2">
+                  {locale === 'fr' ? 'Déconnexion' : 'Logout'}
+                </Typography>
+              </MenuItem>
+            </Menu>
+          </Box>
+        </Box>
+
+        {/* Main Content Area */}
+        <Box sx={{ flexGrow: 1, p: 4, overflow: 'auto' }}>
+          {/* Dashboard Overview Section */}
+          {activeSection === 'dashboard' && (
+            <Box>
+              {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
             {/* Key Metrics Row */}
             <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -924,6 +1031,11 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                 </Card>
               </Grid>
             </Grid>
+
+            {/* Organizations Overview */}
+            <Box sx={{ mt: 3 }}>
+              <OrganizationStats />
+            </Box>
           </Box>
         )}
 
@@ -931,9 +1043,6 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
         {activeSection === 'users' && (
           <Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                {locale === 'fr' ? 'Utilisateurs' : 'Users'}
-              </Typography>
               <Button
                 variant="outlined"
                 startIcon={<Download />}
@@ -1119,6 +1228,11 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                                 <Visibility fontSize="small" />
                               </IconButton>
                             </Tooltip>
+                            <Tooltip title={locale === 'fr' ? 'Modifier profil' : 'Edit profile'}>
+                              <IconButton size="small" color="info" onClick={() => handleEditUser(user)}>
+                                <Person fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
                             <Tooltip title={locale === 'fr' ? 'Modifier crédits' : 'Edit credits'}>
                               <IconButton size="small" color="success" onClick={() => handleEditCredits(user)}>
                                 <Edit fontSize="small" />
@@ -1162,9 +1276,6 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
         {activeSection === 'demos' && (
           <Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                {locale === 'fr' ? 'Demandes de démo' : 'Demo Requests'}
-              </Typography>
               <Button
                 variant="outlined"
                 startIcon={<Download />}
@@ -1356,9 +1467,6 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
         {activeSection === 'waitlist' && (
           <Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                {locale === 'fr' ? 'Liste d\'attente' : 'Waitlist'}
-              </Typography>
               <Button
                 variant="outlined"
                 startIcon={<Download />}
@@ -1551,9 +1659,6 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
         {/* Placeholder sections for other tabs */}
         {activeSection === 'subscriptions' && (
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
-              {locale === 'fr' ? 'Gestion des abonnements' : 'Subscription Management'}
-            </Typography>
 
             {!analytics ? (
               <Card sx={{ borderRadius: '16px', p: 4, textAlign: 'center' }}>
@@ -1789,9 +1894,6 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
 
         {activeSection === 'analytics' && (
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
-              {locale === 'fr' ? 'Analytique avancée' : 'Advanced Analytics'}
-            </Typography>
 
             {!timeseriesData ? (
               <Card sx={{ borderRadius: '16px', p: 4, textAlign: 'center' }}>
@@ -1968,10 +2070,7 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
 
         {activeSection === 'health' && (
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
-              {locale === 'fr' ? 'Santé du système' : 'System Health'}
-            </Typography>
-            <Card sx={{ borderRadius: '16px', p: 4, textAlign: 'center' }}>
+            <Card sx={{ borderRadius: '16px', p: 4, textAlign: 'center', mt: 3 }}>
               <Typography variant="h6" sx={{ color: '#6B7280' }}>
                 {locale === 'fr' ? 'Monitoring en développement' : 'Monitoring coming soon'}
               </Typography>
@@ -1981,9 +2080,6 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
 
         {activeSection === 'settings' && (
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
-              {locale === 'fr' ? 'Santé du système' : 'System Health'}
-            </Typography>
 
             {/* System Status Cards */}
             <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -2152,12 +2248,6 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
         {/* Integrations Section */}
         {activeSection === 'integrations' && (
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-              {locale === 'fr' ? 'Intégrations' : 'Integrations'}
-            </Typography>
-            <Typography variant="body2" sx={{ color: '#6B7280', mb: 3 }}>
-              {locale === 'fr' ? 'Surveillance et analyse de vos services tiers' : 'Monitor and analyze your third-party services'}
-            </Typography>
 
             {/* Integration Service Cards */}
             <Grid container spacing={3}>
@@ -2228,33 +2318,16 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                       </Grid>
                     </Grid>
 
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                      <Button
-                        fullWidth
-                        variant="contained"
-                        onClick={handleTestSentry}
-                        sx={{
-                          textTransform: 'none',
-                          borderRadius: '12px',
-                          background: 'linear-gradient(135deg, #6D28D9 0%, #5B21B6 100%)',
-                          '&:hover': {
-                            background: 'linear-gradient(135deg, #5B21B6 0%, #4C1D95 100%)'
-                          }
-                        }}
-                      >
-                        {locale === 'fr' ? 'Tester' : 'Test'}
-                      </Button>
-                      <Button
-                        fullWidth
-                        variant="outlined"
-                        endIcon={<OpenInNew />}
-                        href="https://sentry.io"
-                        target="_blank"
-                        sx={{ textTransform: 'none', borderRadius: '12px' }}
-                      >
-                        {locale === 'fr' ? 'Dashboard' : 'Dashboard'}
-                      </Button>
-                    </Box>
+                    <Button
+                      fullWidth
+                      variant="outlined"
+                      endIcon={<OpenInNew />}
+                      href="https://sentry.io"
+                      target="_blank"
+                      sx={{ textTransform: 'none', borderRadius: '12px' }}
+                    >
+                      {locale === 'fr' ? 'Dashboard' : 'Dashboard'}
+                    </Button>
                   </CardContent>
                 </Card>
               </Grid>
@@ -2318,33 +2391,16 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
                       </Grid>
                     </Grid>
 
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                      <Button
-                        fullWidth
-                        variant="contained"
-                        onClick={handleTestPostHog}
-                        sx={{
-                          textTransform: 'none',
-                          borderRadius: '12px',
-                          background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
-                          '&:hover': {
-                            background: 'linear-gradient(135deg, #D97706 0%, #B45309 100%)'
-                          }
-                        }}
-                      >
-                        {locale === 'fr' ? 'Tester' : 'Test'}
-                      </Button>
-                      <Button
-                        fullWidth
-                        variant="outlined"
-                        endIcon={<OpenInNew />}
-                        href="https://app.posthog.com"
-                        target="_blank"
-                        sx={{ textTransform: 'none', borderRadius: '12px' }}
-                      >
-                        {locale === 'fr' ? 'Dashboard' : 'Dashboard'}
-                      </Button>
-                    </Box>
+                    <Button
+                      fullWidth
+                      variant="outlined"
+                      endIcon={<OpenInNew />}
+                      href="https://app.posthog.com"
+                      target="_blank"
+                      sx={{ textTransform: 'none', borderRadius: '12px' }}
+                    >
+                      {locale === 'fr' ? 'Dashboard' : 'Dashboard'}
+                    </Button>
                   </CardContent>
                 </Card>
               </Grid>
@@ -2533,6 +2589,14 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
         onSuccess={handleCreditsUpdated}
       />
 
+      <EditUserModal
+        open={editUserOpen}
+        onClose={() => setEditUserOpen(false)}
+        user={selectedUser}
+        onUserUpdated={handleUserUpdated}
+        locale={locale}
+      />
+
       <DemoNotesModal
         open={demoNotesOpen}
         onClose={() => setDemoNotesOpen(false)}
@@ -2548,6 +2612,7 @@ export default function AdminPage({ params }: { params: { locale: string } }) {
         onClose={() => setSnackbar({ ...snackbar, open: false })}
         message={snackbar.message}
       />
+    </Box>
     </Box>
   )
 }
