@@ -414,7 +414,7 @@ export default function LandingPage() {
                 <Button
                   variant="outlined"
                   size="large"
-                  onClick={() => router.push('/pricing')}
+                  onClick={() => handleScroll('waitlist')}
                   sx={{
                     borderColor: 'rgba(232, 226, 213, 0.5)',
                     borderWidth: 1.5,
