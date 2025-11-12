@@ -1626,6 +1626,97 @@
 
         "defaultQuality": "Good",
         "defaultExtras": "Standard"
+      },
+
+      "adjustments": {
+        "title": "Adjustments Calculator",
+        "subtitle": "Detailed adjustment calculations for the direct comparison approach - single_family",
+        "calculate": "Calculate",
+        "syncToTable": "Sync to Table",
+        "unsavedChanges": "You have unsaved changes to adjustment rates",
+
+        "defaultRates": "Default Rates",
+        "viewingRatesFor": "Viewing rates for",
+        "viewingDifferentType": "Viewing different type than current appraisal",
+        "adjustmentsGrid": "Adjustments Grid",
+        "category": "Category",
+        "subject": "Subject",
+        "comparable": "Comparable",
+        "total": "Total",
+        "adjustedValue": "Adjusted Value",
+
+        "propertyTypes": {
+          "single_family": "Single Family",
+          "condo": "Condo",
+          "duplex": "Duplex",
+          "triplex": "Triplex",
+          "quadruplex_plus": "Quadruplex+",
+          "apartment": "Apartment",
+          "semi_commercial": "Semi-Commercial",
+          "commercial": "Commercial",
+          "land": "Land",
+          "other": "Other"
+        },
+
+        "rateCategories": {
+          "marketTiming": "Market & Timing",
+          "livingArea": "Living Area",
+          "land": "Land & Lot",
+          "basement": "Basement",
+          "quality": "Quality",
+          "age": "Effective Age",
+          "bathrooms": "Bathrooms",
+          "garage": "Garage & Parking",
+          "floor": "Floor (Condo/Apartment)",
+          "landscaping": "Landscaping",
+          "extras": "Extras",
+          "unitLocation": "Unit Location (Condo/Apartment)"
+        },
+
+        "marketAppreciationRate": "Market Appreciation Rate",
+        "livingAreaRate": "Living Area Rate",
+        "landRate": "Land Rate",
+        "landDepreciationRate": "Land Depreciation Rate",
+        "basementFinishRate": "Basement Finish Rate",
+        "basementDepreciationRate": "Basement Depreciation Rate",
+        "qualityAdjustmentMethod": "Quality Adjustment Method",
+        "qualityAdjustmentValue": "Quality Adjustment Value",
+        "ageAdjustmentRate": "Age Adjustment Rate",
+        "ageAdjustmentMethod": "Age Adjustment Method",
+        "bathroomValue": "Bathroom Value",
+        "bathroomDepreciationRate": "Bathroom Depreciation Rate",
+        "garageValue": "Garage Value",
+        "floorValue": "Floor Value (per floor)",
+        "landscapingDepreciationRate": "Landscaping Depreciation Rate",
+        "extrasDepreciationRate": "Extras Depreciation Rate",
+        "cornerUnitPremium": "Corner Unit Premium",
+
+        "categories": {
+          "timing": "Timing Adjustment",
+          "timingDescription": "Effective date - sale date × % annual market appreciation",
+          "livingArea": "Living Area",
+          "livingAreaDescription": "Difference in area × $/sq.ft.",
+          "lotSize": "Lot Size",
+          "lotSizeDescription": "Difference in area × $/sq.ft. × (1 - % depreciation)",
+          "quality": "Quality",
+          "qualityDescription": "Adjustment based on construction quality",
+          "effectiveAge": "Effective/Apparent Age",
+          "effectiveAgeDescription": "Age difference × $/year or %",
+          "basement": "Basement Finish",
+          "basementDescription": "Finish difference × $/sq.ft. × (1 - % depreciation)",
+          "bathrooms": "Bathrooms",
+          "bathroomsDescription": "Bathroom difference × $ per bathroom × (1 - % depreciation)",
+          "garage": "Garage/Parking",
+          "garageDescription": "Subject value - comparable value",
+          "floor": "Floor",
+          "floorDescription": "Floor difference × $ per floor (condos)",
+          "landscaping": "Landscaping",
+          "landscapingDescription": "Value × (1 - % depreciation)",
+          "extras": "Extras",
+          "extrasDescription": "Value × (1 - % depreciation)",
+          "unitLocation": "Unit Location",
+          "unitLocationDescription": "Corner unit premium (condos)"
+        }
       }
     },
 

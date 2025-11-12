@@ -139,6 +139,12 @@ export default function AppraisalEditPage() {
       const loadedData = (data.form_data as any) || {};
       sectionsDataRef.current = loadedData;
       setSectionsData(loadedData);
+
+      // Load adjustments data
+      const loadedAdjustmentsData = (data.adjustments_data as any) || null;
+      console.log('📥 Loading adjustments_data:', loadedAdjustmentsData);
+      setAdjustmentsData(loadedAdjustmentsData);
+
       setIsInitialLoad(false);
 
       // Calculate and update completion percentage if needed
@@ -284,8 +290,49 @@ export default function AppraisalEditPage() {
 
   const handleAdjustmentsChange = (data: any) => {
     setAdjustmentsData(data);
-    // Auto-save adjustments data
-    handleSectionChange('adjustments_calculator', data);
+
+    // Clear existing timer
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+    }
+
+    // Set state to unsaved
+    setSaveState('unsaved');
+
+    // Set new timer for auto-save
+    if (!isInitialLoad) {
+      console.log('⏰ Adjustments auto-save timer set for 2 seconds');
+      saveTimerRef.current = setTimeout(async () => {
+        try {
+          setSaving(true);
+          setSaveState('saving');
+          const supabase = createClient();
+
+          console.log('💾 Saving adjustments_data to Supabase:', JSON.stringify(data, null, 2));
+
+          const { error } = await supabase
+            .from('appraisals')
+            .update({
+              adjustments_data: data as any,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', id);
+
+          if (error) {
+            console.error('❌ Adjustments save error:', error);
+            throw error;
+          }
+
+          console.log('✅ Adjustments save successful');
+          setSaveState('saved');
+        } catch (error) {
+          console.error('Error saving adjustments:', error);
+          setSaveState('unsaved');
+        } finally {
+          setSaving(false);
+        }
+      }, 2000);
+    }
   };
 
   const handleSyncToDirectComparison = () => {
@@ -591,6 +638,7 @@ export default function AppraisalEditPage() {
                     onChange={handleAdjustmentsChange}
                     directComparisonData={sectionsDataRef.current.methode_parite || {}}
                     propertyType={appraisal.property_type}
+                    effectiveDate={appraisal.effective_date}
                     onSyncToDirectComparison={handleSyncToDirectComparison}
                     onClose={() => setCurrentToolTab(-1)}
                   />

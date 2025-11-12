@@ -47,6 +47,7 @@ interface AdjustmentsFormProps {
   onChange: (data: AdjustmentsData) => void;
   directComparisonData: any; // Subject + comparables from Direct Comparison
   propertyType: string;
+  effectiveDate?: string | null;
   onSyncToDirectComparison?: () => void;
   onClose?: () => void;
 }
@@ -56,6 +57,7 @@ export default function AdjustmentsForm({
   onChange,
   directComparisonData,
   propertyType,
+  effectiveDate,
   onSyncToDirectComparison,
   onClose
 }: AdjustmentsFormProps) {
@@ -65,6 +67,24 @@ export default function AdjustmentsForm({
   const [adjustmentsData, setAdjustmentsData] = useState<AdjustmentsData>(data);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [selectedPropertyType, setSelectedPropertyType] = useState<string>(propertyType);
+
+  // Initialize ratesByType if not present
+  useEffect(() => {
+    if (!adjustmentsData.ratesByType) {
+      setAdjustmentsData(prev => ({
+        ...prev,
+        ratesByType: {
+          [propertyType]: prev.defaultRates
+        }
+      }));
+    }
+  }, []);
+
+  // Propagate changes to parent component
+  useEffect(() => {
+    onChange(adjustmentsData);
+  }, [adjustmentsData]);
 
   // Initialize adjustments data from Direct Comparison
   useEffect(() => {
@@ -75,6 +95,43 @@ export default function AdjustmentsForm({
     }
   }, [directComparisonData]);
 
+  // Recalculate adjustments when default rates change
+  useEffect(() => {
+    if (adjustmentsData.comparables && adjustmentsData.comparables.length > 0) {
+      const updatedComparables = adjustmentsData.comparables.map((comp, index) => {
+        const newAdjustments: any = { ...comp.adjustments };
+        let total = 0;
+
+        // Recalculate each category
+        ADJUSTMENT_CATEGORIES.forEach(category => {
+          if (category.applicablePropertyTypes.includes(propertyType)) {
+            const amount = calculateAdjustment(category.id, index);
+            if (newAdjustments[category.id]) {
+              newAdjustments[category.id] = {
+                ...newAdjustments[category.id],
+                calculatedAmount: amount
+              };
+              total += amount;
+            }
+          }
+        });
+
+        const salePrice = parseFloat(directComparisonData?.comparables?.[index]?.salePrice || '0');
+        return {
+          ...comp,
+          adjustments: newAdjustments,
+          totalAdjustment: total,
+          adjustedValue: salePrice + total
+        };
+      });
+
+      setAdjustmentsData(prev => ({
+        ...prev,
+        comparables: updatedComparables
+      }));
+    }
+  }, [adjustmentsData.defaultRates]);
+
   const initializeFromDirectComparison = () => {
     const subject = directComparisonData.subject;
     const comparables = directComparisonData.comparables || [];
@@ -84,21 +141,37 @@ export default function AdjustmentsForm({
       // Initialize each adjustment category with data from Direct Comparison
       const adjustments: any = {};
 
-      // Timing
+      // Timing - Calculate timing adjustment
+      const timingAmount = (() => {
+        if (comp.saleDate && effectiveDate) {
+          const saleDate = new Date(comp.saleDate);
+          const effDate = new Date(effectiveDate);
+          const months = (effDate.getTime() - saleDate.getTime()) / (1000 * 60 * 60 * 24 * 30);
+          const salePrice = parseFloat(comp.salePrice) || 0;
+          return ((defaultRates.marketAppreciationRate / 100) / 12) * months * salePrice;
+        }
+        return 0;
+      })();
+
       adjustments.timing = {
         category: 'timing',
         enabled: true,
-        subjectValue: null,
-        subjectLabel: 'N/A (Effective Date)',
+        subjectValue: effectiveDate || null,
+        subjectLabel: effectiveDate || 'N/A (Effective Date)',
         comparableValue: comp.saleDate || null,
         comparableLabel: comp.saleDate || 'N/A',
         difference: 0,
         adjustmentRate: defaultRates.marketAppreciationRate,
-        calculatedAmount: 0,
+        calculatedAmount: timingAmount,
         notes: 'Based on market appreciation rate'
       };
 
-      // Living Area
+      // Living Area - Calculate living area adjustment
+      const compArea = parseFloat(comp.livingArea?.replace(/[^0-9.]/g, '') || '0');
+      const subjectArea = parseFloat(subject?.livingArea?.replace(/[^0-9.]/g, '') || '0');
+      const areaDiff = compArea - subjectArea;
+      const livingAreaAmount = -areaDiff * defaultRates.livingAreaRate;
+
       adjustments.livingArea = {
         category: 'livingArea',
         enabled: true,
@@ -106,9 +179,9 @@ export default function AdjustmentsForm({
         subjectLabel: subject?.livingArea || 'N/A',
         comparableValue: comp.livingArea || null,
         comparableLabel: comp.livingArea || 'N/A',
-        difference: 0,
+        difference: areaDiff,
         adjustmentRate: defaultRates.livingAreaRate,
-        calculatedAmount: 0
+        calculatedAmount: livingAreaAmount
       };
 
       // Lot Size
@@ -262,13 +335,38 @@ export default function AdjustmentsForm({
     }));
   };
 
-  // Update rates
-  const updateRate = (rateKey: keyof DefaultRates, value: number) => {
+  // Handle property type change
+  const handlePropertyTypeChange = (newPropertyType: string) => {
+    // Save current rates for current property type
+    const updatedRatesByType = {
+      ...adjustmentsData.ratesByType,
+      [selectedPropertyType]: adjustmentsData.defaultRates
+    };
+
+    // Load rates for new property type (or use defaults)
+    const newRates = updatedRatesByType[newPropertyType] || DEFAULT_RATES_BY_PROPERTY_TYPE[newPropertyType] || adjustmentsData.defaultRates;
+
+    setSelectedPropertyType(newPropertyType);
     setAdjustmentsData(prev => ({
       ...prev,
-      defaultRates: {
-        ...prev.defaultRates,
-        [rateKey]: value
+      defaultRates: newRates,
+      ratesByType: updatedRatesByType
+    }));
+  };
+
+  // Update rates for selected property type
+  const updateRate = (rateKey: keyof DefaultRates, value: number) => {
+    const updatedRates = {
+      ...adjustmentsData.defaultRates,
+      [rateKey]: value
+    };
+
+    setAdjustmentsData(prev => ({
+      ...prev,
+      defaultRates: updatedRates,
+      ratesByType: {
+        ...prev.ratesByType,
+        [selectedPropertyType]: updatedRates
       }
     }));
     setHasUnsavedChanges(true);
@@ -289,12 +387,14 @@ export default function AdjustmentsForm({
 
     switch (categoryId) {
       case 'timing': {
-        // (effective_date - sale_date) × annual_market_appreciation_rate
-        const saleDate = new Date(comparable.saleDate);
-        const effectiveDate = new Date(); // TODO: Get from appraisal
-        const yearsDiff = (effectiveDate.getTime() - saleDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
-        const salePrice = parseFloat(comparable.salePrice) || 0;
-        adjustment = salePrice * (rates.marketAppreciationRate / 100) * yearsDiff;
+        // Formula: ((rate% / 12) × months × sale price)
+        if (comparable.saleDate && effectiveDate) {
+          const saleDate = new Date(comparable.saleDate);
+          const effDate = new Date(effectiveDate);
+          const months = (effDate.getTime() - saleDate.getTime()) / (1000 * 60 * 60 * 24 * 30);
+          const salePrice = parseFloat(comparable.salePrice) || 0;
+          adjustment = ((rates.marketAppreciationRate / 100) / 12) * months * salePrice;
+        }
         break;
       }
 
@@ -538,20 +638,46 @@ export default function AdjustmentsForm({
         </Box>
       </Box>
 
-      {hasUnsavedChanges && (
-        <Alert severity="warning" sx={{ mb: 2 }}>
-          {t('unsavedChanges')}
-        </Alert>
-      )}
-
       {/* Default Rates Section */}
       <Card sx={{ mb: 3, borderRadius: '16px' }}>
         <CardContent>
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-            {t('defaultRates')}
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {t('defaultRates')}
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <FormControl size="small" sx={{ minWidth: 220 }}>
+                <InputLabel>{t('viewingRatesFor')}</InputLabel>
+                <Select
+                  value={selectedPropertyType}
+                  onChange={(e) => handlePropertyTypeChange(e.target.value)}
+                  label={t('viewingRatesFor')}
+                >
+                  <MenuItem value="single_family">{t('propertyTypes.single_family')}</MenuItem>
+                  <MenuItem value="condo">{t('propertyTypes.condo')}</MenuItem>
+                  <MenuItem value="duplex">{t('propertyTypes.duplex')}</MenuItem>
+                  <MenuItem value="triplex">{t('propertyTypes.triplex')}</MenuItem>
+                  <MenuItem value="quadruplex_plus">{t('propertyTypes.quadruplex_plus')}</MenuItem>
+                  <MenuItem value="apartment">{t('propertyTypes.apartment')}</MenuItem>
+                  <MenuItem value="semi_commercial">{t('propertyTypes.semi_commercial')}</MenuItem>
+                  <MenuItem value="commercial">{t('propertyTypes.commercial')}</MenuItem>
+                  <MenuItem value="land">{t('propertyTypes.land')}</MenuItem>
+                  <MenuItem value="other">{t('propertyTypes.other')}</MenuItem>
+                </Select>
+              </FormControl>
+              {selectedPropertyType !== propertyType && (
+                <Chip
+                  label={t('viewingDifferentType')}
+                  color="warning"
+                  size="small"
+                  icon={<Info />}
+                />
+              )}
+            </Box>
+          </Box>
+
           <Grid container spacing={2}>
-            {/* Timing */}
+            {/* Market & Timing */}
             <Grid item xs={12} sm={6} md={4}>
               <TextField
                 fullWidth
@@ -583,7 +709,7 @@ export default function AdjustmentsForm({
             </Grid>
 
             {/* Land */}
-            {propertyType !== 'condo' && (
+            {selectedPropertyType !== 'condo' && selectedPropertyType !== 'apartment' && (
               <>
                 <Grid item xs={12} sm={6} md={4}>
                   <TextField
@@ -616,7 +742,7 @@ export default function AdjustmentsForm({
             )}
 
             {/* Basement */}
-            {propertyType !== 'condo' && (
+            {selectedPropertyType !== 'condo' && selectedPropertyType !== 'apartment' && (
               <>
                 <Grid item xs={12} sm={6} md={4}>
                   <TextField
@@ -749,8 +875,8 @@ export default function AdjustmentsForm({
               />
             </Grid>
 
-            {/* Floor (Condos only) */}
-            {propertyType === 'condo' && (
+            {/* Floor (Condos/Apartments) */}
+            {(selectedPropertyType === 'condo' || selectedPropertyType === 'apartment') && (
               <Grid item xs={12} sm={6} md={4}>
                 <TextField
                   fullWidth
@@ -768,7 +894,7 @@ export default function AdjustmentsForm({
             )}
 
             {/* Landscaping */}
-            {propertyType !== 'condo' && (
+            {selectedPropertyType !== 'condo' && selectedPropertyType !== 'apartment' && (
               <Grid item xs={12} sm={6} md={4}>
                 <TextField
                   fullWidth
@@ -799,8 +925,8 @@ export default function AdjustmentsForm({
               />
             </Grid>
 
-            {/* Unit Location (Condos only) */}
-            {propertyType === 'condo' && (
+            {/* Unit Location (Condos/Apartments) */}
+            {(selectedPropertyType === 'condo' || selectedPropertyType === 'apartment') && (
               <Grid item xs={12} sm={6} md={4}>
                 <TextField
                   fullWidth
@@ -874,21 +1000,38 @@ export default function AdjustmentsForm({
                         <Typography variant="body2" fontWeight={700}>
                           {t(`categories.${category.labelKey}`)}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {t(`categories.${category.labelKey}Description`)}
-                        </Typography>
+                        {category.id === 'timing' && (() => {
+                          const saleDate = adjustment?.comparableValue ? new Date(adjustment.comparableValue) : null;
+                          const effDate = adjustment?.subjectValue ? new Date(adjustment.subjectValue) : null;
+                          if (saleDate && effDate) {
+                            const months = Math.round((effDate.getTime() - saleDate.getTime()) / (1000 * 60 * 60 * 24 * 30));
+                            const rate = adjustmentsData.defaultRates.marketAppreciationRate || 0;
+                            const salePrice = parseFloat(compData.salePrice) || 0;
+                            return (
+                              <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
+                                ({rate}% / 12) × {months} months × ${salePrice.toLocaleString()}
+                              </Typography>
+                            );
+                          }
+                          return null;
+                        })()}
+                        {category.id !== 'timing' && (
+                          <Typography variant="caption" color="text.secondary">
+                            {t(`categories.${category.labelKey}Description`)}
+                          </Typography>
+                        )}
                       </Box>
                       <Chip
-                        label={`${amount >= 0 ? '+' : ''}$${amount.toLocaleString()}`}
+                        label={`${amount >= 0 ? '+' : ''}$${Math.round(amount).toLocaleString()}`}
                         size="small"
                         color={amount > 0 ? 'success' : amount < 0 ? 'error' : 'default'}
                         sx={{ fontWeight: 600, minWidth: 100 }}
                       />
                     </Box>
 
-                    {/* Side-by-side: Subject vs Comparable */}
+                    {/* Subject | Comparable | Difference | Adjustment */}
                     <Grid container spacing={2}>
-                      <Grid item xs={12} md={5}>
+                      <Grid item xs={12} md={3}>
                         <Paper variant="outlined" sx={{ p: 1.5, bgcolor: 'white' }}>
                           <Typography variant="caption" color="primary.main" fontWeight={600} display="block" mb={1}>
                             SUBJECT
@@ -898,7 +1041,7 @@ export default function AdjustmentsForm({
                           </Typography>
                         </Paper>
                       </Grid>
-                      <Grid item xs={12} md={5}>
+                      <Grid item xs={12} md={3}>
                         <Paper variant="outlined" sx={{ p: 1.5, bgcolor: 'white' }}>
                           <Typography variant="caption" color="secondary.main" fontWeight={600} display="block" mb={1}>
                             COMPARABLE
@@ -908,12 +1051,35 @@ export default function AdjustmentsForm({
                           </Typography>
                         </Paper>
                       </Grid>
-                      <Grid item xs={12} md={2}>
+                      <Grid item xs={12} md={3}>
+                        <Paper variant="outlined" sx={{ p: 1.5, bgcolor: 'grey.100' }}>
+                          <Typography variant="caption" color="text.secondary" fontWeight={600} display="block" mb={1}>
+                            DIFFERENCE
+                          </Typography>
+                          <Typography variant="body2" fontWeight={600}>
+                            {(() => {
+                              if (category.id === 'timing') {
+                                const saleDate = adjustment?.comparableValue ? new Date(adjustment.comparableValue) : null;
+                                const effDate = adjustment?.subjectValue ? new Date(adjustment.subjectValue) : null;
+                                if (saleDate && effDate) {
+                                  const months = Math.round((effDate.getTime() - saleDate.getTime()) / (1000 * 60 * 60 * 24 * 30));
+                                  return `${months} months`;
+                                }
+                                return '-';
+                              }
+                              // For other categories, show the difference
+                              const diff = adjustment?.difference || 0;
+                              return diff !== 0 ? diff.toLocaleString() : '-';
+                            })()}
+                          </Typography>
+                        </Paper>
+                      </Grid>
+                      <Grid item xs={12} md={3}>
                         <TextField
                           fullWidth
                           label="Adjustment"
-                          type="number"
-                          value={adjustment?.manualOverride ?? adjustment?.calculatedAmount ?? 0}
+                          type="text"
+                          value={Math.round(adjustment?.manualOverride ?? adjustment?.calculatedAmount ?? 0).toLocaleString('fr-CA').replace(/,/g, ' ')}
                           size="small"
                           InputProps={{
                             startAdornment: <InputAdornment position="start">$</InputAdornment>

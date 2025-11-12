@@ -1,6 +1,6 @@
 export type AdjustmentUnit = 'per_sqft' | 'per_year' | 'percentage' | 'fixed';
 export type AdjustmentMethod = 'linear' | 'percentage' | 'fixed' | 'custom';
-export type PropertyType = 'single_family' | 'duplex' | 'triplex' | 'quadruplex' | 'condo' | 'commercial' | 'land';
+export type PropertyType = 'single_family' | 'duplex' | 'triplex' | 'quadruplex_plus' | 'condo' | 'apartment' | 'semi_commercial' | 'commercial' | 'land' | 'other';
 
 export interface AdjustmentRate {
   value: number;
@@ -106,6 +106,11 @@ export interface AdjustmentsData {
   // Default rates by property type
   defaultRates: DefaultRates;
 
+  // Organization-level default rates for all property types
+  ratesByType?: {
+    [K in PropertyType]?: DefaultRates;
+  };
+
   // Per-comparable adjustments
   comparables: ComparableAdjustments[];
 
@@ -114,11 +119,13 @@ export interface AdjustmentsData {
   lastSyncedAt?: string;
 }
 
-export interface UserAdjustmentPresets {
-  userId: string;
-  presets: {
-    [propertyType in PropertyType]?: DefaultRates;
-  };
+export interface OrganizationAdjustmentPreset {
+  id: string;
+  organizationId: string;
+  propertyType: PropertyType;
+  rates: DefaultRates;
   createdAt: string;
   updatedAt: string;
+  createdBy?: string;
+  updatedBy?: string;
 }

@@ -1758,12 +1758,42 @@
         "unsavedChanges": "Vous avez des modifications non enregistrées aux taux d'ajustement",
 
         "defaultRates": "Taux par défaut",
+        "viewingRatesFor": "Affichage des taux pour",
+        "viewingDifferentType": "Affichage d'un type différent de l'évaluation actuelle",
         "adjustmentsGrid": "Grille d'ajustements",
         "category": "Catégorie",
         "subject": "Sujet",
         "comparable": "Comparable",
         "total": "Total",
         "adjustedValue": "Valeur ajustée",
+
+        "propertyTypes": {
+          "single_family": "Unifamiliale",
+          "condo": "Condo",
+          "duplex": "Duplex",
+          "triplex": "Triplex",
+          "quadruplex_plus": "Quadruplex+",
+          "apartment": "Appartement",
+          "semi_commercial": "Semi-commercial",
+          "commercial": "Commercial",
+          "land": "Terrain",
+          "other": "Autre"
+        },
+
+        "rateCategories": {
+          "marketTiming": "Marché et chronologie",
+          "livingArea": "Surface habitable",
+          "land": "Terrain et lot",
+          "basement": "Sous-sol",
+          "quality": "Qualité",
+          "age": "Âge effectif",
+          "bathrooms": "Salles de bain",
+          "garage": "Garage et stationnement",
+          "floor": "Étage (Condo/Appartement)",
+          "landscaping": "Aménagement paysager",
+          "extras": "Extras",
+          "unitLocation": "Emplacement de l'unité (Condo/Appartement)"
+        },
 
         "marketAppreciationRate": "Taux d'appréciation du marché",
         "livingAreaRate": "Taux d'aire habitable",
