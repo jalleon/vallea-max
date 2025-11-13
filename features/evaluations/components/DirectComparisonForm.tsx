@@ -1063,6 +1063,23 @@ export default function DirectComparisonForm({
       return strValue;
     };
 
+    // Helper function to parse numeric value from formatted measurement strings
+    const parseNumericValue = (value: string | number | undefined): number => {
+      if (!value) return 0;
+      const strValue = String(value).trim();
+
+      // Extract the first number from formats like "200 m² / 2,152 pi²"
+      const match = strValue.match(/^([\d,]+(?:\.\d+)?)/);
+      if (match) {
+        const numStr = match[1].replace(/,/g, '');
+        const parsed = parseFloat(numStr);
+        return isNaN(parsed) ? 0 : parsed;
+      }
+
+      const parsed = parseFloat(String(value));
+      return isNaN(parsed) ? 0 : parsed;
+    };
+
     // Update custom labels for optional fields
     if (colDef.field === 'label' && ['optional1', 'optional2', 'optional3', 'optional4'].includes(data.rowId)) {
       setCustomLabels(prev => ({
@@ -1097,9 +1114,11 @@ export default function DirectComparisonForm({
       setComparables(prev => {
         const newComparables = [...prev];
         if (isAdjustment) {
+          // User manually entered an adjustment value
           const adjField = `adjustment${field.charAt(0).toUpperCase() + field.slice(1)}` as keyof ComparableProperty;
           newComparables[compIndex] = { ...newComparables[compIndex], [adjField]: parseFloat(newValue) || 0 };
         } else {
+          // User updated a data field - format it and auto-calculate difference if applicable
           const formattedValue = formatAreaValue(newValue, field);
           newComparables[compIndex] = { ...newComparables[compIndex], [field]: formattedValue };
 
@@ -1107,13 +1126,38 @@ export default function DirectComparisonForm({
           if (formattedValue !== newValue) {
             event.node.setDataValue(colDef.field!, formattedValue);
           }
+
+          // Auto-calculate difference for measurement fields
+          // The difference is comparable - subject (e.g., if comp has 200m² and subject has 180m², difference is +20m²)
+          const measurementFields = ['livingArea', 'lotSize'];
+          if (measurementFields.includes(field)) {
+            const subjectValue = parseNumericValue(subject[field as keyof ComparableProperty]);
+            const comparableValue = parseNumericValue(formattedValue);
+            const difference = comparableValue - subjectValue;
+
+            // Store the raw difference (in m² or pi² depending on what was extracted)
+            // The Adj column will show this difference
+            const adjField = `adjustment${field.charAt(0).toUpperCase() + field.slice(1)}` as keyof ComparableProperty;
+            newComparables[compIndex] = { ...newComparables[compIndex], [adjField]: Math.round(difference * 100) / 100 };
+          }
+
+          // Auto-calculate difference for other numeric fields
+          const otherNumericFields = ['roomsTotal', 'roomsBedrooms', 'age', 'condition', 'daysOnMarket'];
+          if (otherNumericFields.includes(field)) {
+            const subjectValue = parseNumericValue(subject[field as keyof ComparableProperty]);
+            const comparableValue = parseNumericValue(formattedValue);
+            const difference = comparableValue - subjectValue;
+
+            const adjField = `adjustment${field.charAt(0).toUpperCase() + field.slice(1)}` as keyof ComparableProperty;
+            newComparables[compIndex] = { ...newComparables[compIndex], [adjField]: Math.round(difference * 100) / 100 };
+          }
         }
         // Recalculate totals
         newComparables[compIndex] = calculateComparableTotals(newComparables[compIndex]);
         return newComparables;
       });
     }
-  }, [measurementSystem]);
+  }, [measurementSystem, subject]);
 
   return (
     <Box>
