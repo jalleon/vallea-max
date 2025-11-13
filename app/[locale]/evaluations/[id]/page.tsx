@@ -342,29 +342,24 @@ export default function AppraisalEditPage() {
     const directComparisonSection = sectionsDataRef.current.methode_parite;
     if (!directComparisonSection || !directComparisonSection.comparables) return;
 
-    // Update comparables with adjustment amounts
+    // Update comparables with calculated totals and percentages ONLY
+    // DO NOT overwrite the raw difference adjustment fields (adjustmentLivingArea, adjustmentLotSize, etc.)
+    // Those fields show area/numeric differences, not monetary amounts
     const updatedComparables = directComparisonSection.comparables.map((comp: any, index: number) => {
       const adjustmentData = adjustmentsData.comparables[index];
       if (!adjustmentData) return comp;
 
-      // Map adjustments to Direct Comparison fields
+      // Only update the calculated summary fields
       const newComp = { ...comp };
-      const adjustments = adjustmentData.adjustments;
 
-      if (adjustments.timing) newComp.adjustmentDataSource = adjustments.timing.calculatedAmount;
-      if (adjustments.livingArea) newComp.adjustmentLivingArea = adjustments.livingArea.calculatedAmount;
-      if (adjustments.lotSize) newComp.adjustmentLotSize = adjustments.lotSize.calculatedAmount;
-      if (adjustments.quality) newComp.adjustmentQuality = adjustments.quality.calculatedAmount;
-      if (adjustments.effectiveAge) newComp.adjustmentAge = adjustments.effectiveAge.calculatedAmount;
-      if (adjustments.basement) newComp.adjustmentBasement = adjustments.basement.calculatedAmount;
-      if (adjustments.bathrooms) newComp.adjustmentRooms = adjustments.bathrooms.calculatedAmount;
-      if (adjustments.garage) newComp.adjustmentParking = adjustments.garage.calculatedAmount;
-      if (adjustments.extras) newComp.adjustmentExtras = adjustments.extras.calculatedAmount;
-      if (adjustments.unitLocation) newComp.adjustmentUnitLocation = adjustments.unitLocation.calculatedAmount;
+      // Update total adjustment (sum of all monetary adjustments)
+      newComp.totalAdjustment = adjustmentData.totalAdjustment || 0;
 
-      // Also update gross and net adjustment percentages
+      // Update gross and net adjustment percentages
       newComp.grossAdjustmentPercent = adjustmentData.totalAdjustment || 0;
       newComp.netAdjustmentPercent = adjustmentData.totalAdjustment || 0;
+
+      // Update adjusted value (sale price + total adjustment)
       newComp.adjustedValue = adjustmentData.adjustedValue || 0;
 
       return newComp;
@@ -376,7 +371,7 @@ export default function AppraisalEditPage() {
       comparables: updatedComparables
     });
 
-    alert('Adjustments synced to Direct Comparison table!');
+    alert('Summary values synced to Direct Comparison table!');
   };
 
   const handleReloadSubjectProperty = () => {

@@ -1086,7 +1086,8 @@ export default function DirectComparisonForm({
           const pi2 = parseFloat(numStr);
           if (!isNaN(pi2)) {
             // Convert pi² to m²
-            return Math.round(pi2 / 10.764 * 100) / 100;
+            const m2 = Math.round(pi2 / 10.764 * 100) / 100;
+            return m2;
           }
         }
       }
@@ -1151,7 +1152,7 @@ export default function DirectComparisonForm({
             const comparableValue = parseNumericValue(formattedValue);
             const difference = comparableValue - subjectValue;
 
-            // Store the raw difference (in m² or pi² depending on what was extracted)
+            // Store the raw difference (in m²)
             // The Adj column will show this difference
             const adjField = `adjustment${field.charAt(0).toUpperCase() + field.slice(1)}` as keyof ComparableProperty;
             newComparables[compIndex] = { ...newComparables[compIndex], [adjField]: Math.round(difference * 100) / 100 };
