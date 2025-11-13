@@ -1,4 +1,4 @@
-import { DefaultRates } from '../types/adjustments.types';
+import { DefaultRates, PropertyType } from '../types/adjustments.types';
 
 // Default adjustment rates for different property types
 export const DEFAULT_RATES_BY_PROPERTY_TYPE: Record<string, DefaultRates> = {
@@ -138,7 +138,15 @@ export const DEFAULT_RATES_BY_PROPERTY_TYPE: Record<string, DefaultRates> = {
 };
 
 // Adjustment categories configuration
-export const ADJUSTMENT_CATEGORIES = [
+export const ADJUSTMENT_CATEGORIES: Array<{
+  id: string;
+  labelKey: string;
+  directComparisonField: string;
+  requiresRate: boolean;
+  requiresDepreciation: boolean;
+  unit: string;
+  applicablePropertyTypes: PropertyType[];
+}> = [
   {
     id: 'timing',
     labelKey: 'timing',
@@ -146,7 +154,7 @@ export const ADJUSTMENT_CATEGORIES = [
     requiresRate: true,
     requiresDepreciation: false,
     unit: 'percentage',
-    applicablePropertyTypes: ['single_family', 'duplex', 'triplex', 'quadruplex', 'condo', 'commercial', 'land']
+    applicablePropertyTypes: ['single_family', 'duplex', 'triplex', 'quadruplex_plus', 'condo', 'commercial', 'land']
   },
   {
     id: 'livingArea',
@@ -155,7 +163,7 @@ export const ADJUSTMENT_CATEGORIES = [
     requiresRate: true,
     requiresDepreciation: false,
     unit: 'per_sqft',
-    applicablePropertyTypes: ['single_family', 'duplex', 'triplex', 'quadruplex', 'condo', 'commercial']
+    applicablePropertyTypes: ['single_family', 'duplex', 'triplex', 'quadruplex_plus', 'condo', 'commercial']
   },
   {
     id: 'lotSize',
@@ -164,7 +172,7 @@ export const ADJUSTMENT_CATEGORIES = [
     requiresRate: true,
     requiresDepreciation: true,
     unit: 'per_sqft',
-    applicablePropertyTypes: ['single_family', 'duplex', 'triplex', 'quadruplex', 'commercial', 'land']
+    applicablePropertyTypes: ['single_family', 'duplex', 'triplex', 'quadruplex_plus', 'commercial', 'land']
   },
   {
     id: 'quality',
@@ -173,7 +181,7 @@ export const ADJUSTMENT_CATEGORIES = [
     requiresRate: true,
     requiresDepreciation: false,
     unit: 'percentage',
-    applicablePropertyTypes: ['single_family', 'duplex', 'triplex', 'quadruplex', 'condo', 'commercial']
+    applicablePropertyTypes: ['single_family', 'duplex', 'triplex', 'quadruplex_plus', 'condo', 'commercial']
   },
   {
     id: 'effectiveAge',
@@ -182,7 +190,7 @@ export const ADJUSTMENT_CATEGORIES = [
     requiresRate: true,
     requiresDepreciation: false,
     unit: 'per_year',
-    applicablePropertyTypes: ['single_family', 'duplex', 'triplex', 'quadruplex', 'condo', 'commercial']
+    applicablePropertyTypes: ['single_family', 'duplex', 'triplex', 'quadruplex_plus', 'condo', 'commercial']
   },
   {
     id: 'basement',
@@ -191,7 +199,7 @@ export const ADJUSTMENT_CATEGORIES = [
     requiresRate: true,
     requiresDepreciation: true,
     unit: 'per_sqft',
-    applicablePropertyTypes: ['single_family', 'duplex', 'triplex', 'quadruplex']
+    applicablePropertyTypes: ['single_family', 'duplex', 'triplex', 'quadruplex_plus']
   },
   {
     id: 'bathrooms',
@@ -200,7 +208,7 @@ export const ADJUSTMENT_CATEGORIES = [
     requiresRate: true,
     requiresDepreciation: true,
     unit: 'fixed',
-    applicablePropertyTypes: ['single_family', 'duplex', 'triplex', 'quadruplex', 'condo']
+    applicablePropertyTypes: ['single_family', 'duplex', 'triplex', 'quadruplex_plus', 'condo']
   },
   {
     id: 'garage',
@@ -209,7 +217,7 @@ export const ADJUSTMENT_CATEGORIES = [
     requiresRate: true,
     requiresDepreciation: false,
     unit: 'fixed',
-    applicablePropertyTypes: ['single_family', 'duplex', 'triplex', 'quadruplex', 'condo']
+    applicablePropertyTypes: ['single_family', 'duplex', 'triplex', 'quadruplex_plus', 'condo']
   },
   {
     id: 'floor',
@@ -218,7 +226,7 @@ export const ADJUSTMENT_CATEGORIES = [
     requiresRate: true,
     requiresDepreciation: false,
     unit: 'fixed',
-    applicablePropertyTypes: ['condo']
+    applicablePropertyTypes: ['condo', 'apartment']
   },
   {
     id: 'landscaping',
@@ -227,7 +235,7 @@ export const ADJUSTMENT_CATEGORIES = [
     requiresRate: true,
     requiresDepreciation: true,
     unit: 'fixed',
-    applicablePropertyTypes: ['single_family', 'duplex', 'triplex', 'quadruplex', 'land']
+    applicablePropertyTypes: ['single_family', 'duplex', 'triplex', 'quadruplex_plus', 'land']
   },
   {
     id: 'extras',
@@ -236,7 +244,7 @@ export const ADJUSTMENT_CATEGORIES = [
     requiresRate: true,
     requiresDepreciation: true,
     unit: 'fixed',
-    applicablePropertyTypes: ['single_family', 'duplex', 'triplex', 'quadruplex', 'condo', 'commercial']
+    applicablePropertyTypes: ['single_family', 'duplex', 'triplex', 'quadruplex_plus', 'condo', 'commercial']
   },
   {
     id: 'unitLocation',
@@ -245,6 +253,6 @@ export const ADJUSTMENT_CATEGORIES = [
     requiresRate: true,
     requiresDepreciation: false,
     unit: 'fixed',
-    applicablePropertyTypes: ['condo']
+    applicablePropertyTypes: ['condo', 'apartment']
   }
-] as const;
+];
