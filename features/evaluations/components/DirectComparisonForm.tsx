@@ -186,23 +186,23 @@ export default function DirectComparisonForm({
   }, []);
 
   // Fix incorrect adjustment values on initial data load
-  // This runs once when initialData changes (e.g., when loading from database)
+  // This runs once when data prop changes (e.g., when loading from database)
   const hasFixedDataRef = useRef(false);
   useEffect(() => {
     // Only run once when data is first loaded
-    if (hasFixedDataRef.current || !initialData?.comparables?.length) return;
+    if (hasFixedDataRef.current || !data?.comparables?.length) return;
 
     const measurementFields = ['livingArea', 'lotSize'];
     const otherNumericFields = ['roomsTotal', 'roomsBedrooms', 'age', 'condition', 'daysOnMarket'];
     const fieldsToRecalculate = [...measurementFields, ...otherNumericFields];
 
     let hasChanges = false;
-    const fixedComparables = initialData.comparables.map((comp: ComparableProperty) => {
+    const fixedComparables = data.comparables.map((comp: ComparableProperty) => {
       let compHasChanges = false;
       const updatedComp = { ...comp };
 
       fieldsToRecalculate.forEach((field) => {
-        const subjectValue = parseNumericValue(initialData.subject[field as keyof ComparableProperty]);
+        const subjectValue = parseNumericValue(data.subject[field as keyof ComparableProperty]);
         const comparableValue = parseNumericValue(comp[field as keyof ComparableProperty]);
 
         // Only recalculate if we have valid data
@@ -234,7 +234,7 @@ export default function DirectComparisonForm({
       setComparables(fixedComparables);
       hasFixedDataRef.current = true;
     }
-  }, [initialData, parseNumericValue]);
+  }, [data, parseNumericValue]);
 
   useEffect(() => {
     // Skip onChange on initial mount
