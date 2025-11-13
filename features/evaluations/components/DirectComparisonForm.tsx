@@ -158,6 +158,77 @@ export default function DirectComparisonForm({
   const isInitialMountRef = useRef(true);
   const loadedPropertyIdRef = useRef<string | null>(null);
 
+  // Helper function to parse numeric value from formatted measurement strings
+  const parseNumericValue = useCallback((value: string | number | undefined): number => {
+    if (!value) return 0;
+    const strValue = String(value).trim();
+
+    // For formatted measurements like "200 m² / 2,152 pi²", always extract the m² value
+    if (strValue.includes('m²')) {
+      const match = strValue.match(/([\d.]+)\s*m²/);
+      if (match) {
+        const parsed = parseFloat(match[1]);
+        return isNaN(parsed) ? 0 : parsed;
+      }
+    } else if (strValue.includes('pi²') || strValue.includes('ft²')) {
+      const match = strValue.match(/([\d,]+(?:\.\d+)?)\s*(?:pi²|ft²)/);
+      if (match) {
+        const numStr = match[1].replace(/,/g, '');
+        const pi2 = parseFloat(numStr);
+        if (!isNaN(pi2)) {
+          return Math.round(pi2 / 10.764 * 100) / 100;
+        }
+      }
+    }
+
+    const parsed = parseFloat(String(value).replace(/,/g, ''));
+    return isNaN(parsed) ? 0 : parsed;
+  }, []);
+
+  // Recalculate all adjustment differences when comparables or subject data changes
+  // This fixes any incorrect monetary values that may have been synced from Adjustments Calculator
+  useEffect(() => {
+    if (comparables.length === 0 || !subject) return;
+
+    const measurementFields = ['livingArea', 'lotSize'];
+    const otherNumericFields = ['roomsTotal', 'roomsBedrooms', 'age', 'condition', 'daysOnMarket'];
+    const fieldsToRecalculate = [...measurementFields, ...otherNumericFields];
+
+    let hasChanges = false;
+    const updatedComparables = comparables.map((comp) => {
+      const updatedComp = { ...comp };
+
+      fieldsToRecalculate.forEach((field) => {
+        const subjectValue = parseNumericValue(subject[field as keyof ComparableProperty]);
+        const comparableValue = parseNumericValue(comp[field as keyof ComparableProperty]);
+
+        // Only recalculate if we have valid data
+        if (subjectValue !== 0 || comparableValue !== 0) {
+          const difference = comparableValue - subjectValue;
+          const adjField = `adjustment${field.charAt(0).toUpperCase() + field.slice(1)}` as keyof ComparableProperty;
+          const currentAdjustment = comp[adjField] as number;
+
+          // Check if the current adjustment is way off (indicating it's a monetary value, not a difference)
+          // Or if it's missing entirely
+          const expectedDiff = Math.round(difference * 100) / 100;
+          if (currentAdjustment === undefined ||
+              currentAdjustment === null ||
+              Math.abs(currentAdjustment - expectedDiff) > 1000) {
+            updatedComp[adjField] = expectedDiff as any;
+            hasChanges = true;
+          }
+        }
+      });
+
+      return hasChanges ? calculateComparableTotals(updatedComp) : updatedComp;
+    });
+
+    if (hasChanges) {
+      console.log('🔧 Recalculated adjustment differences to fix incorrect values');
+      setComparables(updatedComparables);
+    }
+  }, [comparables, subject, parseNumericValue]);
+
   useEffect(() => {
     // Skip onChange on initial mount
     if (isInitialMountRef.current) {
