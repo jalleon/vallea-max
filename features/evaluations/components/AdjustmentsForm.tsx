@@ -149,6 +149,157 @@ export default function AdjustmentsForm({
     }
   }, [directComparisonData]);
 
+  // Sync data from Direct Comparison when it changes (but preserve adjustment calculations)
+  useEffect(() => {
+    if (directComparisonData?.comparables?.length > 0 && adjustmentsData.comparables?.length > 0) {
+      const subject = directComparisonData.subject;
+      const comparables = directComparisonData.comparables;
+
+      const updatedComparables = adjustmentsData.comparables.map((comp, index) => {
+        const directComp = comparables[index];
+        if (!directComp) return comp;
+
+        const updatedAdjustments: any = { ...comp.adjustments };
+        let total = 0;
+
+        // Update timing
+        if (updatedAdjustments.timing) {
+          updatedAdjustments.timing = {
+            ...updatedAdjustments.timing,
+            subjectValue: effectiveDate || null,
+            subjectLabel: effectiveDate || 'N/A (Effective Date)',
+            comparableValue: directComp.saleDate || null,
+            comparableLabel: directComp.saleDate || 'N/A'
+          };
+        }
+
+        // Update livingArea
+        if (updatedAdjustments.livingArea) {
+          updatedAdjustments.livingArea = {
+            ...updatedAdjustments.livingArea,
+            subjectValue: subject?.livingArea || null,
+            subjectLabel: formatAreaMeasurement(subject?.livingArea),
+            comparableValue: directComp.livingArea || null,
+            comparableLabel: formatAreaMeasurement(directComp.livingArea)
+          };
+        }
+
+        // Update lotSize
+        if (updatedAdjustments.lotSize) {
+          updatedAdjustments.lotSize = {
+            ...updatedAdjustments.lotSize,
+            subjectValue: subject?.lotSize || null,
+            subjectLabel: formatAreaMeasurement(subject?.lotSize),
+            comparableValue: directComp.lotSize || null,
+            comparableLabel: formatAreaMeasurement(directComp.lotSize)
+          };
+        }
+
+        // Update quality
+        if (updatedAdjustments.quality) {
+          updatedAdjustments.quality = {
+            ...updatedAdjustments.quality,
+            subjectValue: subject?.quality || null,
+            subjectLabel: subject?.quality || 'N/A',
+            comparableValue: directComp.quality || null,
+            comparableLabel: directComp.quality || 'N/A'
+          };
+        }
+
+        // Update effectiveAge
+        if (updatedAdjustments.effectiveAge) {
+          updatedAdjustments.effectiveAge = {
+            ...updatedAdjustments.effectiveAge,
+            subjectValue: subject?.age || null,
+            subjectLabel: subject?.age ? `${subject.age} years` : 'N/A',
+            comparableValue: directComp.age || null,
+            comparableLabel: directComp.age ? `${directComp.age} years` : 'N/A'
+          };
+        }
+
+        // Update basement
+        if (updatedAdjustments.basement) {
+          updatedAdjustments.basement = {
+            ...updatedAdjustments.basement,
+            subjectValue: subject?.basement || null,
+            subjectLabel: subject?.basement || 'N/A',
+            comparableValue: directComp.basement || null,
+            comparableLabel: directComp.basement || 'N/A'
+          };
+        }
+
+        // Update bathrooms
+        if (updatedAdjustments.bathrooms) {
+          updatedAdjustments.bathrooms = {
+            ...updatedAdjustments.bathrooms,
+            subjectValue: subject?.roomsBathrooms || null,
+            subjectLabel: subject?.roomsBathrooms || 'N/A',
+            comparableValue: directComp.roomsBathrooms || null,
+            comparableLabel: directComp.roomsBathrooms || 'N/A'
+          };
+        }
+
+        // Update garage
+        if (updatedAdjustments.garage) {
+          updatedAdjustments.garage = {
+            ...updatedAdjustments.garage,
+            subjectValue: subject?.parking || null,
+            subjectLabel: subject?.parking || 'N/A',
+            comparableValue: directComp.parking || null,
+            comparableLabel: directComp.parking || 'N/A'
+          };
+        }
+
+        // Update extras
+        if (updatedAdjustments.extras) {
+          updatedAdjustments.extras = {
+            ...updatedAdjustments.extras,
+            subjectValue: subject?.extras || null,
+            subjectLabel: subject?.extras || 'N/A',
+            comparableValue: directComp.extras || null,
+            comparableLabel: directComp.extras || 'N/A'
+          };
+        }
+
+        // Update unitLocation (for condos)
+        if (updatedAdjustments.unitLocation) {
+          updatedAdjustments.unitLocation = {
+            ...updatedAdjustments.unitLocation,
+            subjectValue: subject?.unitLocation || null,
+            subjectLabel: subject?.unitLocation || 'N/A',
+            comparableValue: directComp.unitLocation || null,
+            comparableLabel: directComp.unitLocation || 'N/A'
+          };
+        }
+
+        // Recalculate all adjustments with the updated data
+        ADJUSTMENT_CATEGORIES.forEach(category => {
+          if (category.applicablePropertyTypes.includes(propertyType) && updatedAdjustments[category.id]) {
+            const amount = calculateAdjustment(category.id, index);
+            updatedAdjustments[category.id] = {
+              ...updatedAdjustments[category.id],
+              calculatedAmount: amount
+            };
+            total += amount;
+          }
+        });
+
+        const salePrice = parseFloat(directComp.salePrice || '0');
+        return {
+          ...comp,
+          adjustments: updatedAdjustments,
+          totalAdjustment: total,
+          adjustedValue: salePrice + total
+        };
+      });
+
+      setAdjustmentsData(prev => ({
+        ...prev,
+        comparables: updatedComparables
+      }));
+    }
+  }, [directComparisonData, effectiveDate]);
+
   // Update area labels when measurement system changes
   useEffect(() => {
     if (adjustmentsData.comparables && adjustmentsData.comparables.length > 0) {
