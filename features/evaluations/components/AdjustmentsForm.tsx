@@ -35,7 +35,6 @@ import {
   Save,
   Refresh,
   Sync,
-  Calculate,
   Info,
   Close
 } from '@mui/icons-material';
@@ -603,52 +602,6 @@ export default function AdjustmentsForm({
     return Math.round(adjustment);
   };
 
-  // Calculate all adjustments for all comparables
-  const calculateAllAdjustments = () => {
-    const updatedComparables = adjustmentsData.comparables.map((comp, index) => {
-      const newAdjustments: any = { ...comp.adjustments };
-      let total = 0;
-
-      ADJUSTMENT_CATEGORIES.forEach(category => {
-        if (category.applicablePropertyTypes.includes(propertyType)) {
-          const amount = calculateAdjustment(category.id, index);
-          // Preserve existing adjustment data, only update the calculated amount
-          if (newAdjustments[category.id]) {
-            newAdjustments[category.id] = {
-              ...newAdjustments[category.id],
-              calculatedAmount: amount
-            };
-          }
-          total += amount;
-        }
-      });
-
-      const comparable = directComparisonData.comparables[index];
-      const salePrice = parseFloat(comparable?.salePrice || '0');
-
-      return {
-        ...comp,
-        adjustments: newAdjustments,
-        totalAdjustment: total,
-        adjustedValue: salePrice + total
-      };
-    });
-
-    setAdjustmentsData(prev => ({
-      ...prev,
-      comparables: updatedComparables,
-      lastSyncedAt: new Date().toISOString()
-    }));
-
-    onChange({
-      ...adjustmentsData,
-      comparables: updatedComparables,
-      lastSyncedAt: new Date().toISOString()
-    });
-
-    setHasUnsavedChanges(false);
-  };
-
   const toggleCategory = (categoryId: string) => {
     setExpandedCategories(prev => {
       const newSet = new Set(prev);
@@ -709,22 +662,15 @@ export default function AdjustmentsForm({
           )}
           <Button
             startIcon={<Refresh />}
-            onClick={resetToDefaults}
+            onClick={() => {
+              initializeFromDirectComparison();
+            }}
             variant="outlined"
             size="small"
             sx={{ textTransform: 'none' }}
+            color="info"
           >
-            {tCommon('reset')}
-          </Button>
-          <Button
-            startIcon={<Calculate />}
-            onClick={calculateAllAdjustments}
-            variant="contained"
-            size="small"
-            sx={{ textTransform: 'none' }}
-            color="primary"
-          >
-            {t('calculate')}
+            {t('reloadFromDirectComparison')}
           </Button>
           {onSyncToDirectComparison && (
             <Button

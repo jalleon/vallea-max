@@ -1773,7 +1773,7 @@
   "adjustments": {
     "title": "Adjustments Calculator",
     "subtitle": "Detailed adjustment calculations for the direct comparison approach",
-    "calculate": "Calculate",
+    "reloadFromDirectComparison": "Reload from Direct Comparison",
     "syncToTable": "Sync to Table",
     "defaultRates": "Default Rates",
     "marketAppreciationRate": "Market Appreciation Rate",

@@ -1755,7 +1755,7 @@
       "adjustments": {
         "title": "Calculateur d'ajustements",
         "subtitle": "Calcul détaillé des ajustements pour la méthode de comparaison directe",
-        "calculate": "Calculer",
+        "reloadFromDirectComparison": "Recharger depuis Comparaison Directe",
         "syncToTable": "Synchroniser au tableau",
         "unsavedChanges": "Vous avez des modifications non enregistrées aux taux d'ajustement",
 
