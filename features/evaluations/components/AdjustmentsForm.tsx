@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Box,
   Button,
@@ -71,6 +71,9 @@ export default function AdjustmentsForm({
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [selectedPropertyType, setSelectedPropertyType] = useState<PropertyType>(propertyType);
+
+  // Ref to track previous directComparisonData to detect actual changes
+  const prevDirectComparisonDataRef = useRef<string>('');
 
   // Helper function to format area measurements based on selected measurement system
   const formatAreaMeasurement = (value: string | number | null | undefined): string => {
@@ -152,6 +155,20 @@ export default function AdjustmentsForm({
   // Sync data from Direct Comparison when it changes (but preserve adjustment calculations)
   useEffect(() => {
     if (directComparisonData?.comparables?.length > 0 && adjustmentsData.comparables?.length > 0) {
+      // Check if data actually changed by comparing stringified version
+      const currentData = JSON.stringify({
+        subject: directComparisonData.subject,
+        comparables: directComparisonData.comparables
+      });
+
+      if (currentData === prevDirectComparisonDataRef.current) {
+        // Data hasn't changed, skip update
+        return;
+      }
+
+      console.log('[AdjustmentsForm] Data changed, syncing from Direct Comparison...');
+      prevDirectComparisonDataRef.current = currentData;
+
       const subject = directComparisonData.subject;
       const comparables = directComparisonData.comparables;
 
