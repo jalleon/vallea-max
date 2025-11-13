@@ -411,6 +411,11 @@ export const emailService = {
       text-align: center;
       color: white;
     }
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 700;
+    }
     .content {
       padding: 40px 30px;
       text-align: center;
