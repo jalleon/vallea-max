@@ -186,25 +186,17 @@ export default function DirectComparisonForm({
   }, []);
 
   // Fix incorrect adjustment values on data load from database
-  // This runs when the property ID changes (indicating new data loaded)
-  const lastFixedPropertyIdRef = useRef<string | null>(null);
+  // This runs whenever the data or reloadTrigger changes
   useEffect(() => {
     console.log('🔍 Auto-fix useEffect triggered', {
       hasComparables: !!data?.comparables?.length,
       hasSubject: !!data?.subject,
       subjectPropertyId,
-      lastFixedPropertyId: lastFixedPropertyIdRef.current
+      reloadTrigger
     });
 
     if (!data?.comparables?.length || !data?.subject) {
       console.log('⏸️  Skipping auto-fix: no data');
-      return;
-    }
-
-    // Only run if this is a different property or first load
-    const currentPropertyId = subjectPropertyId || 'new';
-    if (lastFixedPropertyIdRef.current === currentPropertyId) {
-      console.log('⏸️  Skipping auto-fix: already fixed for this property');
       return;
     }
 
@@ -254,12 +246,10 @@ export default function DirectComparisonForm({
     if (hasChanges) {
       console.log('✅ Fixed incorrect adjustment values loaded from database');
       setComparables(fixedComparables);
-      lastFixedPropertyIdRef.current = currentPropertyId;
     } else {
       console.log('✅ No invalid values found, all adjustment fields are correct');
-      lastFixedPropertyIdRef.current = currentPropertyId;
     }
-  }, [data, subjectPropertyId, parseNumericValue]);
+  }, [data, subjectPropertyId, parseNumericValue, reloadTrigger]);
 
   useEffect(() => {
     // Skip onChange on initial mount
@@ -309,12 +299,11 @@ export default function DirectComparisonForm({
     }
   }, [subject, comparables]);
 
-  // Clear loaded property ref and reset fix flag when reload trigger changes
+  // Clear loaded property ref when reload trigger changes
   useEffect(() => {
     if (reloadTrigger > 0) {
-      console.log('🔄 Reload trigger changed - clearing loadedPropertyIdRef and lastFixedPropertyIdRef');
+      console.log('🔄 Reload trigger changed - clearing loadedPropertyIdRef');
       loadedPropertyIdRef.current = null;
-      lastFixedPropertyIdRef.current = null; // Allow fixing data again on next load
     }
   }, [reloadTrigger]);
 
