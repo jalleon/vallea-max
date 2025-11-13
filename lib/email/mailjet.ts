@@ -411,10 +411,10 @@ export const emailService = {
       text-align: center;
       color: white;
     }
-    .logo {
-      max-width: 150px;
-      height: auto;
-      margin-bottom: 20px;
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 700;
     }
     .content {
       padding: 40px 30px;
@@ -432,7 +432,6 @@ export const emailService = {
 <body>
   <div class="container">
     <div class="header">
-      <img src="${process.env.NEXT_PUBLIC_SITE_URL}/logo.png" alt="Valea Max" class="logo">
       <h1>${isEnglish ? 'You\'re In!' : 'Vous êtes inscrit !'}</h1>
     </div>
 
@@ -668,11 +667,6 @@ export const emailService = {
       font-size: 28px;
       font-weight: 700;
     }
-    .logo {
-      max-width: 150px;
-      height: auto;
-      margin-bottom: 20px;
-    }
     .content {
       padding: 40px 30px;
     }
@@ -709,7 +703,6 @@ export const emailService = {
 <body>
   <div class="container">
     <div class="header">
-      <img src="${process.env.NEXT_PUBLIC_SITE_URL}/logo.png" alt="Valea Max" class="logo">
       <h1>${isEnglish ? 'Demo Request Received' : 'Demande de démo reçue'}</h1>
     </div>
 
