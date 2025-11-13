@@ -185,21 +185,24 @@ export default function DirectComparisonForm({
     return isNaN(parsed) ? 0 : parsed;
   }, []);
 
-  // Recalculate all adjustment differences when comparables or subject data changes
-  // This fixes any incorrect monetary values that may have been synced from Adjustments Calculator
+  // Fix incorrect adjustment values on initial data load
+  // This runs once when initialData changes (e.g., when loading from database)
+  const hasFixedDataRef = useRef(false);
   useEffect(() => {
-    if (comparables.length === 0 || !subject) return;
+    // Only run once when data is first loaded
+    if (hasFixedDataRef.current || !initialData?.comparables?.length) return;
 
     const measurementFields = ['livingArea', 'lotSize'];
     const otherNumericFields = ['roomsTotal', 'roomsBedrooms', 'age', 'condition', 'daysOnMarket'];
     const fieldsToRecalculate = [...measurementFields, ...otherNumericFields];
 
     let hasChanges = false;
-    const updatedComparables = comparables.map((comp) => {
+    const fixedComparables = initialData.comparables.map((comp: ComparableProperty) => {
+      let compHasChanges = false;
       const updatedComp = { ...comp };
 
       fieldsToRecalculate.forEach((field) => {
-        const subjectValue = parseNumericValue(subject[field as keyof ComparableProperty]);
+        const subjectValue = parseNumericValue(initialData.subject[field as keyof ComparableProperty]);
         const comparableValue = parseNumericValue(comp[field as keyof ComparableProperty]);
 
         // Only recalculate if we have valid data
@@ -209,25 +212,29 @@ export default function DirectComparisonForm({
           const currentAdjustment = comp[adjField] as number;
 
           // Check if the current adjustment is way off (indicating it's a monetary value, not a difference)
-          // Or if it's missing entirely
           const expectedDiff = Math.round(difference * 100) / 100;
-          if (currentAdjustment === undefined ||
-              currentAdjustment === null ||
-              Math.abs(currentAdjustment - expectedDiff) > 1000) {
+          const isInvalid = currentAdjustment === undefined ||
+                           currentAdjustment === null ||
+                           Math.abs(currentAdjustment) > 1000; // Any adjustment > 1000 is likely a monetary value
+
+          if (isInvalid) {
+            console.log(`🔧 Fixing ${field} adjustment: ${currentAdjustment} -> ${expectedDiff}`);
             updatedComp[adjField] = expectedDiff as any;
+            compHasChanges = true;
             hasChanges = true;
           }
         }
       });
 
-      return hasChanges ? calculateComparableTotals(updatedComp) : updatedComp;
+      return compHasChanges ? calculateComparableTotals(updatedComp) : updatedComp;
     });
 
     if (hasChanges) {
-      console.log('🔧 Recalculated adjustment differences to fix incorrect values');
-      setComparables(updatedComparables);
+      console.log('🔧 Fixed incorrect adjustment values on load');
+      setComparables(fixedComparables);
+      hasFixedDataRef.current = true;
     }
-  }, [comparables, subject, parseNumericValue]);
+  }, [initialData, parseNumericValue]);
 
   useEffect(() => {
     // Skip onChange on initial mount
@@ -277,11 +284,12 @@ export default function DirectComparisonForm({
     }
   }, [subject, comparables]);
 
-  // Clear loaded property ref when reload trigger changes
+  // Clear loaded property ref and reset fix flag when reload trigger changes
   useEffect(() => {
     if (reloadTrigger > 0) {
-      console.log('🔄 Reload trigger changed - clearing loadedPropertyIdRef to force reload');
+      console.log('🔄 Reload trigger changed - clearing loadedPropertyIdRef and resetting fix flag');
       loadedPropertyIdRef.current = null;
+      hasFixedDataRef.current = false; // Allow fixing data again on next load
     }
   }, [reloadTrigger]);
 
