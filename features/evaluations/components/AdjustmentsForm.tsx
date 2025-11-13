@@ -26,7 +26,8 @@ import {
   MenuItem,
   InputAdornment,
   Tooltip,
-  Alert
+  Alert,
+  CircularProgress
 } from '@mui/material';
 import {
   ExpandMore,
@@ -50,6 +51,7 @@ interface AdjustmentsFormProps {
   effectiveDate?: string | null;
   onSyncToDirectComparison?: () => void;
   onClose?: () => void;
+  measurementSystem?: 'imperial' | 'metric'; // From Direct Comparison
 }
 
 export default function AdjustmentsForm({
@@ -59,7 +61,8 @@ export default function AdjustmentsForm({
   propertyType,
   effectiveDate,
   onSyncToDirectComparison,
-  onClose
+  onClose,
+  measurementSystem = 'imperial' // Default to imperial
 }: AdjustmentsFormProps) {
   const t = useTranslations('evaluations.sections.adjustments');
   const tCommon = useTranslations('common');
@@ -69,13 +72,56 @@ export default function AdjustmentsForm({
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [selectedPropertyType, setSelectedPropertyType] = useState<PropertyType>(propertyType);
 
-  // Initialize ratesByType if not present
+  // Helper function to format area measurements based on selected measurement system
+  const formatAreaMeasurement = (value: string | number | null | undefined): string => {
+    if (!value) return 'N/A';
+
+    const strValue = String(value);
+
+    // Check if value contains both units (e.g., "558.65 m² / 6,013 ft²" or "6,013 pi² / 558.65 m²")
+    if (strValue.includes('/')) {
+      const parts = strValue.split('/');
+
+      // Determine which part is metric and which is imperial by checking the unit symbols
+      const firstPart = parts[0].trim();
+      const secondPart = parts[1].trim();
+
+      const firstIsMetric = firstPart.includes('m²');
+      const firstIsImperial = firstPart.includes('pi²') || firstPart.includes('ft²');
+
+      if (measurementSystem === 'imperial') {
+        // Return the imperial part (pi² or ft²)
+        if (firstIsImperial) {
+          return firstPart;
+        } else {
+          return secondPart;
+        }
+      } else {
+        // Return the metric part (m²)
+        if (firstIsMetric) {
+          return firstPart;
+        } else {
+          return secondPart;
+        }
+      }
+    }
+
+    // If no slash, return as-is (already in single format)
+    return strValue;
+  };
+
+  // Initialize defaultRates and ratesByType if not present
   useEffect(() => {
-    if (!adjustmentsData.ratesByType) {
+    const needsInit = !adjustmentsData.defaultRates || !adjustmentsData.ratesByType;
+
+    if (needsInit) {
+      const defaultRates = adjustmentsData.defaultRates || DEFAULT_RATES_BY_PROPERTY_TYPE[propertyType] || DEFAULT_RATES_BY_PROPERTY_TYPE.single_family;
+
       setAdjustmentsData(prev => ({
         ...prev,
+        defaultRates,
         ratesByType: {
-          [propertyType]: prev.defaultRates
+          [propertyType]: defaultRates
         }
       }));
     }
@@ -94,6 +140,45 @@ export default function AdjustmentsForm({
       }
     }
   }, [directComparisonData]);
+
+  // Update area labels when measurement system changes
+  useEffect(() => {
+    if (adjustmentsData.comparables && adjustmentsData.comparables.length > 0) {
+      const subject = directComparisonData.subject;
+
+      const updatedComparables = adjustmentsData.comparables.map(comp => {
+        const updatedAdjustments: any = { ...comp.adjustments };
+
+        // Update livingArea labels
+        if (updatedAdjustments.livingArea) {
+          updatedAdjustments.livingArea = {
+            ...updatedAdjustments.livingArea,
+            subjectLabel: formatAreaMeasurement(subject?.livingArea),
+            comparableLabel: formatAreaMeasurement(updatedAdjustments.livingArea.comparableValue)
+          };
+        }
+
+        // Update lotSize labels
+        if (updatedAdjustments.lotSize) {
+          updatedAdjustments.lotSize = {
+            ...updatedAdjustments.lotSize,
+            subjectLabel: formatAreaMeasurement(subject?.lotSize),
+            comparableLabel: formatAreaMeasurement(updatedAdjustments.lotSize.comparableValue)
+          };
+        }
+
+        return {
+          ...comp,
+          adjustments: updatedAdjustments
+        };
+      });
+
+      setAdjustmentsData(prev => ({
+        ...prev,
+        comparables: updatedComparables
+      }));
+    }
+  }, [measurementSystem]);
 
   // Recalculate adjustments when default rates change
   useEffect(() => {
@@ -176,9 +261,9 @@ export default function AdjustmentsForm({
         category: 'livingArea',
         enabled: true,
         subjectValue: subject?.livingArea || null,
-        subjectLabel: subject?.livingArea || 'N/A',
+        subjectLabel: formatAreaMeasurement(subject?.livingArea),
         comparableValue: comp.livingArea || null,
-        comparableLabel: comp.livingArea || 'N/A',
+        comparableLabel: formatAreaMeasurement(comp.livingArea),
         difference: areaDiff,
         adjustmentRate: defaultRates.livingAreaRate,
         calculatedAmount: livingAreaAmount
@@ -189,9 +274,9 @@ export default function AdjustmentsForm({
         category: 'lotSize',
         enabled: true,
         subjectValue: subject?.lotSize || null,
-        subjectLabel: subject?.lotSize || 'N/A',
+        subjectLabel: formatAreaMeasurement(subject?.lotSize),
         comparableValue: comp.lotSize || null,
-        comparableLabel: comp.lotSize || 'N/A',
+        comparableLabel: formatAreaMeasurement(comp.lotSize),
         difference: 0,
         adjustmentRate: defaultRates.landRate,
         depreciationRate: defaultRates.landDepreciationRate,
@@ -579,6 +664,15 @@ export default function AdjustmentsForm({
   const applicableCategories = ADJUSTMENT_CATEGORIES.filter(cat =>
     cat.applicablePropertyTypes.includes(propertyType)
   );
+
+  // Show loading state while initializing
+  if (!adjustmentsData.defaultRates) {
+    return (
+      <Box sx={{ p: 3, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ p: 3 }}>
@@ -1037,7 +1131,9 @@ export default function AdjustmentsForm({
                             SUBJECT
                           </Typography>
                           <Typography variant="body2">
-                            {adjustment?.subjectLabel || adjustment?.subjectValue || '-'}
+                            {(category.id === 'livingArea' || category.id === 'lotSize')
+                              ? formatAreaMeasurement(adjustment?.subjectValue)
+                              : (adjustment?.subjectLabel || adjustment?.subjectValue || '-')}
                           </Typography>
                         </Paper>
                       </Grid>
@@ -1047,7 +1143,9 @@ export default function AdjustmentsForm({
                             COMPARABLE
                           </Typography>
                           <Typography variant="body2">
-                            {adjustment?.comparableLabel || adjustment?.comparableValue || '-'}
+                            {(category.id === 'livingArea' || category.id === 'lotSize')
+                              ? formatAreaMeasurement(adjustment?.comparableValue)
+                              : (adjustment?.comparableLabel || adjustment?.comparableValue || '-')}
                           </Typography>
                         </Paper>
                       </Grid>

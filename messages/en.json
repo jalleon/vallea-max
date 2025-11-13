@@ -1511,6 +1511,8 @@
         "removeComparable": "Remove Comparable",
         "selectFromLibrary": "Select from Library",
         "maxComparables": "Maximum 8 comparables",
+        "imperial": "Imperial",
+        "metric": "Metric",
 
         "elementsComparison": "Elements of Comparison",
         "address": "Address",

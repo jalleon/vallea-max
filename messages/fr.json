@@ -1633,6 +1633,8 @@
         "removeComparable": "Retirer le comparable",
         "selectFromLibrary": "Sélectionner de la bibliothèque",
         "maxComparables": "Maximum 8 comparables",
+        "imperial": "Impérial",
+        "metric": "Métrique",
 
         "elementsComparison": "Éléments de comparaison",
         "address": "Adresse",

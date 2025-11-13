@@ -641,6 +641,7 @@ export default function AppraisalEditPage() {
                     effectiveDate={appraisal.effective_date}
                     onSyncToDirectComparison={handleSyncToDirectComparison}
                     onClose={() => setCurrentToolTab(-1)}
+                    measurementSystem={sectionsDataRef.current.methode_parite?.measurementSystem || 'imperial'}
                   />
                 </Box>
               )}

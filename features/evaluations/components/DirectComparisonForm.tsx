@@ -14,9 +14,11 @@ import {
   Paper,
   TextField,
   Grid,
-  Chip
+  Chip,
+  ToggleButtonGroup,
+  ToggleButton
 } from '@mui/material';
-import { Add, Delete, Search } from '@mui/icons-material';
+import { Add, Delete, Search, SquareFoot, Straighten } from '@mui/icons-material';
 import { useTranslations } from 'next-intl';
 import { AgGridReact } from 'ag-grid-react';
 import { ColDef, ColGroupDef, CellValueChangedEvent, ICellRendererParams, ValueFormatterParams, ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
@@ -134,6 +136,11 @@ export default function DirectComparisonForm({
     optional4?: string;
   }>(data.customLabels || {});
 
+  // Measurement system (imperial by default)
+  const [measurementSystem, setMeasurementSystem] = useState<'imperial' | 'metric'>(
+    data.measurementSystem || 'imperial'
+  );
+
   // Undo/Redo state
   const [history, setHistory] = useState<Array<{ subject: ComparableProperty; comparables: ComparableProperty[] }>>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -165,7 +172,7 @@ export default function DirectComparisonForm({
 
     // Debounce onChange calls - only call after 300ms of no changes
     onChangeTimerRef.current = setTimeout(() => {
-      onChange({ subject, comparables, customLabels });
+      onChange({ subject, comparables, customLabels, measurementSystem });
     }, 300);
 
     return () => {
@@ -173,7 +180,14 @@ export default function DirectComparisonForm({
         clearTimeout(onChangeTimerRef.current);
       }
     };
-  }, [subject, comparables, customLabels]);
+  }, [subject, comparables, customLabels, measurementSystem]);
+
+  // Refresh grid cells when measurement system changes
+  useEffect(() => {
+    if (gridRef.current?.api) {
+      gridRef.current.api.refreshCells({ force: true });
+    }
+  }, [measurementSystem]);
 
   // Save to history when data changes (but not during undo/redo)
   useEffect(() => {
@@ -256,24 +270,24 @@ export default function DirectComparisonForm({
             lotSizeText = `${m2} m² / ${ft2.toLocaleString()} ft²`;
           }
 
-          // Build living area with both pi² and m² - check both aire_habitable and superficie_habitable
+          // Build living area with both m² and pi² (consistent with lotSize format)
           let livingAreaText = '';
-          if (property.aire_habitable_pi2) {
-            const pi2 = property.aire_habitable_pi2;
-            const m2 = Math.round(pi2 / 10.764);
-            livingAreaText = `${pi2.toLocaleString()} pi² / ${m2} m²`;
-          } else if (property.aire_habitable_m2) {
+          if (property.aire_habitable_m2) {
             const m2 = property.aire_habitable_m2;
             const pi2 = Math.round(m2 * 10.764);
-            livingAreaText = `${pi2.toLocaleString()} pi² / ${m2} m²`;
-          } else if (property.superficie_habitable_pi2) {
-            const pi2 = property.superficie_habitable_pi2;
+            livingAreaText = `${m2} m² / ${pi2.toLocaleString()} pi²`;
+          } else if (property.aire_habitable_pi2) {
+            const pi2 = property.aire_habitable_pi2;
             const m2 = Math.round(pi2 / 10.764);
-            livingAreaText = `${pi2.toLocaleString()} pi² / ${m2} m²`;
+            livingAreaText = `${m2} m² / ${pi2.toLocaleString()} pi²`;
           } else if (property.superficie_habitable_m2) {
             const m2 = property.superficie_habitable_m2;
             const pi2 = Math.round(m2 * 10.764);
-            livingAreaText = `${pi2.toLocaleString()} pi² / ${m2} m²`;
+            livingAreaText = `${m2} m² / ${pi2.toLocaleString()} pi²`;
+          } else if (property.superficie_habitable_pi2) {
+            const pi2 = property.superficie_habitable_pi2;
+            const m2 = Math.round(pi2 / 10.764);
+            livingAreaText = `${m2} m² / ${pi2.toLocaleString()} pi²`;
           }
 
           // Update subject with property data
@@ -349,6 +363,30 @@ export default function DirectComparisonForm({
       setTimeout(() => { isUndoingRef.current = false; }, 0);
     }
   };
+
+  // Helper function to format area measurements based on selected system
+  // Format is always: "metric m² / imperial (ft² or pi²)"
+  const formatAreaMeasurement = useCallback((value: string | number | undefined): string => {
+    if (!value) return '';
+
+    const strValue = String(value);
+
+    // Check if value contains both units (e.g., "558.65 m² / 6,013 ft²")
+    if (strValue.includes('/')) {
+      const parts = strValue.split('/');
+
+      if (measurementSystem === 'imperial') {
+        // Return only the imperial part (after the /) - ft² or pi²
+        return parts[1].trim();
+      } else {
+        // Return only the metric part (before the /) - m²
+        return parts[0].trim();
+      }
+    }
+
+    // If no slash, return as-is (already in single format)
+    return strValue;
+  }, [measurementSystem]);
 
   function createEmptySubject(): ComparableProperty {
     return {
@@ -516,24 +554,24 @@ export default function DirectComparisonForm({
         lotSizeText = `${m2} m² / ${ft2.toLocaleString()} ft²`;
       }
 
-      // Build living area with both pi² and m² - check both aire_habitable and superficie_habitable
+      // Build living area with both m² and pi² (consistent with lotSize format)
       let livingAreaText = '';
-      if (property.aire_habitable_pi2) {
-        const pi2 = property.aire_habitable_pi2;
-        const m2 = Math.round(pi2 / 10.764);
-        livingAreaText = `${pi2.toLocaleString()} pi² / ${m2} m²`;
-      } else if (property.aire_habitable_m2) {
+      if (property.aire_habitable_m2) {
         const m2 = property.aire_habitable_m2;
         const pi2 = Math.round(m2 * 10.764);
-        livingAreaText = `${pi2.toLocaleString()} pi² / ${m2} m²`;
-      } else if (property.superficie_habitable_pi2) {
-        const pi2 = property.superficie_habitable_pi2;
+        livingAreaText = `${m2} m² / ${pi2.toLocaleString()} pi²`;
+      } else if (property.aire_habitable_pi2) {
+        const pi2 = property.aire_habitable_pi2;
         const m2 = Math.round(pi2 / 10.764);
-        livingAreaText = `${pi2.toLocaleString()} pi² / ${m2} m²`;
+        livingAreaText = `${m2} m² / ${pi2.toLocaleString()} pi²`;
       } else if (property.superficie_habitable_m2) {
         const m2 = property.superficie_habitable_m2;
         const pi2 = Math.round(m2 * 10.764);
-        livingAreaText = `${pi2.toLocaleString()} pi² / ${m2} m²`;
+        livingAreaText = `${m2} m² / ${pi2.toLocaleString()} pi²`;
+      } else if (property.superficie_habitable_pi2) {
+        const pi2 = property.superficie_habitable_pi2;
+        const m2 = Math.round(pi2 / 10.764);
+        livingAreaText = `${m2} m² / ${pi2.toLocaleString()} pi²`;
       }
 
       newComparables[selectingForIndex] = {
@@ -706,6 +744,13 @@ export default function DirectComparisonForm({
               const subjectNotApplicable = ['dataSource', 'saleDate', 'salePrice', 'daysOnMarket'];
               return !calculated.includes(params.data.rowId) && !subjectNotApplicable.includes(params.data.rowId);
             },
+            valueFormatter: (params: any) => {
+              // Format area measurements based on selected measurement system
+              if (params.data.rowId === 'livingArea' || params.data.rowId === 'lotSize') {
+                return formatAreaMeasurement(params.value);
+              }
+              return params.value;
+            },
             cellStyle: (params: any) => {
               const calculated = ['distance', 'totalAdjustment', 'adjustedValue', 'grossAdjustmentPercent', 'netAdjustmentPercent', 'pricePerSqFt'];
               const isTotalAdjustment = params.data.rowId === 'totalAdjustment';
@@ -735,6 +780,11 @@ export default function DirectComparisonForm({
               // Subject property doesn't have sale data - keep empty
               if (['dataSource', 'saleDate', 'salePrice', 'daysOnMarket'].includes(params.data.rowId)) {
                 return '';
+              }
+
+              // Format area measurements based on measurement system
+              if (params.data.rowId === 'livingArea' || params.data.rowId === 'lotSize') {
+                return formatAreaMeasurement(params.value);
               }
 
               // Format bathrooms as "full:half"
@@ -773,6 +823,13 @@ export default function DirectComparisonForm({
             editable: (params: any) => {
               const calculated = ['distance', 'totalAdjustment', 'adjustedValue', 'grossAdjustmentPercent', 'netAdjustmentPercent', 'pricePerSqFt'];
               return !calculated.includes(params.data.rowId);
+            },
+            valueFormatter: (params: any) => {
+              // Format area measurements based on selected measurement system
+              if (params.data.rowId === 'livingArea' || params.data.rowId === 'lotSize') {
+                return formatAreaMeasurement(params.value);
+              }
+              return params.value;
             },
             cellStyle: (params: any) => {
               const calculated = ['distance', 'totalAdjustment', 'adjustedValue', 'grossAdjustmentPercent', 'netAdjustmentPercent', 'pricePerSqFt'];
@@ -884,6 +941,11 @@ export default function DirectComparisonForm({
                 return `$${parseFloat(price).toLocaleString()}`;
               }
 
+              // Format area measurements based on measurement system
+              if (params.data.rowId === 'livingArea' || params.data.rowId === 'lotSize') {
+                return formatAreaMeasurement(params.value);
+              }
+
               // Format bathrooms as "full:half"
               if (params.data.rowId === 'roomsBathrooms') {
                 const value = params.value || '';
@@ -957,7 +1019,7 @@ export default function DirectComparisonForm({
     });
 
     return cols;
-  }, [comparables, t]);
+  }, [comparables, t, formatAreaMeasurement]);
 
   // Handle cell value changes
   const onCellValueChanged = useCallback((event: CellValueChangedEvent) => {
@@ -1068,9 +1130,29 @@ export default function DirectComparisonForm({
       </Typography>
 
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-          {comparables.length} / 8 {t('maxComparables').toLowerCase()}
-        </Typography>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+            {comparables.length} / 8 {t('maxComparables').toLowerCase()}
+          </Typography>
+          <ToggleButtonGroup
+            value={measurementSystem}
+            exclusive
+            onChange={(e, newValue) => {
+              if (newValue) setMeasurementSystem(newValue);
+            }}
+            size="small"
+            sx={{ height: 32 }}
+          >
+            <ToggleButton value="imperial" sx={{ px: 2, textTransform: 'none', fontSize: '13px' }}>
+              <SquareFoot sx={{ fontSize: 16, mr: 0.5 }} />
+              {t('imperial')}
+            </ToggleButton>
+            <ToggleButton value="metric" sx={{ px: 2, textTransform: 'none', fontSize: '13px' }}>
+              <Straighten sx={{ fontSize: 16, mr: 0.5 }} />
+              {t('metric')}
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
         <Box sx={{ display: 'flex', gap: 1 }}>
           {comparables.length > 1 && (
             <Button
