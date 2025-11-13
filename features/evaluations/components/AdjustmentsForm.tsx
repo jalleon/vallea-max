@@ -42,6 +42,7 @@ import {
 import { useTranslations } from 'next-intl';
 import { AdjustmentsData, DefaultRates, ComparableAdjustments, AdjustmentDetail, PropertyType } from '../types/adjustments.types';
 import { DEFAULT_RATES_BY_PROPERTY_TYPE, ADJUSTMENT_CATEGORIES } from '../constants/adjustments.constants';
+import { adjustmentPresetsService } from '../_api/adjustment-presets.service';
 
 interface AdjustmentsFormProps {
   data: AdjustmentsData;
@@ -110,21 +111,29 @@ export default function AdjustmentsForm({
     return strValue;
   };
 
-  // Initialize defaultRates and ratesByType if not present
+  // Load organization presets and initialize defaultRates
   useEffect(() => {
-    const needsInit = !adjustmentsData.defaultRates || !adjustmentsData.ratesByType;
+    const loadOrganizationPresets = async () => {
+      const needsInit = !adjustmentsData.defaultRates || !adjustmentsData.ratesByType;
 
-    if (needsInit) {
-      const defaultRates = adjustmentsData.defaultRates || DEFAULT_RATES_BY_PROPERTY_TYPE[propertyType] || DEFAULT_RATES_BY_PROPERTY_TYPE.single_family;
+      if (needsInit) {
+        // Try to load organization preset for this property type
+        const orgPreset = await adjustmentPresetsService.getOrganizationPreset(propertyType);
 
-      setAdjustmentsData(prev => ({
-        ...prev,
-        defaultRates,
-        ratesByType: {
-          [propertyType]: defaultRates
-        }
-      }));
-    }
+        // Use organization preset if available, otherwise use hardcoded defaults
+        const defaultRates = orgPreset || DEFAULT_RATES_BY_PROPERTY_TYPE[propertyType] || DEFAULT_RATES_BY_PROPERTY_TYPE.single_family;
+
+        setAdjustmentsData(prev => ({
+          ...prev,
+          defaultRates,
+          ratesByType: {
+            [propertyType]: defaultRates
+          }
+        }));
+      }
+    };
+
+    loadOrganizationPresets();
   }, []);
 
   // Propagate changes to parent component
@@ -440,11 +449,14 @@ export default function AdjustmentsForm({
   };
 
   // Update rates for selected property type
-  const updateRate = (rateKey: keyof DefaultRates, value: number) => {
+  const updateRate = async (rateKey: keyof DefaultRates, value: number) => {
     const updatedRates = {
       ...adjustmentsData.defaultRates,
       [rateKey]: value
     };
+
+    // Save to organization presets
+    await adjustmentPresetsService.saveOrganizationPreset(selectedPropertyType, updatedRates);
 
     setAdjustmentsData(prev => ({
       ...prev,
