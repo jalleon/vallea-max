@@ -39,14 +39,14 @@ import {
   Close
 } from '@mui/icons-material';
 import { useTranslations } from 'next-intl';
-import { AdjustmentsData, DefaultRates, ComparableAdjustments, AdjustmentDetail } from '../types/adjustments.types';
+import { AdjustmentsData, DefaultRates, ComparableAdjustments, AdjustmentDetail, PropertyType } from '../types/adjustments.types';
 import { DEFAULT_RATES_BY_PROPERTY_TYPE, ADJUSTMENT_CATEGORIES } from '../constants/adjustments.constants';
 
 interface AdjustmentsFormProps {
   data: AdjustmentsData;
   onChange: (data: AdjustmentsData) => void;
   directComparisonData: any; // Subject + comparables from Direct Comparison
-  propertyType: string;
+  propertyType: PropertyType;
   effectiveDate?: string | null;
   onSyncToDirectComparison?: () => void;
   onClose?: () => void;
@@ -67,7 +67,7 @@ export default function AdjustmentsForm({
   const [adjustmentsData, setAdjustmentsData] = useState<AdjustmentsData>(data);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [selectedPropertyType, setSelectedPropertyType] = useState<string>(propertyType);
+  const [selectedPropertyType, setSelectedPropertyType] = useState<PropertyType>(propertyType);
 
   // Initialize ratesByType if not present
   useEffect(() => {
@@ -336,7 +336,7 @@ export default function AdjustmentsForm({
   };
 
   // Handle property type change
-  const handlePropertyTypeChange = (newPropertyType: string) => {
+  const handlePropertyTypeChange = (newPropertyType: PropertyType) => {
     // Save current rates for current property type
     const updatedRatesByType = {
       ...adjustmentsData.ratesByType,
@@ -650,7 +650,7 @@ export default function AdjustmentsForm({
                 <InputLabel>{t('viewingRatesFor')}</InputLabel>
                 <Select
                   value={selectedPropertyType}
-                  onChange={(e) => handlePropertyTypeChange(e.target.value)}
+                  onChange={(e) => handlePropertyTypeChange(e.target.value as PropertyType)}
                   label={t('viewingRatesFor')}
                 >
                   <MenuItem value="single_family">{t('propertyTypes.single_family')}</MenuItem>
