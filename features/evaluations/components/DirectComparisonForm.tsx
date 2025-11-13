@@ -1026,6 +1026,43 @@ export default function DirectComparisonForm({
     const { data, colDef, newValue } = event;
     const field = data.field;
 
+    // Helper function to format area values with appropriate units
+    const formatAreaValue = (value: string | number, fieldName: string): string => {
+      if (!value || value === '') return '';
+
+      const strValue = String(value).trim();
+
+      // Skip if already has units
+      if (strValue.includes('m²') || strValue.includes('pi²') || strValue.includes('ft²') || strValue.includes('/')) {
+        return strValue;
+      }
+
+      // Only format area fields
+      if (fieldName === 'livingArea' || fieldName === 'lotSize') {
+        // Extract just the number
+        const numValue = strValue.replace(/[^0-9.]/g, '');
+        if (!numValue) return strValue;
+
+        const num = parseFloat(numValue);
+        if (isNaN(num)) return strValue;
+
+        // Add appropriate suffix based on measurement system
+        if (measurementSystem === 'imperial') {
+          // Convert to metric and format as "m² / pi²"
+          const m2 = Math.round(num / 10.764 * 100) / 100;
+          const pi2 = Math.round(num);
+          return `${m2} m² / ${pi2.toLocaleString()} pi²`;
+        } else {
+          // Convert to imperial and format as "m² / pi²"
+          const m2 = Math.round(num * 100) / 100;
+          const pi2 = Math.round(num * 10.764);
+          return `${m2} m² / ${pi2.toLocaleString()} pi²`;
+        }
+      }
+
+      return strValue;
+    };
+
     // Update custom labels for optional fields
     if (colDef.field === 'label' && ['optional1', 'optional2', 'optional3', 'optional4'].includes(data.rowId)) {
       setCustomLabels(prev => ({
@@ -1037,7 +1074,13 @@ export default function DirectComparisonForm({
 
     // Update subject
     if (colDef.field === 'subjectData1') {
-      setSubject(prev => ({ ...prev, [field]: newValue }));
+      const formattedValue = formatAreaValue(newValue, field);
+      setSubject(prev => ({ ...prev, [field]: formattedValue }));
+
+      // Update the cell display
+      if (formattedValue !== newValue) {
+        event.node.setDataValue(colDef.field!, formattedValue);
+      }
     } else if (colDef.field === 'subjectData2') {
       const secondFieldName = field === 'address' ? 'addressLine2' : field === 'dataSource' ? 'dataSourceAlt' : '';
       if (secondFieldName) {
@@ -1057,14 +1100,20 @@ export default function DirectComparisonForm({
           const adjField = `adjustment${field.charAt(0).toUpperCase() + field.slice(1)}` as keyof ComparableProperty;
           newComparables[compIndex] = { ...newComparables[compIndex], [adjField]: parseFloat(newValue) || 0 };
         } else {
-          newComparables[compIndex] = { ...newComparables[compIndex], [field]: newValue };
+          const formattedValue = formatAreaValue(newValue, field);
+          newComparables[compIndex] = { ...newComparables[compIndex], [field]: formattedValue };
+
+          // Update the cell display
+          if (formattedValue !== newValue) {
+            event.node.setDataValue(colDef.field!, formattedValue);
+          }
         }
         // Recalculate totals
         newComparables[compIndex] = calculateComparableTotals(newComparables[compIndex]);
         return newComparables;
       });
     }
-  }, []);
+  }, [measurementSystem]);
 
   return (
     <Box>
