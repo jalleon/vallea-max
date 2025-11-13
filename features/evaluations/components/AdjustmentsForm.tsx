@@ -606,22 +606,19 @@ export default function AdjustmentsForm({
   // Calculate all adjustments for all comparables
   const calculateAllAdjustments = () => {
     const updatedComparables = adjustmentsData.comparables.map((comp, index) => {
-      const newAdjustments: any = {};
+      const newAdjustments: any = { ...comp.adjustments };
       let total = 0;
 
       ADJUSTMENT_CATEGORIES.forEach(category => {
         if (category.applicablePropertyTypes.includes(propertyType)) {
           const amount = calculateAdjustment(category.id, index);
-          newAdjustments[category.id] = {
-            category: category.id,
-            enabled: true,
-            subjectValue: null,
-            comparableValue: null,
-            difference: 0,
-            adjustmentRate: 0,
-            calculatedAmount: amount,
-            calculationFormula: `${category.id} adjustment`
-          };
+          // Preserve existing adjustment data, only update the calculated amount
+          if (newAdjustments[category.id]) {
+            newAdjustments[category.id] = {
+              ...newAdjustments[category.id],
+              calculatedAmount: amount
+            };
+          }
           total += amount;
         }
       });

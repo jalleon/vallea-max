@@ -338,9 +338,9 @@ export default function AppraisalEditPage() {
   const handleSyncToDirectComparison = () => {
     if (!adjustmentsData || !adjustmentsData.comparables) return;
 
-    // Find the Direct Comparison section in sectionsData
-    const directComparisonSection = sectionsData.direct_comparison;
-    if (!directComparisonSection) return;
+    // Find the Direct Comparison section in sectionsDataRef (use ref for latest data)
+    const directComparisonSection = sectionsDataRef.current.methode_parite;
+    if (!directComparisonSection || !directComparisonSection.comparables) return;
 
     // Update comparables with adjustment amounts
     const updatedComparables = directComparisonSection.comparables.map((comp: any, index: number) => {
@@ -362,11 +362,16 @@ export default function AppraisalEditPage() {
       if (adjustments.extras) newComp.adjustmentExtras = adjustments.extras.calculatedAmount;
       if (adjustments.unitLocation) newComp.adjustmentUnitLocation = adjustments.unitLocation.calculatedAmount;
 
+      // Also update gross and net adjustment percentages
+      newComp.grossAdjustmentPercent = adjustmentData.totalAdjustment || 0;
+      newComp.netAdjustmentPercent = adjustmentData.totalAdjustment || 0;
+      newComp.adjustedValue = adjustmentData.adjustedValue || 0;
+
       return newComp;
     });
 
     // Update sections data with new comparables
-    handleSectionChange('direct_comparison', {
+    handleSectionChange('methode_parite', {
       ...directComparisonSection,
       comparables: updatedComparables
     });
