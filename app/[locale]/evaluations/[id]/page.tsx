@@ -140,8 +140,8 @@ export default function AppraisalEditPage() {
       sectionsDataRef.current = loadedData;
       setSectionsData(loadedData);
 
-      // Load adjustments data
-      const loadedAdjustmentsData = (data.adjustments_data as any) || null;
+      // Load adjustments data (type assertion needed - field exists in DB but not in generated types yet)
+      const loadedAdjustmentsData = ((data as any).adjustments_data as any) || null;
       console.log('📥 Loading adjustments_data:', loadedAdjustmentsData);
       setAdjustmentsData(loadedAdjustmentsData);
 
