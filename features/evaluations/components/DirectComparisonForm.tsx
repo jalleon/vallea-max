@@ -185,56 +185,59 @@ export default function DirectComparisonForm({
     return isNaN(parsed) ? 0 : parsed;
   }, []);
 
-  // Fix incorrect adjustment values on initial data load
-  // This runs once when data prop changes (e.g., when loading from database)
-  const hasFixedDataRef = useRef(false);
+  // Fix incorrect adjustment values on data load from database
+  // This runs when the property ID changes (indicating new data loaded)
+  const lastFixedPropertyIdRef = useRef<string | null>(null);
   useEffect(() => {
-    // Only run once when data is first loaded
-    if (hasFixedDataRef.current || !data?.comparables?.length) return;
+    if (!data?.comparables?.length || !data?.subject) return;
+
+    // Only run if this is a different property or first load
+    const currentPropertyId = subjectPropertyId || 'new';
+    if (lastFixedPropertyIdRef.current === currentPropertyId) return;
 
     const measurementFields = ['livingArea', 'lotSize'];
-    const otherNumericFields = ['roomsTotal', 'roomsBedrooms', 'age', 'condition', 'daysOnMarket'];
-    const fieldsToRecalculate = [...measurementFields, ...otherNumericFields];
 
     let hasChanges = false;
     const fixedComparables = data.comparables.map((comp: ComparableProperty) => {
       let compHasChanges = false;
       const updatedComp = { ...comp };
 
-      fieldsToRecalculate.forEach((field) => {
+      measurementFields.forEach((field) => {
         const subjectValue = parseNumericValue(data.subject[field as keyof ComparableProperty]);
         const comparableValue = parseNumericValue(comp[field as keyof ComparableProperty]);
 
-        // Only recalculate if we have valid data
-        if (subjectValue !== 0 || comparableValue !== 0) {
-          const difference = comparableValue - subjectValue;
-          const adjField = `adjustment${field.charAt(0).toUpperCase() + field.slice(1)}` as keyof ComparableProperty;
-          const currentAdjustment = comp[adjField] as number;
+        // Calculate expected difference
+        const difference = comparableValue - subjectValue;
+        const adjField = `adjustment${field.charAt(0).toUpperCase() + field.slice(1)}` as keyof ComparableProperty;
+        const currentAdjustment = comp[adjField] as number;
 
-          // Check if the current adjustment is way off (indicating it's a monetary value, not a difference)
-          const expectedDiff = Math.round(difference * 100) / 100;
-          const isInvalid = currentAdjustment === undefined ||
-                           currentAdjustment === null ||
-                           Math.abs(currentAdjustment) > 1000; // Any adjustment > 1000 is likely a monetary value
+        // Check if the current adjustment is invalid (monetary value instead of area difference)
+        // For area fields, any value over 1000 is definitely wrong (no property has 1000+ m² difference)
+        const expectedDiff = Math.round(difference * 100) / 100;
+        const isInvalid = currentAdjustment !== undefined &&
+                         currentAdjustment !== null &&
+                         Math.abs(currentAdjustment) > 1000;
 
-          if (isInvalid) {
-            console.log(`🔧 Fixing ${field} adjustment: ${currentAdjustment} -> ${expectedDiff}`);
-            updatedComp[adjField] = expectedDiff as any;
-            compHasChanges = true;
-            hasChanges = true;
-          }
+        if (isInvalid && (subjectValue !== 0 || comparableValue !== 0)) {
+          console.log(`🔧 Auto-fixing ${field} for comparable ${comp.id}: ${currentAdjustment} -> ${expectedDiff} m²`);
+          updatedComp[adjField] = expectedDiff as any;
+          compHasChanges = true;
+          hasChanges = true;
         }
       });
 
-      return compHasChanges ? calculateComparableTotals(updatedComp) : updatedComp;
+      return compHasChanges ? updatedComp : comp;
     });
 
     if (hasChanges) {
-      console.log('🔧 Fixed incorrect adjustment values on load');
+      console.log('✅ Fixed incorrect adjustment values loaded from database');
       setComparables(fixedComparables);
-      hasFixedDataRef.current = true;
+      lastFixedPropertyIdRef.current = currentPropertyId;
+    } else {
+      // No changes needed, but mark as checked
+      lastFixedPropertyIdRef.current = currentPropertyId;
     }
-  }, [data, parseNumericValue]);
+  }, [data, subjectPropertyId, parseNumericValue]);
 
   useEffect(() => {
     // Skip onChange on initial mount
@@ -287,9 +290,9 @@ export default function DirectComparisonForm({
   // Clear loaded property ref and reset fix flag when reload trigger changes
   useEffect(() => {
     if (reloadTrigger > 0) {
-      console.log('🔄 Reload trigger changed - clearing loadedPropertyIdRef and resetting fix flag');
+      console.log('🔄 Reload trigger changed - clearing loadedPropertyIdRef and lastFixedPropertyIdRef');
       loadedPropertyIdRef.current = null;
-      hasFixedDataRef.current = false; // Allow fixing data again on next load
+      lastFixedPropertyIdRef.current = null; // Allow fixing data again on next load
     }
   }, [reloadTrigger]);
 
