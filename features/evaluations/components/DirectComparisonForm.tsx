@@ -1064,19 +1064,35 @@ export default function DirectComparisonForm({
     };
 
     // Helper function to parse numeric value from formatted measurement strings
+    // Always extract m² (metric) value for consistency
     const parseNumericValue = (value: string | number | undefined): number => {
       if (!value) return 0;
       const strValue = String(value).trim();
 
-      // Extract the first number from formats like "200 m² / 2,152 pi²"
-      const match = strValue.match(/^([\d,]+(?:\.\d+)?)/);
-      if (match) {
-        const numStr = match[1].replace(/,/g, '');
-        const parsed = parseFloat(numStr);
-        return isNaN(parsed) ? 0 : parsed;
+      // For formatted measurements like "200 m² / 2,152 pi²", always extract the m² value (first number)
+      // For formatted measurements like "2,152 pi²" without m², extract the pi² and convert to m²
+      if (strValue.includes('m²')) {
+        // Extract the number before "m²"
+        const match = strValue.match(/([\d.]+)\s*m²/);
+        if (match) {
+          const parsed = parseFloat(match[1]);
+          return isNaN(parsed) ? 0 : parsed;
+        }
+      } else if (strValue.includes('pi²') || strValue.includes('ft²')) {
+        // Extract the number before "pi²" or "ft²" and convert to m²
+        const match = strValue.match(/([\d,]+(?:\.\d+)?)\s*(?:pi²|ft²)/);
+        if (match) {
+          const numStr = match[1].replace(/,/g, '');
+          const pi2 = parseFloat(numStr);
+          if (!isNaN(pi2)) {
+            // Convert pi² to m²
+            return Math.round(pi2 / 10.764 * 100) / 100;
+          }
+        }
       }
 
-      const parsed = parseFloat(String(value));
+      // Fallback: try to parse as plain number
+      const parsed = parseFloat(String(value).replace(/,/g, ''));
       return isNaN(parsed) ? 0 : parsed;
     };
 
