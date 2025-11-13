@@ -189,16 +189,30 @@ export default function DirectComparisonForm({
   // This runs when the property ID changes (indicating new data loaded)
   const lastFixedPropertyIdRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!data?.comparables?.length || !data?.subject) return;
+    console.log('🔍 Auto-fix useEffect triggered', {
+      hasComparables: !!data?.comparables?.length,
+      hasSubject: !!data?.subject,
+      subjectPropertyId,
+      lastFixedPropertyId: lastFixedPropertyIdRef.current
+    });
+
+    if (!data?.comparables?.length || !data?.subject) {
+      console.log('⏸️  Skipping auto-fix: no data');
+      return;
+    }
 
     // Only run if this is a different property or first load
     const currentPropertyId = subjectPropertyId || 'new';
-    if (lastFixedPropertyIdRef.current === currentPropertyId) return;
+    if (lastFixedPropertyIdRef.current === currentPropertyId) {
+      console.log('⏸️  Skipping auto-fix: already fixed for this property');
+      return;
+    }
 
+    console.log('🔍 Checking adjustment fields for invalid values...');
     const measurementFields = ['livingArea', 'lotSize'];
 
     let hasChanges = false;
-    const fixedComparables = data.comparables.map((comp: ComparableProperty) => {
+    const fixedComparables = data.comparables.map((comp: ComparableProperty, index: number) => {
       let compHasChanges = false;
       const updatedComp = { ...comp };
 
@@ -211,6 +225,14 @@ export default function DirectComparisonForm({
         const adjField = `adjustment${field.charAt(0).toUpperCase() + field.slice(1)}` as keyof ComparableProperty;
         const currentAdjustment = comp[adjField] as number;
 
+        console.log(`📊 Comp ${index + 1} ${field}:`, {
+          subject: subjectValue,
+          comparable: comparableValue,
+          currentAdjustment,
+          expectedDiff: Math.round(difference * 100) / 100,
+          isInvalid: currentAdjustment !== undefined && currentAdjustment !== null && Math.abs(currentAdjustment) > 1000
+        });
+
         // Check if the current adjustment is invalid (monetary value instead of area difference)
         // For area fields, any value over 1000 is definitely wrong (no property has 1000+ m² difference)
         const expectedDiff = Math.round(difference * 100) / 100;
@@ -219,7 +241,7 @@ export default function DirectComparisonForm({
                          Math.abs(currentAdjustment) > 1000;
 
         if (isInvalid && (subjectValue !== 0 || comparableValue !== 0)) {
-          console.log(`🔧 Auto-fixing ${field} for comparable ${comp.id}: ${currentAdjustment} -> ${expectedDiff} m²`);
+          console.log(`🔧 Auto-fixing ${field} for comparable ${index + 1}: ${currentAdjustment} -> ${expectedDiff} m²`);
           updatedComp[adjField] = expectedDiff as any;
           compHasChanges = true;
           hasChanges = true;
@@ -234,7 +256,7 @@ export default function DirectComparisonForm({
       setComparables(fixedComparables);
       lastFixedPropertyIdRef.current = currentPropertyId;
     } else {
-      // No changes needed, but mark as checked
+      console.log('✅ No invalid values found, all adjustment fields are correct');
       lastFixedPropertyIdRef.current = currentPropertyId;
     }
   }, [data, subjectPropertyId, parseNumericValue]);
