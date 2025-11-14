@@ -15,10 +15,22 @@ export interface AdjustmentDetail {
   // Subject data
   subjectValue: number | string | null;
   subjectLabel?: string;
+  subjectRate?: number; // Rate for subject (basement, lot size, bathrooms)
+  subjectSize?: number; // Size for subject (basement area, lot size)
+  subjectBathroomCount?: number; // Number of bathrooms for subject
+  subjectPowderRoomCount?: number; // Number of powder rooms for subject
+  subjectBathroomRate?: number; // $ per bathroom for subject
+  subjectPowderRoomRate?: number; // $ per powder room for subject
 
   // Comparable data
   comparableValue: number | string | null;
   comparableLabel?: string;
+  comparableRate?: number; // Rate for comparable (can differ per comparable)
+  comparableSize?: number; // Size for comparable (can differ per comparable)
+  comparableBathroomCount?: number; // Number of bathrooms for comparable
+  comparablePowderRoomCount?: number; // Number of powder rooms for comparable
+  comparableBathroomRate?: number; // $ per bathroom for comparable
+  comparablePowderRoomRate?: number; // $ per powder room for comparable
 
   // Calculation inputs
   difference: number;
@@ -80,7 +92,9 @@ export interface DefaultRates {
   ageAdjustmentMethod: 'per_year' | 'percentage';
 
   // Bathrooms
-  bathroomValue: number; // $ per bathroom
+  bathroomValue: number; // $ per bathroom (legacy - for default initialization)
+  bathroomRate: number; // $ per bathroom
+  powderRoomRate: number; // $ per powder room
   bathroomDepreciationRate: number; // %
 
   // Garage/Parking

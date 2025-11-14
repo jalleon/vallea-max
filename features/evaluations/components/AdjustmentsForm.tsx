@@ -96,11 +96,11 @@ export default function AdjustmentsForm({
       const firstIsImperial = firstPart.includes('pi²') || firstPart.includes('ft²');
 
       if (measurementSystem === 'imperial') {
-        // Return the imperial part (pi² or ft²)
+        // Return the imperial part (pi² or ft²), normalized to pi²
         if (firstIsImperial) {
-          return firstPart;
+          return firstPart.replace('ft²', 'pi²');
         } else {
-          return secondPart;
+          return secondPart.replace('ft²', 'pi²');
         }
       } else {
         // Return the metric part (m²)
@@ -112,8 +112,8 @@ export default function AdjustmentsForm({
       }
     }
 
-    // If no slash, return as-is (already in single format)
-    return strValue;
+    // If no slash, return as-is but normalize ft² to pi²
+    return strValue.replace('ft²', 'pi²');
   };
 
   // Helper function to parse numeric value from area measurement based on selected measurement system
@@ -296,13 +296,36 @@ export default function AdjustmentsForm({
 
         // Update bathrooms
         if (updatedAdjustments.bathrooms) {
+          // Parse bathroom counts from "2:1" format
+          const parseBathrooms = (value: string | null): { bathrooms: number; powderRooms: number } => {
+            if (!value) return { bathrooms: 0, powderRooms: 0 };
+            const parts = value.split(':');
+            return {
+              bathrooms: parseFloat(parts[0] || '0') || 0,
+              powderRooms: parseFloat(parts[1] || '0') || 0
+            };
+          };
+
+          const subjectBath = parseBathrooms(subject?.roomsBathrooms);
+          const compBath = parseBathrooms(directComp.roomsBathrooms);
+
           updatedAdjustments.bathrooms = {
             ...updatedAdjustments.bathrooms,
             subjectValue: subject?.roomsBathrooms || null,
             subjectLabel: subject?.roomsBathrooms || 'N/A',
+            subjectBathroomCount: subjectBath.bathrooms,
+            subjectPowderRoomCount: subjectBath.powderRooms,
             comparableValue: directComp.roomsBathrooms || null,
-            comparableLabel: directComp.roomsBathrooms || 'N/A'
+            comparableLabel: directComp.roomsBathrooms || 'N/A',
+            comparableBathroomCount: compBath.bathrooms,
+            comparablePowderRoomCount: compBath.powderRooms
           };
+
+          // Recalculate bathroom adjustment
+          updatedAdjustments.bathrooms.calculatedAmount = calculateAdjustmentWithCustomRates(
+            'bathrooms',
+            updatedAdjustments.bathrooms
+          );
         }
 
         // Update garage
@@ -494,23 +517,30 @@ export default function AdjustmentsForm({
         calculatedAmount: livingAreaAmount
       };
 
-      // Lot Size - Calculate lot size adjustment
+      // Lot Size - Calculate lot size adjustment with per-comparable rates
       const compLot = parseAreaValue(comp.lotSize);
       const subjectLot = parseAreaValue(subject?.lotSize);
       const lotDiff = compLot - subjectLot;
-      const depreciationFactor = 1 - (defaultRates.landDepreciationRate / 100);
-      const lotSizeAmount = -lotDiff * defaultRates.landRate * depreciationFactor;
+
+      // New formula: (subject lot size × subject rate) - (comp lot size × comp rate) × depreciation
+      const subjectLotValue = subjectLot * defaultRates.landRate;
+      const compLotValue = compLot * defaultRates.landRate;
+      const lotSizeAmount = subjectLotValue - compLotValue; // No depreciation by default
 
       adjustments.lotSize = {
         category: 'lotSize',
         enabled: true,
         subjectValue: subject?.lotSize || null,
         subjectLabel: formatAreaMeasurement(subject?.lotSize),
+        subjectRate: defaultRates.landRate, // Rate for subject (same for all comparables initially)
+        subjectSize: subjectLot, // Size extracted from subject property
         comparableValue: comp.lotSize || null,
         comparableLabel: formatAreaMeasurement(comp.lotSize),
+        comparableRate: defaultRates.landRate, // Rate for comparable (can be edited per comparable)
+        comparableSize: compLot, // Size extracted from comparable
         difference: lotDiff,
         adjustmentRate: defaultRates.landRate,
-        depreciationRate: defaultRates.landDepreciationRate,
+        depreciationRate: undefined, // No default depreciation
         calculatedAmount: lotSizeAmount
       };
 
@@ -541,31 +571,70 @@ export default function AdjustmentsForm({
       };
 
       // Basement
+      // Basement - Calculate basement adjustment with per-comparable rates and sizes
+      // TODO: Extract basement size from property inspection data if available
+      const subjectBasementSize = 0; // Will be populated from inspection data or user input
+      const compBasementSize = 0; // Will be populated from inspection data or user input
+
+      // New formula: (subject size × subject rate) - (comp size × comp rate) × depreciation
+      const subjectBasementValue = subjectBasementSize * defaultRates.basementFinishRate;
+      const compBasementValue = compBasementSize * defaultRates.basementFinishRate;
+      const basementAmount = subjectBasementValue - compBasementValue; // No depreciation by default
+
       adjustments.basement = {
         category: 'basement',
         enabled: true,
         subjectValue: subject?.basement || null,
         subjectLabel: subject?.basement || 'N/A',
+        subjectRate: defaultRates.basementFinishRate, // Rate per sq.ft/sq.m for subject
+        subjectSize: subjectBasementSize, // Basement area for subject (user editable)
         comparableValue: comp.basement || null,
         comparableLabel: comp.basement || 'N/A',
-        difference: 0,
+        comparableRate: defaultRates.basementFinishRate, // Rate per sq.ft/sq.m for comparable (user editable)
+        comparableSize: compBasementSize, // Basement area for comparable (user editable)
+        difference: subjectBasementSize - compBasementSize,
         adjustmentRate: defaultRates.basementFinishRate,
-        depreciationRate: defaultRates.basementDepreciationRate,
-        calculatedAmount: 0
+        depreciationRate: undefined, // No default depreciation
+        calculatedAmount: basementAmount
       };
 
-      // Bathrooms
+      // Bathrooms - Parse "2:1" format (bathrooms:powderRooms)
+      const parseBathrooms = (value: string | null): { bathrooms: number; powderRooms: number } => {
+        if (!value) return { bathrooms: 0, powderRooms: 0 };
+        const parts = value.split(':');
+        return {
+          bathrooms: parseFloat(parts[0] || '0') || 0,
+          powderRooms: parseFloat(parts[1] || '0') || 0
+        };
+      };
+
+      const subjectBath = parseBathrooms(subject?.roomsBathrooms);
+      const compBath = parseBathrooms(comp.roomsBathrooms);
+
+      // Calculate bathroom adjustment: (subject BR × $ BR + subject PR × $ PR) - (comp BR × $ BR + comp PR × $ PR)
+      const subjectBathValue = (subjectBath.bathrooms * defaultRates.bathroomRate) + (subjectBath.powderRooms * defaultRates.powderRoomRate);
+      const compBathValue = (compBath.bathrooms * defaultRates.bathroomRate) + (compBath.powderRooms * defaultRates.powderRoomRate);
+      const bathroomAmount = subjectBathValue - compBathValue;
+
       adjustments.bathrooms = {
         category: 'bathrooms',
         enabled: true,
-        subjectValue: subject?.bathrooms || null,
-        subjectLabel: subject?.bathrooms || 'N/A',
-        comparableValue: comp.bathrooms || null,
-        comparableLabel: comp.bathrooms || 'N/A',
+        subjectValue: subject?.roomsBathrooms || null,
+        subjectLabel: subject?.roomsBathrooms || 'N/A',
+        subjectBathroomCount: subjectBath.bathrooms,
+        subjectPowderRoomCount: subjectBath.powderRooms,
+        subjectBathroomRate: defaultRates.bathroomRate,
+        subjectPowderRoomRate: defaultRates.powderRoomRate,
+        comparableValue: comp.roomsBathrooms || null,
+        comparableLabel: comp.roomsBathrooms || 'N/A',
+        comparableBathroomCount: compBath.bathrooms,
+        comparablePowderRoomCount: compBath.powderRooms,
+        comparableBathroomRate: defaultRates.bathroomRate,
+        comparablePowderRoomRate: defaultRates.powderRoomRate,
         difference: 0,
         adjustmentRate: defaultRates.bathroomValue,
-        depreciationRate: defaultRates.bathroomDepreciationRate,
-        calculatedAmount: 0
+        depreciationRate: undefined, // No default depreciation
+        calculatedAmount: bathroomAmount
       };
 
       // Garage
@@ -697,6 +766,175 @@ export default function AdjustmentsForm({
       await adjustmentPresetsService.saveOrganizationPreset(selectedPropertyType, updatedRates);
       console.log('✅ Rates saved to organization presets');
     }, 1000);
+  };
+
+  // Update subject rate/size for a specific category
+  const updateSubjectAdjustment = (
+    comparableIndex: number,
+    categoryId: string,
+    field: 'subjectRate' | 'subjectSize',
+    value: number
+  ) => {
+    setAdjustmentsData(prev => {
+      const newComparables = [...prev.comparables];
+      const adjustment = newComparables[comparableIndex]?.adjustments[categoryId];
+
+      if (adjustment) {
+        newComparables[comparableIndex] = {
+          ...newComparables[comparableIndex],
+          adjustments: {
+            ...newComparables[comparableIndex].adjustments,
+            [categoryId]: {
+              ...adjustment,
+              [field]: value
+            }
+          }
+        };
+
+        // Recalculate the adjustment amount
+        const updatedAdjustment = newComparables[comparableIndex].adjustments[categoryId];
+        if (updatedAdjustment) {
+          const calculatedAmount = calculateAdjustmentWithCustomRates(
+            categoryId,
+            updatedAdjustment
+          );
+          updatedAdjustment.calculatedAmount = calculatedAmount;
+        }
+
+        // Recalculate total adjustment for this comparable
+        const totalAdjustment = Object.values(newComparables[comparableIndex].adjustments).reduce(
+          (sum, adj) => sum + (adj?.calculatedAmount || 0),
+          0
+        );
+        newComparables[comparableIndex].totalAdjustment = totalAdjustment;
+
+        // Calculate adjusted value
+        const salePrice = parseFloat(directComparisonData.comparables[comparableIndex]?.salePrice || '0');
+        newComparables[comparableIndex].adjustedValue = salePrice + totalAdjustment;
+      }
+
+      return { ...prev, comparables: newComparables };
+    });
+    setHasUnsavedChanges(true);
+  };
+
+  // Update comparable rate/size for a specific category
+  const updateComparableAdjustment = (
+    comparableIndex: number,
+    categoryId: string,
+    field: 'comparableRate' | 'comparableSize',
+    value: number
+  ) => {
+    setAdjustmentsData(prev => {
+      const newComparables = [...prev.comparables];
+      const adjustment = newComparables[comparableIndex]?.adjustments[categoryId];
+
+      if (adjustment) {
+        newComparables[comparableIndex] = {
+          ...newComparables[comparableIndex],
+          adjustments: {
+            ...newComparables[comparableIndex].adjustments,
+            [categoryId]: {
+              ...adjustment,
+              [field]: value
+            }
+          }
+        };
+
+        // Recalculate the adjustment amount
+        const updatedAdjustment = newComparables[comparableIndex].adjustments[categoryId];
+        if (updatedAdjustment) {
+          const calculatedAmount = calculateAdjustmentWithCustomRates(
+            categoryId,
+            updatedAdjustment
+          );
+          updatedAdjustment.calculatedAmount = calculatedAmount;
+        }
+
+        // Recalculate total adjustment for this comparable
+        const totalAdjustment = Object.values(newComparables[comparableIndex].adjustments).reduce(
+          (sum, adj) => sum + (adj?.calculatedAmount || 0),
+          0
+        );
+        newComparables[comparableIndex].totalAdjustment = totalAdjustment;
+
+        // Calculate adjusted value
+        const salePrice = parseFloat(directComparisonData.comparables[comparableIndex]?.salePrice || '0');
+        newComparables[comparableIndex].adjustedValue = salePrice + totalAdjustment;
+      }
+
+      return { ...prev, comparables: newComparables };
+    });
+    setHasUnsavedChanges(true);
+  };
+
+  // Calculate adjustment amount using custom rates (for basement, lotSize, etc.)
+  const calculateAdjustmentWithCustomRates = (
+    categoryId: string,
+    adjustment: AdjustmentDetail
+  ): number => {
+    const rates = adjustmentsData.defaultRates;
+
+    switch (categoryId) {
+      case 'basement': {
+        // Formula: (subject size × subject rate) - (comp size × comp rate) × depreciation
+        const subjectRate = adjustment.subjectRate !== undefined && adjustment.subjectRate !== null ? adjustment.subjectRate : rates.basementFinishRate;
+        const comparableRate = adjustment.comparableRate !== undefined && adjustment.comparableRate !== null ? adjustment.comparableRate : rates.basementFinishRate;
+
+        const subjectValue = (adjustment.subjectSize || 0) * subjectRate;
+        const compValue = (adjustment.comparableSize || 0) * comparableRate;
+        const difference = subjectValue - compValue;
+
+        // Apply depreciation only if specified (not undefined and not 0)
+        if (adjustment.depreciationRate !== undefined && adjustment.depreciationRate !== 0) {
+          const depreciationFactor = 1 - (adjustment.depreciationRate / 100);
+          return difference * depreciationFactor;
+        }
+
+        return difference;
+      }
+
+      case 'lotSize': {
+        // Formula: (subject lot size × subject rate) - (comp lot size × comp rate) × depreciation
+        const subjectRate = adjustment.subjectRate !== undefined && adjustment.subjectRate !== null ? adjustment.subjectRate : rates.landRate;
+        const comparableRate = adjustment.comparableRate !== undefined && adjustment.comparableRate !== null ? adjustment.comparableRate : rates.landRate;
+
+        const subjectValue = (adjustment.subjectSize || 0) * subjectRate;
+        const compValue = (adjustment.comparableSize || 0) * comparableRate;
+        const difference = subjectValue - compValue;
+
+        // Apply depreciation only if specified (not undefined and not 0)
+        if (adjustment.depreciationRate !== undefined && adjustment.depreciationRate !== 0) {
+          const depreciationFactor = 1 - (adjustment.depreciationRate / 100);
+          return difference * depreciationFactor;
+        }
+
+        return difference;
+      }
+
+      case 'bathrooms': {
+        // Formula: [(subject BR × $ BR) + (subject PR × $ PR)] - [(comp BR × $ BR) + (comp PR × $ PR)] × depreciation
+        const subjectBRRate = adjustment.subjectBathroomRate !== undefined && adjustment.subjectBathroomRate !== null ? adjustment.subjectBathroomRate : rates.bathroomRate;
+        const subjectPRRate = adjustment.subjectPowderRoomRate !== undefined && adjustment.subjectPowderRoomRate !== null ? adjustment.subjectPowderRoomRate : rates.powderRoomRate;
+        const comparableBRRate = adjustment.comparableBathroomRate !== undefined && adjustment.comparableBathroomRate !== null ? adjustment.comparableBathroomRate : rates.bathroomRate;
+        const comparablePRRate = adjustment.comparablePowderRoomRate !== undefined && adjustment.comparablePowderRoomRate !== null ? adjustment.comparablePowderRoomRate : rates.powderRoomRate;
+
+        const subjectValue = (adjustment.subjectBathroomCount || 0) * subjectBRRate + (adjustment.subjectPowderRoomCount || 0) * subjectPRRate;
+        const compValue = (adjustment.comparableBathroomCount || 0) * comparableBRRate + (adjustment.comparablePowderRoomCount || 0) * comparablePRRate;
+        const difference = subjectValue - compValue;
+
+        // Apply depreciation only if specified (not undefined and not 0)
+        if (adjustment.depreciationRate !== undefined && adjustment.depreciationRate !== 0) {
+          const depreciationFactor = 1 - (adjustment.depreciationRate / 100);
+          return difference * depreciationFactor;
+        }
+
+        return difference;
+      }
+
+      default:
+        return adjustment.calculatedAmount || 0;
+    }
   };
 
   // Calculate adjustment for a specific category and comparable
@@ -988,39 +1226,6 @@ export default function AdjustmentsForm({
               />
             </Grid>
 
-            {/* Land */}
-            {selectedPropertyType !== 'condo' && selectedPropertyType !== 'apartment' && (
-              <>
-                <Grid item xs={12} sm={6} md={4}>
-                  <TextField
-                    fullWidth
-                    label={t('landRate')}
-                    type="number"
-                    value={adjustmentsData.defaultRates.landRate}
-                    onChange={(e) => updateRate('landRate', parseFloat(e.target.value) || 0)}
-                    InputProps={{
-                      startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                      endAdornment: <InputAdornment position="end">/sq.ft.</InputAdornment>
-                    }}
-                    size="small"
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <TextField
-                    fullWidth
-                    label={t('landDepreciationRate')}
-                    type="number"
-                    value={adjustmentsData.defaultRates.landDepreciationRate}
-                    onChange={(e) => updateRate('landDepreciationRate', parseFloat(e.target.value) || 0)}
-                    InputProps={{
-                      endAdornment: <InputAdornment position="end">%</InputAdornment>
-                    }}
-                    size="small"
-                  />
-                </Grid>
-              </>
-            )}
-
             {/* Basement */}
             {selectedPropertyType !== 'condo' && selectedPropertyType !== 'apartment' && (
               <>
@@ -1309,12 +1514,606 @@ export default function AdjustmentsForm({
                       />
                     </Box>
 
-                    {/* Subject | Comparable | Difference | Adjustment */}
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} md={3}>
-                        <Paper variant="outlined" sx={{ p: 1.5, bgcolor: 'white' }}>
-                          <Typography variant="caption" color="primary.main" fontWeight={600} display="block" mb={1}>
-                            SUBJECT
+                    {/* Special layout for basement and lotSize with editable rates and sizes */}
+                    {category.id === 'basement' ? (
+                      /* Basement: Editable rate and size for both subject and comparable */
+                      <Grid container spacing={2}>
+                        {/* Subject Card */}
+                        <Grid item xs={12} md={4}>
+                          <Paper variant="outlined" sx={{ p: 2, bgcolor: 'primary.50', borderColor: 'primary.main', borderWidth: 2 }}>
+                            <Typography variant="caption" color="primary.main" fontWeight={700} display="block" mb={2}>
+                              {t('subject').toUpperCase()}
+                            </Typography>
+                            <Grid container spacing={1.5}>
+                              <Grid item xs={6}>
+                                <TextField
+                                  fullWidth
+                                  label={t('rate')}
+                                  type="number"
+                                  value={adjustment?.subjectRate || 0}
+                                  onChange={(e) => updateSubjectAdjustment(compIdx, category.id, 'subjectRate', parseFloat(e.target.value) || 0)}
+                                  InputProps={{
+                                    startAdornment: <InputAdornment position="start">$</InputAdornment>
+                                  }}
+                                  size="small"
+                                />
+                              </Grid>
+                              <Grid item xs={6}>
+                                <TextField
+                                  fullWidth
+                                  label={t('size')}
+                                  type="number"
+                                  value={adjustment?.subjectSize || 0}
+                                  onChange={(e) => updateSubjectAdjustment(compIdx, category.id, 'subjectSize', parseFloat(e.target.value) || 0)}
+                                  InputProps={{
+                                    endAdornment: <InputAdornment position="end">{measurementSystem === 'imperial' ? 'pi²' : 'm²'}</InputAdornment>
+                                  }}
+                                  size="small"
+                                />
+                              </Grid>
+                              <Grid item xs={12}>
+                                <Divider sx={{ my: 1 }} />
+                                <Typography variant="caption" color="text.secondary" display="block">
+                                  {t('calculatedValue')}
+                                </Typography>
+                                <Typography variant="body2" fontWeight={600}>
+                                  ${((adjustment?.subjectSize || 0) * (adjustment?.subjectRate || 0)).toLocaleString()}
+                                </Typography>
+                              </Grid>
+                            </Grid>
+                          </Paper>
+                        </Grid>
+
+                        {/* Comparable Card */}
+                        <Grid item xs={12} md={4}>
+                          <Paper variant="outlined" sx={{ p: 2, bgcolor: 'secondary.50', borderColor: 'secondary.main', borderWidth: 2 }}>
+                            <Typography variant="caption" color="secondary.main" fontWeight={700} display="block" mb={2}>
+                              {t('comparable').toUpperCase()}
+                            </Typography>
+                            <Grid container spacing={1.5}>
+                              <Grid item xs={6}>
+                                <TextField
+                                  fullWidth
+                                  label={t('rate')}
+                                  type="number"
+                                  value={adjustment?.comparableRate || 0}
+                                  onChange={(e) => updateComparableAdjustment(compIdx, category.id, 'comparableRate', parseFloat(e.target.value) || 0)}
+                                  InputProps={{
+                                    startAdornment: <InputAdornment position="start">$</InputAdornment>
+                                  }}
+                                  size="small"
+                                />
+                              </Grid>
+                              <Grid item xs={6}>
+                                <TextField
+                                  fullWidth
+                                  label={t('size')}
+                                  type="number"
+                                  value={adjustment?.comparableSize || 0}
+                                  onChange={(e) => updateComparableAdjustment(compIdx, category.id, 'comparableSize', parseFloat(e.target.value) || 0)}
+                                  InputProps={{
+                                    endAdornment: <InputAdornment position="end">{measurementSystem === 'imperial' ? 'pi²' : 'm²'}</InputAdornment>
+                                  }}
+                                  size="small"
+                                />
+                              </Grid>
+                              <Grid item xs={12}>
+                                <Divider sx={{ my: 1 }} />
+                                <Typography variant="caption" color="text.secondary" display="block">
+                                  {t('calculatedValue')}
+                                </Typography>
+                                <Typography variant="body2" fontWeight={600}>
+                                  ${((adjustment?.comparableSize || 0) * (adjustment?.comparableRate || 0)).toLocaleString()}
+                                </Typography>
+                              </Grid>
+                            </Grid>
+                          </Paper>
+                        </Grid>
+
+                        {/* Difference Card */}
+                        <Grid item xs={12} md={4}>
+                          <Paper variant="outlined" sx={{ p: 2, bgcolor: 'grey.100', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                            <Box>
+                              <Typography variant="caption" color="text.secondary" fontWeight={700} display="block" mb={2}>
+                                {t('difference').toUpperCase()}
+                              </Typography>
+                              <Grid container spacing={1.5}>
+                                <Grid item xs={6}>
+                                  <Typography variant="caption" color="text.secondary" display="block">
+                                    {t('rate')}
+                                  </Typography>
+                                  <Typography variant="body2" fontWeight={600}>
+                                    ${((adjustment?.comparableRate || 0) - (adjustment?.subjectRate || 0)).toLocaleString()}/
+                                    {measurementSystem === 'imperial' ? 'pi²' : 'm²'}
+                                  </Typography>
+                                </Grid>
+                                <Grid item xs={6}>
+                                  <Typography variant="caption" color="text.secondary" display="block">
+                                    {t('size')}
+                                  </Typography>
+                                  <Typography variant="body2" fontWeight={600}>
+                                    {((adjustment?.comparableSize || 0) - (adjustment?.subjectSize || 0)).toLocaleString()}{' '}
+                                    {measurementSystem === 'imperial' ? 'pi²' : 'm²'}
+                                  </Typography>
+                                </Grid>
+                              </Grid>
+                            </Box>
+                            <Box>
+                              <Divider sx={{ my: 1.5 }} />
+                              <Grid container spacing={1} alignItems="center">
+                                <Grid item xs={6}>
+                                  <TextField
+                                    fullWidth
+                                    label={t('depreciation')}
+                                    type="number"
+                                    value={adjustment?.depreciationRate || ''}
+                                    onChange={(e) => {
+                                      const newRate = parseFloat(e.target.value) || 0;
+                                      setAdjustmentsData(prev => {
+                                        const newComparables = [...prev.comparables];
+                                        const adj = newComparables[compIdx]?.adjustments[category.id];
+                                        if (adj) {
+                                          adj.depreciationRate = newRate;
+                                          adj.calculatedAmount = calculateAdjustmentWithCustomRates(category.id, adj);
+
+                                          // Recalculate total
+                                          const total = Object.values(newComparables[compIdx].adjustments).reduce(
+                                            (sum, a) => sum + (a?.calculatedAmount || 0),
+                                            0
+                                          );
+                                          newComparables[compIdx].totalAdjustment = total;
+                                          newComparables[compIdx].adjustedValue = parseFloat(compData.salePrice || '0') + total;
+                                        }
+                                        return { ...prev, comparables: newComparables };
+                                      });
+                                      setHasUnsavedChanges(true);
+                                    }}
+                                    InputProps={{
+                                      endAdornment: <InputAdornment position="end">%</InputAdornment>
+                                    }}
+                                    size="small"
+                                  />
+                                </Grid>
+                                <Grid item xs={6}>
+                                  <Box>
+                                    <Typography variant="caption" color="text.secondary" display="block">
+                                      {t('total')}
+                                    </Typography>
+                                    <Typography variant="h6" fontWeight={700} color={amount >= 0 ? 'success.main' : 'error.main'}>
+                                      {amount >= 0 ? '+' : ''}${Math.round(amount).toLocaleString()}
+                                    </Typography>
+                                  </Box>
+                                </Grid>
+                              </Grid>
+                            </Box>
+                          </Paper>
+                        </Grid>
+                      </Grid>
+                    ) : category.id === 'lotSize' ? (
+                      /* Lot Size: Display size as read-only, only rate is editable */
+                      <Grid container spacing={2}>
+                        {/* Subject Card */}
+                        <Grid item xs={12} md={4}>
+                          <Paper variant="outlined" sx={{ p: 2, bgcolor: 'primary.50', borderColor: 'primary.main', borderWidth: 2 }}>
+                            <Typography variant="caption" color="primary.main" fontWeight={700} display="block" mb={2}>
+                              {t('subject').toUpperCase()}
+                            </Typography>
+                            <Grid container spacing={1.5}>
+                              <Grid item xs={6}>
+                                <TextField
+                                  fullWidth
+                                  label={t('rate')}
+                                  type="number"
+                                  value={adjustment?.subjectRate || 0}
+                                  onChange={(e) => updateSubjectAdjustment(compIdx, category.id, 'subjectRate', parseFloat(e.target.value) || 0)}
+                                  InputProps={{
+                                    startAdornment: <InputAdornment position="start">$</InputAdornment>
+                                  }}
+                                  size="small"
+                                />
+                              </Grid>
+                              <Grid item xs={6}>
+                                <Box>
+                                  <Typography variant="caption" color="text.secondary" display="block">
+                                    {t('size')}
+                                  </Typography>
+                                  <Typography variant="body2" fontWeight={600}>
+                                    {formatAreaMeasurement(adjustment?.subjectValue)}
+                                  </Typography>
+                                </Box>
+                              </Grid>
+                              <Grid item xs={12}>
+                                <Divider sx={{ my: 1 }} />
+                                <Typography variant="caption" color="text.secondary" display="block">
+                                  {t('calculatedValue')}
+                                </Typography>
+                                <Typography variant="body2" fontWeight={600}>
+                                  ${((adjustment?.subjectSize || 0) * (adjustment?.subjectRate || 0)).toLocaleString()}
+                                </Typography>
+                              </Grid>
+                            </Grid>
+                          </Paper>
+                        </Grid>
+
+                        {/* Comparable Card */}
+                        <Grid item xs={12} md={4}>
+                          <Paper variant="outlined" sx={{ p: 2, bgcolor: 'secondary.50', borderColor: 'secondary.main', borderWidth: 2 }}>
+                            <Typography variant="caption" color="secondary.main" fontWeight={700} display="block" mb={2}>
+                              {t('comparable').toUpperCase()}
+                            </Typography>
+                            <Grid container spacing={1.5}>
+                              <Grid item xs={6}>
+                                <TextField
+                                  fullWidth
+                                  label={t('rate')}
+                                  type="number"
+                                  value={adjustment?.comparableRate || 0}
+                                  onChange={(e) => updateComparableAdjustment(compIdx, category.id, 'comparableRate', parseFloat(e.target.value) || 0)}
+                                  InputProps={{
+                                    startAdornment: <InputAdornment position="start">$</InputAdornment>
+                                  }}
+                                  size="small"
+                                />
+                              </Grid>
+                              <Grid item xs={6}>
+                                <Box>
+                                  <Typography variant="caption" color="text.secondary" display="block">
+                                    {t('size')}
+                                  </Typography>
+                                  <Typography variant="body2" fontWeight={600}>
+                                    {formatAreaMeasurement(adjustment?.comparableValue)}
+                                  </Typography>
+                                </Box>
+                              </Grid>
+                              <Grid item xs={12}>
+                                <Divider sx={{ my: 1 }} />
+                                <Typography variant="caption" color="text.secondary" display="block">
+                                  {t('calculatedValue')}
+                                </Typography>
+                                <Typography variant="body2" fontWeight={600}>
+                                  ${((adjustment?.comparableSize || 0) * (adjustment?.comparableRate || 0)).toLocaleString()}
+                                </Typography>
+                              </Grid>
+                            </Grid>
+                          </Paper>
+                        </Grid>
+
+                        {/* Difference Card */}
+                        <Grid item xs={12} md={4}>
+                          <Paper variant="outlined" sx={{ p: 2, bgcolor: 'grey.100', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                            <Box>
+                              <Typography variant="caption" color="text.secondary" fontWeight={700} display="block" mb={2}>
+                                {t('difference').toUpperCase()}
+                              </Typography>
+                              <Grid container spacing={1.5}>
+                                <Grid item xs={6}>
+                                  <Typography variant="caption" color="text.secondary" display="block">
+                                    {t('rate')}
+                                  </Typography>
+                                  <Typography variant="body2" fontWeight={600}>
+                                    ${((adjustment?.comparableRate || 0) - (adjustment?.subjectRate || 0)).toLocaleString()}/
+                                    {measurementSystem === 'imperial' ? 'pi²' : 'm²'}
+                                  </Typography>
+                                </Grid>
+                                <Grid item xs={6}>
+                                  <Typography variant="caption" color="text.secondary" display="block">
+                                    {t('size')}
+                                  </Typography>
+                                  <Typography variant="body2" fontWeight={600}>
+                                    {((adjustment?.comparableSize || 0) - (adjustment?.subjectSize || 0)).toLocaleString()}{' '}
+                                    {measurementSystem === 'imperial' ? 'pi²' : 'm²'}
+                                  </Typography>
+                                </Grid>
+                              </Grid>
+                            </Box>
+                            <Box>
+                              <Divider sx={{ my: 1.5 }} />
+                              <Grid container spacing={1} alignItems="center">
+                                <Grid item xs={6}>
+                                  <TextField
+                                    fullWidth
+                                    label={t('depreciation')}
+                                    type="number"
+                                    value={adjustment?.depreciationRate || ''}
+                                    onChange={(e) => {
+                                      const newRate = parseFloat(e.target.value) || 0;
+                                      setAdjustmentsData(prev => {
+                                        const newComparables = [...prev.comparables];
+                                        const adj = newComparables[compIdx]?.adjustments[category.id];
+                                        if (adj) {
+                                          adj.depreciationRate = newRate;
+                                          adj.calculatedAmount = calculateAdjustmentWithCustomRates(category.id, adj);
+
+                                          // Recalculate total
+                                          const total = Object.values(newComparables[compIdx].adjustments).reduce(
+                                            (sum, a) => sum + (a?.calculatedAmount || 0),
+                                            0
+                                          );
+                                          newComparables[compIdx].totalAdjustment = total;
+                                          newComparables[compIdx].adjustedValue = parseFloat(compData.salePrice || '0') + total;
+                                        }
+                                        return { ...prev, comparables: newComparables };
+                                      });
+                                      setHasUnsavedChanges(true);
+                                    }}
+                                    InputProps={{
+                                      endAdornment: <InputAdornment position="end">%</InputAdornment>
+                                    }}
+                                    size="small"
+                                  />
+                                </Grid>
+                                <Grid item xs={6}>
+                                  <Box>
+                                    <Typography variant="caption" color="text.secondary" display="block">
+                                      {t('total')}
+                                    </Typography>
+                                    <Typography variant="h6" fontWeight={700} color={amount >= 0 ? 'success.main' : 'error.main'}>
+                                      {amount >= 0 ? '+' : ''}${Math.round(amount).toLocaleString()}
+                                    </Typography>
+                                  </Box>
+                                </Grid>
+                              </Grid>
+                            </Box>
+                          </Paper>
+                        </Grid>
+                      </Grid>
+                    ) : category.id === 'bathrooms' ? (
+                      /* Bathrooms: Editable counts and rates for both subject and comparable */
+                      <Grid container spacing={2}>
+                        {/* Subject Card */}
+                        <Grid item xs={12} md={4}>
+                          <Paper variant="outlined" sx={{ p: 2, bgcolor: 'primary.50', borderColor: 'primary.main', borderWidth: 2 }}>
+                            <Typography variant="caption" color="primary.main" fontWeight={700} display="block" mb={2}>
+                              {t('subject').toUpperCase()}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" mb={1}>
+                              {adjustment?.subjectValue || '0:0'}
+                            </Typography>
+                            <Grid container spacing={1.5}>
+                              <Grid item xs={6}>
+                                <TextField
+                                  fullWidth
+                                  label={t('bathroomRate')}
+                                  type="number"
+                                  value={adjustment?.subjectBathroomRate || 0}
+                                  onChange={(e) => {
+                                    const newRate = parseFloat(e.target.value) || 0;
+                                    setAdjustmentsData(prev => {
+                                      const newComparables = [...prev.comparables];
+                                      const adj = newComparables[compIdx]?.adjustments[category.id];
+                                      if (adj) {
+                                        adj.subjectBathroomRate = newRate;
+                                        adj.calculatedAmount = calculateAdjustmentWithCustomRates(category.id, adj);
+
+                                        // Recalculate total
+                                        const total = Object.values(newComparables[compIdx].adjustments).reduce(
+                                          (sum, a) => sum + (a?.calculatedAmount || 0),
+                                          0
+                                        );
+                                        newComparables[compIdx].totalAdjustment = total;
+                                        newComparables[compIdx].adjustedValue = parseFloat(compData.salePrice || '0') + total;
+                                      }
+                                      return { ...prev, comparables: newComparables };
+                                    });
+                                    setHasUnsavedChanges(true);
+                                  }}
+                                  InputProps={{
+                                    startAdornment: <InputAdornment position="start">$</InputAdornment>
+                                  }}
+                                  size="small"
+                                />
+                              </Grid>
+                              <Grid item xs={6}>
+                                <TextField
+                                  fullWidth
+                                  label={t('powderRoomRate')}
+                                  type="number"
+                                  value={adjustment?.subjectPowderRoomRate || 0}
+                                  onChange={(e) => {
+                                    const newRate = parseFloat(e.target.value) || 0;
+                                    setAdjustmentsData(prev => {
+                                      const newComparables = [...prev.comparables];
+                                      const adj = newComparables[compIdx]?.adjustments[category.id];
+                                      if (adj) {
+                                        adj.subjectPowderRoomRate = newRate;
+                                        adj.calculatedAmount = calculateAdjustmentWithCustomRates(category.id, adj);
+
+                                        // Recalculate total
+                                        const total = Object.values(newComparables[compIdx].adjustments).reduce(
+                                          (sum, a) => sum + (a?.calculatedAmount || 0),
+                                          0
+                                        );
+                                        newComparables[compIdx].totalAdjustment = total;
+                                        newComparables[compIdx].adjustedValue = parseFloat(compData.salePrice || '0') + total;
+                                      }
+                                      return { ...prev, comparables: newComparables };
+                                    });
+                                    setHasUnsavedChanges(true);
+                                  }}
+                                  InputProps={{
+                                    startAdornment: <InputAdornment position="start">$</InputAdornment>
+                                  }}
+                                  size="small"
+                                />
+                              </Grid>
+                              <Grid item xs={12}>
+                                <Divider sx={{ my: 1 }} />
+                                <Typography variant="caption" color="text.secondary" display="block">
+                                  {t('calculatedValue')}
+                                </Typography>
+                                <Typography variant="body2" fontWeight={600}>
+                                  ${((adjustment?.subjectBathroomCount || 0) * (adjustment?.subjectBathroomRate || 0) + (adjustment?.subjectPowderRoomCount || 0) * (adjustment?.subjectPowderRoomRate || 0)).toLocaleString()}
+                                </Typography>
+                              </Grid>
+                            </Grid>
+                          </Paper>
+                        </Grid>
+
+                        {/* Comparable Card */}
+                        <Grid item xs={12} md={4}>
+                          <Paper variant="outlined" sx={{ p: 2, bgcolor: 'secondary.50', borderColor: 'secondary.main', borderWidth: 2 }}>
+                            <Typography variant="caption" color="secondary.main" fontWeight={700} display="block" mb={2}>
+                              {t('comparable').toUpperCase()}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" mb={1}>
+                              {adjustment?.comparableValue || '0:0'}
+                            </Typography>
+                            <Grid container spacing={1.5}>
+                              <Grid item xs={6}>
+                                <TextField
+                                  fullWidth
+                                  label={t('bathroomRate')}
+                                  type="number"
+                                  value={adjustment?.comparableBathroomRate || 0}
+                                  onChange={(e) => {
+                                    const newRate = parseFloat(e.target.value) || 0;
+                                    setAdjustmentsData(prev => {
+                                      const newComparables = [...prev.comparables];
+                                      const adj = newComparables[compIdx]?.adjustments[category.id];
+                                      if (adj) {
+                                        adj.comparableBathroomRate = newRate;
+                                        adj.calculatedAmount = calculateAdjustmentWithCustomRates(category.id, adj);
+
+                                        // Recalculate total
+                                        const total = Object.values(newComparables[compIdx].adjustments).reduce(
+                                          (sum, a) => sum + (a?.calculatedAmount || 0),
+                                          0
+                                        );
+                                        newComparables[compIdx].totalAdjustment = total;
+                                        newComparables[compIdx].adjustedValue = parseFloat(compData.salePrice || '0') + total;
+                                      }
+                                      return { ...prev, comparables: newComparables };
+                                    });
+                                    setHasUnsavedChanges(true);
+                                  }}
+                                  InputProps={{
+                                    startAdornment: <InputAdornment position="start">$</InputAdornment>
+                                  }}
+                                  size="small"
+                                />
+                              </Grid>
+                              <Grid item xs={6}>
+                                <TextField
+                                  fullWidth
+                                  label={t('powderRoomRate')}
+                                  type="number"
+                                  value={adjustment?.comparablePowderRoomRate || 0}
+                                  onChange={(e) => {
+                                    const newRate = parseFloat(e.target.value) || 0;
+                                    setAdjustmentsData(prev => {
+                                      const newComparables = [...prev.comparables];
+                                      const adj = newComparables[compIdx]?.adjustments[category.id];
+                                      if (adj) {
+                                        adj.comparablePowderRoomRate = newRate;
+                                        adj.calculatedAmount = calculateAdjustmentWithCustomRates(category.id, adj);
+
+                                        // Recalculate total
+                                        const total = Object.values(newComparables[compIdx].adjustments).reduce(
+                                          (sum, a) => sum + (a?.calculatedAmount || 0),
+                                          0
+                                        );
+                                        newComparables[compIdx].totalAdjustment = total;
+                                        newComparables[compIdx].adjustedValue = parseFloat(compData.salePrice || '0') + total;
+                                      }
+                                      return { ...prev, comparables: newComparables };
+                                    });
+                                    setHasUnsavedChanges(true);
+                                  }}
+                                  InputProps={{
+                                    startAdornment: <InputAdornment position="start">$</InputAdornment>
+                                  }}
+                                  size="small"
+                                />
+                              </Grid>
+                              <Grid item xs={12}>
+                                <Divider sx={{ my: 1 }} />
+                                <Typography variant="caption" color="text.secondary" display="block">
+                                  {t('calculatedValue')}
+                                </Typography>
+                                <Typography variant="body2" fontWeight={600}>
+                                  ${((adjustment?.comparableBathroomCount || 0) * (adjustment?.comparableBathroomRate || 0) + (adjustment?.comparablePowderRoomCount || 0) * (adjustment?.comparablePowderRoomRate || 0)).toLocaleString()}
+                                </Typography>
+                              </Grid>
+                            </Grid>
+                          </Paper>
+                        </Grid>
+
+                        {/* Difference Card */}
+                        <Grid item xs={12} md={4}>
+                          <Paper variant="outlined" sx={{ p: 2, bgcolor: 'grey.100', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                            <Box>
+                              <Typography variant="caption" color="text.secondary" fontWeight={700} display="block" mb={2}>
+                                {t('difference').toUpperCase()}
+                              </Typography>
+                              <Grid container spacing={1.5}>
+                                <Grid item xs={12}>
+                                  <Typography variant="caption" color="text.secondary" display="block">
+                                    {t('formula')}
+                                  </Typography>
+                                  <Typography variant="body2" fontWeight={600}>
+                                    (BR diff × $ BR) + (PR diff × $ PR)
+                                  </Typography>
+                                </Grid>
+                              </Grid>
+                            </Box>
+                            <Box>
+                              <Divider sx={{ my: 1.5 }} />
+                              <Grid container spacing={1} alignItems="center">
+                                <Grid item xs={6}>
+                                  <TextField
+                                    fullWidth
+                                    label={t('depreciation')}
+                                    type="number"
+                                    value={adjustment?.depreciationRate || ''}
+                                    onChange={(e) => {
+                                      const newRate = parseFloat(e.target.value) || 0;
+                                      setAdjustmentsData(prev => {
+                                        const newComparables = [...prev.comparables];
+                                        const adj = newComparables[compIdx]?.adjustments[category.id];
+                                        if (adj) {
+                                          adj.depreciationRate = newRate;
+                                          adj.calculatedAmount = calculateAdjustmentWithCustomRates(category.id, adj);
+
+                                          // Recalculate total
+                                          const total = Object.values(newComparables[compIdx].adjustments).reduce(
+                                            (sum, a) => sum + (a?.calculatedAmount || 0),
+                                            0
+                                          );
+                                          newComparables[compIdx].totalAdjustment = total;
+                                          newComparables[compIdx].adjustedValue = parseFloat(compData.salePrice || '0') + total;
+                                        }
+                                        return { ...prev, comparables: newComparables };
+                                      });
+                                      setHasUnsavedChanges(true);
+                                    }}
+                                    InputProps={{
+                                      endAdornment: <InputAdornment position="end">%</InputAdornment>
+                                    }}
+                                    size="small"
+                                  />
+                                </Grid>
+                                <Grid item xs={6}>
+                                  <Box>
+                                    <Typography variant="caption" color="text.secondary" display="block">
+                                      {t('total')}
+                                    </Typography>
+                                    <Typography variant="h6" fontWeight={700} color={amount >= 0 ? 'success.main' : 'error.main'}>
+                                      {amount >= 0 ? '+' : ''}${Math.round(amount).toLocaleString()}
+                                    </Typography>
+                                  </Box>
+                                </Grid>
+                              </Grid>
+                            </Box>
+                          </Paper>
+                        </Grid>
+                      </Grid>
+                    ) : (
+                      /* Standard 4-column layout for other categories */
+                      <Grid container spacing={2}>
+                        <Grid item xs={12} md={3}>
+                          <Paper variant="outlined" sx={{ p: 1.5, bgcolor: 'white' }}>
+                            <Typography variant="caption" color="primary.main" fontWeight={600} display="block" mb={1}>
+                              SUBJECT
                           </Typography>
                           <Typography variant="body2">
                             {(category.id === 'livingArea' || category.id === 'lotSize')
@@ -1378,6 +2177,7 @@ export default function AdjustmentsForm({
                         />
                       </Grid>
                     </Grid>
+                    )}
                   </Box>
                 );
               })}

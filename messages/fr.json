@@ -1766,8 +1766,13 @@
         "category": "Catégorie",
         "subject": "Sujet",
         "comparable": "Comparable",
+        "difference": "Différence",
         "total": "Total",
         "adjustedValue": "Valeur ajustée",
+        "rate": "Taux",
+        "size": "Superficie",
+        "calculatedValue": "Valeur calculée",
+        "depreciation": "Dépréciation",
 
         "propertyTypes": {
           "single_family": "Unifamiliale",
@@ -1808,12 +1813,17 @@
         "ageAdjustmentRate": "Taux d'ajustement d'âge",
         "ageAdjustmentMethod": "Méthode d'ajustement d'âge",
         "bathroomValue": "Valeur par salle de bain",
+        "bathroomRate": "$ SDB",
+        "powderRoomRate": "$ SDE",
         "bathroomDepreciationRate": "Taux de dépréciation salle de bain",
         "garageValue": "Valeur du garage",
         "floorValue": "Valeur par étage",
         "landscapingDepreciationRate": "Taux de dépréciation aménagement",
         "extrasDepreciationRate": "Taux de dépréciation extras",
         "cornerUnitPremium": "Prime unité de coin",
+        "difference": "Différence",
+        "adjustment": "Ajustement",
+        "formula": "Formule",
 
         "categories": {
           "timing": "Ajustement de temps",

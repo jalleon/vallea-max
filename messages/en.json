@@ -1644,8 +1644,13 @@
         "category": "Category",
         "subject": "Subject",
         "comparable": "Comparable",
+        "difference": "Difference",
         "total": "Total",
         "adjustedValue": "Adjusted Value",
+        "rate": "Rate",
+        "size": "Size",
+        "calculatedValue": "Calculated Value",
+        "depreciation": "Depreciation",
 
         "propertyTypes": {
           "single_family": "Single Family",
@@ -1787,6 +1792,8 @@
     "ageAdjustmentRate": "Age Adjustment Rate",
     "ageAdjustmentMethod": "Age Adjustment Method",
     "bathroomValue": "Bathroom Value",
+    "bathroomRate": "$ BR",
+    "powderRoomRate": "$ PR",
     "bathroomDepreciationRate": "Bathroom Depreciation Rate",
     "garageValue": "Garage Value",
     "floorValue": "Floor Value (per floor)",
@@ -1805,6 +1812,7 @@
     "adjustedValue": "Adjusted Value",
     "difference": "Difference",
     "adjustment": "Adjustment",
+    "formula": "Formula",
     "categories": {
       "timing": "Timing Adjustment",
       "timingDescription": "Based on sale date vs. effective date and market appreciation rate",
