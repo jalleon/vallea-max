@@ -18,7 +18,7 @@ import {
   ToggleButtonGroup,
   ToggleButton
 } from '@mui/material';
-import { Add, Delete, Search, SquareFoot, Straighten } from '@mui/icons-material';
+import { Add, Delete, Search, SquareFoot, Straighten, Refresh } from '@mui/icons-material';
 import { useTranslations } from 'next-intl';
 import { AgGridReact } from 'ag-grid-react';
 import { ColDef, ColGroupDef, CellValueChangedEvent, ICellRendererParams, ValueFormatterParams, ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
@@ -158,6 +158,46 @@ export default function DirectComparisonForm({
   const isInitialMountRef = useRef(true);
   const loadedPropertyIdRef = useRef<string | null>(null);
 
+  // Helper to parse numeric values from formatted strings
+  const parseNumericValue = useCallback((value: string | number | undefined): number => {
+    if (!value) return 0;
+    const strValue = String(value).trim();
+
+    // Extract m² value
+    if (strValue.includes('m²')) {
+      const match = strValue.match(/([\d.]+)\s*m²/);
+      if (match) return parseFloat(match[1]) || 0;
+    }
+
+    // Extract pi² and convert to m²
+    if (strValue.includes('pi²') || strValue.includes('ft²')) {
+      const match = strValue.match(/([\d,]+(?:\.\d+)?)\s*(?:pi²|ft²)/);
+      if (match) {
+        const pi2 = parseFloat(match[1].replace(/,/g, ''));
+        return Math.round(pi2 / 10.764 * 100) / 100;
+      }
+    }
+
+    return parseFloat(String(value).replace(/,/g, '')) || 0;
+  }, []);
+
+  // Recalculate all adjustment differences based on current data
+  const recalculateAdjustments = useCallback(() => {
+    setComparables(prev => prev.map(comp => {
+      const updatedComp = { ...comp };
+
+      // Recalculate area differences
+      ['livingArea', 'lotSize'].forEach(field => {
+        const subjectVal = parseNumericValue(subject[field as keyof ComparableProperty]);
+        const compVal = parseNumericValue(comp[field as keyof ComparableProperty]);
+        const diff = Math.round((compVal - subjectVal) * 100) / 100;
+        const adjField = `adjustment${field.charAt(0).toUpperCase() + field.slice(1)}` as keyof ComparableProperty;
+        updatedComp[adjField] = diff as any;
+      });
+
+      return updatedComp;
+    }));
+  }, [subject, parseNumericValue]);
 
   useEffect(() => {
     // Skip onChange on initial mount
@@ -1265,6 +1305,16 @@ export default function DirectComparisonForm({
           </ToggleButtonGroup>
         </Box>
         <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button
+            startIcon={<Refresh />}
+            onClick={recalculateAdjustments}
+            size="small"
+            variant="outlined"
+            color="primary"
+            sx={{ textTransform: 'none', borderRadius: '8px' }}
+          >
+            Recalculate Differences
+          </Button>
           {comparables.length > 1 && (
             <Button
               startIcon={<Delete />}
