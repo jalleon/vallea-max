@@ -75,6 +75,9 @@ export default function AdjustmentsForm({
   // Ref to track previous directComparisonData to detect actual changes
   const prevDirectComparisonDataRef = useRef<string>('');
 
+  // Ref for debouncing rate saves
+  const rateSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   // Helper function to format area measurements based on selected measurement system
   const formatAreaMeasurement = (value: string | number | null | undefined): string => {
     if (!value) return 'N/A';
@@ -111,6 +114,42 @@ export default function AdjustmentsForm({
 
     // If no slash, return as-is (already in single format)
     return strValue;
+  };
+
+  // Helper function to parse numeric value from area measurement based on selected measurement system
+  const parseAreaValue = (value: string | number | null | undefined): number => {
+    if (!value) return 0;
+
+    const strValue = String(value);
+
+    // Check if value contains both units (e.g., "558.65 m² / 6,013 ft²" or "6,013 pi² / 558.65 m²")
+    if (strValue.includes('/')) {
+      const parts = strValue.split('/');
+
+      // Determine which part is metric and which is imperial
+      const firstPart = parts[0].trim();
+      const secondPart = parts[1].trim();
+
+      const firstIsMetric = firstPart.includes('m²');
+      const firstIsImperial = firstPart.includes('pi²') || firstPart.includes('ft²');
+
+      let targetPart: string;
+      if (measurementSystem === 'imperial') {
+        // Extract the imperial value
+        targetPart = firstIsImperial ? firstPart : secondPart;
+      } else {
+        // Extract the metric value
+        targetPart = firstIsMetric ? firstPart : secondPart;
+      }
+
+      // Extract numeric value from the target part
+      const numMatch = targetPart.match(/([\d,]+(?:\.\d+)?)/);
+      return numMatch ? parseFloat(numMatch[1].replace(/,/g, '')) : 0;
+    }
+
+    // If no slash, extract any numeric value
+    const numMatch = strValue.match(/([\d,]+(?:\.\d+)?)/);
+    return numMatch ? parseFloat(numMatch[1].replace(/,/g, '')) : 0;
   };
 
   // Load organization presets and initialize defaultRates
@@ -192,23 +231,33 @@ export default function AdjustmentsForm({
 
         // Update livingArea
         if (updatedAdjustments.livingArea) {
+          const compAreaValue = parseAreaValue(directComp.livingArea);
+          const subjectAreaValue = parseAreaValue(subject?.livingArea);
+          const areaDifference = compAreaValue - subjectAreaValue;
+
           updatedAdjustments.livingArea = {
             ...updatedAdjustments.livingArea,
             subjectValue: subject?.livingArea || null,
             subjectLabel: formatAreaMeasurement(subject?.livingArea),
             comparableValue: directComp.livingArea || null,
-            comparableLabel: formatAreaMeasurement(directComp.livingArea)
+            comparableLabel: formatAreaMeasurement(directComp.livingArea),
+            difference: areaDifference
           };
         }
 
         // Update lotSize
         if (updatedAdjustments.lotSize) {
+          const compLotValue = parseAreaValue(directComp.lotSize);
+          const subjectLotValue = parseAreaValue(subject?.lotSize);
+          const lotDifference = compLotValue - subjectLotValue;
+
           updatedAdjustments.lotSize = {
             ...updatedAdjustments.lotSize,
             subjectValue: subject?.lotSize || null,
             subjectLabel: formatAreaMeasurement(subject?.lotSize),
             comparableValue: directComp.lotSize || null,
-            comparableLabel: formatAreaMeasurement(directComp.lotSize)
+            comparableLabel: formatAreaMeasurement(directComp.lotSize),
+            difference: lotDifference
           };
         }
 
@@ -428,8 +477,8 @@ export default function AdjustmentsForm({
       };
 
       // Living Area - Calculate living area adjustment
-      const compArea = parseFloat(comp.livingArea?.replace(/[^0-9.]/g, '') || '0');
-      const subjectArea = parseFloat(subject?.livingArea?.replace(/[^0-9.]/g, '') || '0');
+      const compArea = parseAreaValue(comp.livingArea);
+      const subjectArea = parseAreaValue(subject?.livingArea);
       const areaDiff = compArea - subjectArea;
       const livingAreaAmount = -areaDiff * defaultRates.livingAreaRate;
 
@@ -445,7 +494,13 @@ export default function AdjustmentsForm({
         calculatedAmount: livingAreaAmount
       };
 
-      // Lot Size
+      // Lot Size - Calculate lot size adjustment
+      const compLot = parseAreaValue(comp.lotSize);
+      const subjectLot = parseAreaValue(subject?.lotSize);
+      const lotDiff = compLot - subjectLot;
+      const depreciationFactor = 1 - (defaultRates.landDepreciationRate / 100);
+      const lotSizeAmount = -lotDiff * defaultRates.landRate * depreciationFactor;
+
       adjustments.lotSize = {
         category: 'lotSize',
         enabled: true,
@@ -453,10 +508,10 @@ export default function AdjustmentsForm({
         subjectLabel: formatAreaMeasurement(subject?.lotSize),
         comparableValue: comp.lotSize || null,
         comparableLabel: formatAreaMeasurement(comp.lotSize),
-        difference: 0,
+        difference: lotDiff,
         adjustmentRate: defaultRates.landRate,
         depreciationRate: defaultRates.landDepreciationRate,
-        calculatedAmount: 0
+        calculatedAmount: lotSizeAmount
       };
 
       // Quality
@@ -616,15 +671,13 @@ export default function AdjustmentsForm({
   };
 
   // Update rates for selected property type
-  const updateRate = async (rateKey: keyof DefaultRates, value: number) => {
+  const updateRate = (rateKey: keyof DefaultRates, value: number) => {
     const updatedRates = {
       ...adjustmentsData.defaultRates,
       [rateKey]: value
     };
 
-    // Save to organization presets
-    await adjustmentPresetsService.saveOrganizationPreset(selectedPropertyType, updatedRates);
-
+    // Update UI immediately for responsiveness
     setAdjustmentsData(prev => ({
       ...prev,
       defaultRates: updatedRates,
@@ -634,6 +687,16 @@ export default function AdjustmentsForm({
       }
     }));
     setHasUnsavedChanges(true);
+
+    // Debounce database save (save after 1 second of no typing)
+    if (rateSaveTimerRef.current) {
+      clearTimeout(rateSaveTimerRef.current);
+    }
+
+    rateSaveTimerRef.current = setTimeout(async () => {
+      await adjustmentPresetsService.saveOrganizationPreset(selectedPropertyType, updatedRates);
+      console.log('✅ Rates saved to organization presets');
+    }, 1000);
   };
 
   // Calculate adjustment for a specific category and comparable
@@ -664,8 +727,8 @@ export default function AdjustmentsForm({
 
       case 'livingArea': {
         // (comp_living_area - subject_living_area) × rate_per_sqft
-        const compArea = parseFloat(comparable.livingArea?.replace(/[^0-9.]/g, '') || '0');
-        const subjectArea = parseFloat(subject.livingArea?.replace(/[^0-9.]/g, '') || '0');
+        const compArea = parseAreaValue(comparable.livingArea);
+        const subjectArea = parseAreaValue(subject.livingArea);
         const diff = compArea - subjectArea;
         adjustment = -diff * rates.livingAreaRate; // Negative if comp is larger
         break;
@@ -673,8 +736,8 @@ export default function AdjustmentsForm({
 
       case 'lotSize': {
         // (comp_lot - subject_lot) × land_rate_per_sqft × (1 - depreciation_rate)
-        const compLot = parseFloat(comparable.lotSize?.replace(/[^0-9.]/g, '') || '0');
-        const subjectLot = parseFloat(subject.lotSize?.replace(/[^0-9.]/g, '') || '0');
+        const compLot = parseAreaValue(comparable.lotSize);
+        const subjectLot = parseAreaValue(subject.lotSize);
         const diff = compLot - subjectLot;
         const depreciationFactor = 1 - (rates.landDepreciationRate / 100);
         adjustment = -diff * rates.landRate * depreciationFactor;
@@ -1288,7 +1351,14 @@ export default function AdjustmentsForm({
                                 }
                                 return '-';
                               }
-                              // For other categories, show the difference
+                              // For area measurements (livingArea, lotSize), add the unit label
+                              if (category.id === 'livingArea' || category.id === 'lotSize') {
+                                const diff = adjustment?.difference || 0;
+                                if (diff === 0) return '-';
+                                const unit = measurementSystem === 'imperial' ? 'pi²' : 'm²';
+                                return `${diff.toLocaleString()} ${unit}`;
+                              }
+                              // For other categories, show the difference without units
                               const diff = adjustment?.difference || 0;
                               return diff !== 0 ? diff.toLocaleString() : '-';
                             })()}

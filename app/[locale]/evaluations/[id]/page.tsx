@@ -52,6 +52,7 @@ export default function AppraisalEditPage() {
   const [saveState, setSaveState] = useState<'saved' | 'unsaved' | 'saving'>('saved');
   const [currentTab, setCurrentTab] = useState(0);
   const [currentToolTab, setCurrentToolTab] = useState(-1); // -1 = no tool tab selected
+  const [adjustmentsReloadKey, setAdjustmentsReloadKey] = useState(0); // Force reload counter
   const [sectionsData, setSectionsData] = useState<any>({});
   const [adjustmentsData, setAdjustmentsData] = useState<any>(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
@@ -88,6 +89,13 @@ export default function AppraisalEditPage() {
       }
     }
   }, [id]);
+
+  // Increment adjustments reload key when the Adjustments Calculator tab is opened
+  useEffect(() => {
+    if (currentToolTab === 0) {
+      setAdjustmentsReloadKey(prev => prev + 1);
+    }
+  }, [currentToolTab]);
 
   const getSections = () => {
     if (!appraisal) return [];
@@ -628,6 +636,7 @@ export default function AppraisalEditPage() {
               {currentToolTab === 0 && (
                 <Box sx={{ p: 0 }}>
                   <AdjustmentsForm
+                    key={`adjustments-${adjustmentsReloadKey}`}
                     data={adjustmentsData || {
                       subjectPropertyId: appraisal.property_id,
                       propertyType: appraisal.property_type,
