@@ -81,7 +81,7 @@ export interface WizardStep1Data {
 export interface WizardStep2Data {
   clientName: string;
   propertyId: string | null;
-  address: string;
+  address: string | null;
   city: string;
   postalCode: string;
   valueType: ValueType | null;

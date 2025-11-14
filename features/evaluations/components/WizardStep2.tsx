@@ -27,9 +27,10 @@ interface WizardStep2Props {
 export default function WizardStep2({ data, onChange }: WizardStep2Props) {
   const t = useTranslations('evaluations.wizard.step2');
 
-  // Derive property source from data instead of maintaining separate state
+  // Derive property source from data
+  // Use a special marker in address field to track manual mode when empty
   const propertySource: 'library' | 'manual' = data.propertyId ? 'library' :
-    (data.address || data.city) ? 'manual' : 'library';
+    (data.address !== '' || data.city !== '' || data.address === null) ? 'manual' : 'library';
 
   const handlePropertySelect = (propertyId: string, propertyData: any) => {
     onChange({
@@ -43,8 +44,10 @@ export default function WizardStep2({ data, onChange }: WizardStep2Props) {
 
   const handleSourceChange = (source: 'library' | 'manual') => {
     if (source === 'manual') {
-      onChange({ ...data, propertyId: null, address: '', city: '', postalCode: '' });
+      // Set address to null to indicate manual mode (even when empty)
+      onChange({ ...data, propertyId: null, address: null, city: '', postalCode: '' });
     } else {
+      // Set address to empty string to indicate library mode
       onChange({ ...data, propertyId: null, address: '', city: '', postalCode: '' });
     }
   };
@@ -117,7 +120,7 @@ export default function WizardStep2({ data, onChange }: WizardStep2Props) {
                 fullWidth
                 required
                 label={t('address')}
-                value={data.address}
+                value={data.address || ''}
                 onChange={(e) => onChange({ ...data, address: e.target.value })}
                 placeholder={t('addressPlaceholder')}
               />

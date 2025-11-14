@@ -77,7 +77,7 @@ export default function AppraisalWizard({ templateType, onComplete, onCancel, cr
       step2Data.valueType !== null &&
       step2Data.evaluationObjective.trim() !== '' &&
       step2Data.effectiveDate !== '' &&
-      (step2Data.propertyId !== null || (step2Data.address.trim() !== '' && step2Data.city.trim() !== ''))
+      (step2Data.propertyId !== null || (step2Data.address && step2Data.address.trim() !== '' && step2Data.city.trim() !== ''))
     );
   };
 
