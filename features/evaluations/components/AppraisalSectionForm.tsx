@@ -105,6 +105,8 @@ export default function AppraisalSectionForm({
     // Custom Sections
     if (templateType === 'CUSTOM') {
       switch (sectionId) {
+        case 'presentation':
+          return renderPresentationSection();
         case 'informations_generales':
           return renderGeneralInfoSection();
         case 'description_propriete':
@@ -473,6 +475,156 @@ export default function AppraisalSectionForm({
           placeholder={t('landDescriptionPlaceholder')}
           value={formData.landDescription || ''}
           onChange={(e) => handleFieldChange('landDescription', e.target.value)}
+        />
+      </Grid>
+    </Grid>
+  );
+
+  const renderPresentationSection = () => (
+    <Grid container spacing={3}>
+      {/* Report Title */}
+      <Grid item xs={12}>
+        <Typography variant="h6" gutterBottom sx={{ textAlign: 'center', fontWeight: 700, mb: 3 }}>
+          {t('reportTitle').toUpperCase()}
+        </Typography>
+        <TextField
+          fullWidth
+          value={formData.reportTitle || 'RAPPORT D\'ÉVALUATION IMMOBILIÈRE'}
+          onChange={(e) => handleFieldChange('reportTitle', e.target.value)}
+          placeholder="RAPPORT D'ÉVALUATION IMMOBILIÈRE"
+          sx={{ mb: 3 }}
+        />
+      </Grid>
+
+      <Grid item xs={12}>
+        <Divider sx={{ my: 2 }} />
+      </Grid>
+
+      {/* Civic Address and City */}
+      <Grid item xs={12}>
+        <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
+          Adresse civique et ville
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {formData.civicAddress || 'Adresse non spécifiée'}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {formData.city || 'Ville non spécifiée'}
+        </Typography>
+      </Grid>
+
+      {/* File Number */}
+      <Grid item xs={12} md={6}>
+        <TextField
+          fullWidth
+          label={t('fileNumber')}
+          value={formData.fileNumber || ''}
+          onChange={(e) => handleFieldChange('fileNumber', e.target.value)}
+          placeholder="XXXX-XXXX"
+        />
+      </Grid>
+
+      <Grid item xs={12}>
+        <Divider sx={{ my: 2 }} />
+      </Grid>
+
+      {/* Property Photo */}
+      <Grid item xs={12}>
+        <Typography variant="body1" sx={{ fontWeight: 600, mb: 2 }}>
+          {t('propertyPhoto')}
+        </Typography>
+        <Box sx={{ border: '2px dashed', borderColor: 'divider', borderRadius: 2, p: 3, textAlign: 'center', bgcolor: 'grey.50' }}>
+          {formData.propertyPhotoUrl ? (
+            <Box>
+              <Box component="img" src={formData.propertyPhotoUrl} alt="Property" sx={{ maxWidth: '100%', maxHeight: 300, borderRadius: 2, mb: 2 }} />
+              <Button variant="outlined" size="small" onClick={() => handleFieldChange('propertyPhotoUrl', '')}>
+                {t('changePhoto')}
+              </Button>
+            </Box>
+          ) : (
+            <Box>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Photo placeholder - Upload feature coming soon
+              </Typography>
+              <Button variant="contained" size="small" disabled>
+                {t('uploadPhoto')}
+              </Button>
+            </Box>
+          )}
+        </Box>
+      </Grid>
+
+      {/* Client Name */}
+      <Grid item xs={12}>
+        <TextField
+          fullWidth
+          label={t('clientName')}
+          value={formData.clientName || ''}
+          onChange={(e) => handleFieldChange('clientName', e.target.value)}
+          placeholder="Nom du client"
+        />
+      </Grid>
+
+      <Grid item xs={12}>
+        <Divider sx={{ my: 2 }} />
+      </Grid>
+
+      {/* Company Logo */}
+      <Grid item xs={12}>
+        <Typography variant="body1" sx={{ fontWeight: 600, mb: 2 }}>
+          {t('companyLogo')}
+        </Typography>
+        <Box sx={{ border: '2px dashed', borderColor: 'divider', borderRadius: 2, p: 3, textAlign: 'center', bgcolor: 'grey.50' }}>
+          {formData.companyLogoUrl ? (
+            <Box>
+              <Box component="img" src={formData.companyLogoUrl} alt="Company Logo" sx={{ maxWidth: '100%', maxHeight: 150, borderRadius: 2, mb: 2 }} />
+              <Button variant="outlined" size="small" onClick={() => handleFieldChange('companyLogoUrl', '')}>
+                {t('changeLogo')}
+              </Button>
+            </Box>
+          ) : (
+            <Box>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Logo placeholder - Upload feature coming soon
+              </Typography>
+              <Button variant="contained" size="small" disabled>
+                {t('uploadLogo')}
+              </Button>
+            </Box>
+          )}
+        </Box>
+      </Grid>
+
+      {/* Company Information */}
+      <Grid item xs={12}>
+        <TextField
+          fullWidth
+          label={t('companyAddress')}
+          value={formData.companyAddress || ''}
+          onChange={(e) => handleFieldChange('companyAddress', e.target.value)}
+          placeholder="123 Rue Exemple, Ville, QC H1H 1H1"
+          multiline
+          rows={2}
+        />
+      </Grid>
+
+      <Grid item xs={12} md={6}>
+        <TextField
+          fullWidth
+          label={t('companyPhone')}
+          value={formData.companyPhone || ''}
+          onChange={(e) => handleFieldChange('companyPhone', e.target.value)}
+          placeholder="(514) 123-4567"
+        />
+      </Grid>
+
+      <Grid item xs={12} md={6}>
+        <TextField
+          fullWidth
+          label={t('companyWebsite')}
+          value={formData.companyWebsite || ''}
+          onChange={(e) => handleFieldChange('companyWebsite', e.target.value)}
+          placeholder="www.example.com"
         />
       </Grid>
     </Grid>
