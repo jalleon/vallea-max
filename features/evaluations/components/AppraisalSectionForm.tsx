@@ -114,6 +114,8 @@ export default function AppraisalSectionForm({
           return renderPresentationSection();
         case 'fiche_reference':
           return renderReferenceSheetSection();
+        case 'general':
+          return renderGeneralitiesSection();
         case 'informations_generales':
           return renderGeneralInfoSection();
         case 'description_propriete':
@@ -1058,6 +1060,992 @@ export default function AppraisalSectionForm({
           <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary', lineHeight: 1.6 }}>
             {tRef('legalNoteText')}
           </Typography>
+        </Grid>
+      </Grid>
+    );
+  };
+
+  const renderGeneralitiesSection = () => {
+    const tGen = useTranslations('evaluations.sections.generalSection');
+
+    return (
+      <Grid container spacing={3}>
+        {/* GÉNÉRALITÉS Header */}
+        <Grid item xs={12}>
+          <Typography variant="h5" sx={{ fontWeight: 700, mb: 3, color: 'primary.main' }}>
+            {tGen('generalities')}
+          </Typography>
+        </Grid>
+
+        {/* Evaluation Purpose */}
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tGen('evaluationPurpose')}
+            value={formData.evaluationPurpose || ''}
+            onChange={(e) => handleFieldChange('evaluationPurpose', e.target.value)}
+            placeholder={tGen('evaluationPurposePlaceholder')}
+          />
+        </Grid>
+
+        {/* Property Right Evaluated */}
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tGen('propertyRightEvaluated')}
+            value={formData.propertyRightEvaluated || ''}
+            onChange={(e) => handleFieldChange('propertyRightEvaluated', e.target.value)}
+            placeholder={tGen('propertyRightPlaceholder')}
+          />
+        </Grid>
+
+        {/* PROPERTY IDENTIFICATION */}
+        <Grid item xs={12}>
+          <Divider sx={{ my: 2 }} />
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'primary.main' }}>
+            {tGen('propertyIdentification')}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12}>
+          <Typography variant="body1">
+            {allSectionsData?.presentation?.civicAddress || appraisalData?.address || 'Adresse non spécifiée'}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12}>
+          <Typography variant="body1">
+            {allSectionsData?.presentation?.city || appraisalData?.city || ''}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tGen('lotNumber')}
+            value={formData.lotNumber || ''}
+            onChange={(e) => handleFieldChange('lotNumber', e.target.value)}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tGen('cadastre')}
+            value={formData.cadastre || 'Cadastre du Québec'}
+            onChange={(e) => handleFieldChange('cadastre', e.target.value)}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tGen('ownerName')}
+            value={formData.ownerName || ''}
+            onChange={(e) => handleFieldChange('ownerName', e.target.value)}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tGen('ownerPhone')}
+            value={formData.ownerPhone || ''}
+            onChange={(e) => handleFieldChange('ownerPhone', e.target.value)}
+          />
+        </Grid>
+
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            size="small"
+            multiline
+            rows={3}
+            label={tGen('summaryDescription')}
+            value={formData.summaryDescription || ''}
+            onChange={(e) => handleFieldChange('summaryDescription', e.target.value)}
+            placeholder={tGen('summaryDescriptionPlaceholder')}
+          />
+        </Grid>
+
+        {/* Construction Status - Checkboxes */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+            {tGen('constructionStatus')}
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 3 }}>
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.constructionStatusRenovation || false}
+                onChange={(e) => handleFieldChange('constructionStatusRenovation', e.target.checked)}
+              />
+              {' '}{tGen('underRenovation')}
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.constructionStatusToBeBuilt || false}
+                onChange={(e) => handleFieldChange('constructionStatusToBeBuilt', e.target.checked)}
+              />
+              {' '}{tGen('toBeBuilt')}
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.constructionStatusExisting || false}
+                onChange={(e) => handleFieldChange('constructionStatusExisting', e.target.checked)}
+              />
+              {' '}{tGen('existing')}
+            </label>
+          </Box>
+        </Grid>
+
+        {/* SECTOR */}
+        <Grid item xs={12}>
+          <Divider sx={{ my: 2 }} />
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'primary.main' }}>
+            {tGen('sector')}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+            {tGen('sectorLabel')}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            select
+            label={tGen('trend')}
+            value={formData.sectorTrend || ''}
+            onChange={(e) => handleFieldChange('sectorTrend', e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value=""></option>
+            <option value="stable">{tGen('stable')}</option>
+            <option value="increasing">{tGen('increasing')}</option>
+            <option value="decreasing">{tGen('decreasing')}</option>
+          </TextField>
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tGen('age')}
+            value={formData.sectorAge || ''}
+            onChange={(e) => handleFieldChange('sectorAge', e.target.value)}
+            placeholder="25 à 80 ans"
+          />
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            select
+            label={tGen('homogeneity')}
+            value={formData.sectorHomogeneity || ''}
+            onChange={(e) => handleFieldChange('sectorHomogeneity', e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value=""></option>
+            <option value="good">{tGen('good')}</option>
+            <option value="average">{tGen('average')}</option>
+            <option value="poor">{tGen('poor')}</option>
+          </TextField>
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            select
+            label={tGen('accessibility')}
+            value={formData.sectorAccessibility || ''}
+            onChange={(e) => handleFieldChange('sectorAccessibility', e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value=""></option>
+            <option value="good">{tGen('good')}</option>
+            <option value="average">{tGen('average')}</option>
+            <option value="poor">{tGen('poor')}</option>
+          </TextField>
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            select
+            label={tGen('subjectConformity')}
+            value={formData.subjectConformity || ''}
+            onChange={(e) => handleFieldChange('subjectConformity', e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value=""></option>
+            <option value="good">{tGen('good')}</option>
+            <option value="average">{tGen('average')}</option>
+            <option value="poor">{tGen('poor')}</option>
+          </TextField>
+        </Grid>
+
+        {/* Neighborhood */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, mt: 2 }}>
+            {tGen('neighborhood')}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tGen('dominantPropertyType')}
+            value={formData.dominantPropertyType || ''}
+            onChange={(e) => handleFieldChange('dominantPropertyType', e.target.value)}
+            placeholder="Semi-commerciale"
+          />
+        </Grid>
+
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            size="small"
+            multiline
+            rows={2}
+            label={tGen('favorableFactors')}
+            value={formData.favorableFactors || ''}
+            onChange={(e) => handleFieldChange('favorableFactors', e.target.value)}
+            placeholder={tGen('favorableFactorsPlaceholder')}
+          />
+        </Grid>
+
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            size="small"
+            multiline
+            rows={2}
+            label={tGen('unfavorableFactors')}
+            value={formData.unfavorableFactors || ''}
+            onChange={(e) => handleFieldChange('unfavorableFactors', e.target.value)}
+            placeholder={tGen('unfavorableFactorsPlaceholder')}
+          />
+        </Grid>
+
+        {/* Proximity to Services */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, mt: 2 }}>
+            {tGen('proximityServices')}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={6} md={2}>
+          <TextField
+            fullWidth
+            size="small"
+            select
+            label={tGen('convenience')}
+            value={formData.convenienceProximity || ''}
+            onChange={(e) => handleFieldChange('convenienceProximity', e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value=""></option>
+            <option value="nearby">{tGen('nearby')}</option>
+            <option value="1-2km">{tGen('oneToTwoKm')}</option>
+            <option value="2-3km">{tGen('twoToThreeKm')}</option>
+            <option value="3km+">{tGen('threePlusKm')}</option>
+          </TextField>
+        </Grid>
+
+        <Grid item xs={6} md={2}>
+          <TextField
+            fullWidth
+            size="small"
+            select
+            label={tGen('supermarket')}
+            value={formData.supermarketProximity || ''}
+            onChange={(e) => handleFieldChange('supermarketProximity', e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value=""></option>
+            <option value="nearby">{tGen('nearby')}</option>
+            <option value="1-2km">{tGen('oneToTwoKm')}</option>
+            <option value="2-3km">{tGen('twoToThreeKm')}</option>
+            <option value="3km+">{tGen('threePlusKm')}</option>
+          </TextField>
+        </Grid>
+
+        <Grid item xs={6} md={2}>
+          <TextField
+            fullWidth
+            size="small"
+            select
+            label={tGen('shoppingCenter')}
+            value={formData.shoppingCenterProximity || ''}
+            onChange={(e) => handleFieldChange('shoppingCenterProximity', e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value=""></option>
+            <option value="nearby">{tGen('nearby')}</option>
+            <option value="1-2km">{tGen('oneToTwoKm')}</option>
+            <option value="2-3km">{tGen('twoToThreeKm')}</option>
+            <option value="3km+">{tGen('threePlusKm')}</option>
+          </TextField>
+        </Grid>
+
+        <Grid item xs={6} md={2}>
+          <TextField
+            fullWidth
+            size="small"
+            select
+            label={tGen('school')}
+            value={formData.schoolProximity || ''}
+            onChange={(e) => handleFieldChange('schoolProximity', e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value=""></option>
+            <option value="nearby">{tGen('nearby')}</option>
+            <option value="1-2km">{tGen('oneToTwoKm')}</option>
+            <option value="2-3km">{tGen('twoToThreeKm')}</option>
+            <option value="3km+">{tGen('threePlusKm')}</option>
+          </TextField>
+        </Grid>
+
+        <Grid item xs={6} md={2}>
+          <TextField
+            fullWidth
+            size="small"
+            select
+            label={tGen('transport')}
+            value={formData.transportProximity || ''}
+            onChange={(e) => handleFieldChange('transportProximity', e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value=""></option>
+            <option value="nearby">{tGen('nearby')}</option>
+            <option value="1-2km">{tGen('oneToTwoKm')}</option>
+            <option value="2-3km">{tGen('twoToThreeKm')}</option>
+            <option value="3km+">{tGen('threePlusKm')}</option>
+          </TextField>
+        </Grid>
+
+        <Grid item xs={6} md={2}>
+          <TextField
+            fullWidth
+            size="small"
+            select
+            label={tGen('park')}
+            value={formData.parkProximity || ''}
+            onChange={(e) => handleFieldChange('parkProximity', e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value=""></option>
+            <option value="nearby">{tGen('nearby')}</option>
+            <option value="1-2km">{tGen('oneToTwoKm')}</option>
+            <option value="2-3km">{tGen('twoToThreeKm')}</option>
+            <option value="3km+">{tGen('threePlusKm')}</option>
+          </TextField>
+        </Grid>
+
+        {/* Sector Comments */}
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            size="small"
+            multiline
+            rows={4}
+            label={tGen('comments')}
+            value={formData.sectorComments || ''}
+            onChange={(e) => handleFieldChange('sectorComments', e.target.value)}
+            placeholder={tGen('sectorComments')}
+          />
+        </Grid>
+
+        {/* LOCAL REAL ESTATE MARKET */}
+        <Grid item xs={12}>
+          <Divider sx={{ my: 2 }} />
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'primary.main' }}>
+            {tGen('localRealEstateMarket')}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            size="small"
+            select
+            label={tGen('propertiesForSaleOrRent')}
+            value={formData.propertiesForSaleOrRent || ''}
+            onChange={(e) => handleFieldChange('propertiesForSaleOrRent', e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value=""></option>
+            <option value="none">{tGen('none')}</option>
+            <option value="few">{tGen('few')}</option>
+            <option value="many">{tGen('many')}</option>
+          </TextField>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            size="small"
+            select
+            label={tGen('saleDelay')}
+            value={formData.saleDelay || ''}
+            onChange={(e) => handleFieldChange('saleDelay', e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value=""></option>
+            <option value="0-4">{tGen('zeroToFourMonths')}</option>
+            <option value="4-8">{tGen('fourToEightMonths')}</option>
+            <option value="8+">{tGen('eightPlusMonths')}</option>
+          </TextField>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            size="small"
+            select
+            label={tGen('supplyAndDemand')}
+            value={formData.supplyAndDemand || ''}
+            onChange={(e) => handleFieldChange('supplyAndDemand', e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value=""></option>
+            <option value="balanced">{tGen('balanced')}</option>
+            <option value="imbalanced">{tGen('imbalanced')}</option>
+          </TextField>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            select
+            label={tGen('marketType')}
+            value={formData.marketType || ''}
+            onChange={(e) => handleFieldChange('marketType', e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value=""></option>
+            <option value="buyer">{tGen('buyer')}</option>
+            <option value="seller">{tGen('seller')}</option>
+          </TextField>
+        </Grid>
+
+        {/* Price Variation */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, mt: 2 }}>
+            {tGen('priceVariation')}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={6} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            select
+            label={tGen('land')}
+            value={formData.landPriceVariation || ''}
+            onChange={(e) => handleFieldChange('landPriceVariation', e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value=""></option>
+            <option value="stable">{tGen('stable')}</option>
+            <option value="increasing">{tGen('increasing')}</option>
+            <option value="decreasing">{tGen('decreasing')}</option>
+          </TextField>
+        </Grid>
+
+        <Grid item xs={6} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            select
+            label={tGen('rent')}
+            value={formData.rentPriceVariation || ''}
+            onChange={(e) => handleFieldChange('rentPriceVariation', e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value=""></option>
+            <option value="stable">{tGen('stable')}</option>
+            <option value="increasing">{tGen('increasing')}</option>
+            <option value="decreasing">{tGen('decreasing')}</option>
+          </TextField>
+        </Grid>
+
+        <Grid item xs={6} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            select
+            label={tGen('constructionCost')}
+            value={formData.constructionCostVariation || ''}
+            onChange={(e) => handleFieldChange('constructionCostVariation', e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value=""></option>
+            <option value="stable">{tGen('stable')}</option>
+            <option value="increasing">{tGen('increasing')}</option>
+            <option value="decreasing">{tGen('decreasing')}</option>
+          </TextField>
+        </Grid>
+
+        <Grid item xs={6} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            select
+            label={tGen('interestRates')}
+            value={formData.interestRatesVariation || ''}
+            onChange={(e) => handleFieldChange('interestRatesVariation', e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value=""></option>
+            <option value="stable">{tGen('ratherStable')}</option>
+            <option value="increasing">{tGen('increasing')}</option>
+            <option value="decreasing">{tGen('decreasing')}</option>
+          </TextField>
+        </Grid>
+
+        {/* Anticipated Price Trend */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, mt: 2 }}>
+            {tGen('anticipatedPriceTrend')}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            select
+            label={tGen('shortTerm')}
+            value={formData.shortTermTrend || ''}
+            onChange={(e) => handleFieldChange('shortTermTrend', e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value=""></option>
+            <option value="stable">{tGen('stable')}</option>
+            <option value="increasing">{tGen('increasing')}</option>
+            <option value="decreasing">{tGen('decreasing')}</option>
+          </TextField>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            select
+            label={tGen('mediumTerm')}
+            value={formData.mediumTermTrend || ''}
+            onChange={(e) => handleFieldChange('mediumTermTrend', e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value=""></option>
+            <option value="stable">{tGen('ratherStable')}</option>
+            <option value="increasing">{tGen('increasing')}</option>
+            <option value="decreasing">{tGen('decreasing')}</option>
+          </TextField>
+        </Grid>
+
+        {/* Market Comments */}
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            size="small"
+            multiline
+            rows={3}
+            label={tGen('comments')}
+            value={formData.marketComments || ''}
+            onChange={(e) => handleFieldChange('marketComments', e.target.value)}
+            placeholder={tGen('marketComments')}
+          />
+        </Grid>
+
+        {/* MUNICIPAL DATA */}
+        <Grid item xs={12}>
+          <Divider sx={{ my: 2 }} />
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'primary.main' }}>
+            {tGen('municipalData')}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+            {tGen('taxRoll')}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tGen('matriculeNumber')}
+            value={formData.matriculeNumber || ''}
+            onChange={(e) => handleFieldChange('matriculeNumber', e.target.value)}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tGen('rollYear')}
+            value={formData.rollYear || ''}
+            onChange={(e) => handleFieldChange('rollYear', e.target.value)}
+            placeholder="2023-2024-2025"
+          />
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tGen('marketDate')}
+            type="date"
+            value={formData.marketDate || ''}
+            onChange={(e) => handleFieldChange('marketDate', e.target.value)}
+            InputLabelProps={{ shrink: true }}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tGen('median')}
+            value={formData.median || ''}
+            onChange={(e) => handleFieldChange('median', e.target.value)}
+            placeholder="100%"
+          />
+        </Grid>
+
+        {/* Evaluation */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, mt: 2 }}>
+            {tGen('evaluation')}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            size="small"
+            type="number"
+            label={tGen('landValue')}
+            value={formData.evaluationLandValue || ''}
+            onChange={(e) => handleFieldChange('evaluationLandValue', e.target.value)}
+            InputProps={{
+              startAdornment: <Typography sx={{ mr: 1 }}>$</Typography>
+            }}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            size="small"
+            type="number"
+            label={tGen('buildingValue')}
+            value={formData.evaluationBuildingValue || ''}
+            onChange={(e) => handleFieldChange('evaluationBuildingValue', e.target.value)}
+            InputProps={{
+              startAdornment: <Typography sx={{ mr: 1 }}>$</Typography>
+            }}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            size="small"
+            type="number"
+            label={tGen('totalValue')}
+            value={formData.evaluationTotalValue || ''}
+            onChange={(e) => handleFieldChange('evaluationTotalValue', e.target.value)}
+            InputProps={{
+              startAdornment: <Typography sx={{ mr: 1 }}>$</Typography>
+            }}
+          />
+        </Grid>
+
+        {/* Taxes */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, mt: 2 }}>
+            {tGen('taxes')}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            size="small"
+            type="number"
+            label={tGen('municipalTax')}
+            value={formData.municipalTax || ''}
+            onChange={(e) => handleFieldChange('municipalTax', e.target.value)}
+            InputProps={{
+              startAdornment: <Typography sx={{ mr: 1 }}>$</Typography>
+            }}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            size="small"
+            type="number"
+            label={tGen('schoolTax')}
+            value={formData.schoolTax || ''}
+            onChange={(e) => handleFieldChange('schoolTax', e.target.value)}
+            InputProps={{
+              startAdornment: <Typography sx={{ mr: 1 }}>$</Typography>
+            }}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            size="small"
+            type="number"
+            label={tGen('totalTax')}
+            value={formData.totalTax || ''}
+            onChange={(e) => handleFieldChange('totalTax', e.target.value)}
+            InputProps={{
+              startAdornment: <Typography sx={{ mr: 1 }}>$</Typography>
+            }}
+          />
+        </Grid>
+
+        {/* Zoning */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, mt: 2 }}>
+            {tGen('zoning')}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Typography variant="body2">{tGen('conformUse')}:</Typography>
+            <label>
+              <input
+                type="radio"
+                name="conformUse"
+                value="yes"
+                checked={formData.conformUse === 'yes'}
+                onChange={(e) => handleFieldChange('conformUse', e.target.value)}
+              />
+              {' '}{tGen('yes')}
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="conformUse"
+                value="no"
+                checked={formData.conformUse === 'no'}
+                onChange={(e) => handleFieldChange('conformUse', e.target.value)}
+              />
+              {' '}{tGen('no')}
+            </label>
+            <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
+              {tGen('ifNoExplain')}
+            </Typography>
+          </Box>
+        </Grid>
+
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            size="small"
+            multiline
+            rows={4}
+            label={tGen('comments')}
+            value={formData.zoningComments || ''}
+            onChange={(e) => handleFieldChange('zoningComments', e.target.value)}
+            placeholder={tGen('zoningComments')}
+          />
+        </Grid>
+
+        {/* SERVICES */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, mt: 2 }}>
+            {tGen('services')}
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.serviceAqueduct || false}
+                onChange={(e) => handleFieldChange('serviceAqueduct', e.target.checked)}
+              />
+              {' '}{tGen('aqueduct')}
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.serviceStormSewer || false}
+                onChange={(e) => handleFieldChange('serviceStormSewer', e.target.checked)}
+              />
+              {' '}{tGen('stormSewer')}
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.serviceSanitarySewer || false}
+                onChange={(e) => handleFieldChange('serviceSanitarySewer', e.target.checked)}
+              />
+              {' '}{tGen('sanitarySewer')}
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.serviceWell || false}
+                onChange={(e) => handleFieldChange('serviceWell', e.target.checked)}
+              />
+              {' '}{tGen('well')}
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.serviceSepticTank || false}
+                onChange={(e) => handleFieldChange('serviceSepticTank', e.target.checked)}
+              />
+              {' '}{tGen('septicTank')}
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.serviceLighting || false}
+                onChange={(e) => handleFieldChange('serviceLighting', e.target.checked)}
+              />
+              {' '}{tGen('lighting')}
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.serviceNaturalGas || false}
+                onChange={(e) => handleFieldChange('serviceNaturalGas', e.target.checked)}
+              />
+              {' '}{tGen('naturalGas')}
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.serviceFireHydrants || false}
+                onChange={(e) => handleFieldChange('serviceFireHydrants', e.target.checked)}
+              />
+              {' '}{tGen('fireHydrants')}
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.serviceDitch || false}
+                onChange={(e) => handleFieldChange('serviceDitch', e.target.checked)}
+              />
+              {' '}{tGen('ditch')}
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.serviceDrainField || false}
+                onChange={(e) => handleFieldChange('serviceDrainField', e.target.checked)}
+              />
+              {' '}{tGen('drainField')}
+            </label>
+          </Box>
+        </Grid>
+
+        {/* STREETS */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, mt: 2 }}>
+            {tGen('streets')}
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.streetPaving || false}
+                onChange={(e) => handleFieldChange('streetPaving', e.target.checked)}
+              />
+              {' '}{tGen('paving')}
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.streetSidewalk || false}
+                onChange={(e) => handleFieldChange('streetSidewalk', e.target.checked)}
+              />
+              {' '}{tGen('sidewalk')}
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.streetCurb || false}
+                onChange={(e) => handleFieldChange('streetCurb', e.target.checked)}
+              />
+              {' '}{tGen('curb')}
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.streetAlley || false}
+                onChange={(e) => handleFieldChange('streetAlley', e.target.checked)}
+              />
+              {' '}{tGen('alley')}
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.streetBikePath || false}
+                onChange={(e) => handleFieldChange('streetBikePath', e.target.checked)}
+              />
+              {' '}{tGen('bikePath')}
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.streetOther || false}
+                onChange={(e) => handleFieldChange('streetOther', e.target.checked)}
+              />
+              {' '}{tGen('other')}
+            </label>
+          </Box>
+        </Grid>
+
+        {/* ADDITIONAL COMMENTS */}
+        <Grid item xs={12}>
+          <Divider sx={{ my: 2 }} />
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'primary.main' }}>
+            {tGen('additionalComments')}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            size="small"
+            multiline
+            rows={5}
+            value={formData.additionalComments || ''}
+            onChange={(e) => handleFieldChange('additionalComments', e.target.value)}
+            placeholder={tGen('additionalCommentsPlaceholder')}
+          />
         </Grid>
       </Grid>
     );
