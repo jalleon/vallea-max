@@ -116,6 +116,8 @@ export default function AppraisalSectionForm({
           return renderReferenceSheetSection();
         case 'general':
           return renderGeneralitiesSection();
+        case 'description':
+          return renderDescriptionSection();
         case 'informations_generales':
           return renderGeneralInfoSection();
         case 'description_propriete':
@@ -2045,6 +2047,856 @@ export default function AppraisalSectionForm({
             value={formData.additionalComments || ''}
             onChange={(e) => handleFieldChange('additionalComments', e.target.value)}
             placeholder={tGen('additionalCommentsPlaceholder')}
+          />
+        </Grid>
+      </Grid>
+    );
+  };
+
+  const renderDescriptionSection = () => {
+    const tDesc = useTranslations('evaluations.sections.descriptionSection');
+
+    return (
+      <Grid container spacing={3}>
+        {/* LAND SUMMARY DESCRIPTION */}
+        <Grid item xs={12}>
+          <Typography variant="h5" sx={{ fontWeight: 700, mb: 3, color: 'primary.main' }}>
+            {tDesc('landSummary')}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tDesc('topography')}
+            value={formData.topography || ''}
+            onChange={(e) => handleFieldChange('topography', e.target.value)}
+            placeholder={tDesc('flatRelationToNeighboring')}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            select
+            label={tDesc('floodRisk')}
+            value={formData.floodRisk || ''}
+            onChange={(e) => handleFieldChange('floodRisk', e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value=""></option>
+            <option value="none">{tDesc('none')}</option>
+            <option value="low">{tDesc('low')}</option>
+            <option value="medium">{tDesc('medium')}</option>
+            <option value="high">{tDesc('high')}</option>
+          </TextField>
+        </Grid>
+
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tDesc('contaminationRisk')}
+            value={formData.contaminationRisk || ''}
+            onChange={(e) => handleFieldChange('contaminationRisk', e.target.value)}
+            placeholder={tDesc('imperceptibleUnknownHistory')}
+          />
+        </Grid>
+
+        {/* Location Certificate */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, mt: 2 }}>
+            {tDesc('locationCertificate')}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Typography variant="body2">{tDesc('consulted')}:</Typography>
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.certificateConsulted || false}
+                onChange={(e) => handleFieldChange('certificateConsulted', e.target.checked)}
+              />
+            </label>
+          </Box>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Typography variant="body2">{tDesc('updateRecommended')}:</Typography>
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.certificateUpdateRecommended || false}
+                onChange={(e) => handleFieldChange('certificateUpdateRecommended', e.target.checked)}
+              />
+            </label>
+          </Box>
+        </Grid>
+
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tDesc('certificateComments')}
+            value={formData.certificateComments || ''}
+            onChange={(e) => handleFieldChange('certificateComments', e.target.value)}
+            placeholder={tDesc('certificateDatePlaceholder')}
+          />
+        </Grid>
+
+        {/* Dimensions */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, mt: 2 }}>
+            {tDesc('dimensions')}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            size="small"
+            type="number"
+            label={tDesc('frontage')}
+            value={formData.lotFrontage || ''}
+            onChange={(e) => handleFieldChange('lotFrontage', e.target.value)}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            size="small"
+            type="number"
+            label={tDesc('depth')}
+            value={formData.lotDepth || ''}
+            onChange={(e) => handleFieldChange('lotDepth', e.target.value)}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            size="small"
+            type="number"
+            label={`${tDesc('area')} (pi²)`}
+            value={formData.lotArea || ''}
+            onChange={(e) => handleFieldChange('lotArea', e.target.value)}
+          />
+        </Grid>
+
+        {/* Accessibility */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, mt: 2 }}>
+            {tDesc('accessibility')}
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.accessibilityShared || false}
+                onChange={(e) => handleFieldChange('accessibilityShared', e.target.checked)}
+              />
+              {' '}{tDesc('shared')}
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.accessibilityPrivate || false}
+                onChange={(e) => handleFieldChange('accessibilityPrivate', e.target.checked)}
+              />
+              {' '}{tDesc('private')}
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.accessibilityPublic || false}
+                onChange={(e) => handleFieldChange('accessibilityPublic', e.target.checked)}
+              />
+              {' '}{tDesc('public')}
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.accessibilityOther || false}
+                onChange={(e) => handleFieldChange('accessibilityOther', e.target.checked)}
+              />
+              {' '}{tDesc('other')}
+            </label>
+          </Box>
+        </Grid>
+
+        {/* Highest and Best Use */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, mt: 2 }}>
+            {tDesc('highestBestUse')}
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+            <label>
+              <input
+                type="radio"
+                name="highestBestUse"
+                value="yes"
+                checked={formData.highestBestUse === 'yes'}
+                onChange={(e) => handleFieldChange('highestBestUse', e.target.value)}
+              />
+              {' '}{tDesc('yes')}
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="highestBestUse"
+                value="no"
+                checked={formData.highestBestUse === 'no'}
+                onChange={(e) => handleFieldChange('highestBestUse', e.target.value)}
+              />
+              {' '}{tDesc('no')}
+            </label>
+            <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
+              {tDesc('ifNoComment')}
+            </Typography>
+          </Box>
+          <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary', lineHeight: 1.6 }}>
+            {tDesc('highestBestUseDefinition')}
+          </Typography>
+        </Grid>
+
+        {/* EXTERIOR DEVELOPMENT / PARKING */}
+        <Grid item xs={12}>
+          <Divider sx={{ my: 2 }} />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
+              {tDesc('exteriorDevelopment')}
+            </Typography>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
+              {tDesc('dependencies')}
+            </Typography>
+          </Box>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+            {tDesc('parking')}
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <TextField
+              size="small"
+              label={tDesc('interior')}
+              type="number"
+              value={formData.parkingInterior || ''}
+              onChange={(e) => handleFieldChange('parkingInterior', e.target.value)}
+              sx={{ width: '120px' }}
+            />
+            <TextField
+              size="small"
+              label={tDesc('exterior')}
+              type="number"
+              value={formData.parkingExterior || ''}
+              onChange={(e) => handleFieldChange('parkingExterior', e.target.value)}
+              sx={{ width: '120px' }}
+            />
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.parkingNone || false}
+                onChange={(e) => handleFieldChange('parkingNone', e.target.checked)}
+              />
+              {' '}{tDesc('noneParking')}
+            </label>
+          </Box>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            multiline
+            rows={2}
+            label={tDesc('dependenciesDescription')}
+            value={formData.dependenciesDescription || ''}
+            onChange={(e) => handleFieldChange('dependenciesDescription', e.target.value)}
+            placeholder={tDesc('dependenciesPlaceholder')}
+          />
+        </Grid>
+
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            size="small"
+            multiline
+            rows={2}
+            value={formData.exteriorAmenities || ''}
+            onChange={(e) => handleFieldChange('exteriorAmenities', e.target.value)}
+            placeholder={tDesc('exteriorAmenities')}
+          />
+        </Grid>
+
+        {/* BUILDING SUMMARY DESCRIPTION */}
+        <Grid item xs={12}>
+          <Divider sx={{ my: 2 }} />
+          <Typography variant="h5" sx={{ fontWeight: 700, mb: 3, color: 'primary.main' }}>
+            {tDesc('buildingSummary')}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+            {tDesc('generalities')}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tDesc('buildingUse')}
+            value={formData.buildingUse || ''}
+            onChange={(e) => handleFieldChange('buildingUse', e.target.value)}
+            placeholder={tDesc('residentialCommercial')}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tDesc('propertyType')}
+            value={formData.propertyType || ''}
+            onChange={(e) => handleFieldChange('propertyType', e.target.value)}
+            placeholder={tDesc('semiCommercial')}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tDesc('groundDimensions')}
+            value={formData.groundDimensions || ''}
+            onChange={(e) => handleFieldChange('groundDimensions', e.target.value)}
+            placeholder="IRR x IRR"
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            select
+            label={tDesc('constructionQuality')}
+            value={formData.constructionQuality || ''}
+            onChange={(e) => handleFieldChange('constructionQuality', e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value=""></option>
+            <option value="standard">{tDesc('standard')}</option>
+            <option value="superior">{tDesc('superior')}</option>
+            <option value="economical">{tDesc('economical')}</option>
+          </TextField>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            type="number"
+            label={tDesc('numberOfUnits')}
+            value={formData.numberOfUnits || ''}
+            onChange={(e) => handleFieldChange('numberOfUnits', e.target.value)}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            type="number"
+            label={tDesc('constructionYear')}
+            value={formData.constructionYear || ''}
+            onChange={(e) => handleFieldChange('constructionYear', e.target.value)}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tDesc('apparentAge')}
+            value={formData.apparentAgeEconomicLife || ''}
+            onChange={(e) => handleFieldChange('apparentAgeEconomicLife', e.target.value)}
+            placeholder="95 ans / 28 ans"
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            type="number"
+            label={tDesc('numberOfFloors')}
+            value={formData.numberOfFloors || ''}
+            onChange={(e) => handleFieldChange('numberOfFloors', e.target.value)}
+          />
+        </Grid>
+
+        {/* Space Utilization */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, mt: 2 }}>
+            {tDesc('spaceUtilization')}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            size="small"
+            type="number"
+            label={`${tDesc('groundFloorArea')} (${tDesc('squareFeet')})`}
+            value={formData.groundFloorArea || ''}
+            onChange={(e) => handleFieldChange('groundFloorArea', e.target.value)}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            size="small"
+            type="number"
+            label={`${tDesc('basementArea')} (${tDesc('squareFeet')})`}
+            value={formData.basementArea || ''}
+            onChange={(e) => handleFieldChange('basementArea', e.target.value)}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            size="small"
+            type="number"
+            label={`${tDesc('livingArea')} (${tDesc('squareFeet')})`}
+            value={formData.livingAreaExcludingBasement || ''}
+            onChange={(e) => handleFieldChange('livingAreaExcludingBasement', e.target.value)}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tDesc('basementFinishedPercent')}
+            value={formData.basementFinishedPercent || ''}
+            onChange={(e) => handleFieldChange('basementFinishedPercent', e.target.value)}
+            placeholder="0%"
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tDesc('areaSource')}
+            value={formData.areaSource || ''}
+            onChange={(e) => handleFieldChange('areaSource', e.target.value)}
+            placeholder={tDesc('locationCertificateAndMeasured')}
+          />
+        </Grid>
+
+        {/* Components Table */}
+        <Grid item xs={12}>
+          <Divider sx={{ my: 2 }} />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {tDesc('components')}
+            </Typography>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {tDesc('observationsGeneralCondition')}
+            </Typography>
+          </Box>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tDesc('foundation')}
+            value={formData.foundation || ''}
+            onChange={(e) => handleFieldChange('foundation', e.target.value)}
+            placeholder={tDesc('stoneAndMortar')}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            multiline
+            rows={8}
+            label={tDesc('generalConditionNotes')}
+            value={formData.generalConditionNotes || ''}
+            onChange={(e) => handleFieldChange('generalConditionNotes', e.target.value)}
+            placeholder={tDesc('generalConditionPlaceholder')}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tDesc('frame')}
+            value={formData.frame || ''}
+            onChange={(e) => handleFieldChange('frame', e.target.value)}
+            placeholder={tDesc('woodFrame')}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tDesc('exteriorWalls')}
+            value={formData.exteriorWalls || ''}
+            onChange={(e) => handleFieldChange('exteriorWalls', e.target.value)}
+            placeholder={tDesc('brickVinylAluminum')}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tDesc('insulation')}
+            value={formData.insulation || ''}
+            onChange={(e) => handleFieldChange('insulation', e.target.value)}
+            placeholder={tDesc('mineralWool')}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tDesc('roofing')}
+            value={formData.roofing || ''}
+            onChange={(e) => handleFieldChange('roofing', e.target.value)}
+            placeholder={tDesc('asphaltShingles')}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tDesc('soffit')}
+            value={formData.soffit || ''}
+            onChange={(e) => handleFieldChange('soffit', e.target.value)}
+            placeholder={tDesc('ventilatedAluminum')}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tDesc('windows')}
+            value={formData.windows || ''}
+            onChange={(e) => handleFieldChange('windows', e.target.value)}
+            placeholder={tDesc('slidingFixed')}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tDesc('doors')}
+            value={formData.doors || ''}
+            onChange={(e) => handleFieldChange('doors', e.target.value)}
+            placeholder={tDesc('aluminumSteelGlass')}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tDesc('plumbing')}
+            value={formData.plumbing || ''}
+            onChange={(e) => handleFieldChange('plumbing', e.target.value)}
+            placeholder={tDesc('standardWaterHeater')}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tDesc('electricity')}
+            value={formData.electricity || ''}
+            onChange={(e) => handleFieldChange('electricity', e.target.value)}
+            placeholder={tDesc('amperesCircuitBreaker')}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tDesc('heating')}
+            value={formData.heating || ''}
+            onChange={(e) => handleFieldChange('heating', e.target.value)}
+            placeholder={tDesc('biEnergy')}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tDesc('cabinets')}
+            value={formData.cabinets || ''}
+            onChange={(e) => handleFieldChange('cabinets', e.target.value)}
+            placeholder={tDesc('melamineLaminate')}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tDesc('builtInElements')}
+            value={formData.builtInElements || ''}
+            onChange={(e) => handleFieldChange('builtInElements', e.target.value)}
+            placeholder={tDesc('none')}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tDesc('numberOfBathrooms')}
+            value={formData.numberOfBathrooms || ''}
+            onChange={(e) => handleFieldChange('numberOfBathrooms', e.target.value)}
+            placeholder="(1) x 4 appareils"
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tDesc('fireplace')}
+            value={formData.fireplace || ''}
+            onChange={(e) => handleFieldChange('fireplace', e.target.value)}
+            placeholder={tDesc('none')}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tDesc('airConditioning')}
+            value={formData.airConditioning || ''}
+            onChange={(e) => handleFieldChange('airConditioning', e.target.value)}
+            placeholder={tDesc('bathroomFan')}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label={tDesc('specialEquipment')}
+            value={formData.specialEquipment || ''}
+            onChange={(e) => handleFieldChange('specialEquipment', e.target.value)}
+            placeholder={tDesc('centralVacuumAlarm')}
+          />
+        </Grid>
+
+        {/* INTERIOR LAYOUT AND FINISHES */}
+        <Grid item xs={12}>
+          <Divider sx={{ my: 2 }} />
+          <Typography variant="h5" sx={{ fontWeight: 700, mb: 3, color: 'primary.main' }}>
+            {tDesc('interiorLayout')}
+          </Typography>
+        </Grid>
+
+        {/* Basement */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+            {tDesc('basement')}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            multiline
+            rows={3}
+            label={tDesc('roomDescription')}
+            value={formData.basementRoomDescription || ''}
+            onChange={(e) => handleFieldChange('basementRoomDescription', e.target.value)}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            multiline
+            rows={3}
+            label={tDesc('walls')}
+            value={formData.basementWalls || ''}
+            onChange={(e) => handleFieldChange('basementWalls', e.target.value)}
+            placeholder={tDesc('drywall')}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            multiline
+            rows={3}
+            label={tDesc('ceilings')}
+            value={formData.basementCeilings || ''}
+            onChange={(e) => handleFieldChange('basementCeilings', e.target.value)}
+            placeholder={tDesc('drywall')}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            multiline
+            rows={3}
+            label={tDesc('floors')}
+            value={formData.basementFloors || ''}
+            onChange={(e) => handleFieldChange('basementFloors', e.target.value)}
+            placeholder={tDesc('vinylCeramic')}
+          />
+        </Grid>
+
+        {/* Ground Floor */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, mt: 2 }}>
+            {tDesc('groundFloor')}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            multiline
+            rows={3}
+            label={tDesc('roomDescription')}
+            value={formData.groundFloorRoomDescription || ''}
+            onChange={(e) => handleFieldChange('groundFloorRoomDescription', e.target.value)}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            multiline
+            rows={3}
+            label={tDesc('walls')}
+            value={formData.groundFloorWalls || ''}
+            onChange={(e) => handleFieldChange('groundFloorWalls', e.target.value)}
+            placeholder={tDesc('drywall')}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            multiline
+            rows={3}
+            label={tDesc('ceilings')}
+            value={formData.groundFloorCeilings || ''}
+            onChange={(e) => handleFieldChange('groundFloorCeilings', e.target.value)}
+            placeholder={tDesc('drywall')}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            multiline
+            rows={3}
+            label={tDesc('floors')}
+            value={formData.groundFloorFloors || ''}
+            onChange={(e) => handleFieldChange('groundFloorFloors', e.target.value)}
+            placeholder={tDesc('vinylCeramic')}
+          />
+        </Grid>
+
+        {/* Typical Floor */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, mt: 2 }}>
+            {tDesc('typicalFloor')}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            multiline
+            rows={3}
+            label={tDesc('roomDescription')}
+            value={formData.typicalFloorRoomDescription || ''}
+            onChange={(e) => handleFieldChange('typicalFloorRoomDescription', e.target.value)}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            multiline
+            rows={3}
+            label={tDesc('walls')}
+            value={formData.typicalFloorWalls || ''}
+            onChange={(e) => handleFieldChange('typicalFloorWalls', e.target.value)}
+            placeholder={tDesc('drywall')}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            multiline
+            rows={3}
+            label={tDesc('ceilings')}
+            value={formData.typicalFloorCeilings || ''}
+            onChange={(e) => handleFieldChange('typicalFloorCeilings', e.target.value)}
+            placeholder={tDesc('drywall')}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <TextField
+            fullWidth
+            size="small"
+            multiline
+            rows={3}
+            label={tDesc('floors')}
+            value={formData.typicalFloorFloors || ''}
+            onChange={(e) => handleFieldChange('typicalFloorFloors', e.target.value)}
+            placeholder={tDesc('laminateFlooring')}
           />
         </Grid>
       </Grid>
