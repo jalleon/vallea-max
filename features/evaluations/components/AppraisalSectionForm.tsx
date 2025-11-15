@@ -23,6 +23,10 @@ import { TemplateType } from '../types/evaluation.types';
 import { useTranslations } from 'next-intl';
 import DirectComparisonForm from './DirectComparisonForm';
 import { useOrganizationSettings } from '../hooks/useOrganizationSettings';
+import NarrativeEditor from './NarrativeEditor';
+import AIWritingAssistant from './AIWritingAssistant';
+import SnippetsDialog from './SnippetsDialog';
+import PresentationSectionContent from './PresentationSectionContent';
 
 interface AppraisalSectionFormProps {
   sectionId: string;
@@ -48,7 +52,13 @@ export default function AppraisalSectionForm({
   allSectionsData
 }: AppraisalSectionFormProps) {
   const t = useTranslations('evaluations.sections');
+  const tRef = useTranslations('evaluations.sections.referenceSheet');
+  const tGen = useTranslations('evaluations.sections.generalSection');
+  const tDesc = useTranslations('evaluations.sections.descriptionSection');
   const [formData, setFormData] = useState(data);
+  const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
+  const [snippetsDialogOpen, setSnippetsDialogOpen] = useState(false);
+  const [currentNarrativeField, setCurrentNarrativeField] = useState<string>('');
 
   console.log('🔍 AppraisalSectionForm - sectionId:', sectionId);
   console.log('🔍 AppraisalSectionForm - subjectPropertyId:', subjectPropertyId);
@@ -56,6 +66,50 @@ export default function AppraisalSectionForm({
   useEffect(() => {
     setFormData(data);
   }, [data]);
+
+  // Auto-populate reference sheet section on first load
+  useEffect(() => {
+    if (sectionId === 'fiche_reference' && appraisalData && Object.keys(formData).length === 0) {
+      const initialData = {
+        // Purpose and Scope
+        purpose: formData.purpose || tRef('purposePlaceholder'),
+
+        // Property Information - Auto-populated
+        address: appraisalData.address || '',
+        city: appraisalData.city || '',
+        fileNumber: formData.fileNumber || '',
+
+        // Cadastral Information
+        lotNumber: formData.lotNumber || '',
+        cadastre: formData.cadastre || 'Cadastre du Québec',
+
+        // Mandant (Client) Information
+        mandantFileNumber: formData.mandantFileNumber || '',
+        mandantName: formData.mandantName || '',
+        mandantCompany: formData.mandantCompany || '',
+        mandantAddress: formData.mandantAddress || '',
+        mandantCity: formData.mandantCity || '',
+        mandantPhone: formData.mandantPhone || '',
+        mandantEmail: formData.mandantEmail || '',
+
+        // Owner Information
+        ownerName: formData.ownerName || '',
+        ownerPhone: formData.ownerPhone || '',
+
+        // Borrower Information
+        borrowerName: formData.borrowerName || appraisalData.client_name || '',
+        borrowerPhone: formData.borrowerPhone || '',
+
+        // Conclusion
+        currentMarketValue: formData.currentMarketValue || '',
+        potentialMarketValue: formData.potentialMarketValue || '',
+        valueInWords: formData.valueInWords || '',
+        asOfDate: formData.asOfDate || appraisalData.effective_date || new Date().toISOString().split('T')[0]
+      };
+      setFormData(initialData);
+      onChange(initialData);
+    }
+  }, [sectionId, appraisalData]);
 
   const handleFieldChange = (field: string, value: any) => {
     const newData = { ...formData, [field]: value };
@@ -81,9 +135,15 @@ export default function AppraisalSectionForm({
         case 'propriete_evaluee':
           return renderPropertySection();
         case 'quartier':
-          return renderQuartierSection();
+          return renderNarrativeSection('description', 'Describe the neighborhood, amenities, and general desirability...');
+        case 'site':
+          return renderNarrativeSection('description', 'Describe the site characteristics, topography, and location...');
         case 'ameliorations':
-          return renderAmeliorationsSection();
+          return renderNarrativeSection('description', 'Describe the improvements, construction quality, and condition...');
+        case 'exposition':
+          return renderNarrativeSection('description', 'Describe the market exposure and marketing period...');
+        case 'conciliation':
+          return renderNarrativeSection('description', 'Provide reconciliation of value indications from different approaches...');
         case 'technique_parite':
           return <DirectComparisonForm data={formData} onChange={onChange} subjectPropertyId={subjectPropertyId} subjectPropertyType={subjectPropertyType || undefined} reloadTrigger={reloadTrigger} />;
         default:
@@ -102,6 +162,20 @@ export default function AppraisalSectionForm({
           return renderPropertySection();
         case 'methode_parite':
           return <DirectComparisonForm data={formData} onChange={onChange} subjectPropertyId={subjectPropertyId} subjectPropertyType={subjectPropertyType || undefined} reloadTrigger={reloadTrigger} />;
+        case 'voisinage':
+          return renderNarrativeSection('description', 'Describe the neighborhood characteristics...');
+        case 'emplacement':
+          return renderNarrativeSection('description', 'Describe the location and site...');
+        case 'ameliorations':
+          return renderNarrativeSection('description', 'Describe the improvements and building characteristics...');
+        case 'utilisation_optimale':
+          return renderNarrativeSection('description', 'Analyze the highest and best use...');
+        case 'historique_ventes':
+          return renderNarrativeSection('description', 'Describe the sales history...');
+        case 'duree_exposition':
+          return renderNarrativeSection('description', 'Describe the marketing time and exposure...');
+        case 'conciliation_estimation':
+          return renderNarrativeSection('description', 'Provide reconciliation of value estimates...');
         default:
           return renderGenericSection();
       }
@@ -115,9 +189,11 @@ export default function AppraisalSectionForm({
         case 'fiche_reference':
           return renderReferenceSheetSection();
         case 'general':
-          return renderGeneralitiesSection();
+          return renderNarrativeSection('description', 'Provide general information and context...');
         case 'description':
-          return renderDescriptionSection();
+          return renderNarrativeSection('description', 'Provide detailed description...');
+        case 'conclusion_comparaison':
+          return renderNarrativeSection('description', 'Provide conclusion and final reconciliation...');
         case 'informations_generales':
           return renderGeneralInfoSection();
         case 'description_propriete':
@@ -491,7 +567,17 @@ export default function AppraisalSectionForm({
     </Grid>
   );
 
-  const renderPresentationSection = () => {
+  const renderPresentationSection = () => (
+    <PresentationSectionContent
+      formData={formData}
+      handleFieldChange={handleFieldChange}
+      appraisalData={appraisalData}
+      onChange={onChange}
+      setFormData={setFormData}
+    />
+  );
+
+  const renderPresentationSection_OLD = () => {
     const { settings, saveSettings } = useOrganizationSettings();
     const [saving, setSaving] = useState(false);
 
@@ -718,52 +804,6 @@ export default function AppraisalSectionForm({
   };
 
   const renderReferenceSheetSection = () => {
-    const tRef = useTranslations('evaluations.sections.referenceSheet');
-
-    // Auto-populate on first load
-    useEffect(() => {
-      if (appraisalData && Object.keys(formData).length === 0) {
-        const initialData = {
-          // Purpose and Scope
-          purpose: formData.purpose || tRef('purposePlaceholder'),
-
-          // Property Information - Auto-populated
-          address: appraisalData.address || '',
-          city: appraisalData.city || '',
-          fileNumber: formData.fileNumber || '',
-
-          // Cadastral Information
-          lotNumber: formData.lotNumber || '',
-          cadastre: formData.cadastre || 'Cadastre du Québec',
-
-          // Mandant (Client) Information
-          mandantFileNumber: formData.mandantFileNumber || '',
-          mandantName: formData.mandantName || '',
-          mandantCompany: formData.mandantCompany || '',
-          mandantAddress: formData.mandantAddress || '',
-          mandantCity: formData.mandantCity || '',
-          mandantPhone: formData.mandantPhone || '',
-          mandantEmail: formData.mandantEmail || '',
-
-          // Owner Information
-          ownerName: formData.ownerName || '',
-          ownerPhone: formData.ownerPhone || '',
-
-          // Borrower Information
-          borrowerName: formData.borrowerName || appraisalData.client_name || '',
-          borrowerPhone: formData.borrowerPhone || '',
-
-          // Conclusion
-          currentMarketValue: formData.currentMarketValue || '',
-          potentialMarketValue: formData.potentialMarketValue || '',
-          valueInWords: formData.valueInWords || '',
-          asOfDate: formData.asOfDate || appraisalData.effective_date || new Date().toISOString().split('T')[0]
-        };
-        setFormData(initialData);
-        onChange(initialData);
-      }
-    }, [appraisalData]);
-
     return (
       <Grid container spacing={3}>
         <Grid item xs={12}>
@@ -1068,8 +1108,6 @@ export default function AppraisalSectionForm({
   };
 
   const renderGeneralitiesSection = () => {
-    const tGen = useTranslations('evaluations.sections.generalSection');
-
     return (
       <Grid container spacing={3}>
         {/* GÉNÉRALITÉS Header */}
@@ -2054,8 +2092,6 @@ export default function AppraisalSectionForm({
   };
 
   const renderDescriptionSection = () => {
-    const tDesc = useTranslations('evaluations.sections.descriptionSection');
-
     return (
       <Grid container spacing={3}>
         {/* LAND SUMMARY DESCRIPTION */}
@@ -2903,6 +2939,34 @@ export default function AppraisalSectionForm({
     );
   };
 
+  // Render narrative section with rich text editor
+  const renderNarrativeSection = (fieldName: string = 'content', placeholder?: string) => (
+    <Grid container spacing={3}>
+      <Grid item xs={12}>
+        <Typography variant="h6" gutterBottom>
+          {sectionId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+        </Typography>
+      </Grid>
+
+      <Grid item xs={12}>
+        <NarrativeEditor
+          content={formData[fieldName] || ''}
+          onChange={(value) => handleFieldChange(fieldName, value)}
+          placeholder={placeholder || t('contentPlaceholder')}
+          minHeight={400}
+          onAIAssist={() => {
+            setCurrentNarrativeField(fieldName);
+            setAiAssistantOpen(true);
+          }}
+          onInsertSnippet={() => {
+            setCurrentNarrativeField(fieldName);
+            setSnippetsDialogOpen(true);
+          }}
+        />
+      </Grid>
+    </Grid>
+  );
+
   const renderGenericSection = () => (
     <Grid container spacing={3}>
       <Grid item xs={12}>
@@ -2959,6 +3023,37 @@ export default function AppraisalSectionForm({
       <Divider sx={{ mb: 3 }} />
 
       {renderSectionForm()}
+
+      {/* AI Writing Assistant Dialog */}
+      <AIWritingAssistant
+        open={aiAssistantOpen}
+        onClose={() => setAiAssistantOpen(false)}
+        onInsert={(text) => {
+          if (currentNarrativeField) {
+            handleFieldChange(currentNarrativeField, text);
+          }
+          setAiAssistantOpen(false);
+        }}
+        contextData={{
+          address: formData.address,
+          city: formData.city,
+          propertyType: subjectPropertyType,
+        }}
+        currentText={currentNarrativeField ? (formData[currentNarrativeField] || '') : ''}
+      />
+
+      {/* Text Snippets Dialog */}
+      <SnippetsDialog
+        open={snippetsDialogOpen}
+        onClose={() => setSnippetsDialogOpen(false)}
+        onInsert={(text) => {
+          if (currentNarrativeField) {
+            const currentContent = formData[currentNarrativeField] || '';
+            handleFieldChange(currentNarrativeField, currentContent + '\n\n' + text);
+          }
+          setSnippetsDialogOpen(false);
+        }}
+      />
     </Box>
   );
 }

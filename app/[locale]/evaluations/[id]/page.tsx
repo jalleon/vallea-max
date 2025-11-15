@@ -21,6 +21,9 @@ import { TemplateType } from '@/features/evaluations/types/evaluation.types';
 import { NAS_SECTIONS, RPS_SECTIONS, CUSTOM_SECTIONS } from '@/features/evaluations/constants/evaluation.constants';
 import AppraisalSectionForm from '@/features/evaluations/components/AppraisalSectionForm';
 import AdjustmentsForm from '@/features/evaluations/components/AdjustmentsForm';
+import AppraisalLayout from '@/features/evaluations/components/AppraisalLayout';
+import SectionsSidebar from '@/features/evaluations/components/SectionsSidebar';
+import LivePreview from '@/features/evaluations/components/LivePreview';
 import { useTranslations } from 'next-intl';
 
 interface TabPanelProps {
@@ -433,18 +436,18 @@ export default function AppraisalEditPage() {
 
   return (
     <MaterialDashboardLayout>
-      <Box>
-        {/* Header */}
-        <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <Box>
-            <Button
-              startIcon={<ArrowBack />}
-              onClick={() => router.push('/evaluations')}
-              sx={{ mb: 2, textTransform: 'none' }}
-            >
-              {tEval('backToList')}
-            </Button>
+      {/* Header - Above Layout */}
+      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
+        <Button
+          startIcon={<ArrowBack />}
+          onClick={() => router.push('/evaluations')}
+          sx={{ mb: 2, textTransform: 'none' }}
+        >
+          {tEval('backToList')}
+        </Button>
 
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
               <Typography variant="h4" fontWeight={700}>
                 {appraisal.appraisal_number}
@@ -462,38 +465,9 @@ export default function AppraisalEditPage() {
               />
             </Box>
 
-            <Typography variant="body1" color="text.secondary">
+            <Typography variant="body2" color="text.secondary">
               {appraisal.client_name} • {appraisal.address}
             </Typography>
-
-            <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Typography variant="body2" color="text.secondary">
-                {t('progress')}:
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Box
-                  sx={{
-                    width: 200,
-                    height: 8,
-                    bgcolor: 'grey.200',
-                    borderRadius: 1,
-                    overflow: 'hidden'
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: `${completionPercentage}%`,
-                      height: '100%',
-                      bgcolor: 'primary.main',
-                      transition: 'width 0.3s'
-                    }}
-                  />
-                </Box>
-                <Typography variant="body2" fontWeight={600}>
-                  {completionPercentage}%
-                </Typography>
-              </Box>
-            </Box>
           </Box>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -536,130 +510,90 @@ export default function AppraisalEditPage() {
             )}
           </Box>
         </Box>
-
-        {/* Tabs */}
-        <Card sx={{ minHeight: 'calc(100vh - 300px)' }}>
-          {/* Main Section Tabs - First Row */}
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Tabs
-              value={currentTab}
-              onChange={handleTabChange}
-              variant="scrollable"
-              scrollButtons="auto"
-              sx={{
-                '& .MuiTab-root': {
-                  textTransform: 'none',
-                  minHeight: 48,
-                  fontSize: '14px'
-                }
-              }}
-            >
-              {sections.map((sectionId, index) => {
-                const isCompleted = sectionsData[sectionId]?.completed;
-                return (
-                  <Tab
-                    key={sectionId}
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        {getSectionLabel(sectionId)}
-                        {isCompleted && (
-                          <CheckCircle sx={{ fontSize: 16, color: 'success.main' }} />
-                        )}
-                      </Box>
-                    }
-                  />
-                );
-              })}
-            </Tabs>
-          </Box>
-
-          {/* Tools/Calculators Tabs - Second Row */}
-          <Box sx={{ borderBottom: 2, borderColor: 'warning.light', bgcolor: 'grey.50' }}>
-            <Tabs
-              value={currentToolTab}
-              onChange={handleToolTabChange}
-              variant="scrollable"
-              scrollButtons="auto"
-              sx={{
-                minHeight: 42,
-                '& .MuiTab-root': {
-                  textTransform: 'none',
-                  minHeight: 42,
-                  fontSize: '13px',
-                  color: 'text.secondary',
-                  '&.Mui-selected': {
-                    color: 'warning.dark',
-                    fontWeight: 600
-                  }
-                },
-                '& .MuiTabs-indicator': {
-                  backgroundColor: 'warning.main',
-                  height: 3
-                }
-              }}
-            >
-              <Tab
-                value={0}
-                label={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    ⚙️ {t('adjustmentsCalculator')}
-                  </Box>
-                }
-              />
-              {/* Add more tool tabs here in the future */}
-            </Tabs>
-          </Box>
-
-          {/* Render Main Section Tabs or Tool Tabs */}
-          {currentToolTab === -1 ? (
-            // Show normal section tabs
-            sections.map((sectionId, index) => {
-              console.log('🔍 Page.tsx - Rendering section:', sectionId);
-              console.log('🔍 Page.tsx - appraisal.property_id:', appraisal.property_id);
-              return (
-                <TabPanel key={sectionId} value={currentTab} index={index}>
-                  <AppraisalSectionForm
-                    sectionId={sectionId}
-                    templateType={appraisal.template_type}
-                    data={sectionsData[sectionId] || {}}
-                    onChange={(data) => handleSectionChange(sectionId, data)}
-                    subjectPropertyId={appraisal.property_id}
-                    subjectPropertyType={appraisal.property_type}
-                    reloadTrigger={reloadTrigger}
-                    appraisalData={appraisal}
-                    allSectionsData={sectionsData}
-                  />
-                </TabPanel>
-              );
-            })
-          ) : (
-            // Show tool tabs
-            <>
-              {currentToolTab === 0 && (
-                <Box sx={{ p: 0 }}>
-                  <AdjustmentsForm
-                    key={`adjustments-${adjustmentsReloadKey}`}
-                    data={adjustmentsData || {
-                      subjectPropertyId: appraisal.property_id,
-                      propertyType: appraisal.property_type,
-                      defaultRates: {},
-                      comparables: [],
-                      autoSyncToDirectComparison: true
-                    }}
-                    onChange={handleAdjustmentsChange}
-                    directComparisonData={sectionsDataRef.current.methode_parite || {}}
-                    propertyType={appraisal.property_type}
-                    effectiveDate={appraisal.effective_date}
-                    onSyncToDirectComparison={handleSyncToDirectComparison}
-                    onClose={() => setCurrentToolTab(-1)}
-                    measurementSystem={sectionsDataRef.current.methode_parite?.measurementSystem || 'imperial'}
-                  />
-                </Box>
-              )}
-            </>
-          )}
-        </Card>
       </Box>
+
+      {/* NEW LAYOUT - 3 Column */}
+      <AppraisalLayout
+        appraisalId={id}
+        sidebar={
+          <SectionsSidebar
+            sections={sections}
+            sectionsData={sectionsData}
+            currentSectionIndex={currentTab}
+            onSectionClick={setCurrentTab}
+            templateType={appraisal.template_type}
+            completionPercentage={completionPercentage}
+          />
+        }
+        content={
+          <Box>
+            {/* Tool Tabs Bar (if tool tab is active) */}
+            {currentToolTab >= 0 && (
+              <Box sx={{ mb: 2, p: 2, bgcolor: 'warning.50', borderRadius: '8px', border: 1, borderColor: 'warning.light' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Typography variant="subtitle1" fontWeight={600} color="warning.dark">
+                    ⚙️ {t('adjustmentsCalculator')}
+                  </Typography>
+                  <Button
+                    size="small"
+                    onClick={() => setCurrentToolTab(-1)}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Back to Sections
+                  </Button>
+                </Box>
+              </Box>
+            )}
+
+            {/* Render Current Section or Tool */}
+            {currentToolTab === -1 ? (
+              // Render current section
+              <Box>
+                <AppraisalSectionForm
+                  sectionId={sections[currentTab]}
+                  templateType={appraisal.template_type}
+                  data={sectionsData[sections[currentTab]] || {}}
+                  onChange={(data) => handleSectionChange(sections[currentTab], data)}
+                  subjectPropertyId={appraisal.property_id}
+                  subjectPropertyType={appraisal.property_type}
+                  reloadTrigger={reloadTrigger}
+                  appraisalData={appraisal}
+                  allSectionsData={sectionsDataRef.current}
+                />
+              </Box>
+            ) : (
+              // Render tool (Adjustments Calculator)
+              <Box>
+                <AdjustmentsForm
+                  key={`adjustments-${adjustmentsReloadKey}`}
+                  data={adjustmentsData || {
+                    subjectPropertyId: appraisal.property_id,
+                    propertyType: appraisal.property_type,
+                    defaultRates: {},
+                    comparables: [],
+                    autoSyncToDirectComparison: true
+                  }}
+                  onChange={handleAdjustmentsChange}
+                  directComparisonData={sectionsDataRef.current.methode_parite || {}}
+                  propertyType={appraisal.property_type}
+                  effectiveDate={appraisal.effective_date}
+                  onSyncToDirectComparison={handleSyncToDirectComparison}
+                  onClose={() => setCurrentToolTab(-1)}
+                  measurementSystem={sectionsDataRef.current.methode_parite?.measurementSystem || 'imperial'}
+                />
+              </Box>
+            )}
+          </Box>
+        }
+        preview={
+          <LivePreview
+            appraisalData={appraisal}
+            sectionsData={sectionsData}
+            templateType={appraisal.template_type}
+            currentSectionId={sections[currentTab]}
+          />
+        }
+      />
     </MaterialDashboardLayout>
   );
 }

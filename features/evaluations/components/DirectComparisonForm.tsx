@@ -150,6 +150,8 @@ export default function DirectComparisonForm({
   const [selectingForIndex, setSelectingForIndex] = useState<number | null>(null);
   const [libraryProperties, setLibraryProperties] = useState<any[]>([]);
   const [propertySearchQuery, setPropertySearchQuery] = useState('');
+  const [selectedProperties, setSelectedProperties] = useState<Set<string>>(new Set());
+  const [multiSelectMode, setMultiSelectMode] = useState(false);
 
   const isCondo = subjectPropertyType === 'condo';
 
