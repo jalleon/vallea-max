@@ -1021,6 +1021,17 @@ export default function AppraisalSectionForm({
             helperText={appraisalData?.effective_date ? tRef('autoPopulatedInfo') : ''}
           />
         </Grid>
+
+        {/* Legal Note */}
+        <Grid item xs={12}>
+          <Divider sx={{ my: 3 }} />
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+            {tRef('legalNote')}
+          </Typography>
+          <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary', lineHeight: 1.6 }}>
+            {tRef('legalNoteText')}
+          </Typography>
+        </Grid>
       </Grid>
     );
   };

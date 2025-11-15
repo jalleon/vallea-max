@@ -1667,7 +1667,9 @@
         "valueInWords": "Valeur en lettres",
         "valueInWordsPlaceholder": "MILLE DOLLARS",
         "asOfDate": "En date du",
-        "autoPopulatedInfo": "Auto-rempli depuis les données de l'évaluation"
+        "autoPopulatedInfo": "Auto-rempli depuis les données de l'évaluation",
+        "legalNote": "Note légale",
+        "legalNoteText": "Ce rapport a été effectué selon les normes de pratique professionnelle de l'Ordre des évaluateurs agréés du Québec, seulement aux fins mentionnées ci-dessus. La possession de ce rapport ou d'une copie ne confère pas le droit de reproduction ou de publication, ni le droit d'emploi par d'autres personnes que le \"client-mandant\"."
       },
 
       "directComparison": {

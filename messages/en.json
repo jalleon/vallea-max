@@ -1545,7 +1545,9 @@
         "valueInWords": "Value in words",
         "valueInWordsPlaceholder": "THOUSAND DOLLARS",
         "asOfDate": "As of",
-        "autoPopulatedInfo": "Auto-populated from appraisal data"
+        "autoPopulatedInfo": "Auto-populated from appraisal data",
+        "legalNote": "Legal Note",
+        "legalNoteText": "This report was prepared in accordance with the professional practice standards of the Ordre des évaluateurs agréés du Québec, solely for the purposes mentioned above. Possession of this report or a copy thereof does not confer the right to reproduce or publish it, nor the right to use it by persons other than the \"client-principal\"."
       },
 
       "directComparison": {
