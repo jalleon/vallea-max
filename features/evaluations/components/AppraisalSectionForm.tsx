@@ -110,6 +110,8 @@ export default function AppraisalSectionForm({
       switch (sectionId) {
         case 'presentation':
           return renderPresentationSection();
+        case 'fiche_reference':
+          return renderReferenceSheetSection();
         case 'informations_generales':
           return renderGeneralInfoSection();
         case 'description_propriete':
@@ -685,6 +687,335 @@ export default function AppraisalSectionForm({
             onChange={(e) => handleFieldChange('companyWebsite', e.target.value)}
             placeholder="www.example.com"
             helperText="Will be saved for all future appraisals"
+          />
+        </Grid>
+      </Grid>
+    );
+  };
+
+  const renderReferenceSheetSection = () => {
+    const tRef = useTranslations('evaluations.sections.referenceSheet');
+
+    // Auto-populate on first load
+    useEffect(() => {
+      if (appraisalData && Object.keys(formData).length === 0) {
+        const initialData = {
+          // Purpose and Scope
+          purpose: formData.purpose || tRef('purposePlaceholder'),
+
+          // Property Information - Auto-populated
+          address: appraisalData.address || '',
+          city: appraisalData.city || '',
+          fileNumber: formData.fileNumber || '',
+
+          // Cadastral Information
+          lotNumber: formData.lotNumber || '',
+          cadastre: formData.cadastre || 'Cadastre du Québec',
+
+          // Mandant (Client) Information
+          mandantFileNumber: formData.mandantFileNumber || '',
+          mandantName: formData.mandantName || '',
+          mandantCompany: formData.mandantCompany || '',
+          mandantAddress: formData.mandantAddress || '',
+          mandantCity: formData.mandantCity || '',
+          mandantPhone: formData.mandantPhone || '',
+          mandantEmail: formData.mandantEmail || '',
+
+          // Owner Information
+          ownerName: formData.ownerName || '',
+          ownerPhone: formData.ownerPhone || '',
+
+          // Borrower Information
+          borrowerName: formData.borrowerName || appraisalData.client_name || '',
+          borrowerPhone: formData.borrowerPhone || '',
+
+          // Conclusion
+          currentMarketValue: formData.currentMarketValue || '',
+          potentialMarketValue: formData.potentialMarketValue || '',
+          valueInWords: formData.valueInWords || '',
+          asOfDate: formData.asOfDate || appraisalData.effective_date || new Date().toISOString().split('T')[0]
+        };
+        setFormData(initialData);
+        onChange(initialData);
+      }
+    }, [appraisalData]);
+
+    return (
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <Typography variant="h5" sx={{ mb: 1, fontWeight: 600, textAlign: 'center' }}>
+            RAPPORT D'ÉVALUATION IMMOBILIÈRE
+          </Typography>
+        </Grid>
+
+        {/* Purpose and Scope */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+            {tRef('purposeAndScope')}
+          </Typography>
+          <TextField
+            fullWidth
+            multiline
+            rows={2}
+            value={formData.purpose || ''}
+            onChange={(e) => handleFieldChange('purpose', e.target.value)}
+            placeholder={tRef('purposePlaceholder')}
+          />
+        </Grid>
+
+        <Grid item xs={12}>
+          <Divider sx={{ my: 2 }} />
+        </Grid>
+
+        {/* Property Address - Auto-populated */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+            {tRef('address')}
+          </Typography>
+          <TextField
+            fullWidth
+            value={formData.address || ''}
+            InputProps={{ readOnly: true }}
+            helperText={tRef('autoPopulatedInfo')}
+            sx={{ bgcolor: 'grey.50' }}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={8}>
+          <TextField
+            fullWidth
+            label={tRef('city')}
+            value={formData.city || ''}
+            InputProps={{ readOnly: true }}
+            helperText={tRef('autoPopulatedInfo')}
+            sx={{ bgcolor: 'grey.50' }}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            label={tRef('fileNumber')}
+            value={formData.fileNumber || ''}
+            onChange={(e) => handleFieldChange('fileNumber', e.target.value)}
+          />
+        </Grid>
+
+        {/* Cadastral Designation */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+            {tRef('cadastralDesignation')}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label={tRef('lotNumber')}
+            value={formData.lotNumber || ''}
+            onChange={(e) => handleFieldChange('lotNumber', e.target.value)}
+            placeholder="3 492 120"
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label={tRef('cadastre')}
+            value={formData.cadastre || ''}
+            onChange={(e) => handleFieldChange('cadastre', e.target.value)}
+            placeholder="Cadastre du Québec"
+          />
+        </Grid>
+
+        <Grid item xs={12}>
+          <Divider sx={{ my: 2 }} />
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+            {tRef('mandant')}
+          </Typography>
+        </Grid>
+
+        {/* Mandant Information */}
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label={tRef('mandantFileNumber')}
+            value={formData.mandantFileNumber || ''}
+            onChange={(e) => handleFieldChange('mandantFileNumber', e.target.value)}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label={tRef('mandantName')}
+            value={formData.mandantName || ''}
+            onChange={(e) => handleFieldChange('mandantName', e.target.value)}
+            placeholder="Nationwide Appraisal Services"
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label={tRef('mandantCompany')}
+            value={formData.mandantCompany || ''}
+            onChange={(e) => handleFieldChange('mandantCompany', e.target.value)}
+            placeholder="Mouvement Desjardins"
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label={tRef('mandantAddress')}
+            value={formData.mandantAddress || ''}
+            onChange={(e) => handleFieldChange('mandantAddress', e.target.value)}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            label={tRef('mandantCity')}
+            value={formData.mandantCity || ''}
+            onChange={(e) => handleFieldChange('mandantCity', e.target.value)}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            label={tRef('mandantPhone')}
+            value={formData.mandantPhone || ''}
+            onChange={(e) => handleFieldChange('mandantPhone', e.target.value)}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            label={tRef('mandantEmail')}
+            type="email"
+            value={formData.mandantEmail || ''}
+            onChange={(e) => handleFieldChange('mandantEmail', e.target.value)}
+          />
+        </Grid>
+
+        <Grid item xs={12}>
+          <Divider sx={{ my: 2 }} />
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+            {tRef('owner')}
+          </Typography>
+        </Grid>
+
+        {/* Owner Information */}
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label={tRef('ownerName')}
+            value={formData.ownerName || ''}
+            onChange={(e) => handleFieldChange('ownerName', e.target.value)}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label={tRef('ownerPhone')}
+            value={formData.ownerPhone || ''}
+            onChange={(e) => handleFieldChange('ownerPhone', e.target.value)}
+          />
+        </Grid>
+
+        <Grid item xs={12}>
+          <Divider sx={{ my: 2 }} />
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+            {tRef('borrower')}
+          </Typography>
+        </Grid>
+
+        {/* Borrower Information - Auto-populated from client name */}
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label={tRef('borrowerName')}
+            value={formData.borrowerName || ''}
+            onChange={(e) => handleFieldChange('borrowerName', e.target.value)}
+            helperText={appraisalData?.client_name ? tRef('autoPopulatedInfo') : ''}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label={tRef('borrowerPhone')}
+            value={formData.borrowerPhone || ''}
+            onChange={(e) => handleFieldChange('borrowerPhone', e.target.value)}
+          />
+        </Grid>
+
+        <Grid item xs={12}>
+          <Divider sx={{ my: 2 }} />
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+            {tRef('conclusion')}
+          </Typography>
+        </Grid>
+
+        {/* Conclusion - Market Values */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+            {tRef('marketValue')}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label={tRef('currentValue')}
+            type="number"
+            value={formData.currentMarketValue || ''}
+            onChange={(e) => handleFieldChange('currentMarketValue', e.target.value)}
+            placeholder="0"
+            InputProps={{
+              startAdornment: <Typography sx={{ mr: 1 }}>$</Typography>
+            }}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label={tRef('potentialValue')}
+            type="number"
+            value={formData.potentialMarketValue || ''}
+            onChange={(e) => handleFieldChange('potentialMarketValue', e.target.value)}
+            placeholder="0"
+            InputProps={{
+              startAdornment: <Typography sx={{ mr: 1 }}>$</Typography>
+            }}
+          />
+        </Grid>
+
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            label={tRef('valueInWords')}
+            value={formData.valueInWords || ''}
+            onChange={(e) => handleFieldChange('valueInWords', e.target.value)}
+            placeholder={tRef('valueInWordsPlaceholder')}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label={tRef('asOfDate')}
+            type="date"
+            value={formData.asOfDate || ''}
+            onChange={(e) => handleFieldChange('asOfDate', e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            helperText={appraisalData?.effective_date ? tRef('autoPopulatedInfo') : ''}
           />
         </Grid>
       </Grid>
