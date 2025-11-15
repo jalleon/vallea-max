@@ -538,6 +538,7 @@ export default function AppraisalSectionForm({
           </Typography>
           <TextField
             fullWidth
+            size="small"
             value={formData.reportTitle || 'RAPPORT D\'ÉVALUATION IMMOBILIÈRE'}
             onChange={(e) => handleFieldChange('reportTitle', e.target.value)}
             placeholder="RAPPORT D'ÉVALUATION IMMOBILIÈRE"
@@ -553,6 +554,7 @@ export default function AppraisalSectionForm({
         <Grid item xs={12}>
           <TextField
             fullWidth
+            size="small"
             label="Adresse civique"
             value={formData.civicAddress || ''}
             onChange={(e) => handleFieldChange('civicAddress', e.target.value)}
@@ -564,6 +566,7 @@ export default function AppraisalSectionForm({
         <Grid item xs={12} md={8}>
           <TextField
             fullWidth
+            size="small"
             label="Ville"
             value={formData.city || ''}
             onChange={(e) => handleFieldChange('city', e.target.value)}
@@ -576,6 +579,7 @@ export default function AppraisalSectionForm({
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
+            size="small"
             label={t('fileNumber')}
             value={formData.fileNumber || ''}
             onChange={(e) => handleFieldChange('fileNumber', e.target.value)}
@@ -617,6 +621,7 @@ export default function AppraisalSectionForm({
         <Grid item xs={12}>
           <TextField
             fullWidth
+            size="small"
             label={t('clientName')}
             value={formData.clientName || appraisalData?.client_name || ''}
             onChange={(e) => handleFieldChange('clientName', e.target.value)}
@@ -670,6 +675,7 @@ export default function AppraisalSectionForm({
         <Grid item xs={12}>
           <TextField
             fullWidth
+            size="small"
             label={t('companyAddress')}
             value={formData.companyAddress || ''}
             onChange={(e) => handleFieldChange('companyAddress', e.target.value)}
@@ -683,6 +689,7 @@ export default function AppraisalSectionForm({
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
+            size="small"
             label={t('companyPhone')}
             value={formData.companyPhone || ''}
             onChange={(e) => handleFieldChange('companyPhone', e.target.value)}
@@ -694,6 +701,7 @@ export default function AppraisalSectionForm({
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
+            size="small"
             label={t('companyWebsite')}
             value={formData.companyWebsite || ''}
             onChange={(e) => handleFieldChange('companyWebsite', e.target.value)}
