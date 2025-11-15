@@ -627,6 +627,7 @@ export default function AppraisalEditPage() {
                     subjectPropertyType={appraisal.property_type}
                     reloadTrigger={reloadTrigger}
                     appraisalData={appraisal}
+                    allSectionsData={sectionsData}
                   />
                 </TabPanel>
               );

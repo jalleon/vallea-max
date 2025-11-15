@@ -33,6 +33,7 @@ interface AppraisalSectionFormProps {
   subjectPropertyType?: string | null;
   reloadTrigger?: number;
   appraisalData?: any;
+  allSectionsData?: any;
 }
 
 export default function AppraisalSectionForm({
@@ -43,7 +44,8 @@ export default function AppraisalSectionForm({
   subjectPropertyId,
   subjectPropertyType,
   reloadTrigger,
-  appraisalData
+  appraisalData,
+  allSectionsData
 }: AppraisalSectionFormProps) {
   const t = useTranslations('evaluations.sections');
   const [formData, setFormData] = useState(data);
@@ -547,17 +549,27 @@ export default function AppraisalSectionForm({
           <Divider sx={{ my: 2 }} />
         </Grid>
 
-        {/* Civic Address and City - Auto-populated from appraisal */}
+        {/* Civic Address and City - Auto-populated but editable */}
         <Grid item xs={12}>
-          <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
-            Adresse civique et ville
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {appraisalData?.address || formData.civicAddress || 'Adresse non spécifiée'}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {appraisalData?.city || formData.city || 'Ville non spécifiée'}
-          </Typography>
+          <TextField
+            fullWidth
+            label="Adresse civique"
+            value={formData.civicAddress || ''}
+            onChange={(e) => handleFieldChange('civicAddress', e.target.value)}
+            placeholder="123 Rue Exemple"
+            helperText="Auto-rempli depuis les données de l'évaluation"
+          />
+        </Grid>
+
+        <Grid item xs={12} md={8}>
+          <TextField
+            fullWidth
+            label="Ville"
+            value={formData.city || ''}
+            onChange={(e) => handleFieldChange('city', e.target.value)}
+            placeholder="Montréal, Québec"
+            helperText="Auto-rempli depuis les données de l'évaluation"
+          />
         </Grid>
 
         {/* File Number - Editable */}
@@ -767,29 +779,20 @@ export default function AppraisalSectionForm({
           <Divider sx={{ my: 2 }} />
         </Grid>
 
-        {/* Property Address - Auto-populated */}
+        {/* Property Address - Display from presentation section */}
         <Grid item xs={12}>
           <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
             {tRef('address')}
           </Typography>
-          <TextField
-            fullWidth
-            value={formData.address || ''}
-            InputProps={{ readOnly: true }}
-            helperText={tRef('autoPopulatedInfo')}
-            sx={{ bgcolor: 'grey.50' }}
-          />
-        </Grid>
-
-        <Grid item xs={12} md={8}>
-          <TextField
-            fullWidth
-            label={tRef('city')}
-            value={formData.city || ''}
-            InputProps={{ readOnly: true }}
-            helperText={tRef('autoPopulatedInfo')}
-            sx={{ bgcolor: 'grey.50' }}
-          />
+          <Typography variant="body1">
+            {allSectionsData?.presentation?.civicAddress || appraisalData?.address || 'Adresse non spécifiée'}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            {allSectionsData?.presentation?.city || appraisalData?.city || ''}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+            {tRef('autoPopulatedInfo')}
+          </Typography>
         </Grid>
 
         <Grid item xs={12} md={4}>
