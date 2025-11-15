@@ -769,6 +769,7 @@ export default function AppraisalSectionForm({
             fullWidth
             multiline
             rows={2}
+            size="small"
             value={formData.purpose || ''}
             onChange={(e) => handleFieldChange('purpose', e.target.value)}
             placeholder={tRef('purposePlaceholder')}
@@ -798,6 +799,7 @@ export default function AppraisalSectionForm({
         <Grid item xs={12} md={4}>
           <TextField
             fullWidth
+            size="small"
             label={tRef('fileNumber')}
             value={formData.fileNumber || ''}
             onChange={(e) => handleFieldChange('fileNumber', e.target.value)}
@@ -814,6 +816,7 @@ export default function AppraisalSectionForm({
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
+            size="small"
             label={tRef('lotNumber')}
             value={formData.lotNumber || ''}
             onChange={(e) => handleFieldChange('lotNumber', e.target.value)}
@@ -824,6 +827,7 @@ export default function AppraisalSectionForm({
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
+            size="small"
             label={tRef('cadastre')}
             value={formData.cadastre || ''}
             onChange={(e) => handleFieldChange('cadastre', e.target.value)}
@@ -842,6 +846,7 @@ export default function AppraisalSectionForm({
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
+            size="small"
             label={tRef('mandantFileNumber')}
             value={formData.mandantFileNumber || ''}
             onChange={(e) => handleFieldChange('mandantFileNumber', e.target.value)}
@@ -851,6 +856,7 @@ export default function AppraisalSectionForm({
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
+            size="small"
             label={tRef('mandantName')}
             value={formData.mandantName || ''}
             onChange={(e) => handleFieldChange('mandantName', e.target.value)}
@@ -861,6 +867,7 @@ export default function AppraisalSectionForm({
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
+            size="small"
             label={tRef('mandantCompany')}
             value={formData.mandantCompany || ''}
             onChange={(e) => handleFieldChange('mandantCompany', e.target.value)}
@@ -871,6 +878,7 @@ export default function AppraisalSectionForm({
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
+            size="small"
             label={tRef('mandantAddress')}
             value={formData.mandantAddress || ''}
             onChange={(e) => handleFieldChange('mandantAddress', e.target.value)}
@@ -880,6 +888,7 @@ export default function AppraisalSectionForm({
         <Grid item xs={12} md={4}>
           <TextField
             fullWidth
+            size="small"
             label={tRef('mandantCity')}
             value={formData.mandantCity || ''}
             onChange={(e) => handleFieldChange('mandantCity', e.target.value)}
@@ -889,6 +898,7 @@ export default function AppraisalSectionForm({
         <Grid item xs={12} md={4}>
           <TextField
             fullWidth
+            size="small"
             label={tRef('mandantPhone')}
             value={formData.mandantPhone || ''}
             onChange={(e) => handleFieldChange('mandantPhone', e.target.value)}
@@ -898,6 +908,7 @@ export default function AppraisalSectionForm({
         <Grid item xs={12} md={4}>
           <TextField
             fullWidth
+            size="small"
             label={tRef('mandantEmail')}
             type="email"
             value={formData.mandantEmail || ''}
@@ -916,6 +927,7 @@ export default function AppraisalSectionForm({
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
+            size="small"
             label={tRef('ownerName')}
             value={formData.ownerName || ''}
             onChange={(e) => handleFieldChange('ownerName', e.target.value)}
@@ -925,6 +937,7 @@ export default function AppraisalSectionForm({
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
+            size="small"
             label={tRef('ownerPhone')}
             value={formData.ownerPhone || ''}
             onChange={(e) => handleFieldChange('ownerPhone', e.target.value)}
@@ -942,6 +955,7 @@ export default function AppraisalSectionForm({
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
+            size="small"
             label={tRef('borrowerName')}
             value={formData.borrowerName || ''}
             onChange={(e) => handleFieldChange('borrowerName', e.target.value)}
@@ -952,6 +966,7 @@ export default function AppraisalSectionForm({
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
+            size="small"
             label={tRef('borrowerPhone')}
             value={formData.borrowerPhone || ''}
             onChange={(e) => handleFieldChange('borrowerPhone', e.target.value)}
@@ -975,6 +990,7 @@ export default function AppraisalSectionForm({
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
+            size="small"
             label={tRef('currentValue')}
             type="number"
             value={formData.currentMarketValue || ''}
@@ -989,6 +1005,7 @@ export default function AppraisalSectionForm({
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
+            size="small"
             label={tRef('potentialValue')}
             type="number"
             value={formData.potentialMarketValue || ''}
@@ -1003,6 +1020,7 @@ export default function AppraisalSectionForm({
         <Grid item xs={12}>
           <TextField
             fullWidth
+            size="small"
             label={tRef('valueInWords')}
             value={formData.valueInWords || ''}
             onChange={(e) => handleFieldChange('valueInWords', e.target.value)}
@@ -1013,6 +1031,7 @@ export default function AppraisalSectionForm({
         <Grid item xs={12} md={6}>
           <TextField
             fullWidth
+            size="small"
             label={tRef('asOfDate')}
             type="date"
             value={formData.asOfDate || ''}
