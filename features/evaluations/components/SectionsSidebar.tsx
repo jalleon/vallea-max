@@ -80,7 +80,7 @@ export default function SectionsSidebar({
       // Categorize sections (can be customized per template)
       if (['client', 'evaluateur', 'client_evaluateur', 'presentation'].includes(sectionId)) {
         groups.main.push(section);
-      } else if (['sujet', 'propriete_evaluee', 'fiche_reference', 'description', 'ameliorations', 'repartitions_pieces'].includes(sectionId)) {
+      } else if (['sujet', 'propriete_evaluee', 'fiche_reference', 'general', 'description', 'ameliorations', 'repartitions_pieces'].includes(sectionId)) {
         groups.property.push(section);
       } else if ([
         'methode_parite',
