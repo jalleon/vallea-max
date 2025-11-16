@@ -5,7 +5,6 @@ import {
   TextField,
   Typography,
   Box,
-  Divider,
   InputAdornment
 } from '@mui/material';
 import { useTranslations } from 'next-intl';
@@ -163,7 +162,7 @@ export default function ReferenceSheetSectionContent({
           </Typography>
         </Box>
 
-        {/* Lot Number */}
+        {/* Lot Number & Cadastre */}
         <Box
           sx={{
             display: 'grid',
@@ -174,41 +173,22 @@ export default function ReferenceSheetSectionContent({
           }}
         >
           <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>{tRef('lotNumber')}</Typography>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>{tRef('lotNumber')} / {tRef('cadastre')}</Typography>
           </Box>
-          <Box sx={{ p: 1 }}>
+          <Box sx={{ p: 1, display: 'flex', gap: 1 }}>
             <TextField
-              fullWidth
               size="small"
               value={formData.lotNumber || ''}
               onChange={(e) => handleFieldChange('lotNumber', e.target.value)}
               placeholder="3 492 120"
-              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+              sx={{ '& .MuiInputBase-input': { fontSize: '14px' }, flex: 1 }}
             />
-          </Box>
-        </Box>
-
-        {/* Cadastre */}
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: '200px 1fr',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            '&:hover': { bgcolor: 'action.hover' }
-          }}
-        >
-          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>{tRef('cadastre')}</Typography>
-          </Box>
-          <Box sx={{ p: 1 }}>
             <TextField
-              fullWidth
               size="small"
               value={formData.cadastre || ''}
               onChange={(e) => handleFieldChange('cadastre', e.target.value)}
               placeholder="Cadastre du Québec"
-              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+              sx={{ '& .MuiInputBase-input': { fontSize: '14px' }, flex: 1 }}
             />
           </Box>
         </Box>
@@ -395,7 +375,7 @@ export default function ReferenceSheetSectionContent({
           </Typography>
         </Box>
 
-        {/* Owner Name */}
+        {/* Owner Name & Phone */}
         <Box
           sx={{
             display: 'grid',
@@ -406,39 +386,22 @@ export default function ReferenceSheetSectionContent({
           }}
         >
           <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>{tRef('ownerName')}</Typography>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>{tRef('ownerName')} / {tRef('ownerPhone')}</Typography>
           </Box>
-          <Box sx={{ p: 1 }}>
+          <Box sx={{ p: 1, display: 'flex', gap: 1 }}>
             <TextField
-              fullWidth
               size="small"
               value={formData.ownerName || ''}
               onChange={(e) => handleFieldChange('ownerName', e.target.value)}
-              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+              placeholder="John Doe"
+              sx={{ '& .MuiInputBase-input': { fontSize: '14px' }, flex: 2 }}
             />
-          </Box>
-        </Box>
-
-        {/* Owner Phone */}
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: '200px 1fr',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            '&:hover': { bgcolor: 'action.hover' }
-          }}
-        >
-          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>{tRef('ownerPhone')}</Typography>
-          </Box>
-          <Box sx={{ p: 1 }}>
             <TextField
-              fullWidth
               size="small"
               value={formData.ownerPhone || ''}
               onChange={(e) => handleFieldChange('ownerPhone', e.target.value)}
-              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+              placeholder="(514) 555-1234"
+              sx={{ '& .MuiInputBase-input': { fontSize: '14px' }, flex: 1 }}
             />
           </Box>
         </Box>
@@ -450,7 +413,7 @@ export default function ReferenceSheetSectionContent({
           </Typography>
         </Box>
 
-        {/* Borrower Name */}
+        {/* Borrower Name & Phone */}
         <Box
           sx={{
             display: 'grid',
@@ -461,41 +424,30 @@ export default function ReferenceSheetSectionContent({
           }}
         >
           <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>{tRef('borrowerName')}</Typography>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>{tRef('borrowerName')} / {tRef('borrowerPhone')}</Typography>
           </Box>
-          <Box sx={{ p: 1 }}>
-            <TextField
-              fullWidth
-              size="small"
-              value={formData.borrowerName || ''}
-              onChange={(e) => handleFieldChange('borrowerName', e.target.value)}
-              helperText={appraisalData?.client_name ? tRef('autoPopulatedInfo') : ''}
-              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
-            />
-          </Box>
-        </Box>
-
-        {/* Borrower Phone */}
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: '200px 1fr',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            '&:hover': { bgcolor: 'action.hover' }
-          }}
-        >
-          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>{tRef('borrowerPhone')}</Typography>
-          </Box>
-          <Box sx={{ p: 1 }}>
-            <TextField
-              fullWidth
-              size="small"
-              value={formData.borrowerPhone || ''}
-              onChange={(e) => handleFieldChange('borrowerPhone', e.target.value)}
-              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
-            />
+          <Box sx={{ p: 1, display: 'flex', gap: 1, flexDirection: 'column' }}>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <TextField
+                size="small"
+                value={formData.borrowerName || ''}
+                onChange={(e) => handleFieldChange('borrowerName', e.target.value)}
+                placeholder="Jane Smith"
+                sx={{ '& .MuiInputBase-input': { fontSize: '14px' }, flex: 2 }}
+              />
+              <TextField
+                size="small"
+                value={formData.borrowerPhone || ''}
+                onChange={(e) => handleFieldChange('borrowerPhone', e.target.value)}
+                placeholder="(514) 555-1234"
+                sx={{ '& .MuiInputBase-input': { fontSize: '14px' }, flex: 1 }}
+              />
+            </Box>
+            {appraisalData?.client_name && (
+              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '11px', mt: -0.5 }}>
+                {tRef('autoPopulatedInfo')}
+              </Typography>
+            )}
           </Box>
         </Box>
 
@@ -506,7 +458,7 @@ export default function ReferenceSheetSectionContent({
           </Typography>
         </Box>
 
-        {/* Current Market Value */}
+        {/* Current & Potential Market Value */}
         <Box
           sx={{
             display: 'grid',
@@ -517,11 +469,10 @@ export default function ReferenceSheetSectionContent({
           }}
         >
           <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>{tRef('currentValue')}</Typography>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>{tRef('currentValue')} / {tRef('potentialValue')}</Typography>
           </Box>
-          <Box sx={{ p: 1 }}>
+          <Box sx={{ p: 1, display: 'flex', gap: 1 }}>
             <TextField
-              fullWidth
               size="small"
               type="number"
               value={formData.currentMarketValue || ''}
@@ -530,27 +481,9 @@ export default function ReferenceSheetSectionContent({
               InputProps={{
                 startAdornment: <InputAdornment position="start">$</InputAdornment>
               }}
-              sx={{ '& .MuiInputBase-input': { fontSize: '14px' }, maxWidth: 400 }}
+              sx={{ '& .MuiInputBase-input': { fontSize: '14px' }, flex: 1 }}
             />
-          </Box>
-        </Box>
-
-        {/* Potential Market Value */}
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: '200px 1fr',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            '&:hover': { bgcolor: 'action.hover' }
-          }}
-        >
-          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>{tRef('potentialValue')}</Typography>
-          </Box>
-          <Box sx={{ p: 1 }}>
             <TextField
-              fullWidth
               size="small"
               type="number"
               value={formData.potentialMarketValue || ''}
@@ -559,7 +492,7 @@ export default function ReferenceSheetSectionContent({
               InputProps={{
                 startAdornment: <InputAdornment position="start">$</InputAdornment>
               }}
-              sx={{ '& .MuiInputBase-input': { fontSize: '14px' }, maxWidth: 400 }}
+              sx={{ '& .MuiInputBase-input': { fontSize: '14px' }, flex: 1 }}
             />
           </Box>
         </Box>
