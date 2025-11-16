@@ -161,9 +161,11 @@ export class AppraisalDocumentService {
     const content: (Paragraph | Table)[] = [];
 
     // Title Page
+    const presentationData = sections.presentation || {};
+
     content.push(
       new Paragraph({
-        text: 'RAPPORT D\'ÉVALUATION IMMOBILIÈRE',
+        text: presentationData.reportTitle || 'RAPPORT D\'ÉVALUATION IMMOBILIÈRE',
         heading: HeadingLevel.HEADING_1,
         alignment: AlignmentType.CENTER,
         spacing: { before: 2000, after: 400 }
@@ -172,7 +174,7 @@ export class AppraisalDocumentService {
 
     content.push(
       new Paragraph({
-        text: appraisalData.address || '',
+        text: presentationData.fullAddress || appraisalData.address || '',
         alignment: AlignmentType.CENTER,
         spacing: { after: 200 },
         run: {
@@ -183,17 +185,25 @@ export class AppraisalDocumentService {
       })
     );
 
-    content.push(
-      new Paragraph({
-        text: appraisalData.city || '',
-        alignment: AlignmentType.CENTER,
-        spacing: { after: 400 },
-        run: {
-          font: 'Times New Roman',
-          size: 24
-        }
-      })
-    );
+    const cityProvince = [
+      presentationData.city || appraisalData.city || '',
+      presentationData.province || '',
+      presentationData.postalCode || ''
+    ].filter(Boolean).join(', ');
+
+    if (cityProvince) {
+      content.push(
+        new Paragraph({
+          text: cityProvince,
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 400 },
+          run: {
+            font: 'Times New Roman',
+            size: 24
+          }
+        })
+      );
+    }
 
     content.push(
       new Paragraph({
@@ -205,11 +215,116 @@ export class AppraisalDocumentService {
 
     content.push(
       new Paragraph({
-        text: `File Number: ${appraisalData.file_number || 'N/A'}`,
+        text: `File Number: ${presentationData.fileNumber || appraisalData.file_number || 'N/A'}`,
         alignment: AlignmentType.CENTER,
-        spacing: { after: 1000 }
+        spacing: { after: 400 }
       })
     );
+
+    // Client/Borrower
+    if (presentationData.clientName) {
+      content.push(
+        new Paragraph({
+          text: 'Client / Borrower',
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 100 },
+          run: {
+            font: 'Times New Roman',
+            size: 24,
+            bold: true
+          }
+        })
+      );
+      content.push(
+        new Paragraph({
+          text: presentationData.clientName,
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 400 }
+        })
+      );
+    }
+
+    // Appraiser Information
+    if (presentationData.appraiserName || presentationData.appraiserTitle) {
+      content.push(
+        new Paragraph({
+          text: 'Appraiser',
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 100 },
+          run: {
+            font: 'Times New Roman',
+            size: 24,
+            bold: true
+          }
+        })
+      );
+      if (presentationData.appraiserName) {
+        content.push(
+          new Paragraph({
+            text: presentationData.appraiserName,
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 100 }
+          })
+        );
+      }
+      if (presentationData.appraiserTitle) {
+        content.push(
+          new Paragraph({
+            text: presentationData.appraiserTitle,
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 400 },
+            run: {
+              font: 'Times New Roman',
+              size: 22,
+              italics: true
+            }
+          })
+        );
+      }
+    }
+
+    // Company Information
+    if (presentationData.companyName) {
+      content.push(
+        new Paragraph({
+          text: presentationData.companyName,
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 200 },
+          run: {
+            font: 'Times New Roman',
+            size: 26,
+            bold: true
+          }
+        })
+      );
+      if (presentationData.companyAddress) {
+        content.push(
+          new Paragraph({
+            text: presentationData.companyAddress,
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 100 }
+          })
+        );
+      }
+      if (presentationData.companyPhone) {
+        content.push(
+          new Paragraph({
+            text: `Tel: ${presentationData.companyPhone}`,
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 100 }
+          })
+        );
+      }
+      if (presentationData.companyWebsite) {
+        content.push(
+          new Paragraph({
+            text: presentationData.companyWebsite,
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 400 }
+          })
+        );
+      }
+    }
 
     // Page break after title
     content.push(new Paragraph({ children: [new PageBreak()] }));
@@ -714,11 +829,48 @@ export class AppraisalDocumentService {
         <div class="header">APPRAISAL REPORT</div>
 
         <div class="title-page">
-          <h1>RAPPORT D'ÉVALUATION IMMOBILIÈRE</h1>
-          <div class="address">${appraisalData.address || ''}</div>
-          <div class="city">${appraisalData.city || ''}</div>
+          <h1>${sections.presentation?.reportTitle || 'RAPPORT D\'ÉVALUATION IMMOBILIÈRE'}</h1>
+
+          ${sections.presentation?.propertyPhotoUrl ? `
+            <div style="margin: 2em auto; max-width: 400px;">
+              <img src="${sections.presentation.propertyPhotoUrl}" alt="Property" style="width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);" />
+            </div>
+          ` : ''}
+
+          <div class="address">${sections.presentation?.fullAddress || appraisalData.address || ''}</div>
+          <div class="city">${sections.presentation?.city || appraisalData.city || ''}${sections.presentation?.province ? ', ' + sections.presentation.province : ''} ${sections.presentation?.postalCode || ''}</div>
           <div class="metadata">Date: ${new Date().toLocaleDateString('fr-CA')}</div>
-          <div class="metadata">File Number: ${appraisalData.file_number || 'N/A'}</div>
+          <div class="metadata">File Number: ${sections.presentation?.fileNumber || appraisalData.file_number || 'N/A'}</div>
+
+          ${sections.presentation?.clientName ? `
+            <div style="margin-top: 2em;">
+              <div class="metadata" style="font-size: 13pt; color: #333; font-weight: 600;">Client / Borrower</div>
+              <div class="metadata" style="font-size: 12pt; color: #555;">${sections.presentation.clientName}</div>
+            </div>
+          ` : ''}
+
+          ${sections.presentation?.appraiserName || sections.presentation?.appraiserTitle ? `
+            <div style="margin-top: 2em;">
+              <div class="metadata" style="font-size: 13pt; color: #333; font-weight: 600;">Appraiser</div>
+              <div class="metadata" style="font-size: 12pt; color: #555;">${sections.presentation?.appraiserName || ''}</div>
+              ${sections.presentation?.appraiserTitle ? `<div class="metadata" style="font-size: 11pt; color: #666; font-style: italic;">${sections.presentation.appraiserTitle}</div>` : ''}
+            </div>
+          ` : ''}
+
+          ${sections.presentation?.companyLogoUrl ? `
+            <div style="margin: 2em auto; max-width: 200px;">
+              <img src="${sections.presentation.companyLogoUrl}" alt="Company Logo" style="width: 100%; height: auto; max-height: 80px; object-fit: contain;" />
+            </div>
+          ` : ''}
+
+          ${sections.presentation?.companyName ? `
+            <div style="margin-top: 2em;">
+              <div class="metadata" style="font-size: 14pt; color: #333; font-weight: 700;">${sections.presentation.companyName}</div>
+              ${sections.presentation?.companyAddress ? `<div class="metadata" style="font-size: 11pt; color: #666;">${sections.presentation.companyAddress}</div>` : ''}
+              ${sections.presentation?.companyPhone ? `<div class="metadata" style="font-size: 11pt; color: #666;">Tel: ${sections.presentation.companyPhone}</div>` : ''}
+              ${sections.presentation?.companyWebsite ? `<div class="metadata" style="font-size: 11pt; color: #666;">${sections.presentation.companyWebsite}</div>` : ''}
+            </div>
+          ` : ''}
         </div>
 
         <div style="page-break-after: always;"></div>

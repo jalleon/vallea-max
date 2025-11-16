@@ -18,7 +18,7 @@ import {
   Button,
   Divider
 } from '@mui/material';
-import { CheckCircle, Circle, Save } from '@mui/icons-material';
+import { CheckCircle, Circle, Save, Upload } from '@mui/icons-material';
 import { TemplateType } from '../types/evaluation.types';
 import { useTranslations } from 'next-intl';
 import DirectComparisonForm from './DirectComparisonForm';
@@ -27,6 +27,8 @@ import NarrativeEditor from './NarrativeEditor';
 import AIWritingAssistant from './AIWritingAssistant';
 import SnippetsDialog from './SnippetsDialog';
 import PresentationSectionContent from './PresentationSectionContent';
+import ImportFromPreviousDialog from './ImportFromPreviousDialog';
+import SmartValidationWarnings from './SmartValidationWarnings';
 
 interface AppraisalSectionFormProps {
   sectionId: string;
@@ -58,6 +60,7 @@ export default function AppraisalSectionForm({
   const [formData, setFormData] = useState(data);
   const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
   const [snippetsDialogOpen, setSnippetsDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [currentNarrativeField, setCurrentNarrativeField] = useState<string>('');
 
   console.log('🔍 AppraisalSectionForm - sectionId:', sectionId);
@@ -3003,24 +3006,52 @@ export default function AppraisalSectionForm({
     </Grid>
   );
 
+  const handleImportData = (importedData: any) => {
+    // Merge imported data with existing form data
+    const updatedData = {
+      ...formData,
+      ...importedData
+    };
+    setFormData(updatedData);
+    onChange(updatedData);
+  };
+
   return (
     <Box>
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="body2" color="text.secondary">
           {t('fillFields')}
         </Typography>
-        <Button
-          variant={formData.completed ? 'outlined' : 'contained'}
-          color={formData.completed ? 'success' : 'primary'}
-          startIcon={formData.completed ? <CheckCircle /> : <Circle />}
-          onClick={handleMarkComplete}
-          sx={{ textTransform: 'none' }}
-        >
-          {formData.completed ? t('sectionCompleted') : t('markComplete')}
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<Upload />}
+            onClick={() => setImportDialogOpen(true)}
+            sx={{ textTransform: 'none' }}
+          >
+            Import from Previous
+          </Button>
+          <Button
+            variant={formData.completed ? 'outlined' : 'contained'}
+            color={formData.completed ? 'success' : 'primary'}
+            startIcon={formData.completed ? <CheckCircle /> : <Circle />}
+            onClick={handleMarkComplete}
+            sx={{ textTransform: 'none' }}
+          >
+            {formData.completed ? t('sectionCompleted') : t('markComplete')}
+          </Button>
+        </Box>
       </Box>
 
       <Divider sx={{ mb: 3 }} />
+
+      {/* Smart Validation Warnings */}
+      <SmartValidationWarnings
+        formData={formData}
+        propertyType={subjectPropertyType || 'single_family'}
+        sectionId={sectionId}
+      />
 
       {renderSectionForm()}
 
@@ -3053,6 +3084,14 @@ export default function AppraisalSectionForm({
           }
           setSnippetsDialogOpen(false);
         }}
+      />
+
+      {/* Import from Previous Dialog */}
+      <ImportFromPreviousDialog
+        open={importDialogOpen}
+        onClose={() => setImportDialogOpen(false)}
+        onImport={handleImportData}
+        currentSectionId={sectionId}
       />
     </Box>
   );
