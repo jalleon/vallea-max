@@ -188,74 +188,91 @@ export default function TextFieldWithHistory({
           </Box>
         )}
 
-        {savedVariations.length > 0 && (
-          <Box>
-            <Box sx={{ px: 2, pt: 1.5, pb: 0.5, bgcolor: 'grey.50' }}>
-              <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '10px', color: 'text.secondary', textTransform: 'uppercase' }}>
-                Saved Variations
-              </Typography>
-            </Box>
-            <List sx={{ py: 0, maxHeight: 300, overflow: 'auto' }}>
-              {savedVariations.map((variation, index) => {
-                const fieldValue = variation.data[fieldKey];
+        {savedVariations.length > 0 && (() => {
+          // Deduplicate variations by field value (keep first occurrence)
+          const uniqueVariations = savedVariations.reduce((acc, variation) => {
+            const fieldValue = variation.data[fieldKey];
 
-                if (fieldValue === undefined || fieldValue === null || fieldValue === '') {
-                  return null;
-                }
+            if (fieldValue === undefined || fieldValue === null || fieldValue === '') {
+              return acc;
+            }
 
-                return (
-                  <Box key={index}>
-                    {index > 0 && <Divider />}
-                    <ListItem
-                      disablePadding
-                      secondaryAction={
-                        onDeleteVariation ? (
-                          <IconButton
-                            edge="end"
-                            size="small"
-                            onClick={(e) => handleDeleteClick(e, variation.name)}
-                            sx={{
-                              opacity: 0.5,
-                              '&:hover': { opacity: 1, color: 'error.main' }
-                            }}
-                          >
-                            <Delete fontSize="small" />
-                          </IconButton>
-                        ) : null
-                      }
-                    >
-                      <ListItemButton
-                        onClick={() => handleSelectVariation(variation.data)}
-                        sx={{
-                          py: 1.5,
-                          '&:hover': {
-                            bgcolor: 'primary.lighter'
-                          }
-                        }}
+            // Check if this field value already exists
+            const exists = acc.some(v => v.data[fieldKey] === fieldValue);
+            if (!exists) {
+              acc.push(variation);
+            }
+
+            return acc;
+          }, [] as typeof savedVariations);
+
+          if (uniqueVariations.length === 0) {
+            return (
+              <Box sx={{ p: 3, textAlign: 'center' }}>
+                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '11px' }}>
+                  No saved values for this field
+                </Typography>
+              </Box>
+            );
+          }
+
+          return (
+            <Box>
+              <Box sx={{ px: 2, pt: 1.5, pb: 0.5, bgcolor: 'grey.50' }}>
+                <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '10px', color: 'text.secondary', textTransform: 'uppercase' }}>
+                  Saved Variations ({uniqueVariations.length})
+                </Typography>
+              </Box>
+              <List sx={{ py: 0, maxHeight: 300, overflow: 'auto' }}>
+                {uniqueVariations.map((variation, index) => {
+                  const fieldValue = variation.data[fieldKey];
+
+                  return (
+                    <Box key={index}>
+                      {index > 0 && <Divider />}
+                      <ListItem
+                        disablePadding
+                        secondaryAction={
+                          onDeleteVariation ? (
+                            <IconButton
+                              edge="end"
+                              size="small"
+                              onClick={(e) => handleDeleteClick(e, variation.name)}
+                              sx={{
+                                opacity: 0.5,
+                                '&:hover': { opacity: 1, color: 'error.main' }
+                              }}
+                            >
+                              <Delete fontSize="small" />
+                            </IconButton>
+                          ) : null
+                        }
                       >
-                        <ListItemText
-                          primary={fieldValue}
-                          primaryTypographyProps={{
-                            variant: 'subtitle2',
-                            sx: { fontWeight: 600, fontSize: '12px', color: 'primary.main' }
+                        <ListItemButton
+                          onClick={() => handleSelectVariation(variation.data)}
+                          sx={{
+                            py: 1.5,
+                            '&:hover': {
+                              bgcolor: 'primary.lighter'
+                            }
                           }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  </Box>
-                );
-              })}
-
-              {savedVariations.filter(v => v.data[fieldKey]).length === 0 && (
-                <Box sx={{ p: 3, textAlign: 'center' }}>
-                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: '11px' }}>
-                    No saved values for this field
-                  </Typography>
-                </Box>
-              )}
-            </List>
-          </Box>
-        )}
+                        >
+                          <ListItemText
+                            primary={fieldValue}
+                            primaryTypographyProps={{
+                              variant: 'subtitle2',
+                              sx: { fontWeight: 600, fontSize: '12px', color: 'primary.main' }
+                            }}
+                          />
+                        </ListItemButton>
+                      </ListItem>
+                    </Box>
+                  );
+                })}
+              </List>
+            </Box>
+          );
+        })()}
 
         {savedVariations.length === 0 && !hasData && (
           <Box sx={{ p: 3, textAlign: 'center' }}>
