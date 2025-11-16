@@ -28,6 +28,7 @@ import AIWritingAssistant from './AIWritingAssistant';
 import SnippetsDialog from './SnippetsDialog';
 import PresentationSectionContent from './PresentationSectionContent';
 import ReferenceSheetSectionContent from './ReferenceSheetSectionContent';
+import GeneralSectionContent from './GeneralSectionContent';
 import ImportFromPreviousDialog from './ImportFromPreviousDialog';
 import SmartValidationWarnings from './SmartValidationWarnings';
 
@@ -193,7 +194,7 @@ export default function AppraisalSectionForm({
         case 'fiche_reference':
           return renderReferenceSheetSection();
         case 'general':
-          return renderNarrativeSection('description', 'Provide general information and context...');
+          return renderGeneralSection();
         case 'description':
           return renderNarrativeSection('description', 'Provide detailed description...');
         case 'conclusion_comparaison':
@@ -810,6 +811,19 @@ export default function AppraisalSectionForm({
   const renderReferenceSheetSection = () => {
     return (
       <ReferenceSheetSectionContent
+        formData={formData}
+        handleFieldChange={handleFieldChange}
+        appraisalData={appraisalData}
+        onChange={onChange}
+        setFormData={setFormData}
+        allSectionsData={allSectionsData}
+      />
+    );
+  };
+
+  const renderGeneralSection = () => {
+    return (
+      <GeneralSectionContent
         formData={formData}
         handleFieldChange={handleFieldChange}
         appraisalData={appraisalData}
