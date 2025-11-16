@@ -101,18 +101,26 @@ export default function PresentationSectionContent({
 
   // Save variation handler for company info
   const handleSaveCompanyVariation = async (variationName: string, data: any) => {
+    console.log('[DEBUG] handleSaveCompanyVariation called:', { variationName, data });
     await savePreference('company_info', data, variationName);
+    console.log('[DEBUG] After savePreference, current variations:', companyVariations);
   };
 
   // Save variation handler for appraiser info
   const handleSaveAppraiserVariation = async (variationName: string, data: any) => {
+    console.log('[DEBUG] handleSaveAppraiserVariation called:', { variationName, data });
     await savePreference('appraiser_info', data, variationName);
+    console.log('[DEBUG] After savePreference, current variations:', appraiserVariations);
   };
 
   // Delete variation handler
   const handleDeleteVariation = async (type: 'company_info' | 'appraiser_info', variationName: string) => {
+    console.log('[DEBUG] handleDeleteVariation called:', { type, variationName });
     if (confirm(`Delete variation "${variationName}"?`)) {
       await clearPreference(type, variationName);
+      console.log('[DEBUG] After clearPreference');
+    } else {
+      console.log('[DEBUG] Delete cancelled by user');
     }
   };
 

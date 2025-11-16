@@ -43,6 +43,12 @@ export default function TextFieldWithHistory({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleDoubleClick = (event: React.MouseEvent<HTMLElement>) => {
+    console.log('[DEBUG] Double-click on field:', {
+      fieldKey,
+      currentValue: value,
+      savedVariationsCount: savedVariations.length,
+      savedVariations: savedVariations.map(v => ({ name: v.name, hasFieldValue: !!v.data[fieldKey] }))
+    });
     setAnchorEl(event.currentTarget);
   };
 
@@ -52,6 +58,11 @@ export default function TextFieldWithHistory({
 
   const handleSelectVariation = (variationData: any) => {
     const fieldValue = variationData[fieldKey];
+    console.log('[DEBUG] Variation selected:', {
+      fieldKey,
+      fieldValue,
+      fullVariationData: variationData
+    });
     if (fieldValue !== undefined && fieldValue !== null) {
       onChange(fieldValue);
     }
@@ -60,6 +71,10 @@ export default function TextFieldWithHistory({
 
   const handleDeleteClick = (event: React.MouseEvent, variationName: string) => {
     event.stopPropagation();
+    console.log('[DEBUG] Delete clicked:', {
+      fieldKey,
+      variationName
+    });
     if (onDeleteVariation) {
       onDeleteVariation(variationName);
     }
@@ -70,6 +85,12 @@ export default function TextFieldWithHistory({
       const allData = getAllFieldsData();
       // Use the current field value as the variation name
       const variationName = value.trim();
+      console.log('[DEBUG] Save clicked:', {
+        fieldKey,
+        variationName,
+        allData,
+        willSave: !!variationName
+      });
       if (variationName) {
         onSaveVariation(variationName, allData);
         handleClose();
