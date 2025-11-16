@@ -124,6 +124,58 @@ export default function PresentationSectionContent({
     }
   };
 
+  // Handle logo upload
+  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please upload an image file');
+        return;
+      }
+
+      // Check file size (max 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        alert('Image must be smaller than 2MB');
+        return;
+      }
+
+      // Convert to base64 data URL
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result as string;
+        handleFieldChange('companyLogoUrl', dataUrl);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Handle property photo upload
+  const handlePropertyPhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please upload an image file');
+        return;
+      }
+
+      // Check file size (max 5MB for property photos)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Image must be smaller than 5MB');
+        return;
+      }
+
+      // Convert to base64 data URL
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result as string;
+        handleFieldChange('propertyPhotoUrl', dataUrl);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
       {/* Report Title */}
@@ -221,14 +273,35 @@ export default function PresentationSectionContent({
               <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
                 Property Photo
               </Typography>
-              <TextField
-                fullWidth
-                size="small"
-                label="Property Photo URL"
-                value={formData.propertyPhotoUrl || ''}
-                onChange={(e) => handleFieldChange('propertyPhotoUrl', e.target.value)}
-                placeholder="https://..."
-              />
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Property Photo URL"
+                  value={formData.propertyPhotoUrl || ''}
+                  onChange={(e) => handleFieldChange('propertyPhotoUrl', e.target.value)}
+                  placeholder="https://... or upload an image"
+                />
+                <Button
+                  variant="outlined"
+                  component="label"
+                  size="small"
+                  startIcon={<Upload />}
+                  sx={{
+                    minWidth: '120px',
+                    textTransform: 'none',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  Upload
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    onChange={handlePropertyPhotoUpload}
+                  />
+                </Button>
+              </Box>
 
               {formData.propertyPhotoUrl && (
                 <Paper
@@ -378,14 +451,35 @@ export default function PresentationSectionContent({
               <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
                 Company Logo
               </Typography>
-              <TextField
-                fullWidth
-                size="small"
-                label="Company Logo URL"
-                value={formData.companyLogoUrl || ''}
-                onChange={(e) => handleFieldChange('companyLogoUrl', e.target.value)}
-                placeholder="https://..."
-              />
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Company Logo URL"
+                  value={formData.companyLogoUrl || ''}
+                  onChange={(e) => handleFieldChange('companyLogoUrl', e.target.value)}
+                  placeholder="https://... or upload an image"
+                />
+                <Button
+                  variant="outlined"
+                  component="label"
+                  size="small"
+                  startIcon={<Upload />}
+                  sx={{
+                    minWidth: '120px',
+                    textTransform: 'none',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  Upload
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                  />
+                </Button>
+              </Box>
 
               {formData.companyLogoUrl && (
                 <Paper
