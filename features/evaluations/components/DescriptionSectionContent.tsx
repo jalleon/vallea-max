@@ -10,7 +10,8 @@ import {
   Radio,
   RadioGroup,
   FormControlLabel,
-  InputAdornment
+  InputAdornment,
+  Autocomplete
 } from '@mui/material';
 
 interface DescriptionSectionContentProps {
@@ -30,6 +31,122 @@ export default function DescriptionSectionContent({
   setFormData,
   allSectionsData
 }: DescriptionSectionContentProps) {
+
+  // Dropdown options
+  const topographyOptions = [
+    'Plane et en relation avec les lots avoisinants',
+    'Accidenté',
+    'Montagneux',
+    'Pente ascendante',
+    'Pente descendante',
+    'Plane',
+    'Plateau',
+    'Surélevé',
+    'Vallonnée'
+  ];
+
+  const floodRiskOptions = [
+    'Aucun',
+    'Contrôlé par digue ou barrage',
+    'Faible risque',
+    'Non vérifié',
+    'Risque centenaire (0-100 ans)',
+    "Risque d'embâcle",
+    'Risque modéré',
+    'Risque 20 ans (0-20 ans)'
+  ];
+
+  const contaminationRiskOptions = [
+    'Imperceptible',
+    'Imperceptible et historique inconnu',
+    'Risque à proximité',
+    'Risque de contamination'
+  ];
+
+  const propertyTypeOptions = [
+    'Semi-commercial',
+    'Plain-pied détaché',
+    'Plain-pied jumelé',
+    'Cottage détaché',
+    'Cottage jumelé',
+    'Unité de condominium',
+    'Palier multiple',
+    'Maison mobile',
+    'Split level'
+  ];
+
+  const constructionQualityOptions = [
+    'Standard',
+    'Bas de gamme',
+    'Économique',
+    'Moyenne',
+    'Pauvre',
+    'Prestigieuse',
+    'Standard +',
+    'Supérieure'
+  ];
+
+  const foundationOptions = [
+    'Pierre et mortiers',
+    'Béton coulé',
+    'Blocs de béton',
+    'Sur pilotis',
+    'Dalle sur le sol'
+  ];
+
+  const structureOptions = [
+    "Charpente de bois ou l'équivalent",
+    "Structure d'acier",
+    'Structure de béton',
+    'Blocs de béton'
+  ];
+
+  const insulationOptions = [
+    "Laine minérale thermique ou l'équivalent",
+    "Laine minérale ou l'équivalent",
+    'Uréthane giclé'
+  ];
+
+  const roofOptions = [
+    "Bardeaux d'asphalte (+/- 7 ans)",
+    "Bardeaux d'asphalte",
+    'Goudron / Gravier',
+    'Membrane élastomère',
+    'Tôle',
+    "Tuiles d'argile"
+  ];
+
+  const soffitOptions = [
+    'Aluminium ventilé',
+    'Bois',
+    'PVC ventilé'
+  ];
+
+  const doorsOptions = [
+    'Portes aluminium vitrée et acier vitrée',
+    'Acier',
+    'Acier et portes patio'
+  ];
+
+  const heatingOptions = [
+    'Bi-énergie / Électricité et huile x (3)',
+    'Plinthes / Électricité',
+    'Air pulsé et plinthes / Électricité',
+    'Plinthes et convecteur / Électricité',
+    'Bi-énergie / Électricité et gaz',
+    'Bi-énergie / Électricité et huile'
+  ];
+
+  const cabinetsOptions = [
+    'Mélamine / Stratifié',
+    'Bois mou / Armoires de mélamine',
+    'Bois mou / Armoires de bois'
+  ];
+
+  const builtInElementsOptions = [
+    'Aucun',
+    'Hotte, appareils ménagers, etc.'
+  ];
 
   return (
     <Box sx={{ p: 3 }}>
@@ -64,20 +181,38 @@ export default function DescriptionSectionContent({
             <Typography variant="body2" sx={{ fontWeight: 600 }}>Topographie</Typography>
           </Box>
           <Box sx={{ p: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
-            <TextField
+            <Autocomplete
+              freeSolo
               size="small"
+              options={topographyOptions}
               value={formData.topography || ''}
-              onChange={(e) => handleFieldChange('topography', e.target.value)}
-              placeholder="Plane et en relation avec les lots avoisinants"
-              sx={{ '& .MuiInputBase-input': { fontSize: '14px' }, flex: 2 }}
+              onChange={(e, newValue) => handleFieldChange('topography', newValue)}
+              onInputChange={(e, newValue) => handleFieldChange('topography', newValue)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Plane et en relation avec les lots avoisinants"
+                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+                />
+              )}
+              sx={{ flex: 2 }}
             />
             <Typography variant="body2" sx={{ fontWeight: 600, whiteSpace: 'nowrap', ml: 2 }}>Risque d'inondation :</Typography>
-            <TextField
+            <Autocomplete
+              freeSolo
               size="small"
+              options={floodRiskOptions}
               value={formData.floodRisk || ''}
-              onChange={(e) => handleFieldChange('floodRisk', e.target.value)}
-              placeholder="Aucun"
-              sx={{ '& .MuiInputBase-input': { fontSize: '14px' }, flex: 1 }}
+              onChange={(e, newValue) => handleFieldChange('floodRisk', newValue)}
+              onInputChange={(e, newValue) => handleFieldChange('floodRisk', newValue)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Aucun"
+                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+                />
+              )}
+              sx={{ flex: 1 }}
             />
           </Box>
         </Box>
@@ -96,13 +231,21 @@ export default function DescriptionSectionContent({
             <Typography variant="body2" sx={{ fontWeight: 600 }}>Risque de contamination</Typography>
           </Box>
           <Box sx={{ p: 1 }}>
-            <TextField
+            <Autocomplete
+              freeSolo
               fullWidth
               size="small"
+              options={contaminationRiskOptions}
               value={formData.contaminationRisk || ''}
-              onChange={(e) => handleFieldChange('contaminationRisk', e.target.value)}
-              placeholder="Imperceptible et historique inconnu"
-              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+              onChange={(e, newValue) => handleFieldChange('contaminationRisk', newValue)}
+              onInputChange={(e, newValue) => handleFieldChange('contaminationRisk', newValue)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Imperceptible et historique inconnu"
+                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+                />
+              )}
             />
           </Box>
         </Box>
@@ -437,12 +580,21 @@ export default function DescriptionSectionContent({
             <Typography variant="body2" sx={{ fontWeight: 600 }}>Type de propriété</Typography>
           </Box>
           <Box sx={{ p: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
-            <TextField
+            <Autocomplete
+              freeSolo
               size="small"
+              options={propertyTypeOptions}
               value={formData.propertyType || ''}
-              onChange={(e) => handleFieldChange('propertyType', e.target.value)}
-              placeholder="Semi-commercial"
-              sx={{ '& .MuiInputBase-input': { fontSize: '14px' }, flex: 1 }}
+              onChange={(e, newValue) => handleFieldChange('propertyType', newValue)}
+              onInputChange={(e, newValue) => handleFieldChange('propertyType', newValue)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Semi-commercial"
+                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+                />
+              )}
+              sx={{ flex: 1 }}
             />
             <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '11px', ml: 2, whiteSpace: 'nowrap' }}>Dimensions au sol :</Typography>
             <TextField
@@ -469,12 +621,21 @@ export default function DescriptionSectionContent({
             <Typography variant="body2" sx={{ fontWeight: 600 }}>Qualité de la construction</Typography>
           </Box>
           <Box sx={{ p: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
-            <TextField
+            <Autocomplete
+              freeSolo
               size="small"
+              options={constructionQualityOptions}
               value={formData.constructionQuality || ''}
-              onChange={(e) => handleFieldChange('constructionQuality', e.target.value)}
-              placeholder="Standard"
-              sx={{ '& .MuiInputBase-input': { fontSize: '14px' }, flex: 1 }}
+              onChange={(e, newValue) => handleFieldChange('constructionQuality', newValue)}
+              onInputChange={(e, newValue) => handleFieldChange('constructionQuality', newValue)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Standard"
+                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+                />
+              )}
+              sx={{ flex: 1 }}
             />
             <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '11px', ml: 2, whiteSpace: 'nowrap' }}>Nombre d'unité(s) :</Typography>
             <TextField
@@ -730,13 +891,21 @@ export default function DescriptionSectionContent({
             <Typography variant="body2" sx={{ fontWeight: 600 }}>Fondation</Typography>
           </Box>
           <Box sx={{ p: 1 }}>
-            <TextField
+            <Autocomplete
+              freeSolo
               fullWidth
               size="small"
+              options={foundationOptions}
               value={formData.foundation || ''}
-              onChange={(e) => handleFieldChange('foundation', e.target.value)}
-              placeholder="Pierre et mortiers"
-              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+              onChange={(e, newValue) => handleFieldChange('foundation', newValue)}
+              onInputChange={(e, newValue) => handleFieldChange('foundation', newValue)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Pierre et mortiers"
+                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+                />
+              )}
             />
           </Box>
         </Box>
@@ -755,13 +924,21 @@ export default function DescriptionSectionContent({
             <Typography variant="body2" sx={{ fontWeight: 600 }}>Ossature</Typography>
           </Box>
           <Box sx={{ p: 1 }}>
-            <TextField
+            <Autocomplete
+              freeSolo
               fullWidth
               size="small"
+              options={structureOptions}
               value={formData.structure || ''}
-              onChange={(e) => handleFieldChange('structure', e.target.value)}
-              placeholder="Charpente de bois ou l'équivalent"
-              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+              onChange={(e, newValue) => handleFieldChange('structure', newValue)}
+              onInputChange={(e, newValue) => handleFieldChange('structure', newValue)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Charpente de bois ou l'équivalent"
+                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+                />
+              )}
             />
           </Box>
         </Box>
@@ -805,13 +982,21 @@ export default function DescriptionSectionContent({
             <Typography variant="body2" sx={{ fontWeight: 600 }}>Isolant</Typography>
           </Box>
           <Box sx={{ p: 1 }}>
-            <TextField
+            <Autocomplete
+              freeSolo
               fullWidth
               size="small"
+              options={insulationOptions}
               value={formData.insulation || ''}
-              onChange={(e) => handleFieldChange('insulation', e.target.value)}
-              placeholder="Laine minérale thermique ou l'équivalent"
-              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+              onChange={(e, newValue) => handleFieldChange('insulation', newValue)}
+              onInputChange={(e, newValue) => handleFieldChange('insulation', newValue)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Laine minérale thermique ou l'équivalent"
+                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+                />
+              )}
             />
           </Box>
         </Box>
@@ -830,13 +1015,21 @@ export default function DescriptionSectionContent({
             <Typography variant="body2" sx={{ fontWeight: 600 }}>Toiture</Typography>
           </Box>
           <Box sx={{ p: 1 }}>
-            <TextField
+            <Autocomplete
+              freeSolo
               fullWidth
               size="small"
+              options={roofOptions}
               value={formData.roof || ''}
-              onChange={(e) => handleFieldChange('roof', e.target.value)}
-              placeholder="Bardeaux d'asphalte (+/- 7 ans)"
-              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+              onChange={(e, newValue) => handleFieldChange('roof', newValue)}
+              onInputChange={(e, newValue) => handleFieldChange('roof', newValue)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Bardeaux d'asphalte (+/- 7 ans)"
+                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+                />
+              )}
             />
           </Box>
         </Box>
@@ -855,13 +1048,21 @@ export default function DescriptionSectionContent({
             <Typography variant="body2" sx={{ fontWeight: 600 }}>Soffite/corniche</Typography>
           </Box>
           <Box sx={{ p: 1 }}>
-            <TextField
+            <Autocomplete
+              freeSolo
               fullWidth
               size="small"
+              options={soffitOptions}
               value={formData.soffit || ''}
-              onChange={(e) => handleFieldChange('soffit', e.target.value)}
-              placeholder="Aluminium ventilé"
-              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+              onChange={(e, newValue) => handleFieldChange('soffit', newValue)}
+              onInputChange={(e, newValue) => handleFieldChange('soffit', newValue)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Aluminium ventilé"
+                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+                />
+              )}
             />
           </Box>
         </Box>
@@ -905,13 +1106,21 @@ export default function DescriptionSectionContent({
             <Typography variant="body2" sx={{ fontWeight: 600 }}>Portes</Typography>
           </Box>
           <Box sx={{ p: 1 }}>
-            <TextField
+            <Autocomplete
+              freeSolo
               fullWidth
               size="small"
+              options={doorsOptions}
               value={formData.doors || ''}
-              onChange={(e) => handleFieldChange('doors', e.target.value)}
-              placeholder="Portes aluminium vitrée et acier vitrée"
-              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+              onChange={(e, newValue) => handleFieldChange('doors', newValue)}
+              onInputChange={(e, newValue) => handleFieldChange('doors', newValue)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Portes aluminium vitrée et acier vitrée"
+                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+                />
+              )}
             />
           </Box>
         </Box>
@@ -980,13 +1189,21 @@ export default function DescriptionSectionContent({
             <Typography variant="body2" sx={{ fontWeight: 600 }}>Chauffage / Énergie</Typography>
           </Box>
           <Box sx={{ p: 1 }}>
-            <TextField
+            <Autocomplete
+              freeSolo
               fullWidth
               size="small"
+              options={heatingOptions}
               value={formData.heating || ''}
-              onChange={(e) => handleFieldChange('heating', e.target.value)}
-              placeholder="Bi-énergie / Électricité et huile x (3)"
-              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+              onChange={(e, newValue) => handleFieldChange('heating', newValue)}
+              onInputChange={(e, newValue) => handleFieldChange('heating', newValue)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Bi-énergie / Électricité et huile x (3)"
+                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+                />
+              )}
             />
           </Box>
         </Box>
@@ -1005,13 +1222,21 @@ export default function DescriptionSectionContent({
             <Typography variant="body2" sx={{ fontWeight: 600 }}>Armoires / Comptoirs</Typography>
           </Box>
           <Box sx={{ p: 1 }}>
-            <TextField
+            <Autocomplete
+              freeSolo
               fullWidth
               size="small"
+              options={cabinetsOptions}
               value={formData.cabinets || ''}
-              onChange={(e) => handleFieldChange('cabinets', e.target.value)}
-              placeholder="Mélamine / Stratifié"
-              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+              onChange={(e, newValue) => handleFieldChange('cabinets', newValue)}
+              onInputChange={(e, newValue) => handleFieldChange('cabinets', newValue)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Mélamine / Stratifié"
+                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+                />
+              )}
             />
           </Box>
         </Box>
@@ -1030,13 +1255,21 @@ export default function DescriptionSectionContent({
             <Typography variant="body2" sx={{ fontWeight: 600 }}>Éléments incorporés</Typography>
           </Box>
           <Box sx={{ p: 1 }}>
-            <TextField
+            <Autocomplete
+              freeSolo
               fullWidth
               size="small"
+              options={builtInElementsOptions}
               value={formData.builtInElements || ''}
-              onChange={(e) => handleFieldChange('builtInElements', e.target.value)}
-              placeholder="Aucun"
-              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+              onChange={(e, newValue) => handleFieldChange('builtInElements', newValue)}
+              onInputChange={(e, newValue) => handleFieldChange('builtInElements', newValue)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Aucun"
+                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+                />
+              )}
             />
           </Box>
         </Box>
