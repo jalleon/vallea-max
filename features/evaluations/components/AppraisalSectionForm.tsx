@@ -29,6 +29,7 @@ import SnippetsDialog from './SnippetsDialog';
 import PresentationSectionContent from './PresentationSectionContent';
 import ReferenceSheetSectionContent from './ReferenceSheetSectionContent';
 import GeneralSectionContent from './GeneralSectionContent';
+import DescriptionSectionContent from './DescriptionSectionContent';
 import ImportFromPreviousDialog from './ImportFromPreviousDialog';
 import SmartValidationWarnings from './SmartValidationWarnings';
 
@@ -196,7 +197,7 @@ export default function AppraisalSectionForm({
         case 'general':
           return renderGeneralSection();
         case 'description':
-          return renderNarrativeSection('description', 'Provide detailed description...');
+          return renderDescriptionSection();
         case 'conclusion_comparaison':
           return renderNarrativeSection('description', 'Provide conclusion and final reconciliation...');
         case 'informations_generales':
@@ -824,6 +825,19 @@ export default function AppraisalSectionForm({
   const renderGeneralSection = () => {
     return (
       <GeneralSectionContent
+        formData={formData}
+        handleFieldChange={handleFieldChange}
+        appraisalData={appraisalData}
+        onChange={onChange}
+        setFormData={setFormData}
+        allSectionsData={allSectionsData}
+      />
+    );
+  };
+
+  const renderDescriptionSection = () => {
+    return (
+      <DescriptionSectionContent
         formData={formData}
         handleFieldChange={handleFieldChange}
         appraisalData={appraisalData}
