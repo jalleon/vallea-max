@@ -183,6 +183,7 @@ export default function DescriptionSectionContent({
           <Box sx={{ p: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
             <Autocomplete
               freeSolo
+              forcePopupIcon
               size="small"
               options={topographyOptions}
               value={formData.topography || ''}
@@ -200,6 +201,7 @@ export default function DescriptionSectionContent({
             <Typography variant="body2" sx={{ fontWeight: 600, whiteSpace: 'nowrap', ml: 2 }}>Risque d'inondation :</Typography>
             <Autocomplete
               freeSolo
+              forcePopupIcon
               size="small"
               options={floodRiskOptions}
               value={formData.floodRisk || ''}
@@ -582,6 +584,7 @@ export default function DescriptionSectionContent({
           <Box sx={{ p: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
             <Autocomplete
               freeSolo
+              forcePopupIcon
               size="small"
               options={propertyTypeOptions}
               value={formData.propertyType || ''}
@@ -623,6 +626,7 @@ export default function DescriptionSectionContent({
           <Box sx={{ p: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
             <Autocomplete
               freeSolo
+              forcePopupIcon
               size="small"
               options={constructionQualityOptions}
               value={formData.constructionQuality || ''}
