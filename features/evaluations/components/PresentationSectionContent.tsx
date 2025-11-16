@@ -177,419 +177,517 @@ export default function PresentationSectionContent({
   };
 
   return (
-    <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
-      {/* Report Title */}
-      <Card elevation={2} sx={{ mb: 3, borderRadius: '16px' }}>
-        <CardContent>
-          <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main', mb: 2 }}>
-            Report Title
-          </Typography>
-          <TextField
-            fullWidth
-            size="small"
-            label="Report Title"
-            value={formData.reportTitle || ''}
-            onChange={(e) => handleFieldChange('reportTitle', e.target.value)}
-            sx={{
-              '& .MuiInputBase-input': {
-                fontSize: '16px',
-                fontWeight: 500
-              }
-            }}
-          />
-        </CardContent>
-      </Card>
+    <Box sx={{ maxWidth: 1400, mx: 'auto' }}>
+      {/* Compact Table-Style Form */}
+      <Box
+        sx={{
+          border: '1px solid',
+          borderColor: 'divider',
+          borderRadius: '8px',
+          overflow: 'hidden',
+          bgcolor: 'background.paper'
+        }}
+      >
+        {/* Report Title */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: '200px 1fr',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            '&:hover': { bgcolor: 'action.hover' }
+          }}
+        >
+          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>Report Title</Typography>
+          </Box>
+          <Box sx={{ p: 1 }}>
+            <TextField
+              fullWidth
+              size="small"
+              value={formData.reportTitle || ''}
+              onChange={(e) => handleFieldChange('reportTitle', e.target.value)}
+              placeholder="RAPPORT D'ÉVALUATION IMMOBILIÈRE"
+              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+            />
+          </Box>
+        </Box>
 
-      {/* Property Address & Photo */}
-      <Card elevation={2} sx={{ mb: 3, borderRadius: '16px' }}>
-        <CardContent>
-          <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main', mb: 2 }}>
-            Property Address
-          </Typography>
+        {/* Full Address */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: '200px 1fr',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            '&:hover': { bgcolor: 'action.hover' }
+          }}
+        >
+          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>Full Address</Typography>
+          </Box>
+          <Box sx={{ p: 1 }}>
+            <TextField
+              fullWidth
+              size="small"
+              value={formData.fullAddress || ''}
+              onChange={(e) => handleFieldChange('fullAddress', e.target.value)}
+              placeholder="123 Main Street"
+              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+            />
+          </Box>
+        </Box>
 
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                size="small"
-                label="Full Address"
-                value={formData.fullAddress || ''}
-                onChange={(e) => handleFieldChange('fullAddress', e.target.value)}
-                placeholder="123 Main Street"
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                size="small"
-                label="City"
-                value={formData.city || ''}
-                onChange={(e) => handleFieldChange('city', e.target.value)}
-                placeholder="Montreal"
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={3}>
-              <TextField
-                fullWidth
-                size="small"
-                label="Province"
-                value={formData.province || ''}
-                onChange={(e) => handleFieldChange('province', e.target.value)}
-                placeholder="Québec"
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={3}>
-              <TextField
-                fullWidth
-                size="small"
-                label="Postal Code"
-                value={formData.postalCode || ''}
-                onChange={(e) => handleFieldChange('postalCode', e.target.value)}
-                placeholder="H1A 1A1"
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <Divider sx={{ my: 1 }} />
-            </Grid>
-
-            {/* File Number */}
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                size="small"
-                label="File Number"
-                value={formData.fileNumber || ''}
-                onChange={(e) => handleFieldChange('fileNumber', e.target.value)}
-                placeholder="AP-2025-001"
-              />
-            </Grid>
-
-            {/* Property Photo */}
-            <Grid item xs={12}>
-              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-                Property Photo
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+        {/* City, Province, Postal Code */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: '200px 1fr',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            '&:hover': { bgcolor: 'action.hover' }
+          }}
+        >
+          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>City / Province / Postal</Typography>
+          </Box>
+          <Box sx={{ p: 1 }}>
+            <Grid container spacing={1}>
+              <Grid item xs={12} sm={5}>
                 <TextField
                   fullWidth
                   size="small"
-                  label="Property Photo URL"
-                  value={formData.propertyPhotoUrl || ''}
-                  onChange={(e) => handleFieldChange('propertyPhotoUrl', e.target.value)}
-                  placeholder="https://... or upload an image"
+                  placeholder="Montreal"
+                  value={formData.city || ''}
+                  onChange={(e) => handleFieldChange('city', e.target.value)}
+                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
                 />
-                <Button
-                  variant="outlined"
-                  component="label"
-                  size="small"
-                  startIcon={<Upload />}
-                  sx={{
-                    minWidth: '120px',
-                    textTransform: 'none',
-                    whiteSpace: 'nowrap'
-                  }}
-                >
-                  Upload
-                  <input
-                    type="file"
-                    hidden
-                    accept="image/*"
-                    onChange={handlePropertyPhotoUpload}
-                  />
-                </Button>
-              </Box>
-
-              {formData.propertyPhotoUrl && (
-                <Paper
-                  elevation={1}
-                  sx={{
-                    mt: 2,
-                    p: 2,
-                    borderRadius: '12px',
-                    border: '2px dashed',
-                    borderColor: 'primary.light',
-                    textAlign: 'center'
-                  }}
-                >
-                  <Box
-                    component="img"
-                    src={formData.propertyPhotoUrl}
-                    alt="Property"
-                    sx={{
-                      maxWidth: '100%',
-                      maxHeight: 300,
-                      borderRadius: '8px',
-                      objectFit: 'cover'
-                    }}
-                    onError={(e: any) => {
-                      e.target.style.display = 'none';
-                    }}
-                  />
-                </Paper>
-              )}
-
-              {!formData.propertyPhotoUrl && (
-                <Paper
-                  elevation={0}
-                  sx={{
-                    mt: 2,
-                    p: 4,
-                    borderRadius: '12px',
-                    border: '2px dashed',
-                    borderColor: 'divider',
-                    textAlign: 'center',
-                    bgcolor: 'grey.50'
-                  }}
-                >
-                  <ImageIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
-                  <Typography variant="body2" color="text.secondary">
-                    No photo uploaded yet
-                  </Typography>
-                  <Typography variant="caption" color="text.disabled">
-                    Enter photo URL above or upload feature coming soon
-                  </Typography>
-                </Paper>
-              )}
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
-
-      {/* Client/Borrower Information */}
-      <Card elevation={2} sx={{ mb: 3, borderRadius: '16px' }}>
-        <CardContent>
-          <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main', mb: 2 }}>
-            Client / Borrower
-          </Typography>
-          <TextField
-            fullWidth
-            size="small"
-            label="Client Name"
-            value={formData.clientName || ''}
-            onChange={(e) => handleFieldChange('clientName', e.target.value)}
-            placeholder="John Smith"
-          />
-        </CardContent>
-      </Card>
-
-      {/* Appraiser Information */}
-      <Card elevation={2} sx={{ mb: 3, borderRadius: '16px' }}>
-        <CardContent>
-          <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main', mb: 2 }}>
-            Appraiser Information
-          </Typography>
-
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <TextFieldWithHistory
-                fullWidth
-                size="small"
-                label="Appraiser Name"
-                value={formData.appraiserName || ''}
-                onChange={(val) => handleFieldChange('appraiserName', val)}
-                savedVariations={appraiserVariations}
-                fieldKey="appraiserName"
-                onDeleteVariation={(name) => handleDeleteVariation('appraiser_info', name)}
-                onSaveVariation={handleSaveAppraiserVariation}
-                getAllFieldsData={getAppraiserFieldsData}
-                groupLabel="Appraiser Info"
-                placeholder="Jane Doe, E.A."
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextFieldWithHistory
-                fullWidth
-                size="small"
-                label="Title / Designation"
-                value={formData.appraiserTitle || ''}
-                onChange={(val) => handleFieldChange('appraiserTitle', val)}
-                savedVariations={appraiserVariations}
-                fieldKey="appraiserTitle"
-                onDeleteVariation={(name) => handleDeleteVariation('appraiser_info', name)}
-                onSaveVariation={handleSaveAppraiserVariation}
-                getAllFieldsData={getAppraiserFieldsData}
-                groupLabel="Appraiser Info"
-                placeholder="Certified Real Estate Appraiser"
-              />
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
-
-      {/* Company Information */}
-      <Card elevation={2} sx={{ mb: 3, borderRadius: '16px' }}>
-        <CardContent>
-          <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main', mb: 2 }}>
-            Company Information
-          </Typography>
-
-          <Grid container spacing={2}>
-            {/* Company Name */}
-            <Grid item xs={12}>
-              <TextFieldWithHistory
-                fullWidth
-                size="small"
-                label="Company Name"
-                value={formData.companyName || ''}
-                onChange={(val) => handleFieldChange('companyName', val)}
-                savedVariations={companyVariations}
-                fieldKey="companyName"
-                onDeleteVariation={(name) => handleDeleteVariation('company_info', name)}
-                onSaveVariation={handleSaveCompanyVariation}
-                getAllFieldsData={getCompanyFieldsData}
-                groupLabel="Company Info"
-                placeholder="ABC Appraisal Services Inc."
-              />
-            </Grid>
-
-            {/* Company Logo */}
-            <Grid item xs={12}>
-              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-                Company Logo
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+              </Grid>
+              <Grid item xs={12} sm={4}>
                 <TextField
                   fullWidth
                   size="small"
-                  label="Company Logo URL"
-                  value={formData.companyLogoUrl || ''}
-                  onChange={(e) => handleFieldChange('companyLogoUrl', e.target.value)}
-                  placeholder="https://... or upload an image"
+                  placeholder="Québec"
+                  value={formData.province || ''}
+                  onChange={(e) => handleFieldChange('province', e.target.value)}
+                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
                 />
-                <Button
-                  variant="outlined"
-                  component="label"
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <TextField
+                  fullWidth
                   size="small"
-                  startIcon={<Upload />}
+                  placeholder="H1A 1A1"
+                  value={formData.postalCode || ''}
+                  onChange={(e) => handleFieldChange('postalCode', e.target.value)}
+                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+                />
+              </Grid>
+            </Grid>
+          </Box>
+        </Box>
+
+        {/* File Number */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: '200px 1fr',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            '&:hover': { bgcolor: 'action.hover' }
+          }}
+        >
+          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>File Number</Typography>
+          </Box>
+          <Box sx={{ p: 1 }}>
+            <TextField
+              fullWidth
+              size="small"
+              value={formData.fileNumber || ''}
+              onChange={(e) => handleFieldChange('fileNumber', e.target.value)}
+              placeholder="AP-2025-001"
+              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+            />
+          </Box>
+        </Box>
+
+        {/* Property Photo */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: '200px 1fr',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            '&:hover': { bgcolor: 'action.hover' }
+          }}
+        >
+          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'flex-start', pt: 2 }}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>Property Photo</Typography>
+          </Box>
+          <Box sx={{ p: 1 }}>
+            <Box sx={{ display: 'flex', gap: 1, mb: formData.propertyPhotoUrl ? 1 : 0 }}>
+              <TextField
+                fullWidth
+                size="small"
+                value={formData.propertyPhotoUrl || ''}
+                onChange={(e) => handleFieldChange('propertyPhotoUrl', e.target.value)}
+                placeholder="https://... or upload an image"
+                sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+              />
+              <Button
+                variant="outlined"
+                component="label"
+                size="small"
+                startIcon={<Upload />}
+                sx={{
+                  minWidth: '100px',
+                  textTransform: 'none',
+                  whiteSpace: 'nowrap',
+                  fontSize: '12px'
+                }}
+              >
+                Upload
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={handlePropertyPhotoUpload}
+                />
+              </Button>
+            </Box>
+            {formData.propertyPhotoUrl && (
+              <Box
+                sx={{
+                  mt: 1,
+                  p: 1,
+                  borderRadius: '8px',
+                  border: '1px dashed',
+                  borderColor: 'primary.light',
+                  bgcolor: 'grey.50'
+                }}
+              >
+                <Box
+                  component="img"
+                  src={formData.propertyPhotoUrl}
+                  alt="Property"
                   sx={{
-                    minWidth: '120px',
-                    textTransform: 'none',
-                    whiteSpace: 'nowrap'
+                    maxWidth: '100%',
+                    maxHeight: 200,
+                    borderRadius: '4px',
+                    objectFit: 'cover',
+                    display: 'block'
                   }}
-                >
-                  Upload
-                  <input
-                    type="file"
-                    hidden
-                    accept="image/*"
-                    onChange={handleLogoUpload}
-                  />
-                </Button>
+                  onError={(e: any) => {
+                    e.target.style.display = 'none';
+                  }}
+                />
               </Box>
+            )}
+          </Box>
+        </Box>
 
-              {formData.companyLogoUrl && (
-                <Paper
-                  elevation={1}
+        {/* Client Name */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: '200px 1fr',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            '&:hover': { bgcolor: 'action.hover' }
+          }}
+        >
+          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>Client / Borrower</Typography>
+          </Box>
+          <Box sx={{ p: 1 }}>
+            <TextField
+              fullWidth
+              size="small"
+              value={formData.clientName || ''}
+              onChange={(e) => handleFieldChange('clientName', e.target.value)}
+              placeholder="John Smith"
+              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+            />
+          </Box>
+        </Box>
+
+        {/* Appraiser Name */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: '200px 1fr',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            '&:hover': { bgcolor: 'action.hover' }
+          }}
+        >
+          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>Appraiser Name</Typography>
+          </Box>
+          <Box sx={{ p: 1 }}>
+            <TextFieldWithHistory
+              fullWidth
+              size="small"
+              value={formData.appraiserName || ''}
+              onChange={(val) => handleFieldChange('appraiserName', val)}
+              savedVariations={appraiserVariations}
+              fieldKey="appraiserName"
+              onDeleteVariation={(name) => handleDeleteVariation('appraiser_info', name)}
+              onSaveVariation={handleSaveAppraiserVariation}
+              getAllFieldsData={getAppraiserFieldsData}
+              groupLabel="Appraiser Info"
+              placeholder="Jane Doe, E.A."
+              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+            />
+          </Box>
+        </Box>
+
+        {/* Appraiser Title */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: '200px 1fr',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            '&:hover': { bgcolor: 'action.hover' }
+          }}
+        >
+          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>Appraiser Title</Typography>
+          </Box>
+          <Box sx={{ p: 1 }}>
+            <TextFieldWithHistory
+              fullWidth
+              size="small"
+              value={formData.appraiserTitle || ''}
+              onChange={(val) => handleFieldChange('appraiserTitle', val)}
+              savedVariations={appraiserVariations}
+              fieldKey="appraiserTitle"
+              onDeleteVariation={(name) => handleDeleteVariation('appraiser_info', name)}
+              onSaveVariation={handleSaveAppraiserVariation}
+              getAllFieldsData={getAppraiserFieldsData}
+              groupLabel="Appraiser Info"
+              placeholder="Certified Real Estate Appraiser"
+              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+            />
+          </Box>
+        </Box>
+
+        {/* Company Name */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: '200px 1fr',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            '&:hover': { bgcolor: 'action.hover' }
+          }}
+        >
+          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>Company Name</Typography>
+          </Box>
+          <Box sx={{ p: 1 }}>
+            <TextFieldWithHistory
+              fullWidth
+              size="small"
+              value={formData.companyName || ''}
+              onChange={(val) => handleFieldChange('companyName', val)}
+              savedVariations={companyVariations}
+              fieldKey="companyName"
+              onDeleteVariation={(name) => handleDeleteVariation('company_info', name)}
+              onSaveVariation={handleSaveCompanyVariation}
+              getAllFieldsData={getCompanyFieldsData}
+              groupLabel="Company Info"
+              placeholder="ABC Appraisal Services Inc."
+              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+            />
+          </Box>
+        </Box>
+
+        {/* Company Logo */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: '200px 1fr',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            '&:hover': { bgcolor: 'action.hover' }
+          }}
+        >
+          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'flex-start', pt: 2 }}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>Company Logo</Typography>
+          </Box>
+          <Box sx={{ p: 1 }}>
+            <Box sx={{ display: 'flex', gap: 1, mb: formData.companyLogoUrl ? 1 : 0 }}>
+              <TextField
+                fullWidth
+                size="small"
+                value={formData.companyLogoUrl || ''}
+                onChange={(e) => handleFieldChange('companyLogoUrl', e.target.value)}
+                placeholder="https://... or upload an image"
+                sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+              />
+              <Button
+                variant="outlined"
+                component="label"
+                size="small"
+                startIcon={<Upload />}
+                sx={{
+                  minWidth: '100px',
+                  textTransform: 'none',
+                  whiteSpace: 'nowrap',
+                  fontSize: '12px'
+                }}
+              >
+                Upload
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                />
+              </Button>
+            </Box>
+            {formData.companyLogoUrl && (
+              <Box
+                sx={{
+                  mt: 1,
+                  p: 1,
+                  borderRadius: '8px',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  bgcolor: 'grey.50',
+                  textAlign: 'center'
+                }}
+              >
+                <Box
+                  component="img"
+                  src={formData.companyLogoUrl}
+                  alt="Company Logo"
                   sx={{
-                    mt: 2,
-                    p: 2,
-                    borderRadius: '12px',
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    textAlign: 'center',
-                    bgcolor: 'grey.50'
+                    maxWidth: '100%',
+                    maxHeight: 100,
+                    objectFit: 'contain'
                   }}
-                >
-                  <Box
-                    component="img"
-                    src={formData.companyLogoUrl}
-                    alt="Company Logo"
-                    sx={{
-                      maxWidth: '100%',
-                      maxHeight: 120,
-                      objectFit: 'contain'
-                    }}
-                    onError={(e: any) => {
-                      e.target.style.display = 'none';
-                    }}
-                  />
-                </Paper>
-              )}
-            </Grid>
+                  onError={(e: any) => {
+                    e.target.style.display = 'none';
+                  }}
+                />
+              </Box>
+            )}
+          </Box>
+        </Box>
 
-            <Grid item xs={12}>
-              <Divider sx={{ my: 1 }} />
-            </Grid>
+        {/* Company Address */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: '200px 1fr',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            '&:hover': { bgcolor: 'action.hover' }
+          }}
+        >
+          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>Company Address</Typography>
+          </Box>
+          <Box sx={{ p: 1 }}>
+            <TextFieldWithHistory
+              fullWidth
+              size="small"
+              value={formData.companyAddress || ''}
+              onChange={(val) => handleFieldChange('companyAddress', val)}
+              savedVariations={companyVariations}
+              fieldKey="companyAddress"
+              onDeleteVariation={(name) => handleDeleteVariation('company_info', name)}
+              onSaveVariation={handleSaveCompanyVariation}
+              getAllFieldsData={getCompanyFieldsData}
+              groupLabel="Company Info"
+              placeholder="456 Business Ave, Suite 200, Montreal, QC H2X 1Y3"
+              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+            />
+          </Box>
+        </Box>
 
-            {/* Company Address */}
-            <Grid item xs={12}>
-              <TextFieldWithHistory
-                fullWidth
-                size="small"
-                label="Company Address"
-                value={formData.companyAddress || ''}
-                onChange={(val) => handleFieldChange('companyAddress', val)}
-                savedVariations={companyVariations}
-                fieldKey="companyAddress"
-                onDeleteVariation={(name) => handleDeleteVariation('company_info', name)}
-                onSaveVariation={handleSaveCompanyVariation}
-                getAllFieldsData={getCompanyFieldsData}
-                groupLabel="Company Info"
-                placeholder="456 Business Ave, Suite 200, Montreal, QC H2X 1Y3"
-              />
-            </Grid>
+        {/* Company Phone */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: '200px 1fr',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            '&:hover': { bgcolor: 'action.hover' }
+          }}
+        >
+          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>Company Phone</Typography>
+          </Box>
+          <Box sx={{ p: 1 }}>
+            <TextFieldWithHistory
+              fullWidth
+              size="small"
+              value={formData.companyPhone || ''}
+              onChange={(val) => handleFieldChange('companyPhone', val)}
+              savedVariations={companyVariations}
+              fieldKey="companyPhone"
+              onDeleteVariation={(name) => handleDeleteVariation('company_info', name)}
+              onSaveVariation={handleSaveCompanyVariation}
+              getAllFieldsData={getCompanyFieldsData}
+              groupLabel="Company Info"
+              placeholder="(514) 555-1234"
+              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+            />
+          </Box>
+        </Box>
 
-            {/* Phone & Website */}
-            <Grid item xs={12} sm={6}>
-              <TextFieldWithHistory
-                fullWidth
-                size="small"
-                label="Telephone Number"
-                value={formData.companyPhone || ''}
-                onChange={(val) => handleFieldChange('companyPhone', val)}
-                savedVariations={companyVariations}
-                fieldKey="companyPhone"
-                onDeleteVariation={(name) => handleDeleteVariation('company_info', name)}
-                onSaveVariation={handleSaveCompanyVariation}
-                getAllFieldsData={getCompanyFieldsData}
-                groupLabel="Company Info"
-                placeholder="(514) 555-1234"
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextFieldWithHistory
-                fullWidth
-                size="small"
-                label="Website Address"
-                value={formData.companyWebsite || ''}
-                onChange={(val) => handleFieldChange('companyWebsite', val)}
-                savedVariations={companyVariations}
-                fieldKey="companyWebsite"
-                onDeleteVariation={(name) => handleDeleteVariation('company_info', name)}
-                onSaveVariation={handleSaveCompanyVariation}
-                getAllFieldsData={getCompanyFieldsData}
-                groupLabel="Company Info"
-                placeholder="www.abcappraisals.com"
-              />
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
+        {/* Company Website */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: '200px 1fr',
+            '&:hover': { bgcolor: 'action.hover' }
+          }}
+        >
+          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>Company Website</Typography>
+          </Box>
+          <Box sx={{ p: 1 }}>
+            <TextFieldWithHistory
+              fullWidth
+              size="small"
+              value={formData.companyWebsite || ''}
+              onChange={(val) => handleFieldChange('companyWebsite', val)}
+              savedVariations={companyVariations}
+              fieldKey="companyWebsite"
+              onDeleteVariation={(name) => handleDeleteVariation('company_info', name)}
+              onSaveVariation={handleSaveCompanyVariation}
+              getAllFieldsData={getCompanyFieldsData}
+              groupLabel="Company Info"
+              placeholder="www.abcappraisals.com"
+              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+            />
+          </Box>
+        </Box>
+      </Box>
 
       {/* Help Text */}
       <Paper
         elevation={0}
         sx={{
+          mt: 2,
           p: 2,
-          borderRadius: '12px',
+          borderRadius: '8px',
           bgcolor: 'info.lighter',
           border: '1px solid',
           borderColor: 'info.light'
         }}
       >
-        <Typography variant="body2" color="info.dark" sx={{ mb: 1 }}>
-          <strong>💡 Quick Tip:</strong> Double-click any field to save or load variations!
+        <Typography variant="body2" color="info.dark" sx={{ mb: 0.5, fontWeight: 600, fontSize: '13px' }}>
+          Quick Tip: Double-click any field to save or load variations
         </Typography>
-        <Typography variant="caption" color="info.dark" sx={{ display: 'block', fontSize: '11px' }}>
-          • Save multiple office locations (Montreal, Toronto, etc.)<br />
-          • Save different appraisers<br />
-          • Instantly switch between saved variations with one click<br />
-          • All saved variations appear on the title page of your exported report
+        <Typography variant="caption" color="info.dark" sx={{ display: 'block', fontSize: '11px', lineHeight: 1.6 }}>
+          Save multiple office locations (Montreal, Toronto, etc.) • Save different appraisers • Instantly switch between saved variations
         </Typography>
       </Paper>
     </Box>
