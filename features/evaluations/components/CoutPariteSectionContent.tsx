@@ -121,20 +121,19 @@ export default function CoutPariteSectionContent({
     { id: '11', field: '', details: 'Dépréciation:', calculation: '', nouveau: '', depreciation: '', valeur: '' },
     { id: '12', field: 'Valeur contributive des aménagements extérieurs:', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
     { id: '13', field: 'Commentaire(s):', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
-    { id: '14', field: 'Valeur par la méthode du coût', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
-    { id: '15', field: 'Arrondie à:', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' }
+    { id: '14', field: 'Valeur par la méthode du coût', details: '', calculation: 'Arrondie à:', nouveau: '', depreciation: '', valeur: '' }
   ]);
 
   const costColumnDefs: ColDef[] = useMemo(() => [
     {
       field: 'field',
-      headerName: 'MÉTHODE DU COÛT',
+      headerName: '',
       width: 350,
       pinned: 'left',
       wrapText: true,
       autoHeight: true,
       cellStyle: (params) => {
-        if (params.data.id === '14' || params.data.id === '15') {
+        if (params.data.id === '14') {
           return { fontWeight: 700, backgroundColor: '#e3f2fd' };
         }
         if (params.data.id === '7') {
@@ -201,7 +200,16 @@ export default function CoutPariteSectionContent({
         if (rowId === '13') {
           return formData.costComments || 'Nous avons appliqué une dépréciation annuelle conformément aux indications suggérées par les manuels de coût Marshall & Swift ou Publication CCR Québec.';
         }
+        if (rowId === '14') {
+          return 'Arrondie à:';
+        }
         return params.value || '';
+      },
+      cellStyle: (params) => {
+        if (params.data.id === '14') {
+          return { fontWeight: 700, backgroundColor: '#e3f2fd' };
+        }
+        return {};
       }
     },
     {
@@ -223,14 +231,30 @@ export default function CoutPariteSectionContent({
         if (rowId === '11') return `${costValues.outbuildingsValue.toFixed(0)}$`;
         if (rowId === '12') return `${costValues.exteriorImprov.toFixed(0)}$`;
         if (rowId === '14') return `${costValues.total.toFixed(0)}$`;
-        if (rowId === '15') return `${costValues.rounded.toFixed(0)}$`;
         return params.value || '';
       },
       cellStyle: (params) => {
-        if (params.data.id === '14' || params.data.id === '15') {
-          return { fontWeight: 700, color: '#1976d2' };
+        if (params.data.id === '14') {
+          return { fontWeight: 700, color: '#1976d2', backgroundColor: '#e3f2fd' };
         }
         return { fontWeight: 600 };
+      }
+    },
+    {
+      field: 'nouveau',
+      headerName: '',
+      width: 150,
+      editable: false,
+      cellRenderer: (params: any) => {
+        const rowId = params.data.id;
+        if (rowId === '14') return `${costValues.rounded.toFixed(0)}$`;
+        return '';
+      },
+      cellStyle: (params) => {
+        if (params.data.id === '14') {
+          return { fontWeight: 700, color: '#1976d2', backgroundColor: '#e3f2fd' };
+        }
+        return {};
       }
     }
   ], [formData, costValues]);
@@ -495,8 +519,12 @@ export default function CoutPariteSectionContent({
 
       {/* COST APPROACH SECTION */}
       <Box sx={{ mb: 4 }}>
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}>
+          Méthode du Coût
+        </Typography>
+
         {/* Cost AG Grid - All data entry is directly in the table */}
-        <Box className="ag-theme-material" sx={{ height: 600, width: '100%' }}>
+        <Box className="ag-theme-material" sx={{ height: 550, width: '100%' }}>
           <AgGridReact
             rowData={costGridData}
             columnDefs={costColumnDefs}
