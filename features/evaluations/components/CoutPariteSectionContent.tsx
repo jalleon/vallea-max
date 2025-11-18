@@ -216,7 +216,6 @@ export default function CoutPariteSectionContent({
 
     // Map grid changes to formData
     if (rowId === '1' && field === 'calculation') {
-      // Parse "X pi² × Y $" format
       const match = newValue?.match(/([\d.]+)\s*pi²\s*×\s*([\d.]+)/);
       if (match) {
         handleFieldChange('costLandArea', match[1]);
@@ -243,8 +242,9 @@ export default function CoutPariteSectionContent({
     if (rowId === '11' && field === 'calculation') handleFieldChange('costComments', newValue);
   }, [handleFieldChange]);
 
-  // ========== DIRECT COMPARISON GRID DATA ==========
+  // ========== DIRECT COMPARISON - SINGLE COMPREHENSIVE GRID ==========
   const [comparisonGridData, setComparisonGridData] = useState<ComparisonRow[]>([
+    // Market Analysis Section
     { id: '1', field: 'Ville', subject: '', vente1: '', vente2: '', vente3: '' },
     { id: '2', field: 'Rue', subject: '', vente1: '', vente2: '', vente3: '' },
     { id: '3', field: 'No. civique', subject: '', vente1: '', vente2: '', vente3: '' },
@@ -260,61 +260,113 @@ export default function CoutPariteSectionContent({
     { id: '13', field: 'Année const. / Âge apparent', subject: '', vente1: '', vente2: '', vente3: '' },
     { id: '14', field: "Nombre d'étages / d'unité", subject: '', vente1: '', vente2: '', vente3: '' },
     { id: '15', field: 'Dépendance(s)', subject: '', vente1: '', vente2: '', vente3: '' },
-    { id: '16', field: 'Description complémentaire', subject: '', vente1: '', vente2: '', vente3: '' }
-  ]);
+    { id: '16', field: 'Description complémentaire des éléments influant sur les prix de vente par rapport au sujet', subject: '', vente1: '', vente2: '', vente3: '' },
 
-  const [revenueGridData, setRevenueGridData] = useState<ComparisonRow[]>([
-    { id: '1', field: 'Revenus bruts effectif', subject: '', vente1: '', vente2: '', vente3: '' },
-    { id: '2', field: "Frais d'exploitation", subject: '', vente1: '', vente2: '', vente3: '' },
-    { id: '3', field: 'Revenus nets', subject: '0 $', vente1: '0 $', vente2: '0 $', vente3: '0 $' },
-    { id: '4', field: "Taux global d'actualisation (T.G.A.)", subject: 'N/A', vente1: '', vente2: '', vente3: '' }
-  ]);
+    // Revenue Analysis Section
+    { id: '17', field: 'Revenus bruts effectif', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '18', field: "Frais d'exploitation", subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '19', field: 'Revenus nets', subject: '0 $', vente1: '0 $', vente2: '0 $', vente3: '0 $' },
+    { id: '20', field: "Taux global d'actualisation (T.G.A.)", subject: 'N/A', vente1: '', vente2: '', vente3: '' },
 
-  const [residualGridData, setResidualGridData] = useState<ComparisonRow[]>([
-    { id: '1', field: 'Temps', subject: '-', vente1: '1.000', vente2: '1.000', vente3: '1.000' },
-    { id: '2', field: 'Condition de vente', subject: '-', vente1: '1.00', vente2: '1.00', vente3: '1.00' },
-    { id: '3', field: 'Prix de vente ajusté', subject: '-', vente1: '0 $', vente2: '0 $', vente3: '0 $' },
-    { id: '4', field: 'Valeur du terrain', subject: '-', vente1: '0 $', vente2: '0 $', vente3: '0 $' },
-    { id: '5', field: 'Prix résiduel du bâtiment', subject: '-', vente1: '0 $', vente2: '0 $', vente3: '0 $' },
-    { id: '6', field: 'Prix résiduel du bât. au pi²', subject: '-', vente1: '', vente2: '', vente3: '' }
-  ]);
+    // Residual Value Calculation Section
+    { id: '21', field: 'Calcul de la valeur résiduelle', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '22', field: 'Temps', subject: '-', vente1: '1.000', vente2: '1.000', vente3: '1.000' },
+    { id: '23', field: 'Condition de vente', subject: '-', vente1: '1.00', vente2: '1.00', vente3: '1.00' },
+    { id: '24', field: 'Prix de vente ajusté', subject: '-', vente1: '0 $', vente2: '0 $', vente3: '0 $' },
+    { id: '25', field: 'Valeur du terrain', subject: '-', vente1: '0 $', vente2: '0 $', vente3: '0 $' },
+    { id: '26', field: 'Prix résiduel du bâtiment', subject: '-', vente1: '0 $', vente2: '0 $', vente3: '0 $' },
+    { id: '27', field: 'Prix résiduel du bât. au pi²', subject: '-', vente1: '', vente2: '', vente3: '' },
 
-  const [adjustmentsGridData, setAdjustmentsGridData] = useState<ComparisonRow[]>([
-    { id: '1', field: 'Localisation', subject: '', vente1: '', vente2: '', vente3: '' },
-    { id: '2', field: 'Superficie du bâtiment', subject: '', vente1: '', vente2: '', vente3: '' },
-    { id: '3', field: 'Âge / Condition', subject: '', vente1: '', vente2: '', vente3: '' },
-    { id: '4', field: 'Aménagement intérieur', subject: '', vente1: '', vente2: '', vente3: '' },
-    { id: '5', field: 'Sous-sol', subject: '', vente1: '', vente2: '', vente3: '' },
-    { id: '6', field: 'Qualité du bâtiment', subject: '', vente1: '', vente2: '', vente3: '' },
-    { id: '7', field: 'Extras', subject: '', vente1: '', vente2: '', vente3: '' },
-    { id: '8', field: 'Total des ajustements', subject: '', vente1: '0%', vente2: '0%', vente3: '0%' },
-    { id: '9', field: 'Taux unitaire ajusté ($/pi²)', subject: '', vente1: '', vente2: '', vente3: '' }
-  ]);
+    // Adjustments Section
+    { id: '28', field: 'Ajustements', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '29', field: 'Localisation', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '30', field: 'Superficie du bâtiment', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '31', field: 'Âge / Condition', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '32', field: 'Aménagement intérieur', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '33', field: 'Sous-sol', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '34', field: 'Qualité du bâtiment', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '35', field: 'Extras', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '36', field: 'Total des ajustements', subject: '', vente1: '0%', vente2: '0%', vente3: '0%' },
+    { id: '37', field: 'Taux unitaire ajusté ($/pi²)', subject: '', vente1: '', vente2: '', vente3: '' },
 
-  const [finalValueGridData, setFinalValueGridData] = useState<ComparisonRow[]>([
-    { id: '1', field: 'Superficie du terrain sujet', subject: '', vente1: 'X', vente2: '', vente3: '0 $' },
-    { id: '2', field: 'Superficie du bâtiment sujet', subject: '', vente1: 'X', vente2: '', vente3: '0 $' },
-    { id: '3', field: 'Valeur par la méthode de comparaison', subject: '', vente1: '', vente2: '', vente3: '' }
+    // Final Value Section
+    { id: '38', field: 'Valeur du sujet', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '39', field: 'Superficie du terrain sujet', subject: '', vente1: 'X', vente2: '', vente3: '0 $' },
+    { id: '40', field: 'Superficie du bâtiment sujet', subject: '', vente1: 'X', vente2: '', vente3: '0 $' },
+    { id: '41', field: 'Valeur par la méthode de comparaison', subject: '', vente1: '', vente2: '', vente3: '' }
   ]);
 
   const comparisonColumnDefs: ColDef[] = useMemo(() => [
     {
       field: 'field',
-      headerName: 'Analyse du marché (Ventes comparables)',
-      width: 300,
+      headerName: 'MÉTHODE DE COMPARAISON DIRECTE',
+      width: 450,
       pinned: 'left',
-      cellStyle: { fontWeight: 600, backgroundColor: '#f5f5f5' }
+      cellStyle: (params) => {
+        const rowId = params.data.id;
+        // Section headers
+        if (['17', '21', '28', '38'].includes(rowId)) {
+          return { fontWeight: 700, backgroundColor: '#1976d2', color: '#fff' };
+        }
+        // Total/summary rows
+        if (['19', '36', '41'].includes(rowId)) {
+          return { fontWeight: 700, backgroundColor: '#e3f2fd' };
+        }
+        return { fontWeight: 600, backgroundColor: '#fafafa' };
+      }
     },
     {
       field: 'subject',
       headerName: 'Sujet',
       width: 200,
       editable: true,
-      cellStyle: { backgroundColor: '#e3f2fd' }
+      cellStyle: (params) => {
+        const rowId = params.data.id;
+        if (['19', '36', '41'].includes(rowId)) {
+          return { backgroundColor: '#e3f2fd', fontWeight: 600 };
+        }
+        return { backgroundColor: '#e3f2fd' };
+      }
     },
-    { field: 'vente1', headerName: 'Vente no 1', width: 180, editable: true },
-    { field: 'vente2', headerName: 'Vente no 2', width: 180, editable: true },
-    { field: 'vente3', headerName: 'Vente no 3', width: 180, editable: true }
+    {
+      field: 'vente1',
+      headerName: 'Vente no 1',
+      width: 180,
+      editable: true,
+      cellStyle: (params) => {
+        const rowId = params.data.id;
+        if (['19', '36', '41'].includes(rowId)) {
+          return { fontWeight: 600 };
+        }
+        return {};
+      }
+    },
+    {
+      field: 'vente2',
+      headerName: 'Vente no 2',
+      width: 180,
+      editable: true,
+      cellStyle: (params) => {
+        const rowId = params.data.id;
+        if (['19', '36', '41'].includes(rowId)) {
+          return { fontWeight: 600 };
+        }
+        return {};
+      }
+    },
+    {
+      field: 'vente3',
+      headerName: 'Vente no 3',
+      width: 180,
+      editable: true,
+      cellStyle: (params) => {
+        const rowId = params.data.id;
+        if (['19', '36', '41'].includes(rowId)) {
+          return { fontWeight: 600 };
+        }
+        return {};
+      }
+    }
   ], []);
 
   const handleComparisonCellChange = useCallback((event: CellValueChangedEvent) => {
@@ -325,42 +377,6 @@ export default function CoutPariteSectionContent({
       setComparisonGridData(updatedData);
     }
   }, [comparisonGridData]);
-
-  const handleRevenueCellChange = useCallback((event: CellValueChangedEvent) => {
-    const updatedData = [...revenueGridData];
-    const rowIndex = updatedData.findIndex(row => row.id === event.data.id);
-    if (rowIndex !== -1) {
-      updatedData[rowIndex] = event.data;
-      setRevenueGridData(updatedData);
-    }
-  }, [revenueGridData]);
-
-  const handleResidualCellChange = useCallback((event: CellValueChangedEvent) => {
-    const updatedData = [...residualGridData];
-    const rowIndex = updatedData.findIndex(row => row.id === event.data.id);
-    if (rowIndex !== -1) {
-      updatedData[rowIndex] = event.data;
-      setResidualGridData(updatedData);
-    }
-  }, [residualGridData]);
-
-  const handleAdjustmentsCellChange = useCallback((event: CellValueChangedEvent) => {
-    const updatedData = [...adjustmentsGridData];
-    const rowIndex = updatedData.findIndex(row => row.id === event.data.id);
-    if (rowIndex !== -1) {
-      updatedData[rowIndex] = event.data;
-      setAdjustmentsGridData(updatedData);
-    }
-  }, [adjustmentsGridData]);
-
-  const handleFinalValueCellChange = useCallback((event: CellValueChangedEvent) => {
-    const updatedData = [...finalValueGridData];
-    const rowIndex = updatedData.findIndex(row => row.id === event.data.id);
-    if (rowIndex !== -1) {
-      updatedData[rowIndex] = event.data;
-      setFinalValueGridData(updatedData);
-    }
-  }, [finalValueGridData]);
 
   return (
     <Box sx={{ p: 3 }}>
@@ -485,94 +501,18 @@ export default function CoutPariteSectionContent({
         </Box>
       </Box>
 
-      {/* DIRECT COMPARISON SECTION */}
+      {/* DIRECT COMPARISON SECTION - SINGLE COMPREHENSIVE TABLE */}
       <Box>
         <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}>
           Méthode de Comparaison Directe
         </Typography>
 
-        {/* Comparable Properties Grid */}
-        <Box className="ag-theme-material" sx={{ height: 500, width: '100%', mb: 3 }}>
+        {/* Single comprehensive AG Grid with all sections */}
+        <Box className="ag-theme-material" sx={{ height: 1200, width: '100%' }}>
           <AgGridReact
             rowData={comparisonGridData}
             columnDefs={comparisonColumnDefs}
             onCellValueChanged={handleComparisonCellChange}
-            domLayout="normal"
-            suppressMovableColumns={true}
-            enableCellTextSelection={true}
-          />
-        </Box>
-
-        {/* Description complémentaire */}
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-            Description complémentaire des éléments influant sur les prix de vente par rapport au sujet
-          </Typography>
-          <TextField
-            multiline
-            rows={3}
-            fullWidth
-            size="small"
-            placeholder="(1) x commerce, (1) x 3½ pièces, (1) x 4½ pièces, (1) x 6½ pièces"
-            value={formData.complementaryDescription || ''}
-            onChange={(e) => handleFieldChange('complementaryDescription', e.target.value)}
-          />
-        </Box>
-
-        {/* Revenue Analysis */}
-        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-          Revenus bruts effectif
-        </Typography>
-        <Box className="ag-theme-material" sx={{ height: 200, width: '100%', mb: 3 }}>
-          <AgGridReact
-            rowData={revenueGridData}
-            columnDefs={comparisonColumnDefs}
-            onCellValueChanged={handleRevenueCellChange}
-            domLayout="normal"
-            suppressMovableColumns={true}
-            enableCellTextSelection={true}
-          />
-        </Box>
-
-        {/* Residual Value Calculation */}
-        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-          Calcul de la valeur résiduelle
-        </Typography>
-        <Box className="ag-theme-material" sx={{ height: 260, width: '100%', mb: 3 }}>
-          <AgGridReact
-            rowData={residualGridData}
-            columnDefs={comparisonColumnDefs}
-            onCellValueChanged={handleResidualCellChange}
-            domLayout="normal"
-            suppressMovableColumns={true}
-            enableCellTextSelection={true}
-          />
-        </Box>
-
-        {/* Adjustments */}
-        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-          Ajustements
-        </Typography>
-        <Box className="ag-theme-material" sx={{ height: 340, width: '100%', mb: 3 }}>
-          <AgGridReact
-            rowData={adjustmentsGridData}
-            columnDefs={comparisonColumnDefs}
-            onCellValueChanged={handleAdjustmentsCellChange}
-            domLayout="normal"
-            suppressMovableColumns={true}
-            enableCellTextSelection={true}
-          />
-        </Box>
-
-        {/* Final Value */}
-        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-          Valeur du sujet
-        </Typography>
-        <Box className="ag-theme-material" sx={{ height: 180, width: '100%' }}>
-          <AgGridReact
-            rowData={finalValueGridData}
-            columnDefs={comparisonColumnDefs}
-            onCellValueChanged={handleFinalValueCellChange}
             domLayout="normal"
             suppressMovableColumns={true}
             enableCellTextSelection={true}
