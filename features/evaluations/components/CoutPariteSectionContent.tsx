@@ -1,13 +1,20 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   Box,
   Typography,
-  TextField
+  TextField,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions
 } from '@mui/material';
+import { Add, Delete } from '@mui/icons-material';
 import { AgGridReact } from 'ag-grid-react';
-import { ColDef, CellValueChangedEvent, ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
+import { ColDef, CellValueChangedEvent, ModuleRegistry, AllCommunityModule, ColumnResizedEvent } from 'ag-grid-community';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-material.css';
 
@@ -37,9 +44,7 @@ interface ComparisonRow {
   id: string;
   field: string;
   subject: any;
-  vente1: any;
-  vente2: any;
-  vente3: any;
+  [key: string]: any; // Dynamic vente columns (vente1, vente2, vente3, vente4, etc.)
 }
 
 export default function CoutPariteSectionContent({
@@ -243,6 +248,22 @@ export default function CoutPariteSectionContent({
   }, [handleFieldChange]);
 
   // ========== DIRECT COMPARISON - SINGLE COMPREHENSIVE GRID ==========
+  const [numComparables, setNumComparables] = useState<number>(3);
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  // Load column widths from localStorage on mount
+  useEffect(() => {
+    const savedWidths = localStorage.getItem('coutParite_columnWidths');
+    if (savedWidths) {
+      try {
+        setColumnWidths(JSON.parse(savedWidths));
+      } catch (e) {
+        console.error('Failed to parse saved column widths', e);
+      }
+    }
+  }, []);
+
   const [comparisonGridData, setComparisonGridData] = useState<ComparisonRow[]>([
     // Market Analysis Section
     { id: '1', field: 'Ville', subject: '', vente1: '', vente2: '', vente3: '' },
@@ -296,142 +317,97 @@ export default function CoutPariteSectionContent({
     { id: '41', field: 'Valeur par la méthode de comparaison', subject: '', vente1: '', vente2: '', vente3: '' }
   ]);
 
-  const comparisonColumnDefs: ColDef[] = useMemo(() => [
-    {
-      field: 'field',
-      headerName: 'Analyse du marché (Ventes comparables)',
-      width: 450,
-      pinned: 'left',
-      sortable: false,
-      headerClass: 'custom-header',
-      wrapText: true,
-      autoHeight: true,
-      cellStyle: (params) => {
-        const rowId = params.data.id;
-        // Section headers - blue background across all columns
-        if (['21', '28', '38'].includes(rowId)) {
-          return { fontWeight: 700, backgroundColor: '#1976d2', color: '#fff' };
-        }
-        // Total/summary rows
-        if (['19', '36', '41'].includes(rowId)) {
-          return { fontWeight: 700, backgroundColor: '#e3f2fd' };
-        }
-        // Row 16 - Description complémentaire (taller)
-        if (rowId === '16') {
-          return { fontWeight: 400, backgroundColor: '#e8e8e8', whiteSpace: 'normal', lineHeight: '1.5' };
-        }
-        // Row 17 - Revenus bruts effectif (normal grey line)
-        if (rowId === '17') {
+  const comparisonColumnDefs: ColDef[] = useMemo(() => {
+    const columns: ColDef[] = [
+      // First column - Field names
+      {
+        field: 'field',
+        headerName: 'Analyse du marché (Ventes comparables)',
+        width: columnWidths['field'] || 450,
+        pinned: 'left',
+        sortable: false,
+        headerClass: 'custom-header',
+        wrapText: true,
+        autoHeight: true,
+        resizable: true,
+        cellStyle: (params) => {
+          const rowId = params.data.id;
+          if (['21', '28', '38'].includes(rowId)) {
+            return { fontWeight: 700, backgroundColor: '#1976d2', color: '#fff' };
+          }
+          if (['19', '36', '41'].includes(rowId)) {
+            return { fontWeight: 700, backgroundColor: '#e3f2fd' };
+          }
+          if (rowId === '16') {
+            return { fontWeight: 400, backgroundColor: '#e8e8e8', whiteSpace: 'pre-line', lineHeight: '1.5' };
+          }
+          if (rowId === '17') {
+            return { fontWeight: 400, backgroundColor: '#e8e8e8' };
+          }
           return { fontWeight: 400, backgroundColor: '#e8e8e8' };
         }
-        return { fontWeight: 400, backgroundColor: '#e8e8e8' };
-      }
-    },
-    {
-      field: 'subject',
-      headerName: 'Sujet',
-      width: 200,
-      editable: true,
-      sortable: false,
-      headerClass: 'custom-header',
-      wrapText: true,
-      autoHeight: true,
-      cellStyle: (params) => {
-        const rowId = params.data.id;
-        // Section headers - blue background
-        if (['21', '28', '38'].includes(rowId)) {
-          return { fontWeight: 700, backgroundColor: '#1976d2', color: '#fff' };
-        }
-        if (['19', '36', '41'].includes(rowId)) {
-          return { backgroundColor: '#e3f2fd', fontWeight: 600 };
-        }
-        // Row 16 - Description complémentaire
-        if (rowId === '16') {
-          return { backgroundColor: '#e3f2fd', fontWeight: 400, whiteSpace: 'normal', lineHeight: '1.5' };
-        }
-        // Row 17 - Revenus bruts effectif (normal)
-        if (rowId === '17') {
+      },
+      // Subject column
+      {
+        field: 'subject',
+        headerName: 'Sujet',
+        width: columnWidths['subject'] || 200,
+        editable: true,
+        sortable: false,
+        headerClass: 'custom-header',
+        wrapText: true,
+        autoHeight: true,
+        resizable: true,
+        cellStyle: (params) => {
+          const rowId = params.data.id;
+          if (['21', '28', '38'].includes(rowId)) {
+            return { fontWeight: 700, backgroundColor: '#1976d2', color: '#fff' };
+          }
+          if (['19', '36', '41'].includes(rowId)) {
+            return { backgroundColor: '#e3f2fd', fontWeight: 600 };
+          }
+          if (rowId === '16') {
+            return { backgroundColor: '#e3f2fd', fontWeight: 400, whiteSpace: 'pre-line', lineHeight: '1.5' };
+          }
+          if (rowId === '17') {
+            return { backgroundColor: '#e3f2fd', fontWeight: 400 };
+          }
           return { backgroundColor: '#e3f2fd', fontWeight: 400 };
         }
-        return { backgroundColor: '#e3f2fd', fontWeight: 400 };
       }
-    },
-    {
-      field: 'vente1',
-      headerName: 'Vente no 1',
-      width: 180,
-      editable: true,
-      sortable: false,
-      headerClass: 'custom-header',
-      wrapText: true,
-      autoHeight: true,
-      cellStyle: (params) => {
-        const rowId = params.data.id;
-        // Section headers - blue background
-        if (['21', '28', '38'].includes(rowId)) {
-          return { fontWeight: 700, backgroundColor: '#1976d2', color: '#fff' };
+    ];
+
+    // Dynamically add vente columns based on numComparables
+    for (let i = 1; i <= numComparables; i++) {
+      const field = `vente${i}`;
+      columns.push({
+        field,
+        headerName: `Vente no ${i}`,
+        width: columnWidths[field] || 180,
+        editable: true,
+        sortable: false,
+        headerClass: 'custom-header',
+        wrapText: true,
+        autoHeight: true,
+        resizable: true,
+        cellStyle: (params) => {
+          const rowId = params.data.id;
+          if (['21', '28', '38'].includes(rowId)) {
+            return { fontWeight: 700, backgroundColor: '#1976d2', color: '#fff' };
+          }
+          if (['19', '36', '41'].includes(rowId)) {
+            return { fontWeight: 600 };
+          }
+          if (['16', '17'].includes(rowId)) {
+            return { fontWeight: 400, whiteSpace: 'pre-line', lineHeight: '1.5' };
+          }
+          return { fontWeight: 400 };
         }
-        if (['19', '36', '41'].includes(rowId)) {
-          return { fontWeight: 600 };
-        }
-        // Row 16 & 17
-        if (['16', '17'].includes(rowId)) {
-          return { fontWeight: 400, whiteSpace: 'normal', lineHeight: '1.5' };
-        }
-        return { fontWeight: 400 };
-      }
-    },
-    {
-      field: 'vente2',
-      headerName: 'Vente no 2',
-      width: 180,
-      editable: true,
-      sortable: false,
-      headerClass: 'custom-header',
-      wrapText: true,
-      autoHeight: true,
-      cellStyle: (params) => {
-        const rowId = params.data.id;
-        // Section headers - blue background
-        if (['21', '28', '38'].includes(rowId)) {
-          return { fontWeight: 700, backgroundColor: '#1976d2', color: '#fff' };
-        }
-        if (['19', '36', '41'].includes(rowId)) {
-          return { fontWeight: 600 };
-        }
-        // Row 16 & 17
-        if (['16', '17'].includes(rowId)) {
-          return { fontWeight: 400, whiteSpace: 'normal', lineHeight: '1.5' };
-        }
-        return { fontWeight: 400 };
-      }
-    },
-    {
-      field: 'vente3',
-      headerName: 'Vente no 3',
-      width: 180,
-      editable: true,
-      sortable: false,
-      headerClass: 'custom-header',
-      wrapText: true,
-      autoHeight: true,
-      cellStyle: (params) => {
-        const rowId = params.data.id;
-        // Section headers - blue background
-        if (['21', '28', '38'].includes(rowId)) {
-          return { fontWeight: 700, backgroundColor: '#1976d2', color: '#fff' };
-        }
-        if (['19', '36', '41'].includes(rowId)) {
-          return { fontWeight: 600 };
-        }
-        // Row 16 & 17
-        if (['16', '17'].includes(rowId)) {
-          return { fontWeight: 400, whiteSpace: 'normal', lineHeight: '1.5' };
-        }
-        return { fontWeight: 400 };
-      }
+      });
     }
-  ], []);
+
+    return columns;
+  }, [numComparables, columnWidths]);
 
   const handleComparisonCellChange = useCallback((event: CellValueChangedEvent) => {
     const updatedData = [...comparisonGridData];
@@ -441,6 +417,70 @@ export default function CoutPariteSectionContent({
       setComparisonGridData(updatedData);
     }
   }, [comparisonGridData]);
+
+  const addComparable = useCallback(() => {
+    const newNum = numComparables + 1;
+    const newColKey = `vente${newNum}`;
+
+    // Add empty column to all rows
+    const updatedData = comparisonGridData.map(row => ({
+      ...row,
+      [newColKey]: getDefaultValue(row.id)
+    }));
+
+    setComparisonGridData(updatedData);
+    setNumComparables(newNum);
+  }, [numComparables, comparisonGridData]);
+
+  const handleRemoveClick = useCallback(() => {
+    if (numComparables <= 1) return; // Keep at least 1 comparable
+    setDeleteDialogOpen(true);
+  }, [numComparables]);
+
+  const handleRemoveConfirm = useCallback(() => {
+    const colToRemove = `vente${numComparables}`;
+
+    // Remove last column from all rows
+    const updatedData = comparisonGridData.map(row => {
+      const { [colToRemove]: _, ...rest } = row;
+      return rest;
+    });
+
+    setComparisonGridData(updatedData);
+    setNumComparables(numComparables - 1);
+    setDeleteDialogOpen(false);
+  }, [numComparables, comparisonGridData]);
+
+  const handleRemoveCancel = useCallback(() => {
+    setDeleteDialogOpen(false);
+  }, []);
+
+  // Helper function to get default values for new columns
+  const getDefaultValue = (rowId: string): string => {
+    if (rowId === '19') return '0 $';
+    if (rowId === '22') return '1.000';
+    if (rowId === '23') return '1.00';
+    if (['24', '25', '26'].includes(rowId)) return '0 $';
+    if (rowId === '36') return '0%';
+    if (rowId === '39' || rowId === '40') return '0 $';
+    return '';
+  };
+
+  // Handle column resize and save to localStorage
+  const handleColumnResized = useCallback((event: ColumnResizedEvent) => {
+    if (event.finished && event.column) {
+      const field = event.column.getColId();
+      const newWidth = event.column.getActualWidth();
+
+      const updatedWidths = {
+        ...columnWidths,
+        [field]: newWidth
+      };
+
+      setColumnWidths(updatedWidths);
+      localStorage.setItem('coutParite_columnWidths', JSON.stringify(updatedWidths));
+    }
+  }, [columnWidths]);
 
   return (
     <Box sx={{ p: 3 }}>
@@ -576,9 +616,33 @@ export default function CoutPariteSectionContent({
 
       {/* DIRECT COMPARISON SECTION - SINGLE COMPREHENSIVE TABLE */}
       <Box>
-        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}>
-          Méthode de Comparaison Directe
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main' }}>
+            Méthode de Comparaison Directe
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              size="small"
+              variant="outlined"
+              color="error"
+              startIcon={<Delete />}
+              onClick={handleRemoveClick}
+              disabled={numComparables <= 1}
+              sx={{ borderRadius: 2, textTransform: 'none' }}
+            >
+              Remove Comparable
+            </Button>
+            <Button
+              size="small"
+              variant="contained"
+              startIcon={<Add />}
+              onClick={addComparable}
+              sx={{ borderRadius: 2, textTransform: 'none' }}
+            >
+              Add Comparable
+            </Button>
+          </Box>
+        </Box>
 
         {/* Single comprehensive AG Grid with all sections */}
         <Box className="ag-theme-material" sx={{ height: 1200, width: '100%' }}>
@@ -586,11 +650,40 @@ export default function CoutPariteSectionContent({
             rowData={comparisonGridData}
             columnDefs={comparisonColumnDefs}
             onCellValueChanged={handleComparisonCellChange}
+            onColumnResized={handleColumnResized}
             domLayout="normal"
             suppressMovableColumns={true}
             enableCellTextSelection={true}
           />
         </Box>
+
+        {/* Remove Confirmation Dialog */}
+        <Dialog
+          open={deleteDialogOpen}
+          onClose={handleRemoveCancel}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>Confirm Remove Comparable</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Are you sure you want to remove "Vente no {numComparables}"? All data in this column will be lost.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions sx={{ p: 2 }}>
+            <Button onClick={handleRemoveCancel} sx={{ textTransform: 'none' }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleRemoveConfirm}
+              color="error"
+              variant="contained"
+              sx={{ textTransform: 'none' }}
+            >
+              Remove
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </Box>
   );
