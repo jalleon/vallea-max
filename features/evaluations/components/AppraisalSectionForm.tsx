@@ -30,6 +30,7 @@ import PresentationSectionContent from './PresentationSectionContent';
 import ReferenceSheetSectionContent from './ReferenceSheetSectionContent';
 import GeneralSectionContent from './GeneralSectionContent';
 import DescriptionSectionContent from './DescriptionSectionContent';
+import CoutPariteSectionContent from './CoutPariteSectionContent';
 import ImportFromPreviousDialog from './ImportFromPreviousDialog';
 import SmartValidationWarnings from './SmartValidationWarnings';
 
@@ -198,6 +199,8 @@ export default function AppraisalSectionForm({
           return renderGeneralSection();
         case 'description':
           return renderDescriptionSection();
+        case 'cout_parite':
+          return renderCoutPariteSection();
         case 'conclusion_comparaison':
           return renderNarrativeSection('description', 'Provide conclusion and final reconciliation...');
         case 'informations_generales':
@@ -838,6 +841,19 @@ export default function AppraisalSectionForm({
   const renderDescriptionSection = () => {
     return (
       <DescriptionSectionContent
+        formData={formData}
+        handleFieldChange={handleFieldChange}
+        appraisalData={appraisalData}
+        onChange={onChange}
+        setFormData={setFormData}
+        allSectionsData={allSectionsData}
+      />
+    );
+  };
+
+  const renderCoutPariteSection = () => {
+    return (
+      <CoutPariteSectionContent
         formData={formData}
         handleFieldChange={handleFieldChange}
         appraisalData={appraisalData}
