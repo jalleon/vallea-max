@@ -1937,14 +1937,14 @@ export default function AppraisalSectionForm({
 
       <Divider sx={{ mb: 3 }} />
 
+      {renderSectionForm()}
+
       {/* Smart Validation Warnings */}
       <SmartValidationWarnings
         formData={formData}
         propertyType={subjectPropertyType || 'single_family'}
         sectionId={sectionId}
       />
-
-      {renderSectionForm()}
 
       {/* AI Writing Assistant Dialog */}
       <AIWritingAssistant
