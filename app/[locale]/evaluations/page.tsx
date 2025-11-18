@@ -40,22 +40,37 @@ import {
 import { MaterialDashboardLayout } from '../../../components/layout/MaterialDashboardLayout'
 import { appraisalsService } from '@/features/evaluations/_api/appraisals.service'
 import { useTranslations } from 'next-intl'
+import { useAuth } from '@/contexts/AuthContext'
+import { useParams } from 'next/navigation'
 
 export default function EvaluationsPage() {
   const router = useRouter()
+  const params = useParams()
+  const locale = params.locale as string
+  const { user, loading: authLoading } = useAuth()
   const t = useTranslations('evaluations')
   const tTemplates = useTranslations('evaluations.templates')
   const tDetail = useTranslations('evaluations.detail')
   const tCommon = useTranslations('common')
+  const tPropertyTypes = useTranslations('evaluations.propertyTypes')
 
   const [appraisals, setAppraisals] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [appraisalToDelete, setAppraisalToDelete] = useState<any>(null)
 
+  // Auth protection - redirect to login if not authenticated
   useEffect(() => {
-    loadAppraisals()
-  }, [])
+    if (!authLoading && !user) {
+      router.push(`/${locale}/login`)
+    }
+  }, [user, authLoading, router, locale])
+
+  useEffect(() => {
+    if (user) {
+      loadAppraisals()
+    }
+  }, [user])
 
   const loadAppraisals = async () => {
     try {
@@ -143,6 +158,11 @@ export default function EvaluationsPage() {
     }
   }
 
+  const getPropertyTypeLabel = (propertyType: string) => {
+    if (!propertyType) return ''
+    return tPropertyTypes(propertyType) || propertyType
+  }
+
   const getTemplateLabel = (templateType: string) => {
     switch (templateType) {
       case 'RPS': return tTemplates('rps.subtitle')
@@ -180,7 +200,7 @@ export default function EvaluationsPage() {
     }
   }
 
-  if (loading) {
+  if (authLoading || loading || (!user && !authLoading)) {
     return (
       <MaterialDashboardLayout>
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
@@ -331,10 +351,14 @@ export default function EvaluationsPage() {
                             <Typography variant="body2" color="text.secondary">
                               {appraisal.address || appraisal.city || t('noAddress')}
                             </Typography>
-                            <Typography variant="body2" color="text.secondary">•</Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {appraisal.client_name}
-                            </Typography>
+                            {appraisal.property_type && (
+                              <>
+                                <Typography variant="body2" color="text.secondary">•</Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                  {getPropertyTypeLabel(appraisal.property_type)}
+                                </Typography>
+                              </>
+                            )}
                           </Box>
                         </Box>
                       </Box>
