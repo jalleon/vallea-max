@@ -304,17 +304,27 @@ export default function CoutPariteSectionContent({
       pinned: 'left',
       sortable: false,
       headerClass: 'custom-header',
+      wrapText: true,
+      autoHeight: true,
       cellStyle: (params) => {
         const rowId = params.data.id;
-        // Section headers
-        if (['17', '21', '28', '38'].includes(rowId)) {
+        // Section headers - blue background across all columns
+        if (['21', '28', '38'].includes(rowId)) {
           return { fontWeight: 700, backgroundColor: '#1976d2', color: '#fff' };
         }
         // Total/summary rows
         if (['19', '36', '41'].includes(rowId)) {
           return { fontWeight: 700, backgroundColor: '#e3f2fd' };
         }
-        return { fontWeight: 600, backgroundColor: '#e8e8e8' };
+        // Row 16 - Description complémentaire (taller)
+        if (rowId === '16') {
+          return { fontWeight: 400, backgroundColor: '#e8e8e8', whiteSpace: 'normal', lineHeight: '1.5' };
+        }
+        // Row 17 - Revenus bruts effectif (normal grey line)
+        if (rowId === '17') {
+          return { fontWeight: 400, backgroundColor: '#e8e8e8' };
+        }
+        return { fontWeight: 400, backgroundColor: '#e8e8e8' };
       }
     },
     {
@@ -324,12 +334,26 @@ export default function CoutPariteSectionContent({
       editable: true,
       sortable: false,
       headerClass: 'custom-header',
+      wrapText: true,
+      autoHeight: true,
       cellStyle: (params) => {
         const rowId = params.data.id;
+        // Section headers - blue background
+        if (['21', '28', '38'].includes(rowId)) {
+          return { fontWeight: 700, backgroundColor: '#1976d2', color: '#fff' };
+        }
         if (['19', '36', '41'].includes(rowId)) {
           return { backgroundColor: '#e3f2fd', fontWeight: 600 };
         }
-        return { backgroundColor: '#e3f2fd' };
+        // Row 16 - Description complémentaire
+        if (rowId === '16') {
+          return { backgroundColor: '#e3f2fd', fontWeight: 400, whiteSpace: 'normal', lineHeight: '1.5' };
+        }
+        // Row 17 - Revenus bruts effectif (normal)
+        if (rowId === '17') {
+          return { backgroundColor: '#e3f2fd', fontWeight: 400 };
+        }
+        return { backgroundColor: '#e3f2fd', fontWeight: 400 };
       }
     },
     {
@@ -339,12 +363,22 @@ export default function CoutPariteSectionContent({
       editable: true,
       sortable: false,
       headerClass: 'custom-header',
+      wrapText: true,
+      autoHeight: true,
       cellStyle: (params) => {
         const rowId = params.data.id;
+        // Section headers - blue background
+        if (['21', '28', '38'].includes(rowId)) {
+          return { fontWeight: 700, backgroundColor: '#1976d2', color: '#fff' };
+        }
         if (['19', '36', '41'].includes(rowId)) {
           return { fontWeight: 600 };
         }
-        return {};
+        // Row 16 & 17
+        if (['16', '17'].includes(rowId)) {
+          return { fontWeight: 400, whiteSpace: 'normal', lineHeight: '1.5' };
+        }
+        return { fontWeight: 400 };
       }
     },
     {
@@ -354,12 +388,22 @@ export default function CoutPariteSectionContent({
       editable: true,
       sortable: false,
       headerClass: 'custom-header',
+      wrapText: true,
+      autoHeight: true,
       cellStyle: (params) => {
         const rowId = params.data.id;
+        // Section headers - blue background
+        if (['21', '28', '38'].includes(rowId)) {
+          return { fontWeight: 700, backgroundColor: '#1976d2', color: '#fff' };
+        }
         if (['19', '36', '41'].includes(rowId)) {
           return { fontWeight: 600 };
         }
-        return {};
+        // Row 16 & 17
+        if (['16', '17'].includes(rowId)) {
+          return { fontWeight: 400, whiteSpace: 'normal', lineHeight: '1.5' };
+        }
+        return { fontWeight: 400 };
       }
     },
     {
@@ -369,12 +413,22 @@ export default function CoutPariteSectionContent({
       editable: true,
       sortable: false,
       headerClass: 'custom-header',
+      wrapText: true,
+      autoHeight: true,
       cellStyle: (params) => {
         const rowId = params.data.id;
+        // Section headers - blue background
+        if (['21', '28', '38'].includes(rowId)) {
+          return { fontWeight: 700, backgroundColor: '#1976d2', color: '#fff' };
+        }
         if (['19', '36', '41'].includes(rowId)) {
           return { fontWeight: 600 };
         }
-        return {};
+        // Row 16 & 17
+        if (['16', '17'].includes(rowId)) {
+          return { fontWeight: 400, whiteSpace: 'normal', lineHeight: '1.5' };
+        }
+        return { fontWeight: 400 };
       }
     }
   ], []);
