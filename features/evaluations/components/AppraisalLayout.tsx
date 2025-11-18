@@ -99,8 +99,8 @@ export default function AppraisalLayout({
     }
   }, [isMobile, isTablet]);
 
-  const toggleSidebar = () => setSidebarOpen((prev) => !prev);
-  const togglePreview = () => setPreviewOpen((prev) => !prev);
+  const toggleSidebar = () => setSidebarOpen((prev: boolean) => !prev);
+  const togglePreview = () => setPreviewOpen((prev: boolean) => !prev);
 
   // Handle preview panel resizing
   const handleMouseDown = (e: React.MouseEvent) => {

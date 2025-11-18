@@ -1975,7 +1975,7 @@ export default function AppraisalSectionForm({
         contextData={{
           address: formData.address,
           city: formData.city,
-          propertyType: subjectPropertyType,
+          propertyType: subjectPropertyType || undefined,
         }}
         currentText={currentNarrativeField ? (formData[currentNarrativeField] || '') : ''}
       />

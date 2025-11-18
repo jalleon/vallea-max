@@ -110,18 +110,17 @@ export default function CoutPariteSectionContent({
   const [costGridData, setCostGridData] = useState<CostRow[]>([
     { id: '1', field: 'Valeur marchande du terrain', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
     { id: '2', field: 'Coût neuf du bat.:', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
-    { id: '3', field: 'Valeur à neuf:', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
-    { id: '4', field: 'Dépréciation:', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
-    { id: '5', field: 'Aménagement du sous-sol:', details: 'Neuf:', calculation: '', nouveau: '', depreciation: '', valeur: '' },
-    { id: '6', field: '', details: 'Dépréciation:', calculation: '', nouveau: '', depreciation: '', valeur: '' },
-    { id: '7', field: 'Coût déprécié du bâtiment:', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
-    { id: '8', field: 'Extras:', details: 'Neuf:', calculation: '', nouveau: '', depreciation: '', valeur: '' },
-    { id: '9', field: '', details: 'Dépréciation:', calculation: '', nouveau: '', depreciation: '', valeur: '' },
-    { id: '10', field: 'Coût à neuf des dépendances:', details: 'Neuf:', calculation: '', nouveau: '', depreciation: '', valeur: '' },
-    { id: '11', field: '', details: 'Dépréciation:', calculation: '', nouveau: '', depreciation: '', valeur: '' },
-    { id: '12', field: 'Valeur contributive des aménagements extérieurs:', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
-    { id: '13', field: 'Commentaire(s):', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
-    { id: '14', field: 'Valeur par la méthode du coût', details: '', calculation: 'Arrondie à:', nouveau: '', depreciation: '', valeur: '' }
+    { id: '3', field: 'Dépréciation:', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '4', field: 'Aménagement du sous-sol:', details: 'Neuf:', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '5', field: '', details: 'Dépréciation:', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '6', field: 'Coût déprécié du bâtiment:', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '7', field: 'Extras:', details: 'Neuf:', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '8', field: '', details: 'Dépréciation:', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '9', field: 'Coût à neuf des dépendances:', details: 'Neuf:', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '10', field: '', details: 'Dépréciation:', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '11', field: 'Valeur contributive des aménagements extérieurs:', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '12', field: 'Commentaire(s):', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '13', field: 'Valeur par la méthode du coût', details: '', calculation: 'Arrondie à:', nouveau: '', depreciation: '', valeur: '' }
   ]);
 
   const costColumnDefs: ColDef[] = useMemo(() => [
@@ -159,57 +158,54 @@ export default function CoutPariteSectionContent({
       cellRenderer: (params: any) => {
         const rowId = params.data.id;
         if (rowId === '1') {
-          return `Superficie: ${formData.costLandArea || '-'}pi² x ${formData.costLandPrice || '-'}$ = ${costValues.landValue.toFixed(0)}$`;
+          return `Superficie: ${formData.costLandArea || '-'}pi² x ${formData.costLandPrice || '-'}$`;
         }
         if (rowId === '2') {
           return `Superficie habitable: ${formData.costBuildingArea || '-'}pi² x Taux pondéré: ${formData.costWeightedRate || '-'}$`;
         }
         if (rowId === '3') {
-          return '';
-        }
-        if (rowId === '4') {
           const physDepr = formData.costPhysicalDepr || 0;
           const funcDepr = formData.costFunctionalDepr || 0;
           const econDepr = formData.costEconomicDepr || 0;
           return `Physique: ${physDepr}% Fonctionnelle: ${funcDepr}% Économique: ${econDepr}%`;
         }
-        if (rowId === '5') {
+        if (rowId === '4') {
           return `${formData.costBasementNew || 0}$`;
         }
-        if (rowId === '6') {
+        if (rowId === '5') {
           return `${formData.costBasementDepr || 0}%`;
         }
-        if (rowId === '7') {
+        if (rowId === '6') {
           return '';
         }
-        if (rowId === '8') {
+        if (rowId === '7') {
           return `${formData.costExtrasNew || 0}$`;
         }
-        if (rowId === '9') {
+        if (rowId === '8') {
           return `${formData.costExtrasContrib || 0}$`;
         }
-        if (rowId === '10') {
+        if (rowId === '9') {
           return `${formData.costOutbuildingsNew || '-'}$`;
         }
-        if (rowId === '11') {
+        if (rowId === '10') {
           return `${formData.costOutbuildingsDepr || 0}%`;
         }
-        if (rowId === '12') {
+        if (rowId === '11') {
           return `${formData.costExteriorImprov || 0} ${formData.costExteriorImprovPercent || 0}%`;
         }
-        if (rowId === '13') {
+        if (rowId === '12') {
           return formData.costComments || 'Nous avons appliqué une dépréciation annuelle conformément aux indications suggérées par les manuels de coût Marshall & Swift ou Publication CCR Québec.';
         }
-        if (rowId === '14') {
+        if (rowId === '13') {
           return 'Arrondie à:';
         }
         return params.value || '';
       },
       cellStyle: (params) => {
-        if (params.data.id === '14') {
+        if (params.data.id === '13') {
           return { fontWeight: 700, backgroundColor: '#e3f2fd' };
         }
-        return {};
+        return undefined;
       }
     },
     {
@@ -220,24 +216,24 @@ export default function CoutPariteSectionContent({
       cellRenderer: (params: any) => {
         const rowId = params.data.id;
         if (rowId === '1') return `${costValues.landValue.toFixed(0)}$`;
-        if (rowId === '3') return `${costValues.buildingNew.toFixed(0)}$`;
-        if (rowId === '4') return `${costValues.totalDepr.toFixed(0)}$`;
+        if (rowId === '2') return `${costValues.buildingNew.toFixed(0)}$`;
+        if (rowId === '3') return `${costValues.totalDepr.toFixed(0)}$`;
+        if (rowId === '4') return `${costValues.basementValue.toFixed(0)}$`;
         if (rowId === '5') return `${costValues.basementValue.toFixed(0)}$`;
-        if (rowId === '6') return `${costValues.basementValue.toFixed(0)}$`;
-        if (rowId === '7') return `${costValues.buildingValue.toFixed(0)}$`;
-        if (rowId === '8') return `${costValues.extrasNew}$`;
-        if (rowId === '9') return `${costValues.extrasContrib.toFixed(0)}$`;
-        if (rowId === '10') return `${costValues.outbuildingsNew}$`;
-        if (rowId === '11') return `${costValues.outbuildingsValue.toFixed(0)}$`;
-        if (rowId === '12') return `${costValues.exteriorImprov.toFixed(0)}$`;
-        if (rowId === '14') return `${costValues.total.toFixed(0)}$`;
+        if (rowId === '6') return `${costValues.buildingValue.toFixed(0)}$`;
+        if (rowId === '7') return `${costValues.extrasNew}$`;
+        if (rowId === '8') return `${costValues.extrasContrib.toFixed(0)}$`;
+        if (rowId === '9') return `${costValues.outbuildingsNew}$`;
+        if (rowId === '10') return `${costValues.outbuildingsValue.toFixed(0)}$`;
+        if (rowId === '11') return `${costValues.exteriorImprov.toFixed(0)}$`;
+        if (rowId === '13') return `${costValues.total.toFixed(0)}$`;
         return params.value || '';
       },
       cellStyle: (params) => {
-        if (params.data.id === '14') {
+        if (params.data.id === '13') {
           return { fontWeight: 700, color: '#1976d2', backgroundColor: '#e3f2fd' };
         }
-        return { fontWeight: 600 };
+        return { fontWeight: 600 } as any;
       }
     },
     {
@@ -247,14 +243,14 @@ export default function CoutPariteSectionContent({
       editable: false,
       cellRenderer: (params: any) => {
         const rowId = params.data.id;
-        if (rowId === '14') return `${costValues.rounded.toFixed(0)}$`;
+        if (rowId === '13') return `${costValues.rounded.toFixed(0)}$`;
         return '';
       },
       cellStyle: (params) => {
-        if (params.data.id === '14') {
+        if (params.data.id === '13') {
           return { fontWeight: 700, color: '#1976d2', backgroundColor: '#e3f2fd' };
         }
-        return {};
+        return undefined;
       }
     }
   ], [formData, costValues]);
@@ -357,18 +353,18 @@ export default function CoutPariteSectionContent({
         cellStyle: (params) => {
           const rowId = params.data.id;
           if (['21', '28', '38'].includes(rowId)) {
-            return { fontWeight: 700, backgroundColor: '#1976d2', color: '#fff' };
+            return { fontWeight: 700, backgroundColor: '#1976d2', color: '#fff' } as any;
           }
           if (['19', '36', '41'].includes(rowId)) {
-            return { fontWeight: 700, backgroundColor: '#e3f2fd' };
+            return { fontWeight: 700, backgroundColor: '#e3f2fd' } as any;
           }
           if (rowId === '16') {
-            return { fontWeight: 400, backgroundColor: '#e8e8e8', whiteSpace: 'pre-line', lineHeight: '1.5' };
+            return { fontWeight: 400, backgroundColor: '#e8e8e8', whiteSpace: 'pre-line', lineHeight: '1.5' } as any;
           }
           if (rowId === '17') {
-            return { fontWeight: 400, backgroundColor: '#e8e8e8' };
+            return { fontWeight: 400, backgroundColor: '#e8e8e8' } as any;
           }
-          return { fontWeight: 400, backgroundColor: '#e8e8e8' };
+          return { fontWeight: 400, backgroundColor: '#e8e8e8' } as any;
         }
       },
       // Subject column
@@ -385,18 +381,18 @@ export default function CoutPariteSectionContent({
         cellStyle: (params) => {
           const rowId = params.data.id;
           if (['21', '28', '38'].includes(rowId)) {
-            return { fontWeight: 700, backgroundColor: '#1976d2', color: '#fff' };
+            return { fontWeight: 700, backgroundColor: '#1976d2', color: '#fff' } as any;
           }
           if (['19', '36', '41'].includes(rowId)) {
-            return { backgroundColor: '#e3f2fd', fontWeight: 600 };
+            return { backgroundColor: '#e3f2fd', fontWeight: 600 } as any;
           }
           if (rowId === '16') {
-            return { backgroundColor: '#e3f2fd', fontWeight: 400, whiteSpace: 'pre-line', lineHeight: '1.5' };
+            return { backgroundColor: '#e3f2fd', fontWeight: 400, whiteSpace: 'pre-line', lineHeight: '1.5' } as any;
           }
           if (rowId === '17') {
-            return { backgroundColor: '#e3f2fd', fontWeight: 400 };
+            return { backgroundColor: '#e3f2fd', fontWeight: 400 } as any;
           }
-          return { backgroundColor: '#e3f2fd', fontWeight: 400 };
+          return { backgroundColor: '#e3f2fd', fontWeight: 400 } as any;
         }
       }
     ];
@@ -417,15 +413,15 @@ export default function CoutPariteSectionContent({
         cellStyle: (params) => {
           const rowId = params.data.id;
           if (['21', '28', '38'].includes(rowId)) {
-            return { fontWeight: 700, backgroundColor: '#1976d2', color: '#fff' };
+            return { fontWeight: 700, backgroundColor: '#1976d2', color: '#fff' } as any;
           }
           if (['19', '36', '41'].includes(rowId)) {
-            return { fontWeight: 600 };
+            return { fontWeight: 600 } as any;
           }
           if (['16', '17'].includes(rowId)) {
-            return { fontWeight: 400, whiteSpace: 'pre-line', lineHeight: '1.5' };
+            return { fontWeight: 400, whiteSpace: 'pre-line', lineHeight: '1.5' } as any;
           }
-          return { fontWeight: 400 };
+          return { fontWeight: 400 } as any;
         }
       });
     }
@@ -467,7 +463,7 @@ export default function CoutPariteSectionContent({
     // Remove last column from all rows
     const updatedData = comparisonGridData.map(row => {
       const { [colToRemove]: _, ...rest } = row;
-      return rest;
+      return rest as ComparisonRow;
     });
 
     setComparisonGridData(updatedData);
