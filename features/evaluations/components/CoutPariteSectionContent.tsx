@@ -4,11 +4,8 @@ import { useState, useMemo, useCallback } from 'react';
 import {
   Box,
   Typography,
-  TextField,
-  Button,
-  IconButton
+  TextField
 } from '@mui/material';
-import { Add, Delete } from '@mui/icons-material';
 import { AgGridReact } from 'ag-grid-react';
 import { ColDef, CellValueChangedEvent, ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
 import 'ag-grid-community/styles/ag-grid.css';
@@ -26,7 +23,17 @@ interface CoutPariteSectionContentProps {
   allSectionsData: any;
 }
 
-interface ComparableRow {
+interface CostRow {
+  id: string;
+  field: string;
+  details: string;
+  calculation: string;
+  nouveau: any;
+  depreciation: any;
+  valeur: any;
+}
+
+interface ComparisonRow {
   id: string;
   field: string;
   subject: any;
@@ -44,52 +51,253 @@ export default function CoutPariteSectionContent({
   allSectionsData
 }: CoutPariteSectionContentProps) {
 
-  // Calculate values for cost approach
-  const landValue = (parseFloat(formData.landArea || 0) * parseFloat(formData.landPricePerSqFt || 0));
-  const buildingNewCost = (parseFloat(formData.buildingArea || 0) * parseFloat(formData.weightedRate || 0));
-  const physicalDepr = parseFloat(formData.depreciationPhysical || 0) / 100;
-  const functionalDepr = parseFloat(formData.depreciationFunctional || 0) / 100;
-  const economicDepr = parseFloat(formData.depreciationEconomic || 0) / 100;
-  const totalDepreciation = buildingNewCost * (physicalDepr + functionalDepr + economicDepr);
-  const depreciatedBuildingCost = buildingNewCost - totalDepreciation;
+  // ========== COST APPROACH GRID DATA ==========
+  const calculateCostValues = useCallback(() => {
+    const landArea = parseFloat(formData.costLandArea || 0);
+    const landPrice = parseFloat(formData.costLandPrice || 0);
+    const landValue = landArea * landPrice;
 
-  const basementNew = parseFloat(formData.basementNew || 0);
-  const basementDepr = basementNew * (parseFloat(formData.basementDepreciation || 0) / 100);
-  const basementValue = basementNew - basementDepr;
+    const buildingArea = parseFloat(formData.costBuildingArea || 0);
+    const weightedRate = parseFloat(formData.costWeightedRate || 0);
+    const buildingNew = buildingArea * weightedRate;
 
-  const extrasNew = parseFloat(formData.extrasNew || 0);
-  const extrasValue = parseFloat(formData.extrasContribution || 0);
+    const physicalDepr = parseFloat(formData.costPhysicalDepr || 0) / 100;
+    const functionalDepr = parseFloat(formData.costFunctionalDepr || 0) / 100;
+    const economicDepr = parseFloat(formData.costEconomicDepr || 0) / 100;
+    const totalDepr = buildingNew * (physicalDepr + functionalDepr + economicDepr);
+    const buildingValue = buildingNew - totalDepr;
 
-  const outbuildingsNew = parseFloat(formData.outbuildingsNew || 0);
-  const outbuildingsDepr = outbuildingsNew * (parseFloat(formData.outbuildingsDepreciation || 0) / 100);
-  const outbuildingsValue = outbuildingsNew - outbuildingsDepr;
+    const basementNew = parseFloat(formData.costBasementNew || 0);
+    const basementDepr = parseFloat(formData.costBasementDepr || 0) / 100;
+    const basementValue = basementNew - (basementNew * basementDepr);
 
-  const exteriorImprovements = parseFloat(formData.exteriorImprovements || 0);
+    const extrasNew = parseFloat(formData.costExtrasNew || 0);
+    const extrasContrib = parseFloat(formData.costExtrasContrib || 0);
 
-  const totalCostValue = landValue + depreciatedBuildingCost + basementValue + extrasValue + outbuildingsValue + exteriorImprovements;
-  const roundedCostValue = Math.round(totalCostValue / 1000) * 1000;
+    const outbuildingsNew = parseFloat(formData.costOutbuildingsNew || 0);
+    const outbuildingsDepr = parseFloat(formData.costOutbuildingsDepr || 0) / 100;
+    const outbuildingsValue = outbuildingsNew - (outbuildingsNew * outbuildingsDepr);
 
-  // Direct Comparison Grid Data
-  const [gridData, setGridData] = useState<ComparableRow[]>([
-    { id: '1', field: 'Ville', subject: formData.ville || '', vente1: '', vente2: '', vente3: '' },
-    { id: '2', field: 'Rue', subject: formData.rue || '', vente1: '', vente2: '', vente3: '' },
-    { id: '3', field: 'No. civique', subject: formData.noCivique || '', vente1: '', vente2: '', vente3: '' },
-    { id: '4', field: 'Type de propriété', subject: formData.typePropriete || '', vente1: '', vente2: '', vente3: '' },
+    const exteriorImprov = parseFloat(formData.costExteriorImprov || 0);
+
+    const total = landValue + buildingValue + basementValue + extrasContrib + outbuildingsValue + exteriorImprov;
+    const rounded = Math.round(total / 1000) * 1000;
+
+    return {
+      landValue,
+      buildingNew,
+      totalDepr,
+      buildingValue,
+      basementNew,
+      basementValue,
+      extrasNew,
+      extrasContrib,
+      outbuildingsNew,
+      outbuildingsValue,
+      exteriorImprov,
+      total,
+      rounded
+    };
+  }, [formData]);
+
+  const costValues = calculateCostValues();
+
+  const [costGridData, setCostGridData] = useState<CostRow[]>([
+    { id: '1', field: 'Terrain', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '2', field: 'Coût à neuf du bâtiment', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '3', field: 'Dépréciation', details: 'Physique', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '4', field: '', details: 'Fonctionnelle', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '5', field: '', details: 'Économique', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '6', field: 'Coût déprécié du bâtiment', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '7', field: 'Sous-sol', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '8', field: 'Extras', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '9', field: 'Dépendances', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '10', field: 'Améliorations extérieures', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '11', field: 'Commentaires', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '12', field: 'Valeur totale par la méthode du coût', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '13', field: 'Arrondie', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' }
+  ]);
+
+  const costColumnDefs: ColDef[] = useMemo(() => [
+    {
+      field: 'field',
+      headerName: 'MÉTHODE DU COÛT',
+      width: 250,
+      pinned: 'left',
+      cellStyle: (params) => {
+        if (params.data.id === '12' || params.data.id === '13') {
+          return { fontWeight: 700, backgroundColor: '#e3f2fd' };
+        }
+        if (params.data.id === '6') {
+          return { fontWeight: 600, backgroundColor: '#f5f5f5' };
+        }
+        return { fontWeight: 600, backgroundColor: '#fafafa' };
+      }
+    },
+    {
+      field: 'details',
+      headerName: 'Détails',
+      width: 150,
+      editable: false
+    },
+    {
+      field: 'calculation',
+      headerName: 'Calcul',
+      width: 200,
+      editable: true,
+      cellRenderer: (params: any) => {
+        const rowId = params.data.id;
+        if (rowId === '1') return `${formData.costLandArea || 0} pi² × ${formData.costLandPrice || 0} $`;
+        if (rowId === '2') return `${formData.costBuildingArea || 0} pi² × ${formData.costWeightedRate || 0} $`;
+        if (rowId === '12') return `${costValues.landValue.toFixed(0)} + ${costValues.buildingValue.toFixed(0)} + ${costValues.basementValue.toFixed(0)} + ${costValues.extrasContrib.toFixed(0)} + ${costValues.outbuildingsValue.toFixed(0)} + ${costValues.exteriorImprov.toFixed(0)}`;
+        return params.value || '';
+      }
+    },
+    {
+      field: 'nouveau',
+      headerName: 'Nouveau',
+      width: 120,
+      editable: true,
+      cellRenderer: (params: any) => {
+        const rowId = params.data.id;
+        if (rowId === '2') return `${costValues.buildingNew.toFixed(0)} $`;
+        if (rowId === '7') return `${formData.costBasementNew || 0} $`;
+        if (rowId === '8') return `${formData.costExtrasNew || 0} $`;
+        if (rowId === '9') return `${formData.costOutbuildingsNew || 0} $`;
+        return params.value || '';
+      }
+    },
+    {
+      field: 'depreciation',
+      headerName: 'Dépréciation',
+      width: 120,
+      editable: true,
+      cellRenderer: (params: any) => {
+        const rowId = params.data.id;
+        if (rowId === '3') return `${formData.costPhysicalDepr || 0}%`;
+        if (rowId === '4') return `${formData.costFunctionalDepr || 0}%`;
+        if (rowId === '5') return `${formData.costEconomicDepr || 0}%`;
+        if (rowId === '7') return `${formData.costBasementDepr || 0}%`;
+        if (rowId === '9') return `${formData.costOutbuildingsDepr || 0}%`;
+        return params.value || '';
+      }
+    },
+    {
+      field: 'valeur',
+      headerName: 'Valeur',
+      width: 150,
+      editable: false,
+      cellRenderer: (params: any) => {
+        const rowId = params.data.id;
+        if (rowId === '1') return `${costValues.landValue.toFixed(0)} $`;
+        if (rowId === '2') return `${costValues.buildingNew.toFixed(0)} $`;
+        if (rowId === '6') return `${costValues.buildingValue.toFixed(0)} $`;
+        if (rowId === '7') return `${costValues.basementValue.toFixed(0)} $`;
+        if (rowId === '8') return `${costValues.extrasContrib.toFixed(0)} $`;
+        if (rowId === '9') return `${costValues.outbuildingsValue.toFixed(0)} $`;
+        if (rowId === '10') return `${costValues.exteriorImprov.toFixed(0)} $`;
+        if (rowId === '12') return `${costValues.total.toFixed(0)} $`;
+        if (rowId === '13') return `${costValues.rounded.toFixed(0)} $`;
+        return params.value || '';
+      },
+      cellStyle: (params) => {
+        if (params.data.id === '12' || params.data.id === '13') {
+          return { fontWeight: 700, color: '#1976d2' };
+        }
+        return {};
+      }
+    }
+  ], [formData, costValues]);
+
+  const handleCostCellChange = useCallback((event: CellValueChangedEvent) => {
+    const { data, colDef, newValue } = event;
+    const field = colDef.field;
+    const rowId = data.id;
+
+    // Map grid changes to formData
+    if (rowId === '1' && field === 'calculation') {
+      // Parse "X pi² × Y $" format
+      const match = newValue?.match(/([\d.]+)\s*pi²\s*×\s*([\d.]+)/);
+      if (match) {
+        handleFieldChange('costLandArea', match[1]);
+        handleFieldChange('costLandPrice', match[2]);
+      }
+    }
+    if (rowId === '2' && field === 'calculation') {
+      const match = newValue?.match(/([\d.]+)\s*pi²\s*×\s*([\d.]+)/);
+      if (match) {
+        handleFieldChange('costBuildingArea', match[1]);
+        handleFieldChange('costWeightedRate', match[2]);
+      }
+    }
+    if (rowId === '3' && field === 'depreciation') handleFieldChange('costPhysicalDepr', parseFloat(newValue || 0));
+    if (rowId === '4' && field === 'depreciation') handleFieldChange('costFunctionalDepr', parseFloat(newValue || 0));
+    if (rowId === '5' && field === 'depreciation') handleFieldChange('costEconomicDepr', parseFloat(newValue || 0));
+    if (rowId === '7' && field === 'nouveau') handleFieldChange('costBasementNew', parseFloat(newValue || 0));
+    if (rowId === '7' && field === 'depreciation') handleFieldChange('costBasementDepr', parseFloat(newValue || 0));
+    if (rowId === '8' && field === 'nouveau') handleFieldChange('costExtrasNew', parseFloat(newValue || 0));
+    if (rowId === '8' && field === 'depreciation') handleFieldChange('costExtrasContrib', parseFloat(newValue || 0));
+    if (rowId === '9' && field === 'nouveau') handleFieldChange('costOutbuildingsNew', parseFloat(newValue || 0));
+    if (rowId === '9' && field === 'depreciation') handleFieldChange('costOutbuildingsDepr', parseFloat(newValue || 0));
+    if (rowId === '10' && field === 'valeur') handleFieldChange('costExteriorImprov', parseFloat(newValue || 0));
+    if (rowId === '11' && field === 'calculation') handleFieldChange('costComments', newValue);
+  }, [handleFieldChange]);
+
+  // ========== DIRECT COMPARISON GRID DATA ==========
+  const [comparisonGridData, setComparisonGridData] = useState<ComparisonRow[]>([
+    { id: '1', field: 'Ville', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '2', field: 'Rue', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '3', field: 'No. civique', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '4', field: 'Type de propriété', subject: '', vente1: '', vente2: '', vente3: '' },
     { id: '5', field: 'No. enreg. / inscription', subject: 'N/A', vente1: '', vente2: '', vente3: '' },
     { id: '6', field: 'Date de vente', subject: 'N/A', vente1: '', vente2: '', vente3: '' },
     { id: '7', field: 'Prix de vente', subject: 'N/A', vente1: '', vente2: '', vente3: '' },
-    { id: '8', field: "Temps d'exposition", subject: 'N/A', vente1: ' jours', vente2: ' jours', vente3: ' jours' },
-    { id: '9', field: 'Valeur municipale / terrain', subject: formData.valeurMunicipale || '', vente1: '', vente2: '', vente3: '' },
-    { id: '10', field: 'Superficie du terrain', subject: formData.superficieTerrain || '', vente1: '', vente2: '', vente3: '' },
-    { id: '11', field: 'Sup. du bâtiment (s.-s. exclu)', subject: formData.superficieBatiment || '', vente1: '', vente2: '', vente3: '' },
-    { id: '12', field: 'Superficie / % amén. du s.-s.', subject: `${formData.superficieSousSol || 'N/D'}\t${formData.pctAmenagement || '0%'}`, vente1: '', vente2: '', vente3: '' },
-    { id: '13', field: 'Année const. / Âge apparent', subject: `${formData.anneeConstruction || ''}\t${formData.ageApparent || ''} ans`, vente1: ' ans', vente2: 'ans', vente3: ' ans' },
-    { id: '14', field: "Nombre d'étages / d'unité", subject: `${formData.nbEtages || ''}\t${formData.nbUnites || ''}`, vente1: '1\t1', vente2: '1\t1', vente3: '1\t1' },
-    { id: '15', field: 'Dépendance(s)', subject: formData.dependances || 'Aucune', vente1: 'Aucune', vente2: 'Aucune', vente3: 'Aucune' },
-    { id: '16', field: 'Description complémentaire', subject: formData.descriptionComplementaire || '', vente1: '', vente2: '', vente3: '' },
+    { id: '8', field: "Temps d'exposition", subject: 'N/A', vente1: '', vente2: '', vente3: '' },
+    { id: '9', field: 'Valeur municipale / terrain', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '10', field: 'Superficie du terrain', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '11', field: 'Sup. du bâtiment (s.-s. exclu)', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '12', field: 'Superficie / % amén. du s.-s.', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '13', field: 'Année const. / Âge apparent', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '14', field: "Nombre d'étages / d'unité", subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '15', field: 'Dépendance(s)', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '16', field: 'Description complémentaire', subject: '', vente1: '', vente2: '', vente3: '' }
   ]);
 
-  const columnDefs: ColDef[] = useMemo(() => [
+  const [revenueGridData, setRevenueGridData] = useState<ComparisonRow[]>([
+    { id: '1', field: 'Revenus bruts effectif', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '2', field: "Frais d'exploitation", subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '3', field: 'Revenus nets', subject: '0 $', vente1: '0 $', vente2: '0 $', vente3: '0 $' },
+    { id: '4', field: "Taux global d'actualisation (T.G.A.)", subject: 'N/A', vente1: '', vente2: '', vente3: '' }
+  ]);
+
+  const [residualGridData, setResidualGridData] = useState<ComparisonRow[]>([
+    { id: '1', field: 'Temps', subject: '-', vente1: '1.000', vente2: '1.000', vente3: '1.000' },
+    { id: '2', field: 'Condition de vente', subject: '-', vente1: '1.00', vente2: '1.00', vente3: '1.00' },
+    { id: '3', field: 'Prix de vente ajusté', subject: '-', vente1: '0 $', vente2: '0 $', vente3: '0 $' },
+    { id: '4', field: 'Valeur du terrain', subject: '-', vente1: '0 $', vente2: '0 $', vente3: '0 $' },
+    { id: '5', field: 'Prix résiduel du bâtiment', subject: '-', vente1: '0 $', vente2: '0 $', vente3: '0 $' },
+    { id: '6', field: 'Prix résiduel du bât. au pi²', subject: '-', vente1: '', vente2: '', vente3: '' }
+  ]);
+
+  const [adjustmentsGridData, setAdjustmentsGridData] = useState<ComparisonRow[]>([
+    { id: '1', field: 'Localisation', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '2', field: 'Superficie du bâtiment', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '3', field: 'Âge / Condition', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '4', field: 'Aménagement intérieur', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '5', field: 'Sous-sol', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '6', field: 'Qualité du bâtiment', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '7', field: 'Extras', subject: '', vente1: '', vente2: '', vente3: '' },
+    { id: '8', field: 'Total des ajustements', subject: '', vente1: '0%', vente2: '0%', vente3: '0%' },
+    { id: '9', field: 'Taux unitaire ajusté ($/pi²)', subject: '', vente1: '', vente2: '', vente3: '' }
+  ]);
+
+  const [finalValueGridData, setFinalValueGridData] = useState<ComparisonRow[]>([
+    { id: '1', field: 'Superficie du terrain sujet', subject: '', vente1: 'X', vente2: '', vente3: '0 $' },
+    { id: '2', field: 'Superficie du bâtiment sujet', subject: '', vente1: 'X', vente2: '', vente3: '0 $' },
+    { id: '3', field: 'Valeur par la méthode de comparaison', subject: '', vente1: '', vente2: '', vente3: '' }
+  ]);
+
+  const comparisonColumnDefs: ColDef[] = useMemo(() => [
     {
       field: 'field',
       headerName: 'Analyse du marché (Ventes comparables)',
@@ -101,324 +309,274 @@ export default function CoutPariteSectionContent({
       field: 'subject',
       headerName: 'Sujet',
       width: 200,
-      editable: false,
+      editable: true,
       cellStyle: { backgroundColor: '#e3f2fd' }
     },
-    {
-      field: 'vente1',
-      headerName: 'Vente no 1',
-      width: 180,
-      editable: true
-    },
-    {
-      field: 'vente2',
-      headerName: 'Vente no 2',
-      width: 180,
-      editable: true
-    },
-    {
-      field: 'vente3',
-      headerName: 'Vente no 3',
-      width: 180,
-      editable: true
-    }
+    { field: 'vente1', headerName: 'Vente no 1', width: 180, editable: true },
+    { field: 'vente2', headerName: 'Vente no 2', width: 180, editable: true },
+    { field: 'vente3', headerName: 'Vente no 3', width: 180, editable: true }
   ], []);
 
-  const onCellValueChanged = useCallback((event: CellValueChangedEvent) => {
-    console.log('Cell value changed:', event);
-    // Handle cell changes and update formData
-    handleFieldChange('gridData', gridData);
-  }, [gridData, handleFieldChange]);
+  const handleComparisonCellChange = useCallback((event: CellValueChangedEvent) => {
+    const updatedData = [...comparisonGridData];
+    const rowIndex = updatedData.findIndex(row => row.id === event.data.id);
+    if (rowIndex !== -1) {
+      updatedData[rowIndex] = event.data;
+      setComparisonGridData(updatedData);
+    }
+  }, [comparisonGridData]);
+
+  const handleRevenueCellChange = useCallback((event: CellValueChangedEvent) => {
+    const updatedData = [...revenueGridData];
+    const rowIndex = updatedData.findIndex(row => row.id === event.data.id);
+    if (rowIndex !== -1) {
+      updatedData[rowIndex] = event.data;
+      setRevenueGridData(updatedData);
+    }
+  }, [revenueGridData]);
+
+  const handleResidualCellChange = useCallback((event: CellValueChangedEvent) => {
+    const updatedData = [...residualGridData];
+    const rowIndex = updatedData.findIndex(row => row.id === event.data.id);
+    if (rowIndex !== -1) {
+      updatedData[rowIndex] = event.data;
+      setResidualGridData(updatedData);
+    }
+  }, [residualGridData]);
+
+  const handleAdjustmentsCellChange = useCallback((event: CellValueChangedEvent) => {
+    const updatedData = [...adjustmentsGridData];
+    const rowIndex = updatedData.findIndex(row => row.id === event.data.id);
+    if (rowIndex !== -1) {
+      updatedData[rowIndex] = event.data;
+      setAdjustmentsGridData(updatedData);
+    }
+  }, [adjustmentsGridData]);
+
+  const handleFinalValueCellChange = useCallback((event: CellValueChangedEvent) => {
+    const updatedData = [...finalValueGridData];
+    const rowIndex = updatedData.findIndex(row => row.id === event.data.id);
+    if (rowIndex !== -1) {
+      updatedData[rowIndex] = event.data;
+      setFinalValueGridData(updatedData);
+    }
+  }, [finalValueGridData]);
 
   return (
     <Box sx={{ p: 3 }}>
-      {/* MÉTHODE DU COÛT */}
-      <Box
-        sx={{
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: '8px',
-          overflow: 'hidden',
-          bgcolor: 'background.paper',
-          mb: 4
-        }}
-      >
-        {/* Header */}
-        <Box sx={{ bgcolor: 'primary.main', p: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'white', fontSize: '15px' }}>
-            MÉTHODE DU COÛT
-          </Typography>
-        </Box>
+      {/* COST APPROACH SECTION */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}>
+          Méthode du Coût
+        </Typography>
 
-        {/* Land Value */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: '250px 150px 80px 50px 100px auto', borderBottom: '1px solid', borderColor: 'divider', '&:hover': { bgcolor: 'action.hover' } }}>
-          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>Valeur marchande du terrain</Typography>
-          </Box>
-          <Box sx={{ p: 1, borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="caption" sx={{ fontSize: '11px' }}>Superficie :</Typography>
-            <TextField size="small" value={formData.landArea || ''} onChange={(e) => handleFieldChange('landArea', e.target.value)} sx={{ '& .MuiInputBase-input': { fontSize: '13px' }, width: '80px' }} />
-            <Typography variant="caption" sx={{ fontSize: '11px' }}>pi²</Typography>
-          </Box>
-          <Box sx={{ p: 1, borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Typography variant="body2">x</Typography>
-          </Box>
-          <Box sx={{ p: 1, borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
-            <TextField size="small" value={formData.landPricePerSqFt || ''} onChange={(e) => handleFieldChange('landPricePerSqFt', e.target.value)} sx={{ '& .MuiInputBase-input': { fontSize: '13px' }, width: '50px' }} />
-          </Box>
-          <Box sx={{ p: 1, borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Typography variant="body2">=</Typography>
-          </Box>
-          <Box sx={{ p: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>${landValue.toLocaleString()}</Typography>
-          </Box>
-        </Box>
-
-        {/* Building New Cost */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: '250px 150px 80px 50px 100px auto', borderBottom: '1px solid', borderColor: 'divider', '&:hover': { bgcolor: 'action.hover' } }}>
-          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>Coût neuf du bât. :</Typography>
-          </Box>
-          <Box sx={{ p: 1, borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="caption" sx={{ fontSize: '11px' }}>Superficie habitable :</Typography>
-            <TextField size="small" value={formData.buildingArea || ''} onChange={(e) => handleFieldChange('buildingArea', e.target.value)} sx={{ '& .MuiInputBase-input': { fontSize: '13px' }, width: '80px' }} />
-            <Typography variant="caption" sx={{ fontSize: '11px' }}>pi²</Typography>
-          </Box>
-          <Box sx={{ p: 1, borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Typography variant="body2">x</Typography>
-          </Box>
-          <Box sx={{ p: 1, borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Typography variant="caption" sx={{ fontSize: '11px' }}>Taux pondéré :</Typography>
-          </Box>
-          <Box sx={{ p: 1, borderRight: '1px solid', borderColor: 'divider' }}>
-            <TextField size="small" value={formData.weightedRate || ''} onChange={(e) => handleFieldChange('weightedRate', e.target.value)} sx={{ '& .MuiInputBase-input': { fontSize: '13px' }, width: '80px' }} />
-          </Box>
-          <Box sx={{ p: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>${buildingNewCost.toLocaleString()}</Typography>
-          </Box>
-        </Box>
-
-        {/* Depreciation */}
-        <Box sx={{ borderBottom: '1px solid', borderColor: 'divider' }}>
-          <Box sx={{ display: 'grid', gridTemplateColumns: '250px 1fr', '&:hover': { bgcolor: 'action.hover' } }}>
-            <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>Dépréciation :</Typography>
-            </Box>
-            <Box sx={{ p: 1, display: 'flex', gap: 2, alignItems: 'center' }}>
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                <Typography variant="caption" sx={{ fontSize: '11px', fontWeight: 600 }}>Physique :</Typography>
-                <TextField size="small" type="number" value={formData.depreciationPhysical || 0} onChange={(e) => handleFieldChange('depreciationPhysical', e.target.value)} sx={{ '& .MuiInputBase-input': { fontSize: '13px' }, width: '60px' }} />
-                <Typography variant="caption" sx={{ fontSize: '11px' }}>%</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                <Typography variant="caption" sx={{ fontSize: '11px', fontWeight: 600 }}>Fonctionnelle :</Typography>
-                <TextField size="small" type="number" value={formData.depreciationFunctional || 0} onChange={(e) => handleFieldChange('depreciationFunctional', e.target.value)} sx={{ '& .MuiInputBase-input': { fontSize: '13px' }, width: '60px' }} />
-                <Typography variant="caption" sx={{ fontSize: '11px' }}>%</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                <Typography variant="caption" sx={{ fontSize: '11px', fontWeight: 600 }}>Économique :</Typography>
-                <TextField size="small" type="number" value={formData.depreciationEconomic || 0} onChange={(e) => handleFieldChange('depreciationEconomic', e.target.value)} sx={{ '& .MuiInputBase-input': { fontSize: '13px' }, width: '60px' }} />
-                <Typography variant="caption" sx={{ fontSize: '11px' }}>%</Typography>
-              </Box>
-              <Box sx={{ ml: 'auto', display: 'flex', gap: 1, alignItems: 'center' }}>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>${depreciatedBuildingCost.toLocaleString()}</Typography>
-              </Box>
-            </Box>
-          </Box>
-        </Box>
-
-        {/* Basement */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: '250px 1fr', borderBottom: '1px solid', borderColor: 'divider', '&:hover': { bgcolor: 'action.hover' } }}>
-          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>Aménagement du sous-sol :</Typography>
-          </Box>
-          <Box sx={{ p: 1, display: 'flex', gap: 2, alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-              <Typography variant="caption" sx={{ fontSize: '11px', fontWeight: 600 }}>Neuf :</Typography>
-              <TextField size="small" value={formData.basementNew || 0} onChange={(e) => handleFieldChange('basementNew', e.target.value)} sx={{ '& .MuiInputBase-input': { fontSize: '13px' }, width: '80px' }} />
-              <Typography variant="caption" sx={{ fontSize: '11px' }}>$</Typography>
-            </Box>
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-              <Typography variant="caption" sx={{ fontSize: '11px', fontWeight: 600 }}>Dépréciation :</Typography>
-              <TextField size="small" type="number" value={formData.basementDepreciation || 0} onChange={(e) => handleFieldChange('basementDepreciation', e.target.value)} sx={{ '& .MuiInputBase-input': { fontSize: '13px' }, width: '60px' }} />
-              <Typography variant="caption" sx={{ fontSize: '11px' }}>%</Typography>
-            </Box>
-            <Box sx={{ ml: 'auto', display: 'flex', gap: 1, alignItems: 'center' }}>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>${basementValue.toLocaleString()}</Typography>
-            </Box>
-          </Box>
-        </Box>
-
-        {/* Extras */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: '250px 1fr', borderBottom: '1px solid', borderColor: 'divider', '&:hover': { bgcolor: 'action.hover' } }}>
-          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>Extras :</Typography>
-          </Box>
-          <Box sx={{ p: 1, display: 'flex', gap: 2, alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-              <Typography variant="caption" sx={{ fontSize: '11px', fontWeight: 600 }}>Neuf :</Typography>
-              <TextField size="small" value={formData.extrasNew || 0} onChange={(e) => handleFieldChange('extrasNew', e.target.value)} sx={{ '& .MuiInputBase-input': { fontSize: '13px' }, width: '80px' }} />
-              <Typography variant="caption" sx={{ fontSize: '11px' }}>$</Typography>
-            </Box>
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-              <Typography variant="caption" sx={{ fontSize: '11px', fontWeight: 600 }}>Dépréciation :</Typography>
-              <TextField size="small" value={formData.extrasContribution || 0} onChange={(e) => handleFieldChange('extrasContribution', e.target.value)} sx={{ '& .MuiInputBase-input': { fontSize: '13px' }, width: '80px' }} />
-            </Box>
-            <Box sx={{ ml: 'auto', display: 'flex', gap: 1, alignItems: 'center' }}>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>${extrasValue.toLocaleString()}</Typography>
-            </Box>
-          </Box>
-        </Box>
-
-        {/* Depreciated Building Cost */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: '250px 1fr', borderBottom: '1px solid', borderColor: 'divider', bgcolor: '#f5f5f5' }}>
-          <Box sx={{ p: 1.5, bgcolor: 'grey.200', borderRight: '1px solid', borderColor: 'divider' }}>
-            <Typography variant="body2" sx={{ fontWeight: 700 }}>Coût déprécié du bâtiment :</Typography>
-          </Box>
-          <Box sx={{ p: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-            <Typography variant="body1" sx={{ fontWeight: 700 }}>${depreciatedBuildingCost.toLocaleString()}</Typography>
-          </Box>
-        </Box>
-
-        {/* Outbuildings */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: '250px 1fr', borderBottom: '1px solid', borderColor: 'divider', '&:hover': { bgcolor: 'action.hover' } }}>
-          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>Coût à neuf des dépendances :</Typography>
-          </Box>
-          <Box sx={{ p: 1, display: 'flex', gap: 2, alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-              <Typography variant="caption" sx={{ fontSize: '11px', fontWeight: 600 }}>Neuf :</Typography>
-              <TextField size="small" value={formData.outbuildingsNew || 0} onChange={(e) => handleFieldChange('outbuildingsNew', e.target.value)} sx={{ '& .MuiInputBase-input': { fontSize: '13px' }, width: '80px' }} />
-              <Typography variant="caption" sx={{ fontSize: '11px' }}>$</Typography>
-            </Box>
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-              <Typography variant="caption" sx={{ fontSize: '11px', fontWeight: 600 }}>Dépréciation :</Typography>
-              <TextField size="small" type="number" value={formData.outbuildingsDepreciation || 0} onChange={(e) => handleFieldChange('outbuildingsDepreciation', e.target.value)} sx={{ '& .MuiInputBase-input': { fontSize: '13px' }, width: '60px' }} />
-              <Typography variant="caption" sx={{ fontSize: '11px' }}>%</Typography>
-            </Box>
-            <Box sx={{ ml: 'auto', display: 'flex', gap: 1, alignItems: 'center' }}>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>${outbuildingsValue.toLocaleString()}</Typography>
-            </Box>
-          </Box>
-        </Box>
-
-        {/* Exterior Improvements */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: '250px auto 100px', borderBottom: '1px solid', borderColor: 'divider', '&:hover': { bgcolor: 'action.hover' } }}>
-          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>Valeur contributive des aménagements extérieurs :</Typography>
-          </Box>
-          <Box sx={{ p: 1, borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
-            <TextField size="small" value={formData.exteriorImprovements || 0} onChange={(e) => handleFieldChange('exteriorImprovements', e.target.value)} sx={{ '& .MuiInputBase-input': { fontSize: '13px' }, width: '100px' }} />
-          </Box>
-          <Box sx={{ p: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>{formData.exteriorImprovementsPercent || 0}%</Typography>
-          </Box>
-        </Box>
-
-        {/* Comments */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: '250px 1fr', borderBottom: '1px solid', borderColor: 'divider', '&:hover': { bgcolor: 'action.hover' } }}>
-          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>Commentaire(s) :</Typography>
-          </Box>
-          <Box sx={{ p: 1 }}>
-            <TextField
-              fullWidth
-              multiline
-              rows={2}
-              size="small"
-              value={formData.costComments || "Nous avons appliqué une dépréciation annuelle conformément aux indications suggérées par les manuels de coût Marshall & Swift ou Publication CCR Québec."}
-              onChange={(e) => handleFieldChange('costComments', e.target.value)}
-              sx={{ '& .MuiInputBase-input': { fontSize: '13px' } }}
-            />
-          </Box>
-        </Box>
-
-        {/* Total Cost Value */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 200px 200px', bgcolor: 'primary.lighter' }}>
-          <Box sx={{ p: 2 }}>
-            <Typography variant="body1" sx={{ fontWeight: 700, fontSize: '15px' }}>Valeur par la méthode du coût</Typography>
-          </Box>
-          <Box sx={{ p: 2, borderLeft: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-            <Typography variant="body1" sx={{ fontWeight: 600 }}>${totalCostValue.toLocaleString()}</Typography>
-          </Box>
-          <Box sx={{ p: 2, borderLeft: '1px solid', borderColor: 'divider', display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'flex-end' }}>
-            <Typography variant="caption" sx={{ fontSize: '11px' }}>Arrondie à :</Typography>
-            <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>${roundedCostValue.toLocaleString()}</Typography>
-          </Box>
-        </Box>
-      </Box>
-
-      {/* MÉTHODE DE COMPARAISON */}
-      <Box
-        sx={{
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: '8px',
-          overflow: 'hidden',
-          bgcolor: 'background.paper'
-        }}
-      >
-        {/* Header */}
-        <Box sx={{ bgcolor: 'primary.main', p: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'white', fontSize: '15px' }}>
-            MÉTHODE DE COMPARAISON
-          </Typography>
-        </Box>
-
-        {/* AG Grid */}
-        <Box sx={{ height: 600, width: '100%' }} className="ag-theme-material">
-          <AgGridReact
-            rowData={gridData}
-            columnDefs={columnDefs}
-            defaultColDef={{
-              resizable: true,
-              sortable: false,
-              filter: false,
-              cellStyle: { fontSize: '13px' }
-            }}
-            onCellValueChanged={onCellValueChanged}
-            suppressMovableColumns={true}
-            domLayout="normal"
+        {/* Cost Inputs */}
+        <Box sx={{ mb: 2, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 2 }}>
+          <TextField
+            label="Superficie terrain (pi²)"
+            size="small"
+            type="number"
+            value={formData.costLandArea || ''}
+            onChange={(e) => handleFieldChange('costLandArea', e.target.value)}
+          />
+          <TextField
+            label="Prix terrain ($/pi²)"
+            size="small"
+            type="number"
+            value={formData.costLandPrice || ''}
+            onChange={(e) => handleFieldChange('costLandPrice', e.target.value)}
+          />
+          <TextField
+            label="Superficie bâtiment (pi²)"
+            size="small"
+            type="number"
+            value={formData.costBuildingArea || ''}
+            onChange={(e) => handleFieldChange('costBuildingArea', e.target.value)}
+          />
+          <TextField
+            label="Taux pondéré ($/pi²)"
+            size="small"
+            type="number"
+            value={formData.costWeightedRate || ''}
+            onChange={(e) => handleFieldChange('costWeightedRate', e.target.value)}
+          />
+          <TextField
+            label="Dépréciation Physique (%)"
+            size="small"
+            type="number"
+            value={formData.costPhysicalDepr || ''}
+            onChange={(e) => handleFieldChange('costPhysicalDepr', e.target.value)}
+          />
+          <TextField
+            label="Dépréciation Fonctionnelle (%)"
+            size="small"
+            type="number"
+            value={formData.costFunctionalDepr || ''}
+            onChange={(e) => handleFieldChange('costFunctionalDepr', e.target.value)}
+          />
+          <TextField
+            label="Dépréciation Économique (%)"
+            size="small"
+            type="number"
+            value={formData.costEconomicDepr || ''}
+            onChange={(e) => handleFieldChange('costEconomicDepr', e.target.value)}
+          />
+          <TextField
+            label="Sous-sol neuf ($)"
+            size="small"
+            type="number"
+            value={formData.costBasementNew || ''}
+            onChange={(e) => handleFieldChange('costBasementNew', e.target.value)}
+          />
+          <TextField
+            label="Sous-sol dépréciation (%)"
+            size="small"
+            type="number"
+            value={formData.costBasementDepr || ''}
+            onChange={(e) => handleFieldChange('costBasementDepr', e.target.value)}
+          />
+          <TextField
+            label="Extras neuf ($)"
+            size="small"
+            type="number"
+            value={formData.costExtrasNew || ''}
+            onChange={(e) => handleFieldChange('costExtrasNew', e.target.value)}
+          />
+          <TextField
+            label="Extras contribution ($)"
+            size="small"
+            type="number"
+            value={formData.costExtrasContrib || ''}
+            onChange={(e) => handleFieldChange('costExtrasContrib', e.target.value)}
+          />
+          <TextField
+            label="Dépendances neuf ($)"
+            size="small"
+            type="number"
+            value={formData.costOutbuildingsNew || ''}
+            onChange={(e) => handleFieldChange('costOutbuildingsNew', e.target.value)}
+          />
+          <TextField
+            label="Dépendances dépréciation (%)"
+            size="small"
+            type="number"
+            value={formData.costOutbuildingsDepr || ''}
+            onChange={(e) => handleFieldChange('costOutbuildingsDepr', e.target.value)}
+          />
+          <TextField
+            label="Améliorations extérieures ($)"
+            size="small"
+            type="number"
+            value={formData.costExteriorImprov || ''}
+            onChange={(e) => handleFieldChange('costExteriorImprov', e.target.value)}
           />
         </Box>
 
-        {/* Revenue Section */}
-        <Box sx={{ p: 2, bgcolor: 'grey.50', borderTop: '1px solid', borderColor: 'divider' }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>Revenus bruts effectif:</Typography>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>Frais d'exploitation :</Typography>
+        {/* Cost AG Grid */}
+        <Box className="ag-theme-material" sx={{ height: 500, width: '100%' }}>
+          <AgGridReact
+            rowData={costGridData}
+            columnDefs={costColumnDefs}
+            onCellValueChanged={handleCostCellChange}
+            domLayout="normal"
+            suppressMovableColumns={true}
+            enableCellTextSelection={true}
+          />
+        </Box>
+      </Box>
 
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 200px 200px 200px 200px', gap: 1, mt: 2 }}>
-            <Typography variant="caption" sx={{ fontWeight: 600 }}>Revenus nets :</Typography>
-            <TextField size="small" value={formData.netIncomeSubject || '0 $'} sx={{ '& .MuiInputBase-input': { fontSize: '13px' } }} />
-            <TextField size="small" value={formData.netIncomeVente1 || '0 $'} onChange={(e) => handleFieldChange('netIncomeVente1', e.target.value)} sx={{ '& .MuiInputBase-input': { fontSize: '13px' } }} />
-            <TextField size="small" value={formData.netIncomeVente2 || '0 $'} onChange={(e) => handleFieldChange('netIncomeVente2', e.target.value)} sx={{ '& .MuiInputBase-input': { fontSize: '13px' } }} />
-            <TextField size="small" value={formData.netIncomeVente3 || '0 $'} onChange={(e) => handleFieldChange('netIncomeVente3', e.target.value)} sx={{ '& .MuiInputBase-input': { fontSize: '13px' } }} />
-          </Box>
+      {/* DIRECT COMPARISON SECTION */}
+      <Box>
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}>
+          Méthode de Comparaison Directe
+        </Typography>
 
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 200px 200px 200px 200px', gap: 1, mt: 1 }}>
-            <Typography variant="caption" sx={{ fontWeight: 600 }}>Taux global d'actualisation (T.G.A.)</Typography>
-            <TextField size="small" value={formData.tgaSubject || 'N/A'} sx={{ '& .MuiInputBase-input': { fontSize: '13px' } }} />
-            <TextField size="small" value={formData.tgaVente1 || '#DIV/0!'} onChange={(e) => handleFieldChange('tgaVente1', e.target.value)} sx={{ '& .MuiInputBase-input': { fontSize: '13px' } }} />
-            <TextField size="small" value={formData.tgaVente2 || '#DIV/0!'} onChange={(e) => handleFieldChange('tgaVente2', e.target.value)} sx={{ '& .MuiInputBase-input': { fontSize: '13px' } }} />
-            <TextField size="small" value={formData.tgaVente3 || '#DIV/0!'} onChange={(e) => handleFieldChange('tgaVente3', e.target.value)} sx={{ '& .MuiInputBase-input': { fontSize: '13px' } }} />
-          </Box>
+        {/* Comparable Properties Grid */}
+        <Box className="ag-theme-material" sx={{ height: 500, width: '100%', mb: 3 }}>
+          <AgGridReact
+            rowData={comparisonGridData}
+            columnDefs={comparisonColumnDefs}
+            onCellValueChanged={handleComparisonCellChange}
+            domLayout="normal"
+            suppressMovableColumns={true}
+            enableCellTextSelection={true}
+          />
+        </Box>
+
+        {/* Description complémentaire */}
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+            Description complémentaire des éléments influant sur les prix de vente par rapport au sujet
+          </Typography>
+          <TextField
+            multiline
+            rows={3}
+            fullWidth
+            size="small"
+            placeholder="(1) x commerce, (1) x 3½ pièces, (1) x 4½ pièces, (1) x 6½ pièces"
+            value={formData.complementaryDescription || ''}
+            onChange={(e) => handleFieldChange('complementaryDescription', e.target.value)}
+          />
+        </Box>
+
+        {/* Revenue Analysis */}
+        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+          Revenus bruts effectif
+        </Typography>
+        <Box className="ag-theme-material" sx={{ height: 200, width: '100%', mb: 3 }}>
+          <AgGridReact
+            rowData={revenueGridData}
+            columnDefs={comparisonColumnDefs}
+            onCellValueChanged={handleRevenueCellChange}
+            domLayout="normal"
+            suppressMovableColumns={true}
+            enableCellTextSelection={true}
+          />
         </Box>
 
         {/* Residual Value Calculation */}
-        <Box sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2, bgcolor: 'info.lighter', p: 1, borderRadius: '4px' }}>
-            Calcul de la valeur résiduelle
-          </Typography>
+        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+          Calcul de la valeur résiduelle
+        </Typography>
+        <Box className="ag-theme-material" sx={{ height: 260, width: '100%', mb: 3 }}>
+          <AgGridReact
+            rowData={residualGridData}
+            columnDefs={comparisonColumnDefs}
+            onCellValueChanged={handleResidualCellChange}
+            domLayout="normal"
+            suppressMovableColumns={true}
+            enableCellTextSelection={true}
+          />
+        </Box>
 
-          {/* Additional calculation rows would go here */}
+        {/* Adjustments */}
+        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+          Ajustements
+        </Typography>
+        <Box className="ag-theme-material" sx={{ height: 340, width: '100%', mb: 3 }}>
+          <AgGridReact
+            rowData={adjustmentsGridData}
+            columnDefs={comparisonColumnDefs}
+            onCellValueChanged={handleAdjustmentsCellChange}
+            domLayout="normal"
+            suppressMovableColumns={true}
+            enableCellTextSelection={true}
+          />
         </Box>
 
         {/* Final Value */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 200px', bgcolor: 'primary.lighter', p: 2 }}>
-          <Typography variant="body1" sx={{ fontWeight: 700, fontSize: '15px' }}>Valeur par la méthode de comparaison</Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>$0</Typography>
-          </Box>
+        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+          Valeur du sujet
+        </Typography>
+        <Box className="ag-theme-material" sx={{ height: 180, width: '100%' }}>
+          <AgGridReact
+            rowData={finalValueGridData}
+            columnDefs={comparisonColumnDefs}
+            onCellValueChanged={handleFinalValueCellChange}
+            domLayout="normal"
+            suppressMovableColumns={true}
+            enableCellTextSelection={true}
+          />
         </Box>
       </Box>
     </Box>
