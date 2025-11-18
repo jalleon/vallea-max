@@ -299,9 +299,11 @@ export default function CoutPariteSectionContent({
   const comparisonColumnDefs: ColDef[] = useMemo(() => [
     {
       field: 'field',
-      headerName: 'MÉTHODE DE COMPARAISON DIRECTE',
+      headerName: 'Analyse du marché (Ventes comparables)',
       width: 450,
       pinned: 'left',
+      sortable: false,
+      headerClass: 'custom-header',
       cellStyle: (params) => {
         const rowId = params.data.id;
         // Section headers
@@ -312,7 +314,7 @@ export default function CoutPariteSectionContent({
         if (['19', '36', '41'].includes(rowId)) {
           return { fontWeight: 700, backgroundColor: '#e3f2fd' };
         }
-        return { fontWeight: 600, backgroundColor: '#fafafa' };
+        return { fontWeight: 600, backgroundColor: '#e8e8e8' };
       }
     },
     {
@@ -320,6 +322,8 @@ export default function CoutPariteSectionContent({
       headerName: 'Sujet',
       width: 200,
       editable: true,
+      sortable: false,
+      headerClass: 'custom-header',
       cellStyle: (params) => {
         const rowId = params.data.id;
         if (['19', '36', '41'].includes(rowId)) {
@@ -333,6 +337,8 @@ export default function CoutPariteSectionContent({
       headerName: 'Vente no 1',
       width: 180,
       editable: true,
+      sortable: false,
+      headerClass: 'custom-header',
       cellStyle: (params) => {
         const rowId = params.data.id;
         if (['19', '36', '41'].includes(rowId)) {
@@ -346,6 +352,8 @@ export default function CoutPariteSectionContent({
       headerName: 'Vente no 2',
       width: 180,
       editable: true,
+      sortable: false,
+      headerClass: 'custom-header',
       cellStyle: (params) => {
         const rowId = params.data.id;
         if (['19', '36', '41'].includes(rowId)) {
@@ -359,6 +367,8 @@ export default function CoutPariteSectionContent({
       headerName: 'Vente no 3',
       width: 180,
       editable: true,
+      sortable: false,
+      headerClass: 'custom-header',
       cellStyle: (params) => {
         const rowId = params.data.id;
         if (['19', '36', '41'].includes(rowId)) {
@@ -380,6 +390,15 @@ export default function CoutPariteSectionContent({
 
   return (
     <Box sx={{ p: 3 }}>
+      {/* Custom CSS for AG Grid headers */}
+      <style>{`
+        .custom-header {
+          background-color: #1976d2 !important;
+          color: white !important;
+          font-weight: 600 !important;
+        }
+      `}</style>
+
       {/* COST APPROACH SECTION */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}>
