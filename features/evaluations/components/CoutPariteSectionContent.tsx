@@ -108,143 +108,143 @@ export default function CoutPariteSectionContent({
   const costValues = calculateCostValues();
 
   const [costGridData, setCostGridData] = useState<CostRow[]>([
-    { id: '1', field: 'Terrain', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
-    { id: '2', field: 'Coût à neuf du bâtiment', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
-    { id: '3', field: 'Dépréciation', details: 'Physique', calculation: '', nouveau: '', depreciation: '', valeur: '' },
-    { id: '4', field: '', details: 'Fonctionnelle', calculation: '', nouveau: '', depreciation: '', valeur: '' },
-    { id: '5', field: '', details: 'Économique', calculation: '', nouveau: '', depreciation: '', valeur: '' },
-    { id: '6', field: 'Coût déprécié du bâtiment', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
-    { id: '7', field: 'Sous-sol', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
-    { id: '8', field: 'Extras', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
-    { id: '9', field: 'Dépendances', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
-    { id: '10', field: 'Améliorations extérieures', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
-    { id: '11', field: 'Commentaires', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
-    { id: '12', field: 'Valeur totale par la méthode du coût', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
-    { id: '13', field: 'Arrondie', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' }
+    { id: '1', field: 'Valeur marchande du terrain', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '2', field: 'Coût neuf du bat.:', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '3', field: 'Valeur à neuf:', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '4', field: 'Dépréciation:', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '5', field: 'Aménagement du sous-sol:', details: 'Neuf:', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '6', field: '', details: 'Dépréciation:', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '7', field: 'Coût déprécié du bâtiment:', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '8', field: 'Extras:', details: 'Neuf:', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '9', field: '', details: 'Dépréciation:', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '10', field: 'Coût à neuf des dépendances:', details: 'Neuf:', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '11', field: '', details: 'Dépréciation:', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '12', field: 'Valeur contributive des aménagements extérieurs:', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '13', field: 'Commentaire(s):', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '14', field: 'Valeur par la méthode du coût', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' },
+    { id: '15', field: 'Arrondie à:', details: '', calculation: '', nouveau: '', depreciation: '', valeur: '' }
   ]);
 
   const costColumnDefs: ColDef[] = useMemo(() => [
     {
       field: 'field',
       headerName: 'MÉTHODE DU COÛT',
-      width: 250,
+      width: 350,
       pinned: 'left',
+      wrapText: true,
+      autoHeight: true,
       cellStyle: (params) => {
-        if (params.data.id === '12' || params.data.id === '13') {
+        if (params.data.id === '14' || params.data.id === '15') {
           return { fontWeight: 700, backgroundColor: '#e3f2fd' };
         }
-        if (params.data.id === '6') {
+        if (params.data.id === '7') {
           return { fontWeight: 600, backgroundColor: '#f5f5f5' };
         }
-        return { fontWeight: 600, backgroundColor: '#fafafa' };
+        return { fontWeight: 400, backgroundColor: '#fafafa' };
       }
     },
     {
       field: 'details',
-      headerName: 'Détails',
-      width: 150,
-      editable: false
+      headerName: '',
+      width: 120,
+      editable: false,
+      cellStyle: { fontWeight: 400 }
     },
     {
       field: 'calculation',
-      headerName: 'Calcul',
-      width: 200,
+      headerName: '',
+      width: 400,
       editable: true,
+      wrapText: true,
+      autoHeight: true,
       cellRenderer: (params: any) => {
         const rowId = params.data.id;
-        if (rowId === '1') return `${formData.costLandArea || 0} pi² × ${formData.costLandPrice || 0} $`;
-        if (rowId === '2') return `${formData.costBuildingArea || 0} pi² × ${formData.costWeightedRate || 0} $`;
-        if (rowId === '12') return `${costValues.landValue.toFixed(0)} + ${costValues.buildingValue.toFixed(0)} + ${costValues.basementValue.toFixed(0)} + ${costValues.extrasContrib.toFixed(0)} + ${costValues.outbuildingsValue.toFixed(0)} + ${costValues.exteriorImprov.toFixed(0)}`;
-        return params.value || '';
-      }
-    },
-    {
-      field: 'nouveau',
-      headerName: 'Nouveau',
-      width: 120,
-      editable: true,
-      cellRenderer: (params: any) => {
-        const rowId = params.data.id;
-        if (rowId === '2') return `${costValues.buildingNew.toFixed(0)} $`;
-        if (rowId === '7') return `${formData.costBasementNew || 0} $`;
-        if (rowId === '8') return `${formData.costExtrasNew || 0} $`;
-        if (rowId === '9') return `${formData.costOutbuildingsNew || 0} $`;
-        return params.value || '';
-      }
-    },
-    {
-      field: 'depreciation',
-      headerName: 'Dépréciation',
-      width: 120,
-      editable: true,
-      cellRenderer: (params: any) => {
-        const rowId = params.data.id;
-        if (rowId === '3') return `${formData.costPhysicalDepr || 0}%`;
-        if (rowId === '4') return `${formData.costFunctionalDepr || 0}%`;
-        if (rowId === '5') return `${formData.costEconomicDepr || 0}%`;
-        if (rowId === '7') return `${formData.costBasementDepr || 0}%`;
-        if (rowId === '9') return `${formData.costOutbuildingsDepr || 0}%`;
+        if (rowId === '1') {
+          return `Superficie: ${formData.costLandArea || '-'}pi² x ${formData.costLandPrice || '-'}$ = ${costValues.landValue.toFixed(0)}$`;
+        }
+        if (rowId === '2') {
+          return `Superficie habitable: ${formData.costBuildingArea || '-'}pi² x Taux pondéré: ${formData.costWeightedRate || '-'}$`;
+        }
+        if (rowId === '3') {
+          return '';
+        }
+        if (rowId === '4') {
+          const physDepr = formData.costPhysicalDepr || 0;
+          const funcDepr = formData.costFunctionalDepr || 0;
+          const econDepr = formData.costEconomicDepr || 0;
+          return `Physique: ${physDepr}% Fonctionnelle: ${funcDepr}% Économique: ${econDepr}%`;
+        }
+        if (rowId === '5') {
+          return `${formData.costBasementNew || 0}$`;
+        }
+        if (rowId === '6') {
+          return `${formData.costBasementDepr || 0}%`;
+        }
+        if (rowId === '7') {
+          return '';
+        }
+        if (rowId === '8') {
+          return `${formData.costExtrasNew || 0}$`;
+        }
+        if (rowId === '9') {
+          return `${formData.costExtrasContrib || 0}$`;
+        }
+        if (rowId === '10') {
+          return `${formData.costOutbuildingsNew || '-'}$`;
+        }
+        if (rowId === '11') {
+          return `${formData.costOutbuildingsDepr || 0}%`;
+        }
+        if (rowId === '12') {
+          return `${formData.costExteriorImprov || 0} ${formData.costExteriorImprovPercent || 0}%`;
+        }
+        if (rowId === '13') {
+          return formData.costComments || 'Nous avons appliqué une dépréciation annuelle conformément aux indications suggérées par les manuels de coût Marshall & Swift ou Publication CCR Québec.';
+        }
         return params.value || '';
       }
     },
     {
       field: 'valeur',
-      headerName: 'Valeur',
+      headerName: '',
       width: 150,
       editable: false,
       cellRenderer: (params: any) => {
         const rowId = params.data.id;
-        if (rowId === '1') return `${costValues.landValue.toFixed(0)} $`;
-        if (rowId === '2') return `${costValues.buildingNew.toFixed(0)} $`;
-        if (rowId === '6') return `${costValues.buildingValue.toFixed(0)} $`;
-        if (rowId === '7') return `${costValues.basementValue.toFixed(0)} $`;
-        if (rowId === '8') return `${costValues.extrasContrib.toFixed(0)} $`;
-        if (rowId === '9') return `${costValues.outbuildingsValue.toFixed(0)} $`;
-        if (rowId === '10') return `${costValues.exteriorImprov.toFixed(0)} $`;
-        if (rowId === '12') return `${costValues.total.toFixed(0)} $`;
-        if (rowId === '13') return `${costValues.rounded.toFixed(0)} $`;
+        if (rowId === '1') return `${costValues.landValue.toFixed(0)}$`;
+        if (rowId === '3') return `${costValues.buildingNew.toFixed(0)}$`;
+        if (rowId === '4') return `${costValues.totalDepr.toFixed(0)}$`;
+        if (rowId === '5') return `${costValues.basementValue.toFixed(0)}$`;
+        if (rowId === '6') return `${costValues.basementValue.toFixed(0)}$`;
+        if (rowId === '7') return `${costValues.buildingValue.toFixed(0)}$`;
+        if (rowId === '8') return `${costValues.extrasNew}$`;
+        if (rowId === '9') return `${costValues.extrasContrib.toFixed(0)}$`;
+        if (rowId === '10') return `${costValues.outbuildingsNew}$`;
+        if (rowId === '11') return `${costValues.outbuildingsValue.toFixed(0)}$`;
+        if (rowId === '12') return `${costValues.exteriorImprov.toFixed(0)}$`;
+        if (rowId === '14') return `${costValues.total.toFixed(0)}$`;
+        if (rowId === '15') return `${costValues.rounded.toFixed(0)}$`;
         return params.value || '';
       },
       cellStyle: (params) => {
-        if (params.data.id === '12' || params.data.id === '13') {
+        if (params.data.id === '14' || params.data.id === '15') {
           return { fontWeight: 700, color: '#1976d2' };
         }
-        return {};
+        return { fontWeight: 600 };
       }
     }
   ], [formData, costValues]);
 
   const handleCostCellChange = useCallback((event: CellValueChangedEvent) => {
-    const { data, colDef, newValue } = event;
-    const field = colDef.field;
+    const { data, newValue } = event;
     const rowId = data.id;
 
-    // Map grid changes to formData
-    if (rowId === '1' && field === 'calculation') {
-      const match = newValue?.match(/([\d.]+)\s*pi²\s*×\s*([\d.]+)/);
-      if (match) {
-        handleFieldChange('costLandArea', match[1]);
-        handleFieldChange('costLandPrice', match[2]);
-      }
+    // Editable fields are in the calculation column
+    // Parse the values from user input and update formData
+    if (rowId === '13') {
+      // Comments field
+      handleFieldChange('costComments', newValue);
     }
-    if (rowId === '2' && field === 'calculation') {
-      const match = newValue?.match(/([\d.]+)\s*pi²\s*×\s*([\d.]+)/);
-      if (match) {
-        handleFieldChange('costBuildingArea', match[1]);
-        handleFieldChange('costWeightedRate', match[2]);
-      }
-    }
-    if (rowId === '3' && field === 'depreciation') handleFieldChange('costPhysicalDepr', parseFloat(newValue || 0));
-    if (rowId === '4' && field === 'depreciation') handleFieldChange('costFunctionalDepr', parseFloat(newValue || 0));
-    if (rowId === '5' && field === 'depreciation') handleFieldChange('costEconomicDepr', parseFloat(newValue || 0));
-    if (rowId === '7' && field === 'nouveau') handleFieldChange('costBasementNew', parseFloat(newValue || 0));
-    if (rowId === '7' && field === 'depreciation') handleFieldChange('costBasementDepr', parseFloat(newValue || 0));
-    if (rowId === '8' && field === 'nouveau') handleFieldChange('costExtrasNew', parseFloat(newValue || 0));
-    if (rowId === '8' && field === 'depreciation') handleFieldChange('costExtrasContrib', parseFloat(newValue || 0));
-    if (rowId === '9' && field === 'nouveau') handleFieldChange('costOutbuildingsNew', parseFloat(newValue || 0));
-    if (rowId === '9' && field === 'depreciation') handleFieldChange('costOutbuildingsDepr', parseFloat(newValue || 0));
-    if (rowId === '10' && field === 'valeur') handleFieldChange('costExteriorImprov', parseFloat(newValue || 0));
-    if (rowId === '11' && field === 'calculation') handleFieldChange('costComments', newValue);
   }, [handleFieldChange]);
 
   // ========== DIRECT COMPARISON - SINGLE COMPREHENSIVE GRID ==========
@@ -495,114 +495,8 @@ export default function CoutPariteSectionContent({
 
       {/* COST APPROACH SECTION */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}>
-          Méthode du Coût
-        </Typography>
-
-        {/* Cost Inputs */}
-        <Box sx={{ mb: 2, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 2 }}>
-          <TextField
-            label="Superficie terrain (pi²)"
-            size="small"
-            type="number"
-            value={formData.costLandArea || ''}
-            onChange={(e) => handleFieldChange('costLandArea', e.target.value)}
-          />
-          <TextField
-            label="Prix terrain ($/pi²)"
-            size="small"
-            type="number"
-            value={formData.costLandPrice || ''}
-            onChange={(e) => handleFieldChange('costLandPrice', e.target.value)}
-          />
-          <TextField
-            label="Superficie bâtiment (pi²)"
-            size="small"
-            type="number"
-            value={formData.costBuildingArea || ''}
-            onChange={(e) => handleFieldChange('costBuildingArea', e.target.value)}
-          />
-          <TextField
-            label="Taux pondéré ($/pi²)"
-            size="small"
-            type="number"
-            value={formData.costWeightedRate || ''}
-            onChange={(e) => handleFieldChange('costWeightedRate', e.target.value)}
-          />
-          <TextField
-            label="Dépréciation Physique (%)"
-            size="small"
-            type="number"
-            value={formData.costPhysicalDepr || ''}
-            onChange={(e) => handleFieldChange('costPhysicalDepr', e.target.value)}
-          />
-          <TextField
-            label="Dépréciation Fonctionnelle (%)"
-            size="small"
-            type="number"
-            value={formData.costFunctionalDepr || ''}
-            onChange={(e) => handleFieldChange('costFunctionalDepr', e.target.value)}
-          />
-          <TextField
-            label="Dépréciation Économique (%)"
-            size="small"
-            type="number"
-            value={formData.costEconomicDepr || ''}
-            onChange={(e) => handleFieldChange('costEconomicDepr', e.target.value)}
-          />
-          <TextField
-            label="Sous-sol neuf ($)"
-            size="small"
-            type="number"
-            value={formData.costBasementNew || ''}
-            onChange={(e) => handleFieldChange('costBasementNew', e.target.value)}
-          />
-          <TextField
-            label="Sous-sol dépréciation (%)"
-            size="small"
-            type="number"
-            value={formData.costBasementDepr || ''}
-            onChange={(e) => handleFieldChange('costBasementDepr', e.target.value)}
-          />
-          <TextField
-            label="Extras neuf ($)"
-            size="small"
-            type="number"
-            value={formData.costExtrasNew || ''}
-            onChange={(e) => handleFieldChange('costExtrasNew', e.target.value)}
-          />
-          <TextField
-            label="Extras contribution ($)"
-            size="small"
-            type="number"
-            value={formData.costExtrasContrib || ''}
-            onChange={(e) => handleFieldChange('costExtrasContrib', e.target.value)}
-          />
-          <TextField
-            label="Dépendances neuf ($)"
-            size="small"
-            type="number"
-            value={formData.costOutbuildingsNew || ''}
-            onChange={(e) => handleFieldChange('costOutbuildingsNew', e.target.value)}
-          />
-          <TextField
-            label="Dépendances dépréciation (%)"
-            size="small"
-            type="number"
-            value={formData.costOutbuildingsDepr || ''}
-            onChange={(e) => handleFieldChange('costOutbuildingsDepr', e.target.value)}
-          />
-          <TextField
-            label="Améliorations extérieures ($)"
-            size="small"
-            type="number"
-            value={formData.costExteriorImprov || ''}
-            onChange={(e) => handleFieldChange('costExteriorImprov', e.target.value)}
-          />
-        </Box>
-
-        {/* Cost AG Grid */}
-        <Box className="ag-theme-material" sx={{ height: 500, width: '100%' }}>
+        {/* Cost AG Grid - All data entry is directly in the table */}
+        <Box className="ag-theme-material" sx={{ height: 600, width: '100%' }}>
           <AgGridReact
             rowData={costGridData}
             columnDefs={costColumnDefs}
