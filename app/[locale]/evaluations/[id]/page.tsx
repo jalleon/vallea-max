@@ -48,6 +48,7 @@ export default function AppraisalEditPage() {
   const tSections = useTranslations('evaluations.sections');
   const tEval = useTranslations('evaluations');
   const tTemplates = useTranslations('evaluations.templates');
+  const tPropertyTypes = useTranslations('evaluations.propertyTypes');
 
   const [appraisal, setAppraisal] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -295,8 +296,33 @@ export default function AppraisalEditPage() {
     localStorage.setItem(`evaluation-tab-${id}`, newValue.toString());
   };
 
+  // Handle section click from sidebar (same logic as handleTabChange)
+  const handleSectionClick = (sectionIndex: number) => {
+    setCurrentTab(sectionIndex);
+    setCurrentToolTab(-1); // Reset tool tab when changing section
+    // Update URL with tab parameter
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('tab', sectionIndex.toString());
+      window.history.replaceState({}, '', url.toString());
+      // Save to localStorage for persistence
+      localStorage.setItem(`evaluation-tab-${id}`, sectionIndex.toString());
+    }
+  };
+
   const handleToolTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setCurrentToolTab(newValue);
+  };
+
+  // Handle tool click with toggle behavior
+  const handleToolClick = (toolIndex: number) => {
+    if (currentToolTab === toolIndex) {
+      // If clicking the same tool, close it
+      setCurrentToolTab(-1);
+    } else {
+      // Otherwise, open the tool
+      setCurrentToolTab(toolIndex);
+    }
   };
 
   const handleAdjustmentsChange = (data: any) => {
@@ -350,7 +376,16 @@ export default function AppraisalEditPage() {
     if (!adjustmentsData || !adjustmentsData.comparables) return;
 
     // Find the Direct Comparison section in sectionsDataRef (use ref for latest data)
-    const directComparisonSection = sectionsDataRef.current.methode_parite;
+    // Check both methode_parite (residential) and cout_parite (semicommercial)
+    let directComparisonSection = sectionsDataRef.current.methode_parite;
+    let sectionKey = 'methode_parite';
+
+    if (!directComparisonSection || !directComparisonSection.comparables) {
+      // Try cout_parite for semicommercial templates
+      directComparisonSection = sectionsDataRef.current.cout_parite;
+      sectionKey = 'cout_parite';
+    }
+
     if (!directComparisonSection || !directComparisonSection.comparables) return;
 
     // Update comparables with calculated totals and percentages ONLY
@@ -376,8 +411,8 @@ export default function AppraisalEditPage() {
       return newComp;
     });
 
-    // Update sections data with new comparables
-    handleSectionChange('methode_parite', {
+    // Update sections data with new comparables (use the correct section key)
+    handleSectionChange(sectionKey, {
       ...directComparisonSection,
       comparables: updatedComparables
     });
@@ -402,6 +437,11 @@ export default function AppraisalEditPage() {
       default:
         return '';
     }
+  };
+
+  const getPropertyTypeLabel = (propertyType: string) => {
+    if (!propertyType) return '';
+    return tPropertyTypes(propertyType) || propertyType;
   };
 
   const getSectionLabel = (sectionId: string) => {
@@ -466,7 +506,7 @@ export default function AppraisalEditPage() {
             </Box>
 
             <Typography variant="body2" color="text.secondary">
-              {appraisal.client_name} • {appraisal.address}
+              {getPropertyTypeLabel(appraisal.property_type)} • {appraisal.address}
             </Typography>
           </Box>
 
@@ -520,31 +560,15 @@ export default function AppraisalEditPage() {
             sections={sections}
             sectionsData={sectionsData}
             currentSectionIndex={currentTab}
-            onSectionClick={setCurrentTab}
+            onSectionClick={handleSectionClick}
             templateType={appraisal.template_type}
             completionPercentage={completionPercentage}
+            onToolClick={handleToolClick}
+            currentToolIndex={currentToolTab}
           />
         }
         content={
           <Box>
-            {/* Tool Tabs Bar (if tool tab is active) */}
-            {currentToolTab >= 0 && (
-              <Box sx={{ mb: 2, p: 2, bgcolor: 'warning.50', borderRadius: '8px', border: 1, borderColor: 'warning.light' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Typography variant="subtitle1" fontWeight={600} color="warning.dark">
-                    ⚙️ {t('adjustmentsCalculator')}
-                  </Typography>
-                  <Button
-                    size="small"
-                    onClick={() => setCurrentToolTab(-1)}
-                    sx={{ textTransform: 'none' }}
-                  >
-                    Back to Sections
-                  </Button>
-                </Box>
-              </Box>
-            )}
-
             {/* Render Current Section or Tool */}
             {currentToolTab === -1 ? (
               // Render current section
@@ -574,12 +598,20 @@ export default function AppraisalEditPage() {
                     autoSyncToDirectComparison: true
                   }}
                   onChange={handleAdjustmentsChange}
-                  directComparisonData={sectionsDataRef.current.methode_parite || {}}
+                  directComparisonData={
+                    sectionsDataRef.current.methode_parite ||
+                    sectionsDataRef.current.cout_parite ||
+                    {}
+                  }
                   propertyType={appraisal.property_type}
                   effectiveDate={appraisal.effective_date}
                   onSyncToDirectComparison={handleSyncToDirectComparison}
                   onClose={() => setCurrentToolTab(-1)}
-                  measurementSystem={sectionsDataRef.current.methode_parite?.measurementSystem || 'imperial'}
+                  measurementSystem={
+                    sectionsDataRef.current.methode_parite?.measurementSystem ||
+                    sectionsDataRef.current.cout_parite?.measurementSystem ||
+                    'imperial'
+                  }
                 />
               </Box>
             )}
