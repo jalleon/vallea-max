@@ -156,16 +156,21 @@ export default function ImprovementsSection({
         </Typography>
       </Box>
 
-      <Box sx={{ border: '1px solid', borderColor: 'divider', borderTop: 'none', bgcolor: 'background.paper' }}>
-        {/* TOP SECTION - Three columns */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', borderBottom: '2px solid', borderColor: 'divider' }}>
+      <Box sx={{ border: '1px solid', borderColor: 'divider', borderTop: 'none', bgcolor: 'background.paper', overflow: 'hidden' }}>
+        {/* TOP SECTION - Three columns on large screens, stacked on small */}
+        <Box sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' },
+          borderBottom: '2px solid',
+          borderColor: 'divider'
+        }}>
 
           {/* LEFT COLUMN - Building Info */}
-          <Box sx={{ borderRight: '1px solid', borderColor: 'divider' }}>
+          <Box sx={{ borderRight: { xs: 'none', md: '1px solid' }, borderBottom: { xs: '1px solid', md: 'none' }, borderColor: 'divider', overflow: 'hidden', minWidth: 0 }}>
             {/* Year Built */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '160px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(100px, 160px) 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
-                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>YEAR BUILT (estimated):</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px', wordBreak: 'break-word' }}>YEAR BUILT (estimated):</Typography>
               </Box>
               <Box sx={{ p: 0.5 }}>
                 <TextField
@@ -179,7 +184,7 @@ export default function ImprovementsSection({
             </Box>
 
             {/* Year Additions */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '160px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(100px, 160px) 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>YEAR ADDITIONS (estimated):</Typography>
               </Box>
@@ -195,7 +200,7 @@ export default function ImprovementsSection({
             </Box>
 
             {/* Effective Age */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '160px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(100px, 160px) 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>EFFECTIVE AGE:</Typography>
               </Box>
@@ -211,7 +216,7 @@ export default function ImprovementsSection({
             </Box>
 
             {/* Remaining Economic Life */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '160px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(100px, 160px) 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.75, bgcolor: '#b3e5fc', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px', color: '#01579b' }}>REMAINING ECONOMIC LIFE:</Typography>
               </Box>
@@ -238,7 +243,7 @@ export default function ImprovementsSection({
             </Box>
 
             {/* Energy Section */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '100px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(70px, 100px) 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.75, bgcolor: '#b3e5fc', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px', color: '#01579b' }}>Energy Label</Typography>
               </Box>
@@ -254,7 +259,7 @@ export default function ImprovementsSection({
               </Box>
             </Box>
 
-            <Box sx={{ display: 'grid', gridTemplateColumns: '100px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(70px, 100px) 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.75, bgcolor: '#b3e5fc', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px', color: '#e65100' }}>Efficiency Rating</Typography>
               </Box>
@@ -269,7 +274,7 @@ export default function ImprovementsSection({
               </Box>
             </Box>
 
-            <Box sx={{ display: 'grid', gridTemplateColumns: '100px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(70px, 100px) 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.75, bgcolor: '#b3e5fc', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px', color: '#e65100' }}>EV Charger Type</Typography>
               </Box>
@@ -307,7 +312,7 @@ export default function ImprovementsSection({
             </Box>
 
             {/* Electrical */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '80px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(60px, 80px) 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>ELECTRICAL:</Typography>
               </Box>
@@ -325,7 +330,7 @@ export default function ImprovementsSection({
             </Box>
 
             {/* Estimated Rated Capacity */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '200px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(120px, 200px) 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>ESTIMATED RATED CAPACITY OF MAIN PANEL:</Typography>
               </Box>
@@ -341,7 +346,7 @@ export default function ImprovementsSection({
             </Box>
 
             {/* Heating System */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '120px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(80px, 120px) 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>HEATING SYSTEM:</Typography>
               </Box>
@@ -365,7 +370,7 @@ export default function ImprovementsSection({
             </Box>
 
             {/* Water Heater */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '120px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(80px, 120px) 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>WATER HEATER:</Typography>
               </Box>
@@ -382,7 +387,7 @@ export default function ImprovementsSection({
             </Box>
 
             {/* Cooling System */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '120px 1fr' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(80px, 120px) 1fr' }}>
               <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>COOLING SYSTEM:</Typography>
               </Box>
@@ -400,9 +405,9 @@ export default function ImprovementsSection({
           </Box>
 
           {/* MIDDLE COLUMN - Property Type, Design, Construction */}
-          <Box sx={{ borderRight: '1px solid', borderColor: 'divider' }}>
+          <Box sx={{ borderRight: { xs: 'none', md: '1px solid' }, borderBottom: { xs: '1px solid', md: 'none' }, borderColor: 'divider', overflow: 'hidden', minWidth: 0 }}>
             {/* Property Type */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '120px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(80px, 120px) 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>PROPERTY TYPE:</Typography>
               </Box>
@@ -419,7 +424,7 @@ export default function ImprovementsSection({
             </Box>
 
             {/* Design/Style */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '120px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(80px, 120px) 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>DESIGN/STYLE:</Typography>
               </Box>
@@ -436,7 +441,7 @@ export default function ImprovementsSection({
             </Box>
 
             {/* Construction */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '120px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(80px, 120px) 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>CONSTRUCTION:</Typography>
               </Box>
@@ -453,7 +458,7 @@ export default function ImprovementsSection({
             </Box>
 
             {/* Windows */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '120px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(80px, 120px) 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>WINDOWS:</Typography>
               </Box>
@@ -476,7 +481,7 @@ export default function ImprovementsSection({
             </Box>
 
             {/* Basement */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '120px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(80px, 120px) 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>BASEMENT:</Typography>
               </Box>
@@ -493,7 +498,7 @@ export default function ImprovementsSection({
             </Box>
 
             {/* Basement Area */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '120px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(80px, 120px) 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.75, bgcolor: '#b3e5fc', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px', color: '#01579b' }}>BASEMENT AREA:</Typography>
               </Box>
@@ -509,7 +514,7 @@ export default function ImprovementsSection({
             </Box>
 
             {/* Basement Finish */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '120px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(80px, 120px) 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.75, bgcolor: '#b3e5fc', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px', color: '#01579b' }}>BASEMENT FINISH:</Typography>
               </Box>
@@ -525,7 +530,7 @@ export default function ImprovementsSection({
             </Box>
 
             {/* Foundation Walls */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '120px 1fr', borderBottom: '2px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(80px, 120px) 1fr', borderBottom: '2px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>FOUNDATION WALLS:</Typography>
               </Box>
@@ -547,7 +552,7 @@ export default function ImprovementsSection({
             </Box>
 
             {/* Walls/Ceilings checkboxes */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(60px, 80px) 1fr 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}></Box>
               <Box sx={{ p: 0.5, borderRight: '1px solid', borderColor: 'divider', textAlign: 'center' }}>
                 <Typography variant="body2" sx={{ fontSize: '10px', fontWeight: 600, color: '#00897b' }}>Walls</Typography>
@@ -558,7 +563,7 @@ export default function ImprovementsSection({
             </Box>
 
             {/* Drywall */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(60px, 80px) 1fr 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontSize: '10px' }}>Drywall</Typography>
               </Box>
@@ -571,7 +576,7 @@ export default function ImprovementsSection({
             </Box>
 
             {/* Plaster */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(60px, 80px) 1fr 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontSize: '10px' }}>Plaster</Typography>
               </Box>
@@ -584,7 +589,7 @@ export default function ImprovementsSection({
             </Box>
 
             {/* Paneling */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(60px, 80px) 1fr 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontSize: '10px' }}>Paneling</Typography>
               </Box>
@@ -597,7 +602,7 @@ export default function ImprovementsSection({
             </Box>
 
             {/* Other / T-Bar */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(60px, 80px) 1fr 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontSize: '10px' }}>Other</Typography>
               </Box>
@@ -611,7 +616,7 @@ export default function ImprovementsSection({
             </Box>
 
             {/* Plumbing Lines */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '100px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(70px, 100px) 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>PLUMBING LINES:</Typography>
               </Box>
@@ -672,9 +677,9 @@ export default function ImprovementsSection({
           </Box>
 
           {/* RIGHT COLUMN - Roofing, Exterior */}
-          <Box>
+          <Box sx={{ overflow: 'hidden', minWidth: 0 }}>
             {/* Roofing */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '80px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(60px, 80px) 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>ROOFING:</Typography>
               </Box>
@@ -697,7 +702,7 @@ export default function ImprovementsSection({
             </Box>
 
             {/* Exterior Finish */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '100px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(70px, 100px) 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>EXTERIOR FINISH:</Typography>
               </Box>
@@ -741,7 +746,7 @@ export default function ImprovementsSection({
             </Box>
 
             {/* Info Source */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '80px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(60px, 80px) 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>Info Source:</Typography>
               </Box>
@@ -765,32 +770,32 @@ export default function ImprovementsSection({
           </Typography>
         </Box>
 
-        {/* Room Allocation Grid */}
-        <Box sx={{ overflowX: 'auto' }}>
+        {/* Room Allocation Grid - Fixed within frame */}
+        <Box sx={{ overflow: 'hidden' }}>
           <Box sx={{
             display: 'grid',
-            gridTemplateColumns: '70px repeat(13, 55px) 70px 70px',
-            minWidth: 950
+            gridTemplateColumns: 'minmax(50px, 60px) repeat(13, minmax(30px, 1fr)) minmax(40px, 60px) minmax(40px, 60px)',
+            fontSize: '10px'
           }}>
             {/* Header Row */}
             <Box sx={headerCellStyle}>
-              <Typography sx={{ fontSize: '9px', fontWeight: 600 }}>LEVEL</Typography>
+              <Typography sx={{ fontSize: '8px', fontWeight: 600 }}>LEVEL</Typography>
             </Box>
             {ROOM_LABELS.map((label, idx) => (
               <Box key={idx} sx={headerCellStyle}>
-                <Typography sx={{ fontSize: '8px', fontWeight: 600, textAlign: 'center' }}>{label}</Typography>
+                <Typography sx={{ fontSize: '7px', fontWeight: 600, textAlign: 'center', lineHeight: 1.1 }}>{label}</Typography>
               </Box>
             ))}
             <Box sx={headerCellStyle}>
-              <Typography sx={{ fontSize: '9px', fontWeight: 600 }}>ROOM TOTAL</Typography>
+              <Typography sx={{ fontSize: '7px', fontWeight: 600, textAlign: 'center', lineHeight: 1.1 }}>ROOM TOTAL</Typography>
             </Box>
             <Box sx={headerCellStyle}>
-              <Typography sx={{ fontSize: '9px', fontWeight: 600 }}>AREA</Typography>
+              <Typography sx={{ fontSize: '8px', fontWeight: 600 }}>AREA</Typography>
             </Box>
 
             {/* MAIN Row */}
             <Box sx={labelCellStyle}>
-              <Typography sx={{ fontSize: '10px', fontWeight: 600 }}>MAIN</Typography>
+              <Typography sx={{ fontSize: '9px', fontWeight: 600 }}>MAIN</Typography>
             </Box>
             {ROOM_TYPES.map((type, idx) => (
               <Box key={idx} sx={gridCellStyle}>
@@ -799,13 +804,13 @@ export default function ImprovementsSection({
                   type="number"
                   value={formData[`room_main_${type}`] || ''}
                   onChange={(e) => handleFieldChange(`room_main_${type}`, e.target.value)}
-                  inputProps={{ min: 0, style: { textAlign: 'center', fontSize: '11px', padding: '2px' } }}
+                  inputProps={{ min: 0, style: { textAlign: 'center', fontSize: '10px', padding: '1px' } }}
                   sx={{ '& .MuiOutlinedInput-notchedOutline': { border: 'none' }, width: '100%' }}
                 />
               </Box>
             ))}
             <Box sx={totalCellStyle}>
-              <Typography sx={{ fontSize: '11px', fontWeight: 600 }}>{calculations.roomTotalsByFloor.main || 0}</Typography>
+              <Typography sx={{ fontSize: '10px', fontWeight: 600 }}>{calculations.roomTotalsByFloor.main || 0}</Typography>
             </Box>
             <Box sx={gridCellStyle}>
               <TextField
@@ -813,14 +818,14 @@ export default function ImprovementsSection({
                 type="number"
                 value={formData.area_main || ''}
                 onChange={(e) => handleFieldChange('area_main', e.target.value)}
-                inputProps={{ style: { textAlign: 'center', fontSize: '11px', padding: '2px' } }}
+                inputProps={{ style: { textAlign: 'center', fontSize: '10px', padding: '1px' } }}
                 sx={{ '& .MuiOutlinedInput-notchedOutline': { border: 'none' }, width: '100%' }}
               />
             </Box>
 
             {/* SECOND Row */}
             <Box sx={labelCellStyle}>
-              <Typography sx={{ fontSize: '10px', fontWeight: 600 }}>SECOND</Typography>
+              <Typography sx={{ fontSize: '9px', fontWeight: 600 }}>SECOND</Typography>
             </Box>
             {ROOM_TYPES.map((type, idx) => (
               <Box key={idx} sx={gridCellStyle}>
@@ -829,13 +834,13 @@ export default function ImprovementsSection({
                   type="number"
                   value={formData[`room_second_${type}`] || ''}
                   onChange={(e) => handleFieldChange(`room_second_${type}`, e.target.value)}
-                  inputProps={{ min: 0, style: { textAlign: 'center', fontSize: '11px', padding: '2px' } }}
+                  inputProps={{ min: 0, style: { textAlign: 'center', fontSize: '10px', padding: '1px' } }}
                   sx={{ '& .MuiOutlinedInput-notchedOutline': { border: 'none' }, width: '100%' }}
                 />
               </Box>
             ))}
             <Box sx={totalCellStyle}>
-              <Typography sx={{ fontSize: '11px', fontWeight: 600 }}>{calculations.roomTotalsByFloor.second || 0}</Typography>
+              <Typography sx={{ fontSize: '10px', fontWeight: 600 }}>{calculations.roomTotalsByFloor.second || 0}</Typography>
             </Box>
             <Box sx={gridCellStyle}>
               <TextField
@@ -843,14 +848,14 @@ export default function ImprovementsSection({
                 type="number"
                 value={formData.area_second || ''}
                 onChange={(e) => handleFieldChange('area_second', e.target.value)}
-                inputProps={{ style: { textAlign: 'center', fontSize: '11px', padding: '2px' } }}
+                inputProps={{ style: { textAlign: 'center', fontSize: '10px', padding: '1px' } }}
                 sx={{ '& .MuiOutlinedInput-notchedOutline': { border: 'none' }, width: '100%' }}
               />
             </Box>
 
             {/* THIRD Row */}
             <Box sx={labelCellStyle}>
-              <Typography sx={{ fontSize: '10px', fontWeight: 600 }}>THIRD</Typography>
+              <Typography sx={{ fontSize: '9px', fontWeight: 600 }}>THIRD</Typography>
             </Box>
             {ROOM_TYPES.map((type, idx) => (
               <Box key={idx} sx={gridCellStyle}>
@@ -859,13 +864,13 @@ export default function ImprovementsSection({
                   type="number"
                   value={formData[`room_third_${type}`] || ''}
                   onChange={(e) => handleFieldChange(`room_third_${type}`, e.target.value)}
-                  inputProps={{ min: 0, style: { textAlign: 'center', fontSize: '11px', padding: '2px' } }}
+                  inputProps={{ min: 0, style: { textAlign: 'center', fontSize: '10px', padding: '1px' } }}
                   sx={{ '& .MuiOutlinedInput-notchedOutline': { border: 'none' }, width: '100%' }}
                 />
               </Box>
             ))}
             <Box sx={totalCellStyle}>
-              <Typography sx={{ fontSize: '11px', fontWeight: 600 }}>{calculations.roomTotalsByFloor.third || 0}</Typography>
+              <Typography sx={{ fontSize: '10px', fontWeight: 600 }}>{calculations.roomTotalsByFloor.third || 0}</Typography>
             </Box>
             <Box sx={gridCellStyle}>
               <TextField
@@ -873,45 +878,37 @@ export default function ImprovementsSection({
                 type="number"
                 value={formData.area_third || ''}
                 onChange={(e) => handleFieldChange('area_third', e.target.value)}
-                inputProps={{ style: { textAlign: 'center', fontSize: '11px', padding: '2px' } }}
+                inputProps={{ style: { textAlign: 'center', fontSize: '10px', padding: '1px' } }}
                 sx={{ '& .MuiOutlinedInput-notchedOutline': { border: 'none' }, width: '100%' }}
               />
             </Box>
 
             {/* ABOVE GRADE TOTALS Row */}
-            {/* Columns 1-2: Label */}
             <Box sx={{ ...labelCellStyle, bgcolor: '#fff3e0', gridColumn: 'span 2' }}>
-              <Typography sx={{ fontSize: '9px', fontWeight: 600 }}>ABOVE GRADE TOTALS:</Typography>
+              <Typography sx={{ fontSize: '8px', fontWeight: 600 }}>ABOVE GRADE:</Typography>
             </Box>
-            {/* Column 3: Room count total (no label) */}
             <Box sx={{ ...totalCellStyle, justifyContent: 'center' }}>
-              <Typography sx={{ fontSize: '11px', fontWeight: 600 }}>{calculations.aboveGradeRoomTotal}</Typography>
+              <Typography sx={{ fontSize: '10px', fontWeight: 600 }}>{calculations.aboveGradeRoomTotal}</Typography>
             </Box>
-            {/* Columns 4-6: empty (3 columns) */}
             <Box sx={{ ...totalCellStyle, gridColumn: 'span 3' }}></Box>
-            {/* BEDROOMS spanning 2 columns (bedrooms + den) */}
             <Box sx={{ ...totalCellStyle, gridColumn: 'span 2', justifyContent: 'center' }}>
-              <Typography sx={{ fontSize: '9px', mr: 0.5 }}>BEDROOMS:</Typography>
-              <Typography sx={{ fontSize: '11px', fontWeight: 600, color: '#1565c0' }}>{calculations.totalBedrooms}</Typography>
+              <Typography sx={{ fontSize: '8px', mr: 0.25 }}>BED:</Typography>
+              <Typography sx={{ fontSize: '10px', fontWeight: 600, color: '#1565c0' }}>{calculations.totalBedrooms}</Typography>
             </Box>
-            {/* BATHROOMS spanning 2 columns (full bath + part bath) */}
             <Box sx={{ ...totalCellStyle, gridColumn: 'span 2', justifyContent: 'center' }}>
-              <Typography sx={{ fontSize: '9px', mr: 0.5 }}>BATHS:</Typography>
-              <Typography sx={{ fontSize: '11px', fontWeight: 600, color: '#1565c0' }}>{calculations.totalFullBath}</Typography>
-              <Typography sx={{ fontSize: '9px', color: '#e65100', mx: 0.25 }}>F</Typography>
-              <Typography sx={{ fontSize: '11px', fontWeight: 600, color: '#1565c0' }}>{calculations.totalPartBath}</Typography>
-              <Typography sx={{ fontSize: '9px', color: '#e65100' }}>P</Typography>
+              <Typography sx={{ fontSize: '10px', fontWeight: 600, color: '#1565c0' }}>{calculations.totalFullBath}</Typography>
+              <Typography sx={{ fontSize: '8px', color: '#e65100', mx: 0.25 }}>F</Typography>
+              <Typography sx={{ fontSize: '10px', fontWeight: 600, color: '#1565c0' }}>{calculations.totalPartBath}</Typography>
+              <Typography sx={{ fontSize: '8px', color: '#e65100' }}>P</Typography>
             </Box>
-            {/* Remaining columns: laundry, recRoom1, recRoom2, recRoom3 = 4 columns + room total */}
             <Box sx={{ ...totalCellStyle, gridColumn: 'span 5' }}></Box>
-            {/* Area total */}
             <Box sx={{ ...totalCellStyle, bgcolor: '#c8e6c9' }}>
-              <Typography sx={{ fontSize: '11px', fontWeight: 600 }}>{calculations.totalAboveGradeArea || 0}</Typography>
+              <Typography sx={{ fontSize: '10px', fontWeight: 600 }}>{calculations.totalAboveGradeArea || 0}</Typography>
             </Box>
 
             {/* BASEMENT Row */}
-            <Box sx={labelCellStyle}>
-              <Typography sx={{ fontSize: '10px', fontWeight: 600 }}>BASEMENT</Typography>
+            <Box sx={{ ...labelCellStyle, bgcolor: '#e0e0e0' }}>
+              <Typography sx={{ fontSize: '9px', fontWeight: 600 }}>BSMT</Typography>
             </Box>
             {ROOM_TYPES.map((type, idx) => (
               <Box key={idx} sx={gridCellStyle}>
@@ -920,13 +917,13 @@ export default function ImprovementsSection({
                   type="number"
                   value={formData[`room_basement_${type}`] || ''}
                   onChange={(e) => handleFieldChange(`room_basement_${type}`, e.target.value)}
-                  inputProps={{ min: 0, style: { textAlign: 'center', fontSize: '11px', padding: '2px' } }}
+                  inputProps={{ min: 0, style: { textAlign: 'center', fontSize: '10px', padding: '1px' } }}
                   sx={{ '& .MuiOutlinedInput-notchedOutline': { border: 'none' }, width: '100%' }}
                 />
               </Box>
             ))}
             <Box sx={totalCellStyle}>
-              <Typography sx={{ fontSize: '11px', fontWeight: 600 }}>{calculations.roomTotalsByFloor.basement || 0}</Typography>
+              <Typography sx={{ fontSize: '10px', fontWeight: 600 }}>{calculations.roomTotalsByFloor.basement || 0}</Typography>
             </Box>
             <Box sx={gridCellStyle}>
               <TextField
@@ -934,7 +931,7 @@ export default function ImprovementsSection({
                 type="number"
                 value={formData.area_basement || ''}
                 onChange={(e) => handleFieldChange('area_basement', e.target.value)}
-                inputProps={{ style: { textAlign: 'center', fontSize: '11px', padding: '2px' } }}
+                inputProps={{ style: { textAlign: 'center', fontSize: '10px', padding: '1px' } }}
                 sx={{ '& .MuiOutlinedInput-notchedOutline': { border: 'none' }, width: '100%' }}
               />
             </Box>
@@ -1002,7 +999,7 @@ export default function ImprovementsSection({
         </Box>
 
         {/* SITE IMPROVEMENTS */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: '150px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(100px, 150px) 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
           <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
             <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>SITE IMPROVEMENTS:</Typography>
           </Box>
@@ -1037,7 +1034,7 @@ export default function ImprovementsSection({
         </Box>
 
         {/* COMMENTS */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: '100px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(70px, 100px) 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
           <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
             <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>COMMENTS:</Typography>
           </Box>
@@ -1055,7 +1052,7 @@ export default function ImprovementsSection({
         </Box>
 
         {/* BASEMENT */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: '100px 1fr' }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(70px, 100px) 1fr' }}>
           <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
             <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>BASEMENT:</Typography>
           </Box>
