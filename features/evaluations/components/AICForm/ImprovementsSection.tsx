@@ -1,6 +1,7 @@
 'use client';
 
-import { TextField, Typography, Box, Autocomplete } from '@mui/material';
+import { useMemo } from 'react';
+import { TextField, Typography, Box, Checkbox, FormControlLabel, Radio, RadioGroup } from '@mui/material';
 
 interface ImprovementsSectionProps {
   formData: any;
@@ -8,757 +9,1065 @@ interface ImprovementsSectionProps {
   appraisalData?: any;
 }
 
+// Room types for the allocation grid
+const ROOM_TYPES = [
+  'entrance', 'living', 'dining', 'kitchen', 'family',
+  'bedrooms', 'den', 'fullBath', 'partBath', 'laundry',
+  'recRoom1', 'recRoom2', 'recRoom3'
+];
+
+const ROOM_LABELS = [
+  'ENTRANCE', 'LIVING', 'DINING', 'KITCHEN', 'FAMILY',
+  'BEDROOMS', 'DEN', 'FULL BATH', 'PART BATH', 'LAUNDRY',
+  'Rec Room', 'Rec Room', 'Rec Room'
+];
+
+const FLOOR_LEVELS = ['main', 'second', 'third', 'basement'];
+const FLOOR_LABELS = ['MAIN', 'SECOND', 'THIRD', 'BASEMENT'];
+
 export default function ImprovementsSection({
   formData,
   handleFieldChange,
   appraisalData
 }: ImprovementsSectionProps) {
 
-  const designStyleOptions = ['Bungalow', '1 Storey', '1 1/2 Storey', '2 Storey', 'Split Level', 'Bi-Level', 'Townhouse', 'Other'];
-  const conditionOptions = ['Excellent', 'Good', 'Average', 'Fair', 'Poor'];
-  const foundationTypeOptions = ['Concrete', 'Stone', 'Block', 'Wood', 'Piers', 'Slab on Grade'];
-  const basementTypeOptions = ['Full Basement', 'Partial Basement', 'Crawl Space', 'None'];
-  const exteriorWallsOptions = ['Brick', 'Vinyl Siding', 'Wood Siding', 'Aluminum Siding', 'Stucco', 'Stone', 'Combination'];
-  const roofSurfaceOptions = ['Asphalt Shingle', 'Metal', 'Tile', 'Slate', 'Tar & Gravel', 'Other'];
-  const windowsOptions = ['Vinyl', 'Wood', 'Aluminum', 'Combination'];
-  const stormWindowsOptions = ['Yes', 'No', 'Partial'];
-  const heatingTypeOptions = ['Forced Air Gas', 'Forced Air Oil', 'Forced Air Electric', 'Hot Water Gas', 'Hot Water Oil', 'Electric Baseboard', 'Heat Pump', 'Other'];
-  const airConditioningOptions = ['Central Air', 'Window Units', 'None'];
+  // Helper to render checkbox
+  const renderCheckbox = (field: string, label: string) => (
+    <FormControlLabel
+      control={
+        <Checkbox
+          size="small"
+          checked={formData[field] || false}
+          onChange={(e) => handleFieldChange(field, e.target.checked)}
+        />
+      }
+      label={<Typography variant="body2" sx={{ fontSize: '12px' }}>{label}</Typography>}
+      sx={{ mr: 1, minWidth: 'auto', '& .MuiFormControlLabel-label': { ml: 0.5 } }}
+    />
+  );
+
+  // Helper to render condition checkboxes (Good/Average/Fair/Poor)
+  const renderConditionCheckboxes = (fieldPrefix: string) => (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+      {renderCheckbox(`${fieldPrefix}Good`, 'Good')}
+      {renderCheckbox(`${fieldPrefix}Average`, 'Average')}
+      {renderCheckbox(`${fieldPrefix}Fair`, 'Fair')}
+      {renderCheckbox(`${fieldPrefix}Poor`, 'Poor')}
+    </Box>
+  );
+
+  // Get room count for a specific floor and room type
+  const getRoomCount = (floor: string, roomType: string): number => {
+    const key = `room_${floor}_${roomType}`;
+    return parseInt(formData[key]) || 0;
+  };
+
+  // Get area for a specific floor
+  const getFloorArea = (floor: string): number => {
+    const key = `area_${floor}`;
+    return parseFloat(formData[key]) || 0;
+  };
+
+  // Calculate totals
+  const calculations = useMemo(() => {
+    // Above grade totals (main + second + third)
+    const aboveGradeFloors = ['main', 'second', 'third'];
+
+    // Room totals by type (above grade only)
+    const roomTotalsByType: Record<string, number> = {};
+    ROOM_TYPES.forEach(type => {
+      roomTotalsByType[type] = aboveGradeFloors.reduce((sum, floor) => sum + getRoomCount(floor, type), 0);
+    });
+
+    // Total rooms per floor
+    const roomTotalsByFloor: Record<string, number> = {};
+    [...FLOOR_LEVELS].forEach(floor => {
+      roomTotalsByFloor[floor] = ROOM_TYPES.reduce((sum, type) => sum + getRoomCount(floor, type), 0);
+    });
+
+    // Above grade room total
+    const aboveGradeRoomTotal = aboveGradeFloors.reduce((sum, floor) => sum + roomTotalsByFloor[floor], 0);
+
+    // Total bedrooms (above grade)
+    const totalBedrooms = roomTotalsByType['bedrooms'];
+
+    // Total bathrooms (full + part, all floors including basement)
+    const totalFullBath = FLOOR_LEVELS.reduce((sum, floor) => sum + getRoomCount(floor, 'fullBath'), 0);
+    const totalPartBath = FLOOR_LEVELS.reduce((sum, floor) => sum + getRoomCount(floor, 'partBath'), 0);
+
+    // Total area (above grade)
+    const totalAboveGradeArea = aboveGradeFloors.reduce((sum, floor) => sum + getFloorArea(floor), 0);
+
+    return {
+      roomTotalsByType,
+      roomTotalsByFloor,
+      aboveGradeRoomTotal,
+      totalBedrooms,
+      totalFullBath,
+      totalPartBath,
+      totalAboveGradeArea
+    };
+  }, [formData]);
+
+  // Grid cell style for room allocation
+  const gridCellStyle = {
+    border: '1px solid',
+    borderColor: 'divider',
+    p: 0.25,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 32
+  };
+
+  const headerCellStyle = {
+    ...gridCellStyle,
+    bgcolor: '#e3f2fd',
+    fontWeight: 600,
+    fontSize: '10px'
+  };
+
+  const labelCellStyle = {
+    ...gridCellStyle,
+    bgcolor: 'grey.100',
+    justifyContent: 'flex-start',
+    pl: 1,
+    fontWeight: 600
+  };
+
+  const totalCellStyle = {
+    ...gridCellStyle,
+    bgcolor: '#fff3e0',
+    fontWeight: 600
+  };
 
   return (
-    <Box sx={{ p: 3 }}>
-      {/* GENERAL BUILDING INFORMATION */}
+    <Box sx={{ p: 2 }}>
+      {/* IMPROVEMENTS Header */}
       <Box
         sx={{
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: '8px',
-          overflow: 'hidden',
-          bgcolor: 'background.paper',
-          mb: 3
+          bgcolor: '#1565c0',
+          p: 1,
+          borderRadius: '8px 8px 0 0'
         }}
       >
-        <Box sx={{ bgcolor: 'primary.main', p: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'white', fontSize: '13px' }}>
-            GENERAL BUILDING INFORMATION (Page 6)
-          </Typography>
-        </Box>
-
-        {/* Year Built / Effective Age */}
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: '200px 1fr',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            '&:hover': { bgcolor: 'action.hover' }
-          }}
-        >
-          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>Year Built / Effective Age</Typography>
-          </Box>
-          <Box sx={{ p: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
-            <TextField
-              size="small"
-              type="number"
-              placeholder="Year Built"
-              value={formData.yearBuilt || ''}
-              onChange={(e) => handleFieldChange('yearBuilt', e.target.value)}
-              sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '14px' } }}
-            />
-            <TextField
-              size="small"
-              type="number"
-              placeholder="Effective Age (years)"
-              value={formData.effectiveAge || ''}
-              onChange={(e) => handleFieldChange('effectiveAge', e.target.value)}
-              sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '14px' } }}
-            />
-          </Box>
-        </Box>
-
-        {/* Design Style */}
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: '200px 1fr',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            '&:hover': { bgcolor: 'action.hover' }
-          }}
-        >
-          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>Design/Style</Typography>
-          </Box>
-          <Box sx={{ p: 1, display: 'flex', alignItems: 'center' }}>
-            <Autocomplete
-              freeSolo
-              forcePopupIcon
-              size="small"
-              options={designStyleOptions}
-              value={formData.designStyle || ''}
-              onChange={(e, newValue) => handleFieldChange('designStyle', newValue)}
-              onInputChange={(e, newValue) => handleFieldChange('designStyle', newValue)}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  placeholder="Design/Style"
-                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
-                />
-              )}
-              sx={{ flex: 1 }}
-            />
-          </Box>
-        </Box>
-
-        {/* Condition / Quality */}
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: '200px 1fr',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            '&:hover': { bgcolor: 'action.hover' }
-          }}
-        >
-          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>Condition / Quality</Typography>
-          </Box>
-          <Box sx={{ p: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
-            <Autocomplete
-              freeSolo
-              forcePopupIcon
-              size="small"
-              options={conditionOptions}
-              value={formData.overallCondition || ''}
-              onChange={(e, newValue) => handleFieldChange('overallCondition', newValue)}
-              onInputChange={(e, newValue) => handleFieldChange('overallCondition', newValue)}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  placeholder="Overall Condition"
-                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
-                />
-              )}
-              sx={{ flex: 1 }}
-            />
-            <Autocomplete
-              freeSolo
-              forcePopupIcon
-              size="small"
-              options={conditionOptions}
-              value={formData.constructionQuality || ''}
-              onChange={(e, newValue) => handleFieldChange('constructionQuality', newValue)}
-              onInputChange={(e, newValue) => handleFieldChange('constructionQuality', newValue)}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  placeholder="Construction Quality"
-                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
-                />
-              )}
-              sx={{ flex: 1 }}
-            />
-          </Box>
-        </Box>
+        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'white', fontSize: '13px' }}>
+          IMPROVEMENTS
+        </Typography>
       </Box>
 
-      {/* FOUNDATION */}
-      <Box
-        sx={{
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: '8px',
-          overflow: 'hidden',
-          bgcolor: 'background.paper',
-          mb: 3
-        }}
-      >
-        <Box sx={{ bgcolor: 'primary.main', p: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'white', fontSize: '13px' }}>
-            FOUNDATION
+      <Box sx={{ border: '1px solid', borderColor: 'divider', borderTop: 'none', bgcolor: 'background.paper' }}>
+        {/* TOP SECTION - Three columns */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', borderBottom: '2px solid', borderColor: 'divider' }}>
+
+          {/* LEFT COLUMN - Building Info */}
+          <Box sx={{ borderRight: '1px solid', borderColor: 'divider' }}>
+            {/* Year Built */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '160px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>YEAR BUILT (estimated):</Typography>
+              </Box>
+              <Box sx={{ p: 0.5 }}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  value={formData.yearBuilt || ''}
+                  onChange={(e) => handleFieldChange('yearBuilt', e.target.value)}
+                  sx={{ '& .MuiInputBase-input': { fontSize: '12px', p: 0.5 } }}
+                />
+              </Box>
+            </Box>
+
+            {/* Year Additions */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '160px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>YEAR ADDITIONS (estimated):</Typography>
+              </Box>
+              <Box sx={{ p: 0.5 }}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  value={formData.yearAdditions || ''}
+                  onChange={(e) => handleFieldChange('yearAdditions', e.target.value)}
+                  sx={{ '& .MuiInputBase-input': { fontSize: '12px', p: 0.5 } }}
+                />
+              </Box>
+            </Box>
+
+            {/* Effective Age */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '160px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>EFFECTIVE AGE:</Typography>
+              </Box>
+              <Box sx={{ p: 0.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <TextField
+                  size="small"
+                  value={formData.effectiveAge || ''}
+                  onChange={(e) => handleFieldChange('effectiveAge', e.target.value)}
+                  sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '12px', p: 0.5 } }}
+                />
+                <Typography variant="body2" sx={{ fontSize: '11px' }}>years</Typography>
+              </Box>
+            </Box>
+
+            {/* Remaining Economic Life */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '160px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.75, bgcolor: '#b3e5fc', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px', color: '#01579b' }}>REMAINING ECONOMIC LIFE:</Typography>
+              </Box>
+              <Box sx={{ p: 0.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <TextField
+                  size="small"
+                  value={formData.remainingEconomicLife || ''}
+                  onChange={(e) => handleFieldChange('remainingEconomicLife', e.target.value)}
+                  sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '12px', p: 0.5 } }}
+                />
+                <Typography variant="body2" sx={{ fontSize: '11px' }}>years</Typography>
+              </Box>
+            </Box>
+
+            {/* Checkboxes - Under Construction, Appraised As Is, As if Complete */}
+            <Box sx={{ p: 0.75, borderBottom: '1px solid', borderColor: 'divider' }}>
+              {renderCheckbox('underConstruction', 'Under Construction')}
+            </Box>
+            <Box sx={{ p: 0.75, pl: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+              {renderCheckbox('appraisedAsIs', 'Appraised As Is')}
+            </Box>
+            <Box sx={{ p: 0.75, pl: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+              {renderCheckbox('asIfComplete', 'As if Complete (new construction/renovation)')}
+            </Box>
+
+            {/* Energy Section */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '100px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.75, bgcolor: '#b3e5fc', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px', color: '#01579b' }}>Energy Label</Typography>
+              </Box>
+              <Box sx={{ p: 0.5 }}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  placeholder="Not Provided"
+                  value={formData.energyLabel || ''}
+                  onChange={(e) => handleFieldChange('energyLabel', e.target.value)}
+                  sx={{ '& .MuiInputBase-input': { fontSize: '12px', p: 0.5 } }}
+                />
+              </Box>
+            </Box>
+
+            <Box sx={{ display: 'grid', gridTemplateColumns: '100px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.75, bgcolor: '#b3e5fc', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px', color: '#e65100' }}>Efficiency Rating</Typography>
+              </Box>
+              <Box sx={{ p: 0.5 }}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  value={formData.efficiencyRating || ''}
+                  onChange={(e) => handleFieldChange('efficiencyRating', e.target.value)}
+                  sx={{ '& .MuiInputBase-input': { fontSize: '12px', p: 0.5 } }}
+                />
+              </Box>
+            </Box>
+
+            <Box sx={{ display: 'grid', gridTemplateColumns: '100px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.75, bgcolor: '#b3e5fc', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px', color: '#e65100' }}>EV Charger Type</Typography>
+              </Box>
+              <Box sx={{ p: 0.5 }}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  placeholder="Not Applicable"
+                  value={formData.evChargerType || ''}
+                  onChange={(e) => handleFieldChange('evChargerType', e.target.value)}
+                  sx={{ '& .MuiInputBase-input': { fontSize: '12px', p: 0.5 } }}
+                />
+              </Box>
+            </Box>
+
+            {/* Solar Panels */}
+            <Box sx={{ display: 'flex', alignItems: 'center', p: 0.75, borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px', mr: 1 }}>Solar Panels</Typography>
+              <RadioGroup
+                row
+                value={formData.solarPanels || ''}
+                onChange={(e) => handleFieldChange('solarPanels', e.target.value)}
+                sx={{ '& .MuiFormControlLabel-label': { fontSize: '11px' } }}
+              >
+                <FormControlLabel value="yes" control={<Radio size="small" />} label="YES" />
+                <FormControlLabel value="no" control={<Radio size="small" />} label="NO" />
+              </RadioGroup>
+              <TextField
+                size="small"
+                placeholder="Leased as reported by owner"
+                value={formData.solarPanelsDetails || ''}
+                onChange={(e) => handleFieldChange('solarPanelsDetails', e.target.value)}
+                sx={{ flex: 1, ml: 1, '& .MuiInputBase-input': { fontSize: '11px', p: 0.5 } }}
+              />
+            </Box>
+
+            {/* Electrical */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '80px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>ELECTRICAL:</Typography>
+              </Box>
+              <Box sx={{ p: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+                {renderCheckbox('elecFuses', 'Fuses')}
+                {renderCheckbox('elecBreakers', 'Breakers')}
+                <TextField
+                  size="small"
+                  placeholder="Knob and Tube"
+                  value={formData.elecOther || ''}
+                  onChange={(e) => handleFieldChange('elecOther', e.target.value)}
+                  sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '11px', p: 0.5 } }}
+                />
+              </Box>
+            </Box>
+
+            {/* Estimated Rated Capacity */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '200px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>ESTIMATED RATED CAPACITY OF MAIN PANEL:</Typography>
+              </Box>
+              <Box sx={{ p: 0.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <TextField
+                  size="small"
+                  value={formData.mainPanelCapacity || ''}
+                  onChange={(e) => handleFieldChange('mainPanelCapacity', e.target.value)}
+                  sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '12px', p: 0.5 } }}
+                />
+                <Typography variant="body2" sx={{ fontSize: '11px' }}>amps</Typography>
+              </Box>
+            </Box>
+
+            {/* Heating System */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '120px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>HEATING SYSTEM:</Typography>
+              </Box>
+              <Box sx={{ p: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <TextField
+                  size="small"
+                  placeholder="Forced Air"
+                  value={formData.heatingSystem || ''}
+                  onChange={(e) => handleFieldChange('heatingSystem', e.target.value)}
+                  sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '11px', p: 0.5 } }}
+                />
+                <Typography variant="body2" sx={{ fontSize: '11px', color: '#00897b', fontWeight: 600 }}>fuel type</Typography>
+                <TextField
+                  size="small"
+                  placeholder="Other (specify)"
+                  value={formData.heatingFuelType || ''}
+                  onChange={(e) => handleFieldChange('heatingFuelType', e.target.value)}
+                  sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '11px', p: 0.5 } }}
+                />
+              </Box>
+            </Box>
+
+            {/* Water Heater */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '120px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>WATER HEATER:</Typography>
+              </Box>
+              <Box sx={{ p: 0.5 }}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  placeholder="Natural Gas"
+                  value={formData.waterHeater || ''}
+                  onChange={(e) => handleFieldChange('waterHeater', e.target.value)}
+                  sx={{ '& .MuiInputBase-input': { fontSize: '11px', p: 0.5 } }}
+                />
+              </Box>
+            </Box>
+
+            {/* Cooling System */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '120px 1fr' }}>
+              <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>COOLING SYSTEM:</Typography>
+              </Box>
+              <Box sx={{ p: 0.5 }}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  placeholder="Heat Pump"
+                  value={formData.coolingSystem || ''}
+                  onChange={(e) => handleFieldChange('coolingSystem', e.target.value)}
+                  sx={{ '& .MuiInputBase-input': { fontSize: '11px', p: 0.5 } }}
+                />
+              </Box>
+            </Box>
+          </Box>
+
+          {/* MIDDLE COLUMN - Property Type, Design, Construction */}
+          <Box sx={{ borderRight: '1px solid', borderColor: 'divider' }}>
+            {/* Property Type */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '120px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>PROPERTY TYPE:</Typography>
+              </Box>
+              <Box sx={{ p: 0.5 }}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  placeholder="Link"
+                  value={formData.propertyType || ''}
+                  onChange={(e) => handleFieldChange('propertyType', e.target.value)}
+                  sx={{ '& .MuiInputBase-input': { fontSize: '12px', p: 0.5 } }}
+                />
+              </Box>
+            </Box>
+
+            {/* Design/Style */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '120px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>DESIGN/STYLE:</Typography>
+              </Box>
+              <Box sx={{ p: 0.5 }}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  placeholder="3 or more Storey"
+                  value={formData.designStyle || ''}
+                  onChange={(e) => handleFieldChange('designStyle', e.target.value)}
+                  sx={{ '& .MuiInputBase-input': { fontSize: '12px', p: 0.5 } }}
+                />
+              </Box>
+            </Box>
+
+            {/* Construction */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '120px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>CONSTRUCTION:</Typography>
+              </Box>
+              <Box sx={{ p: 0.5 }}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  placeholder="Log"
+                  value={formData.construction || ''}
+                  onChange={(e) => handleFieldChange('construction', e.target.value)}
+                  sx={{ '& .MuiInputBase-input': { fontSize: '12px', p: 0.5 } }}
+                />
+              </Box>
+            </Box>
+
+            {/* Windows */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '120px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>WINDOWS:</Typography>
+              </Box>
+              <Box sx={{ p: 0.5, display: 'flex', gap: 0.5 }}>
+                <TextField
+                  size="small"
+                  placeholder="Other (specify)"
+                  value={formData.windowsType || ''}
+                  onChange={(e) => handleFieldChange('windowsType', e.target.value)}
+                  sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '11px', p: 0.5 } }}
+                />
+                <TextField
+                  size="small"
+                  placeholder="Other (specify)"
+                  value={formData.windowsType2 || ''}
+                  onChange={(e) => handleFieldChange('windowsType2', e.target.value)}
+                  sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '11px', p: 0.5 } }}
+                />
+              </Box>
+            </Box>
+
+            {/* Basement */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '120px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>BASEMENT:</Typography>
+              </Box>
+              <Box sx={{ p: 0.5 }}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  placeholder="Other (specify)"
+                  value={formData.basementType || ''}
+                  onChange={(e) => handleFieldChange('basementType', e.target.value)}
+                  sx={{ '& .MuiInputBase-input': { fontSize: '12px', p: 0.5 } }}
+                />
+              </Box>
+            </Box>
+
+            {/* Basement Area */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '120px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.75, bgcolor: '#b3e5fc', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px', color: '#01579b' }}>BASEMENT AREA:</Typography>
+              </Box>
+              <Box sx={{ p: 0.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <TextField
+                  size="small"
+                  value={formData.basementArea || ''}
+                  onChange={(e) => handleFieldChange('basementArea', e.target.value)}
+                  sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '12px', p: 0.5 } }}
+                />
+                <Typography variant="body2" sx={{ fontSize: '11px' }}>Sq Ft</Typography>
+              </Box>
+            </Box>
+
+            {/* Basement Finish */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '120px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.75, bgcolor: '#b3e5fc', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px', color: '#01579b' }}>BASEMENT FINISH:</Typography>
+              </Box>
+              <Box sx={{ p: 0.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <TextField
+                  size="small"
+                  value={formData.basementFinish || ''}
+                  onChange={(e) => handleFieldChange('basementFinish', e.target.value)}
+                  sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '12px', p: 0.5 } }}
+                />
+                <Typography variant="body2" sx={{ fontSize: '11px' }}>%</Typography>
+              </Box>
+            </Box>
+
+            {/* Foundation Walls */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '120px 1fr', borderBottom: '2px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>FOUNDATION WALLS:</Typography>
+              </Box>
+              <Box sx={{ p: 0.5 }}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  placeholder="Insulated Concrete Forms"
+                  value={formData.foundationWalls || ''}
+                  onChange={(e) => handleFieldChange('foundationWalls', e.target.value)}
+                  sx={{ '& .MuiInputBase-input': { fontSize: '12px', p: 0.5 } }}
+                />
+              </Box>
+            </Box>
+
+            {/* Interior Finish Section */}
+            <Box sx={{ bgcolor: '#e8f5e9', p: 0.75, borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px', color: '#2e7d32' }}>INTERIOR FINISH:</Typography>
+            </Box>
+
+            {/* Walls/Ceilings checkboxes */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}></Box>
+              <Box sx={{ p: 0.5, borderRight: '1px solid', borderColor: 'divider', textAlign: 'center' }}>
+                <Typography variant="body2" sx={{ fontSize: '10px', fontWeight: 600, color: '#00897b' }}>Walls</Typography>
+              </Box>
+              <Box sx={{ p: 0.5, textAlign: 'center' }}>
+                <Typography variant="body2" sx={{ fontSize: '10px', fontWeight: 600, color: '#00897b' }}>Ceilings</Typography>
+              </Box>
+            </Box>
+
+            {/* Drywall */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontSize: '10px' }}>Drywall</Typography>
+              </Box>
+              <Box sx={{ p: 0.25, borderRight: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'center' }}>
+                <Checkbox size="small" checked={formData.drywallWalls || false} onChange={(e) => handleFieldChange('drywallWalls', e.target.checked)} />
+              </Box>
+              <Box sx={{ p: 0.25, display: 'flex', justifyContent: 'center' }}>
+                <Checkbox size="small" checked={formData.drywallCeilings || false} onChange={(e) => handleFieldChange('drywallCeilings', e.target.checked)} />
+              </Box>
+            </Box>
+
+            {/* Plaster */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontSize: '10px' }}>Plaster</Typography>
+              </Box>
+              <Box sx={{ p: 0.25, borderRight: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'center' }}>
+                <Checkbox size="small" checked={formData.plasterWalls || false} onChange={(e) => handleFieldChange('plasterWalls', e.target.checked)} />
+              </Box>
+              <Box sx={{ p: 0.25, display: 'flex', justifyContent: 'center' }}>
+                <Checkbox size="small" checked={formData.plasterCeilings || false} onChange={(e) => handleFieldChange('plasterCeilings', e.target.checked)} />
+              </Box>
+            </Box>
+
+            {/* Paneling */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontSize: '10px' }}>Paneling</Typography>
+              </Box>
+              <Box sx={{ p: 0.25, borderRight: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'center' }}>
+                <Checkbox size="small" checked={formData.panelingWalls || false} onChange={(e) => handleFieldChange('panelingWalls', e.target.checked)} />
+              </Box>
+              <Box sx={{ p: 0.25, display: 'flex', justifyContent: 'center' }}>
+                <Checkbox size="small" checked={formData.panelingCeilings || false} onChange={(e) => handleFieldChange('panelingCeilings', e.target.checked)} />
+              </Box>
+            </Box>
+
+            {/* Other / T-Bar */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontSize: '10px' }}>Other</Typography>
+              </Box>
+              <Box sx={{ p: 0.25, borderRight: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'center' }}>
+                <Checkbox size="small" checked={formData.otherWalls || false} onChange={(e) => handleFieldChange('otherWalls', e.target.checked)} />
+              </Box>
+              <Box sx={{ p: 0.5, display: 'flex', alignItems: 'center' }}>
+                <Typography variant="body2" sx={{ fontSize: '10px', mr: 0.5 }}>T-Bar</Typography>
+                <Checkbox size="small" checked={formData.tbarCeilings || false} onChange={(e) => handleFieldChange('tbarCeilings', e.target.checked)} />
+              </Box>
+            </Box>
+
+            {/* Plumbing Lines */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '100px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>PLUMBING LINES:</Typography>
+              </Box>
+              <Box sx={{ p: 0.5 }}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  placeholder="Kitec"
+                  value={formData.plumbingLines || ''}
+                  onChange={(e) => handleFieldChange('plumbingLines', e.target.value)}
+                  sx={{ '& .MuiInputBase-input': { fontSize: '12px', p: 0.5 } }}
+                />
+              </Box>
+            </Box>
+
+            {/* Built-ins */}
+            <Box sx={{ p: 0.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px', mb: 0.5 }}>BUILT-INS:</Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0 }}>
+                {renderCheckbox('builtInCooktop', 'Cooktop')}
+                {renderCheckbox('builtInOven', 'Oven')}
+                {renderCheckbox('builtInDishwasher', 'Dishwasher')}
+                {renderCheckbox('builtInMicrowave', 'Microwave')}
+                {renderCheckbox('builtInWaterSoftener', 'Water Softener')}
+              </Box>
+            </Box>
+
+            {/* Extras */}
+            <Box sx={{ p: 0.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px', mb: 0.5 }}>EXTRAS:</Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0 }}>
+                {renderCheckbox('extraSecuritySystem', 'Security System')}
+                {renderCheckbox('extraFireplaceGas', 'Fireplace (Gas)')}
+                {renderCheckbox('extraPool', 'Pool')}
+                {renderCheckbox('extraHRVVentillator', 'HR/ER Ventillator')}
+                {renderCheckbox('extraOther', 'Other (specify)')}
+              </Box>
+              {formData.extraOther && (
+                <TextField
+                  size="small"
+                  fullWidth
+                  placeholder="Specify other extras..."
+                  value={formData.extraOtherDetails || ''}
+                  onChange={(e) => handleFieldChange('extraOtherDetails', e.target.value)}
+                  sx={{ mt: 0.5, '& .MuiInputBase-input': { fontSize: '11px', p: 0.5 } }}
+                />
+              )}
+            </Box>
+
+            {/* Overall Interior Condition */}
+            <Box sx={{ p: 0.5 }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px', mb: 0.5 }}>OVERALL INT. COND.:</Typography>
+              {renderConditionCheckboxes('intCond')}
+              <Typography variant="caption" sx={{ fontSize: '9px', color: 'text.secondary', display: 'block', mt: 0.5 }}>
+                Source of Interior Information: Observed by AIC Member
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* RIGHT COLUMN - Roofing, Exterior */}
+          <Box>
+            {/* Roofing */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '80px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>ROOFING:</Typography>
+              </Box>
+              <Box sx={{ p: 0.5 }}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  placeholder="PVC/Polycarbonate/Plastic"
+                  value={formData.roofing || ''}
+                  onChange={(e) => handleFieldChange('roofing', e.target.value)}
+                  sx={{ '& .MuiInputBase-input': { fontSize: '12px', p: 0.5 } }}
+                />
+              </Box>
+            </Box>
+
+            {/* Roofing Condition */}
+            <Box sx={{ p: 0.75, borderBottom: '2px solid', borderColor: 'divider' }}>
+              <Typography variant="body2" sx={{ fontSize: '11px', mb: 0.5 }}>Condition:</Typography>
+              {renderConditionCheckboxes('roofCond')}
+            </Box>
+
+            {/* Exterior Finish */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '100px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>EXTERIOR FINISH:</Typography>
+              </Box>
+              <Box sx={{ p: 0.5 }}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  placeholder="Log"
+                  value={formData.exteriorFinish || ''}
+                  onChange={(e) => handleFieldChange('exteriorFinish', e.target.value)}
+                  sx={{ '& .MuiInputBase-input': { fontSize: '12px', p: 0.5 } }}
+                />
+              </Box>
+            </Box>
+
+            {/* Exterior Condition */}
+            <Box sx={{ p: 0.75, borderBottom: '2px solid', borderColor: 'divider' }}>
+              <Typography variant="body2" sx={{ fontSize: '11px', mb: 0.5 }}>Condition:</Typography>
+              {renderConditionCheckboxes('extCond')}
+            </Box>
+
+            {/* Flooring section */}
+            <Box sx={{ bgcolor: '#e8f5e9', p: 0.75, borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px', color: '#2e7d32' }}>Flooring:</Typography>
+            </Box>
+            <Box sx={{ p: 0.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0 }}>
+                {renderCheckbox('floorCeramic', 'Ceramic')}
+                {renderCheckbox('floorLaminate', 'Laminate')}
+                {renderCheckbox('floorOther', 'Other (specify)')}
+              </Box>
+              {formData.floorOther && (
+                <TextField
+                  size="small"
+                  fullWidth
+                  value={formData.floorOtherDetails || ''}
+                  onChange={(e) => handleFieldChange('floorOtherDetails', e.target.value)}
+                  sx={{ mt: 0.5, '& .MuiInputBase-input': { fontSize: '11px', p: 0.5 } }}
+                />
+              )}
+            </Box>
+
+            {/* Info Source */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '80px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>Info Source:</Typography>
+              </Box>
+              <Box sx={{ p: 0.5 }}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  value={formData.infoSource || ''}
+                  onChange={(e) => handleFieldChange('infoSource', e.target.value)}
+                  sx={{ '& .MuiInputBase-input': { fontSize: '12px', p: 0.5 } }}
+                />
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+
+        {/* ROOM ALLOCATION SECTION */}
+        <Box sx={{ bgcolor: '#e3f2fd', p: 0.75, borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '12px', color: '#1565c0' }}>
+            ROOM ALLOCATION
           </Typography>
         </Box>
 
-        {/* Foundation Type / Basement */}
-        <Box
-          sx={{
+        {/* Room Allocation Grid */}
+        <Box sx={{ overflowX: 'auto' }}>
+          <Box sx={{
             display: 'grid',
-            gridTemplateColumns: '200px 1fr',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            '&:hover': { bgcolor: 'action.hover' }
-          }}
-        >
-          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>Foundation / Basement</Typography>
-          </Box>
-          <Box sx={{ p: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
-            <Autocomplete
-              freeSolo
-              forcePopupIcon
-              size="small"
-              options={foundationTypeOptions}
-              value={formData.foundationType || ''}
-              onChange={(e, newValue) => handleFieldChange('foundationType', newValue)}
-              onInputChange={(e, newValue) => handleFieldChange('foundationType', newValue)}
-              renderInput={(params) => (
+            gridTemplateColumns: '70px repeat(13, 55px) 70px 70px',
+            minWidth: 950
+          }}>
+            {/* Header Row */}
+            <Box sx={headerCellStyle}>
+              <Typography sx={{ fontSize: '9px', fontWeight: 600 }}>LEVEL</Typography>
+            </Box>
+            {ROOM_LABELS.map((label, idx) => (
+              <Box key={idx} sx={headerCellStyle}>
+                <Typography sx={{ fontSize: '8px', fontWeight: 600, textAlign: 'center' }}>{label}</Typography>
+              </Box>
+            ))}
+            <Box sx={headerCellStyle}>
+              <Typography sx={{ fontSize: '9px', fontWeight: 600 }}>ROOM TOTAL</Typography>
+            </Box>
+            <Box sx={headerCellStyle}>
+              <Typography sx={{ fontSize: '9px', fontWeight: 600 }}>AREA</Typography>
+            </Box>
+
+            {/* MAIN Row */}
+            <Box sx={labelCellStyle}>
+              <Typography sx={{ fontSize: '10px', fontWeight: 600 }}>MAIN</Typography>
+            </Box>
+            {ROOM_TYPES.map((type, idx) => (
+              <Box key={idx} sx={gridCellStyle}>
                 <TextField
-                  {...params}
-                  placeholder="Foundation Type"
-                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+                  size="small"
+                  type="number"
+                  value={formData[`room_main_${type}`] || ''}
+                  onChange={(e) => handleFieldChange(`room_main_${type}`, e.target.value)}
+                  inputProps={{ min: 0, style: { textAlign: 'center', fontSize: '11px', padding: '2px' } }}
+                  sx={{ '& .MuiOutlinedInput-notchedOutline': { border: 'none' }, width: '100%' }}
                 />
-              )}
-              sx={{ flex: 1 }}
-            />
-            <Autocomplete
-              freeSolo
-              forcePopupIcon
-              size="small"
-              options={basementTypeOptions}
-              value={formData.basementType || ''}
-              onChange={(e, newValue) => handleFieldChange('basementType', newValue)}
-              onInputChange={(e, newValue) => handleFieldChange('basementType', newValue)}
-              renderInput={(params) => (
+              </Box>
+            ))}
+            <Box sx={totalCellStyle}>
+              <Typography sx={{ fontSize: '11px', fontWeight: 600 }}>{calculations.roomTotalsByFloor.main || 0}</Typography>
+            </Box>
+            <Box sx={gridCellStyle}>
+              <TextField
+                size="small"
+                type="number"
+                value={formData.area_main || ''}
+                onChange={(e) => handleFieldChange('area_main', e.target.value)}
+                inputProps={{ style: { textAlign: 'center', fontSize: '11px', padding: '2px' } }}
+                sx={{ '& .MuiOutlinedInput-notchedOutline': { border: 'none' }, width: '100%' }}
+              />
+            </Box>
+
+            {/* SECOND Row */}
+            <Box sx={labelCellStyle}>
+              <Typography sx={{ fontSize: '10px', fontWeight: 600 }}>SECOND</Typography>
+            </Box>
+            {ROOM_TYPES.map((type, idx) => (
+              <Box key={idx} sx={gridCellStyle}>
                 <TextField
-                  {...params}
-                  placeholder="Basement Type"
-                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+                  size="small"
+                  type="number"
+                  value={formData[`room_second_${type}`] || ''}
+                  onChange={(e) => handleFieldChange(`room_second_${type}`, e.target.value)}
+                  inputProps={{ min: 0, style: { textAlign: 'center', fontSize: '11px', padding: '2px' } }}
+                  sx={{ '& .MuiOutlinedInput-notchedOutline': { border: 'none' }, width: '100%' }}
                 />
-              )}
-              sx={{ flex: 1 }}
-            />
+              </Box>
+            ))}
+            <Box sx={totalCellStyle}>
+              <Typography sx={{ fontSize: '11px', fontWeight: 600 }}>{calculations.roomTotalsByFloor.second || 0}</Typography>
+            </Box>
+            <Box sx={gridCellStyle}>
+              <TextField
+                size="small"
+                type="number"
+                value={formData.area_second || ''}
+                onChange={(e) => handleFieldChange('area_second', e.target.value)}
+                inputProps={{ style: { textAlign: 'center', fontSize: '11px', padding: '2px' } }}
+                sx={{ '& .MuiOutlinedInput-notchedOutline': { border: 'none' }, width: '100%' }}
+              />
+            </Box>
+
+            {/* THIRD Row */}
+            <Box sx={labelCellStyle}>
+              <Typography sx={{ fontSize: '10px', fontWeight: 600 }}>THIRD</Typography>
+            </Box>
+            {ROOM_TYPES.map((type, idx) => (
+              <Box key={idx} sx={gridCellStyle}>
+                <TextField
+                  size="small"
+                  type="number"
+                  value={formData[`room_third_${type}`] || ''}
+                  onChange={(e) => handleFieldChange(`room_third_${type}`, e.target.value)}
+                  inputProps={{ min: 0, style: { textAlign: 'center', fontSize: '11px', padding: '2px' } }}
+                  sx={{ '& .MuiOutlinedInput-notchedOutline': { border: 'none' }, width: '100%' }}
+                />
+              </Box>
+            ))}
+            <Box sx={totalCellStyle}>
+              <Typography sx={{ fontSize: '11px', fontWeight: 600 }}>{calculations.roomTotalsByFloor.third || 0}</Typography>
+            </Box>
+            <Box sx={gridCellStyle}>
+              <TextField
+                size="small"
+                type="number"
+                value={formData.area_third || ''}
+                onChange={(e) => handleFieldChange('area_third', e.target.value)}
+                inputProps={{ style: { textAlign: 'center', fontSize: '11px', padding: '2px' } }}
+                sx={{ '& .MuiOutlinedInput-notchedOutline': { border: 'none' }, width: '100%' }}
+              />
+            </Box>
+
+            {/* ABOVE GRADE TOTALS Row */}
+            {/* Columns 1-2: Label */}
+            <Box sx={{ ...labelCellStyle, bgcolor: '#fff3e0', gridColumn: 'span 2' }}>
+              <Typography sx={{ fontSize: '9px', fontWeight: 600 }}>ABOVE GRADE TOTALS:</Typography>
+            </Box>
+            {/* Column 3: Room count total (no label) */}
+            <Box sx={{ ...totalCellStyle, justifyContent: 'center' }}>
+              <Typography sx={{ fontSize: '11px', fontWeight: 600 }}>{calculations.aboveGradeRoomTotal}</Typography>
+            </Box>
+            {/* Columns 4-6: empty (3 columns) */}
+            <Box sx={{ ...totalCellStyle, gridColumn: 'span 3' }}></Box>
+            {/* BEDROOMS spanning 2 columns (bedrooms + den) */}
+            <Box sx={{ ...totalCellStyle, gridColumn: 'span 2', justifyContent: 'center' }}>
+              <Typography sx={{ fontSize: '9px', mr: 0.5 }}>BEDROOMS:</Typography>
+              <Typography sx={{ fontSize: '11px', fontWeight: 600, color: '#1565c0' }}>{calculations.totalBedrooms}</Typography>
+            </Box>
+            {/* BATHROOMS spanning 2 columns (full bath + part bath) */}
+            <Box sx={{ ...totalCellStyle, gridColumn: 'span 2', justifyContent: 'center' }}>
+              <Typography sx={{ fontSize: '9px', mr: 0.5 }}>BATHS:</Typography>
+              <Typography sx={{ fontSize: '11px', fontWeight: 600, color: '#1565c0' }}>{calculations.totalFullBath}</Typography>
+              <Typography sx={{ fontSize: '9px', color: '#e65100', mx: 0.25 }}>F</Typography>
+              <Typography sx={{ fontSize: '11px', fontWeight: 600, color: '#1565c0' }}>{calculations.totalPartBath}</Typography>
+              <Typography sx={{ fontSize: '9px', color: '#e65100' }}>P</Typography>
+            </Box>
+            {/* Remaining columns: laundry, recRoom1, recRoom2, recRoom3 = 4 columns + room total */}
+            <Box sx={{ ...totalCellStyle, gridColumn: 'span 5' }}></Box>
+            {/* Area total */}
+            <Box sx={{ ...totalCellStyle, bgcolor: '#c8e6c9' }}>
+              <Typography sx={{ fontSize: '11px', fontWeight: 600 }}>{calculations.totalAboveGradeArea || 0}</Typography>
+            </Box>
+
+            {/* BASEMENT Row */}
+            <Box sx={labelCellStyle}>
+              <Typography sx={{ fontSize: '10px', fontWeight: 600 }}>BASEMENT</Typography>
+            </Box>
+            {ROOM_TYPES.map((type, idx) => (
+              <Box key={idx} sx={gridCellStyle}>
+                <TextField
+                  size="small"
+                  type="number"
+                  value={formData[`room_basement_${type}`] || ''}
+                  onChange={(e) => handleFieldChange(`room_basement_${type}`, e.target.value)}
+                  inputProps={{ min: 0, style: { textAlign: 'center', fontSize: '11px', padding: '2px' } }}
+                  sx={{ '& .MuiOutlinedInput-notchedOutline': { border: 'none' }, width: '100%' }}
+                />
+              </Box>
+            ))}
+            <Box sx={totalCellStyle}>
+              <Typography sx={{ fontSize: '11px', fontWeight: 600 }}>{calculations.roomTotalsByFloor.basement || 0}</Typography>
+            </Box>
+            <Box sx={gridCellStyle}>
+              <TextField
+                size="small"
+                type="number"
+                value={formData.area_basement || ''}
+                onChange={(e) => handleFieldChange('area_basement', e.target.value)}
+                inputProps={{ style: { textAlign: 'center', fontSize: '11px', padding: '2px' } }}
+                sx={{ '& .MuiOutlinedInput-notchedOutline': { border: 'none' }, width: '100%' }}
+              />
+            </Box>
           </Box>
         </Box>
 
-        {/* Basement Areas */}
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: '200px 1fr',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            '&:hover': { bgcolor: 'action.hover' }
-          }}
-        >
-          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>Basement Area (sq.ft.)</Typography>
-          </Box>
-          <Box sx={{ p: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
-            <TextField
-              size="small"
-              type="number"
-              placeholder="Finished Area"
-              value={formData.basementFinishedArea || ''}
-              onChange={(e) => handleFieldChange('basementFinishedArea', e.target.value)}
-              sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '14px' } }}
-            />
-            <TextField
-              size="small"
-              type="number"
-              placeholder="Unfinished Area"
-              value={formData.basementUnfinishedArea || ''}
-              onChange={(e) => handleFieldChange('basementUnfinishedArea', e.target.value)}
-              sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '14px' } }}
-            />
-          </Box>
+        {/* Source of Measurement / Unit of Measurement */}
+        <Box sx={{ display: 'flex', alignItems: 'center', p: 1, borderTop: '1px solid', borderBottom: '1px solid', borderColor: 'divider', gap: 2 }}>
+          <Typography variant="body2" sx={{ fontSize: '11px', fontWeight: 600 }}>SOURCE OF MEASUREMENT:</Typography>
+          <TextField
+            size="small"
+            placeholder="Other (specify)"
+            value={formData.sourceOfMeasurement || ''}
+            onChange={(e) => handleFieldChange('sourceOfMeasurement', e.target.value)}
+            sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '12px', p: 0.5 } }}
+          />
+          <Typography variant="body2" sx={{ fontSize: '11px', fontWeight: 600 }}>UNIT OF MEASUREMENT:</Typography>
+          <TextField
+            size="small"
+            placeholder="SqM"
+            value={formData.unitOfMeasurement || ''}
+            onChange={(e) => handleFieldChange('unitOfMeasurement', e.target.value)}
+            sx={{ width: 100, '& .MuiInputBase-input': { fontSize: '12px', p: 0.5 } }}
+          />
         </Box>
-      </Box>
 
-      {/* EXTERIOR */}
-      <Box
-        sx={{
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: '8px',
-          overflow: 'hidden',
-          bgcolor: 'background.paper',
-          mb: 3
-        }}
-      >
-        <Box sx={{ bgcolor: 'primary.main', p: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'white', fontSize: '13px' }}>
-            EXTERIOR
+        {/* GARAGE/PARKING Section */}
+        <Box sx={{ bgcolor: '#e3f2fd', p: 0.75, borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '12px', color: '#1565c0' }}>
+            GARAGE/PARKING
           </Typography>
         </Box>
-
-        {/* Exterior Walls / Roof */}
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: '200px 1fr',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            '&:hover': { bgcolor: 'action.hover' }
-          }}
-        >
-          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>Exterior Walls / Roof</Typography>
+        <Box sx={{ p: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1 }}>
+            {renderCheckbox('garageAttached', 'Attached')}
+            {renderCheckbox('garageDetached', 'Detached')}
+            {renderCheckbox('garageBuiltIn', 'Built-in')}
+            {renderCheckbox('garageSingle', 'Single')}
+            {renderCheckbox('garageDouble', 'Double')}
+            {renderCheckbox('garageTriple', 'Triple')}
+            {renderCheckbox('garageUnderground', 'Underground')}
           </Box>
-          <Box sx={{ p: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
-            <Autocomplete
-              freeSolo
-              forcePopupIcon
-              size="small"
-              options={exteriorWallsOptions}
-              value={formData.exteriorWalls || ''}
-              onChange={(e, newValue) => handleFieldChange('exteriorWalls', newValue)}
-              onInputChange={(e, newValue) => handleFieldChange('exteriorWalls', newValue)}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  placeholder="Exterior Walls"
-                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
-                />
-              )}
-              sx={{ flex: 1 }}
-            />
-            <Autocomplete
-              freeSolo
-              forcePopupIcon
-              size="small"
-              options={roofSurfaceOptions}
-              value={formData.roofSurface || ''}
-              onChange={(e, newValue) => handleFieldChange('roofSurface', newValue)}
-              onInputChange={(e, newValue) => handleFieldChange('roofSurface', newValue)}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  placeholder="Roof Surface"
-                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
-                />
-              )}
-              sx={{ flex: 1 }}
-            />
+          <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
+            {renderCheckbox('garageSecond', 'Second Garage (size)')}
+            {formData.garageSecond && (
+              <TextField
+                size="small"
+                value={formData.garageSecondSize || ''}
+                onChange={(e) => handleFieldChange('garageSecondSize', e.target.value)}
+                sx={{ width: 150, '& .MuiInputBase-input': { fontSize: '11px', p: 0.5 } }}
+              />
+            )}
+          </Box>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            {renderCheckbox('carport', 'Carport (size)')}
+            {formData.carport && (
+              <TextField
+                size="small"
+                value={formData.carportSize || ''}
+                onChange={(e) => handleFieldChange('carportSize', e.target.value)}
+                sx={{ width: 150, '& .MuiInputBase-input': { fontSize: '11px', p: 0.5 } }}
+              />
+            )}
           </Box>
         </Box>
 
-        {/* Windows */}
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: '200px 1fr',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            '&:hover': { bgcolor: 'action.hover' }
-          }}
-        >
-          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>Windows / Storm</Typography>
+        {/* SITE IMPROVEMENTS */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: '150px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
+            <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>SITE IMPROVEMENTS:</Typography>
           </Box>
-          <Box sx={{ p: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
-            <Autocomplete
-              freeSolo
-              forcePopupIcon
-              size="small"
-              options={windowsOptions}
-              value={formData.windows || ''}
-              onChange={(e, newValue) => handleFieldChange('windows', newValue)}
-              onInputChange={(e, newValue) => handleFieldChange('windows', newValue)}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  placeholder="Windows"
-                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
-                />
-              )}
-              sx={{ flex: 1 }}
-            />
-            <Autocomplete
-              freeSolo
-              forcePopupIcon
-              size="small"
-              options={stormWindowsOptions}
-              value={formData.stormWindows || ''}
-              onChange={(e, newValue) => handleFieldChange('stormWindows', newValue)}
-              onInputChange={(e, newValue) => handleFieldChange('stormWindows', newValue)}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  placeholder="Storm Windows/Screens"
-                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
-                />
-              )}
-              sx={{ flex: 1 }}
-            />
-          </Box>
-        </Box>
-      </Box>
-
-      {/* INTERIOR FINISH */}
-      <Box
-        sx={{
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: '8px',
-          overflow: 'hidden',
-          bgcolor: 'background.paper',
-          mb: 3
-        }}
-      >
-        <Box sx={{ bgcolor: 'primary.main', p: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'white', fontSize: '13px' }}>
-            INTERIOR FINISH
-          </Typography>
-        </Box>
-
-        {/* Floors / Walls / Ceilings */}
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: '200px 1fr',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            '&:hover': { bgcolor: 'action.hover' }
-          }}
-        >
-          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>Floors / Walls / Ceilings</Typography>
-          </Box>
-          <Box sx={{ p: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
+          <Box sx={{ p: 0.5 }}>
             <TextField
               size="small"
-              placeholder="Floors (e.g., Hardwood)"
-              value={formData.floors || ''}
-              onChange={(e) => handleFieldChange('floors', e.target.value)}
-              sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '14px' } }}
-            />
-            <TextField
-              size="small"
-              placeholder="Walls (e.g., Drywall)"
-              value={formData.walls || ''}
-              onChange={(e) => handleFieldChange('walls', e.target.value)}
-              sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '14px' } }}
-            />
-            <TextField
-              size="small"
-              placeholder="Ceilings"
-              value={formData.ceilings || ''}
-              onChange={(e) => handleFieldChange('ceilings', e.target.value)}
-              sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '14px' } }}
-            />
-          </Box>
-        </Box>
-      </Box>
-
-      {/* MECHANICAL SYSTEMS */}
-      <Box
-        sx={{
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: '8px',
-          overflow: 'hidden',
-          bgcolor: 'background.paper',
-          mb: 3
-        }}
-      >
-        <Box sx={{ bgcolor: 'primary.main', p: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'white', fontSize: '13px' }}>
-            MECHANICAL SYSTEMS
-          </Typography>
-        </Box>
-
-        {/* Heating / Air Conditioning */}
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: '200px 1fr',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            '&:hover': { bgcolor: 'action.hover' }
-          }}
-        >
-          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>Heating / AC</Typography>
-          </Box>
-          <Box sx={{ p: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
-            <Autocomplete
-              freeSolo
-              forcePopupIcon
-              size="small"
-              options={heatingTypeOptions}
-              value={formData.heatingType || ''}
-              onChange={(e, newValue) => handleFieldChange('heatingType', newValue)}
-              onInputChange={(e, newValue) => handleFieldChange('heatingType', newValue)}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  placeholder="Heating Type"
-                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
-                />
-              )}
-              sx={{ flex: 1 }}
-            />
-            <Autocomplete
-              freeSolo
-              forcePopupIcon
-              size="small"
-              options={airConditioningOptions}
-              value={formData.airConditioning || ''}
-              onChange={(e, newValue) => handleFieldChange('airConditioning', newValue)}
-              onInputChange={(e, newValue) => handleFieldChange('airConditioning', newValue)}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  placeholder="Air Conditioning"
-                  sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
-                />
-              )}
-              sx={{ flex: 1 }}
-            />
-          </Box>
-        </Box>
-
-        {/* Plumbing / Electrical */}
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: '200px 1fr',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            '&:hover': { bgcolor: 'action.hover' }
-          }}
-        >
-          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>Plumbing / Electrical</Typography>
-          </Box>
-          <Box sx={{ p: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
-            <TextField
-              size="small"
-              placeholder="Plumbing (e.g., Copper, PVC)"
-              value={formData.plumbing || ''}
-              onChange={(e) => handleFieldChange('plumbing', e.target.value)}
-              sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '14px' } }}
-            />
-            <TextField
-              size="small"
-              placeholder="Electrical (e.g., 200 amp)"
-              value={formData.electrical || ''}
-              onChange={(e) => handleFieldChange('electrical', e.target.value)}
-              sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '14px' } }}
-            />
-          </Box>
-        </Box>
-      </Box>
-
-      {/* ROOM COUNT */}
-      <Box
-        sx={{
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: '8px',
-          overflow: 'hidden',
-          bgcolor: 'background.paper',
-          mb: 3
-        }}
-      >
-        <Box sx={{ bgcolor: 'primary.main', p: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'white', fontSize: '13px' }}>
-            ROOM COUNT
-          </Typography>
-        </Box>
-
-        {/* Rooms / Bedrooms / Bathrooms */}
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: '200px 1fr',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            '&:hover': { bgcolor: 'action.hover' }
-          }}
-        >
-          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>Rooms / Beds / Baths</Typography>
-          </Box>
-          <Box sx={{ p: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
-            <TextField
-              size="small"
-              type="number"
-              placeholder="Total Rooms"
-              value={formData.totalRooms || ''}
-              onChange={(e) => handleFieldChange('totalRooms', e.target.value)}
-              sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '14px' } }}
-            />
-            <TextField
-              size="small"
-              type="number"
-              placeholder="Bedrooms"
-              value={formData.bedrooms || ''}
-              onChange={(e) => handleFieldChange('bedrooms', e.target.value)}
-              sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '14px' } }}
-            />
-            <TextField
-              size="small"
-              type="number"
-              placeholder="Full Baths"
-              value={formData.bathrooms || ''}
-              onChange={(e) => handleFieldChange('bathrooms', e.target.value)}
-              sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '14px' } }}
-            />
-            <TextField
-              size="small"
-              type="number"
-              placeholder="Half Baths"
-              value={formData.halfBaths || ''}
-              onChange={(e) => handleFieldChange('halfBaths', e.target.value)}
-              sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '14px' } }}
-            />
-          </Box>
-        </Box>
-      </Box>
-
-      {/* FLOOR AREAS */}
-      <Box
-        sx={{
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: '8px',
-          overflow: 'hidden',
-          bgcolor: 'background.paper',
-          mb: 3
-        }}
-      >
-        <Box sx={{ bgcolor: 'primary.main', p: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'white', fontSize: '13px' }}>
-            FLOOR AREAS (sq.ft.)
-          </Typography>
-        </Box>
-
-        {/* Floor Areas */}
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: '200px 1fr',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            '&:hover': { bgcolor: 'action.hover' }
-          }}
-        >
-          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>Main / Second / Total</Typography>
-          </Box>
-          <Box sx={{ p: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
-            <TextField
-              size="small"
-              type="number"
-              placeholder="Main Floor"
-              value={formData.mainFloorArea || ''}
-              onChange={(e) => handleFieldChange('mainFloorArea', e.target.value)}
-              sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '14px' } }}
-            />
-            <TextField
-              size="small"
-              type="number"
-              placeholder="Second Floor"
-              value={formData.secondFloorArea || ''}
-              onChange={(e) => handleFieldChange('secondFloorArea', e.target.value)}
-              sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '14px' } }}
-            />
-            <TextField
-              size="small"
-              type="number"
-              placeholder="Total Above Grade"
-              value={formData.totalAboveGradeArea || ''}
-              onChange={(e) => handleFieldChange('totalAboveGradeArea', e.target.value)}
-              sx={{ flex: 1, '& .MuiInputBase-input': { fontSize: '14px' } }}
-            />
-          </Box>
-        </Box>
-      </Box>
-
-      {/* ADDITIONAL FEATURES */}
-      <Box
-        sx={{
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: '8px',
-          overflow: 'hidden',
-          bgcolor: 'background.paper',
-          mb: 3
-        }}
-      >
-        <Box sx={{ bgcolor: 'primary.main', p: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'white', fontSize: '13px' }}>
-            ADDITIONAL FEATURES
-          </Typography>
-        </Box>
-
-        {/* Special Features */}
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: '200px 1fr',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            '&:hover': { bgcolor: 'action.hover' }
-          }}
-        >
-          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'flex-start', pt: 2 }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>Special Features</Typography>
-          </Box>
-          <Box sx={{ p: 1 }}>
-            <TextField
               fullWidth
+              multiline
+              rows={2}
+              value={formData.siteImprovements || ''}
+              onChange={(e) => handleFieldChange('siteImprovements', e.target.value)}
+              sx={{ '& .MuiInputBase-input': { fontSize: '12px' } }}
+            />
+          </Box>
+        </Box>
+
+        {/* DETRIMENTAL CONDITIONS */}
+        <Box sx={{ p: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
+          {renderCheckbox('detrimentalConditionsObserved', 'Detrimental Conditions Observed')}
+          <Typography variant="body2" sx={{ fontSize: '11px', color: 'text.secondary', ml: 3 }}>
+            Damaged by (specify Fire, Flood, Earthquake, Landslide, Tornado, Storm, Other, Unknown)
+          </Typography>
+          {formData.detrimentalConditionsObserved && (
+            <TextField
               size="small"
+              fullWidth
+              value={formData.detrimentalConditionsDetails || ''}
+              onChange={(e) => handleFieldChange('detrimentalConditionsDetails', e.target.value)}
+              sx={{ mt: 0.5, ml: 3, width: 'calc(100% - 24px)', '& .MuiInputBase-input': { fontSize: '12px', p: 0.5 } }}
+            />
+          )}
+        </Box>
+
+        {/* COMMENTS */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: '100px 1fr', borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
+            <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>COMMENTS:</Typography>
+          </Box>
+          <Box sx={{ p: 0.5 }}>
+            <TextField
+              size="small"
+              fullWidth
               multiline
               rows={3}
-              placeholder="e.g., Fireplace, Finished Basement, Central Vac, Security System, etc."
-              value={formData.specialFeatures || ''}
-              onChange={(e) => handleFieldChange('specialFeatures', e.target.value)}
-              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+              value={formData.improvementsComments || ''}
+              onChange={(e) => handleFieldChange('improvementsComments', e.target.value)}
+              sx={{ '& .MuiInputBase-input': { fontSize: '12px' } }}
             />
           </Box>
         </Box>
 
-        {/* Recent Improvements */}
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: '200px 1fr',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            '&:hover': { bgcolor: 'action.hover' }
-          }}
-        >
-          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'flex-start', pt: 2 }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>Recent Improvements</Typography>
+        {/* BASEMENT */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: '100px 1fr' }}>
+          <Box sx={{ p: 0.75, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider' }}>
+            <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '11px' }}>BASEMENT:</Typography>
           </Box>
-          <Box sx={{ p: 1 }}>
+          <Box sx={{ p: 0.5 }}>
             <TextField
-              fullWidth
               size="small"
+              fullWidth
               multiline
               rows={3}
-              placeholder="List any recent improvements with approximate dates and costs..."
-              value={formData.recentImprovements || ''}
-              onChange={(e) => handleFieldChange('recentImprovements', e.target.value)}
-              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
-            />
-          </Box>
-        </Box>
-
-        {/* Required Repairs */}
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: '200px 1fr',
-            '&:hover': { bgcolor: 'action.hover' }
-          }}
-        >
-          <Box sx={{ p: 1.5, bgcolor: 'grey.50', borderRight: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'flex-start', pt: 2 }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>Required Repairs</Typography>
-          </Box>
-          <Box sx={{ p: 1 }}>
-            <TextField
-              fullWidth
-              size="small"
-              multiline
-              rows={3}
-              placeholder="List any repairs that are required..."
-              value={formData.requiredRepairs || ''}
-              onChange={(e) => handleFieldChange('requiredRepairs', e.target.value)}
-              sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
+              value={formData.basementComments || ''}
+              onChange={(e) => handleFieldChange('basementComments', e.target.value)}
+              sx={{ '& .MuiInputBase-input': { fontSize: '12px' } }}
             />
           </Box>
         </Box>
