@@ -28,6 +28,7 @@ import {
   Assessment,
   Business,
   Settings,
+  Description,
   TrendingUp,
   CheckCircle,
   Schedule,
@@ -125,6 +126,15 @@ export default function EvaluationsPage() {
       icon: Assessment,
       color: 'success',
       count: appraisals.filter(a => a.template_type === 'NAS').length
+    },
+    {
+      id: 'AIC_FORM',
+      title: tTemplates('aic_form.title'),
+      subtitle: tTemplates('aic_form.subtitle'),
+      description: tTemplates('aic_form.description'),
+      icon: Description,
+      color: 'info',
+      count: appraisals.filter(a => a.template_type === 'AIC_FORM').length
     },
     {
       id: 'CUSTOM',

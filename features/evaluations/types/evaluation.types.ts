@@ -2,7 +2,7 @@
  * Type definitions for Evaluations module
  */
 
-export type TemplateType = 'RPS' | 'NAS' | 'CUSTOM';
+export type TemplateType = 'RPS' | 'NAS' | 'CUSTOM' | 'AIC_FORM';
 
 export type PropertyType =
   | 'condo'

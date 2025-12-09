@@ -11,7 +11,7 @@ import {
   Grid,
   Avatar
 } from '@mui/material';
-import { ArrowBack, Business, Assessment, Settings } from '@mui/icons-material';
+import { ArrowBack, Business, Assessment, Settings, Description } from '@mui/icons-material';
 import { MaterialDashboardLayout } from '../../../../components/layout/MaterialDashboardLayout';
 import AppraisalWizard from '@/features/evaluations/components/AppraisalWizard';
 import { TemplateType } from '@/features/evaluations/types/evaluation.types';
@@ -43,6 +43,14 @@ export default function NewEvaluationPage() {
       description: tTemplates('nas.description'),
       icon: Assessment,
       color: 'success'
+    },
+    {
+      id: 'AIC_FORM',
+      title: tTemplates('aic_form.title'),
+      subtitle: tTemplates('aic_form.subtitle'),
+      description: tTemplates('aic_form.description'),
+      icon: Description,
+      color: 'info'
     },
     {
       id: 'CUSTOM',

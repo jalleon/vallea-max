@@ -36,7 +36,12 @@ export function CreditBalanceIndicator() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
 
-      if (!user) return;
+      if (!user) {
+        console.log('[CreditBalance] No user found');
+        return;
+      }
+
+      console.log('[CreditBalance] Loading credits for user:', user.id);
 
       const { data, error } = await supabase
         .from('users')
@@ -45,9 +50,11 @@ export function CreditBalanceIndicator() {
         .single();
 
       if (error || !data) {
-        console.error('Failed to load credits:', error);
+        console.error('[CreditBalance] Failed to load credits:', error);
         return;
       }
+
+      console.log('[CreditBalance] Credits loaded:', data);
 
       const quota = data.scan_credits_quota;
       const used = data.scan_credits_used || 0;

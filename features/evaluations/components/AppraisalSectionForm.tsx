@@ -33,6 +33,14 @@ import DescriptionSectionContent from './DescriptionSectionContent';
 import CoutPariteSectionContent from './CoutPariteSectionContent';
 import ImportFromPreviousDialog from './ImportFromPreviousDialog';
 import SmartValidationWarnings from './SmartValidationWarnings';
+// AIC Form Components
+import TransmittalLetterSection from './AICForm/TransmittalLetterSection';
+import ExecutiveSummarySection from './AICForm/ExecutiveSummarySection';
+import NeighborhoodSiteSection from './AICForm/NeighborhoodSiteSection';
+import SiteSection from './AICForm/SiteSection';
+import ImprovementsSection from './AICForm/ImprovementsSection';
+import PropertyInfoSection from './AICForm/PropertyInfoSection';
+import AssignmentSection from './AICForm/AssignmentSection';
 
 interface AppraisalSectionFormProps {
   sectionId: string;
@@ -207,6 +215,73 @@ export default function AppraisalSectionForm({
           return renderGeneralInfoSection();
         case 'description_propriete':
           return renderPropertyDescriptionSection();
+        default:
+          return renderGenericSection();
+      }
+    }
+
+    // AIC Form Sections (Version 2024)
+    if (templateType === 'AIC_FORM') {
+      switch (sectionId) {
+        // Combined Client + Appraiser + Subject on one page
+        case 'aic_property_info':
+          return <PropertyInfoSection formData={formData} handleFieldChange={handleFieldChange} appraisalData={appraisalData} />;
+        // Assignment section
+        case 'aic_assignment':
+          return <AssignmentSection formData={formData} handleFieldChange={handleFieldChange} appraisalData={appraisalData} />;
+        // Executive Summary
+        case 'executive_summary':
+          return <ExecutiveSummarySection formData={formData} handleFieldChange={handleFieldChange} appraisalData={appraisalData} />;
+        // Combined Neighborhood + Site
+        case 'neighborhood_site':
+          return <NeighborhoodSiteSection formData={formData} handleFieldChange={handleFieldChange} appraisalData={appraisalData} />;
+        // Legacy sections (kept for backwards compatibility)
+        case 'transmittal_letter':
+          return <TransmittalLetterSection formData={formData} handleFieldChange={handleFieldChange} appraisalData={appraisalData} />;
+        case 'assignment':
+          return renderNarrativeSection('content', 'Details of the assignment...');
+        case 'subject_property':
+          return renderPropertySection();
+        case 'site':
+          return <SiteSection formData={formData} handleFieldChange={handleFieldChange} appraisalData={appraisalData} />;
+        case 'improvements':
+          return <ImprovementsSection formData={formData} handleFieldChange={handleFieldChange} appraisalData={appraisalData} />;
+        case 'highest_best_use':
+          return renderNarrativeSection('content', 'Highest and best use analysis...');
+        case 'direct_comparison_approach':
+          return <DirectComparisonForm data={formData} onChange={onChange} subjectPropertyId={subjectPropertyId} subjectPropertyType={subjectPropertyType || undefined} reloadTrigger={reloadTrigger} />;
+        case 'cost_approach':
+          return renderNarrativeSection('content', 'Cost approach analysis...');
+        case 'income_approach':
+          return renderNarrativeSection('content', 'Income approach analysis...');
+        case 'market_rent':
+          return renderNarrativeSection('content', 'Market rent analysis...');
+        case 'reconciliation':
+          return renderNarrativeSection('content', 'Reconciliation of value indications...');
+        case 'scope_certification':
+          return renderNarrativeSection('content', 'Scope of work and certification...');
+        case 'hypothetical_conditions':
+          return renderNarrativeSection('content', 'Hypothetical conditions (if applicable)...');
+        case 'extraordinary_items':
+          return renderNarrativeSection('content', 'Extraordinary assumptions and limiting conditions...');
+        case 'narrative_addendum':
+          return renderNarrativeSection('content', 'Additional narrative information...');
+        case 'photos_addendum':
+          return renderGenericSection();
+        case 'comparable_photos':
+          return renderGenericSection();
+        case 'building_sketch':
+          return renderGenericSection();
+        case 'additional_sales':
+          return renderGenericSection();
+        case 'zoning_map':
+          return renderGenericSection();
+        case 'aerial_map':
+          return renderGenericSection();
+        case 'site_map':
+          return renderGenericSection();
+        case 'as_is_complete':
+          return renderNarrativeSection('content', 'As is / As complete analysis...');
         default:
           return renderGenericSection();
       }
@@ -1958,7 +2033,12 @@ export default function AppraisalSectionForm({
       {/* Smart Validation Warnings */}
       <SmartValidationWarnings
         formData={formData}
-        propertyType={subjectPropertyType || 'single_family'}
+        propertyType={
+          // For aic_property_info, check existingUse field for condo detection
+          formData.existingUse?.toLowerCase() === 'condo'
+            ? 'condo'
+            : (subjectPropertyType || 'single_family')
+        }
         sectionId={sectionId}
       />
 

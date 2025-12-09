@@ -12,11 +12,16 @@ import { createRouteClient } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
+  let body: any;
+
+  console.log('[ProcessText] Request received');
 
   try {
     // Get authenticated user
     const supabase = createRouteClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    console.log('[ProcessText] Auth check:', { hasUser: !!user, authError });
 
     if (authError || !user) {
       return NextResponse.json(
@@ -25,7 +30,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = await request.json();
+    body = await request.json();
     const { text, documentType } = body;
     let { apiKey, provider, model } = body;
 
@@ -182,9 +187,8 @@ export async function POST(request: NextRequest) {
       const supabase = createRouteClient();
       const { data: { user } } = await supabase.auth.getUser();
 
-      if (user) {
+      if (user && body) {
         const processingTime = Date.now() - startTime;
-        const body = await request.json();
 
         await usageTrackingService.trackUsage({
           user_id: user.id,

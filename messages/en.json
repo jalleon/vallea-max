@@ -1287,6 +1287,11 @@
         "title": "Custom Appraisal",
         "subtitle": "Custom format",
         "description": "Create an appraisal with your own criteria"
+      },
+      "aic_form": {
+        "title": "AIC Form",
+        "subtitle": "Appraisal Institute of Canada (2024)",
+        "description": "Official AIC form for residential appraisal"
       }
     },
 
@@ -1457,6 +1462,8 @@
       "landDescription": "Land description",
       "landDescriptionPlaceholder": "Area, topography, orientation, etc.",
 
+      "neighborhood": "Neighborhood",
+      "neighborhood_site": "Neighborhood / Site",
       "site": "Site",
       "repartitions_pieces": "Room distribution",
       "techniques_cout": "Cost approach",
@@ -1513,6 +1520,40 @@
       "reserves_hypotheses": "Limiting conditions and assumptions",
       "sales": "Sales",
       "zoning_plans": "Zoning plans",
+
+      "transmittal_letter": "Transmittal Letter",
+      "executive_summary": "Executive Summary",
+      "assignment": "Assignment",
+      "subject_property": "Subject Property",
+      "highest_best_use": "Highest and Best Use",
+      "direct_comparison_approach": "Direct Comparison Approach",
+      "cost_approach": "Cost Approach",
+      "income_approach": "Income Approach",
+      "market_rent": "Market Rent",
+      "reconciliation": "Reconciliation",
+      "scope_certification": "Scope and Certification",
+      "hypothetical_conditions": "Hypothetical Conditions",
+      "extraordinary_items": "Extraordinary Items",
+      "narrative_addendum": "Narrative Addendum",
+      "photos_addendum": "Photos Addendum",
+      "comparable_photos": "Comparable Photos",
+      "building_sketch": "Building Sketch",
+      "additional_sales": "Additional Sales",
+      "zoning_map": "Zoning Map",
+      "aerial_map": "Aerial Map",
+      "site_map": "Site Map",
+      "as_is_complete": "As Is / As Complete",
+      "improvements": "Improvements",
+
+      "aic_property_info": "Client / Appraiser / Subject",
+      "aic_assignment": "Assignment",
+
+      "aicGroups": {
+        "property_details": "Property Details",
+        "valuation_methods": "Valuation Methods",
+        "conclusion_certification": "Conclusion and Certification",
+        "additional_sections": "Additional Sections"
+      },
 
       "referenceSheet": {
         "title": "Reference Sheet",
@@ -1816,6 +1857,7 @@
         "addComparable": "Add Comparable",
         "removeComparable": "Remove Comparable",
         "selectFromLibrary": "Select from Library",
+        "loadFromLibrary": "Load from Library",
         "maxComparables": "Maximum 8 comparables",
         "imperial": "Imperial",
         "metric": "Metric",

@@ -18,9 +18,10 @@ import { ArrowBack, Save, CheckCircle, Refresh } from '@mui/icons-material';
 import { MaterialDashboardLayout } from '../../../../components/layout/MaterialDashboardLayout';
 import { createClient } from '@/lib/supabase/client';
 import { TemplateType } from '@/features/evaluations/types/evaluation.types';
-import { NAS_SECTIONS, RPS_SECTIONS, CUSTOM_SECTIONS } from '@/features/evaluations/constants/evaluation.constants';
+import { NAS_SECTIONS, RPS_SECTIONS, CUSTOM_SECTIONS, AIC_FORM_SECTIONS } from '@/features/evaluations/constants/evaluation.constants';
 import AppraisalSectionForm from '@/features/evaluations/components/AppraisalSectionForm';
 import AdjustmentsForm from '@/features/evaluations/components/AdjustmentsForm';
+import EffectiveAgeCalculator from '@/features/evaluations/components/EffectiveAgeCalculator';
 import AppraisalLayout from '@/features/evaluations/components/AppraisalLayout';
 import SectionsSidebar from '@/features/evaluations/components/SectionsSidebar';
 import LivePreview from '@/features/evaluations/components/LivePreview';
@@ -59,9 +60,11 @@ export default function AppraisalEditPage() {
   const [adjustmentsReloadKey, setAdjustmentsReloadKey] = useState(0); // Force reload counter
   const [sectionsData, setSectionsData] = useState<any>({});
   const [adjustmentsData, setAdjustmentsData] = useState<any>(null);
+  const [effectiveAgeData, setEffectiveAgeData] = useState<any>(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [reloadTrigger, setReloadTrigger] = useState(0);
   const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const saveEffectiveAgeTimerRef = useRef<NodeJS.Timeout | null>(null);
   const sectionsDataRef = useRef<any>({});
 
   // Restore tab from URL or localStorage on load
@@ -111,6 +114,8 @@ export default function AppraisalEditPage() {
         return RPS_SECTIONS;
       case 'CUSTOM':
         return CUSTOM_SECTIONS;
+      case 'AIC_FORM':
+        return AIC_FORM_SECTIONS;
       default:
         return [];
     }
@@ -157,6 +162,11 @@ export default function AppraisalEditPage() {
       console.log('📥 Loading adjustments_data:', loadedAdjustmentsData);
       setAdjustmentsData(loadedAdjustmentsData);
 
+      // Load effective age data (type assertion needed - field exists in DB but not in generated types yet)
+      const loadedEffectiveAgeData = ((data as any).effective_age_data as any) || null;
+      console.log('📥 Loading effective_age_data:', loadedEffectiveAgeData);
+      setEffectiveAgeData(loadedEffectiveAgeData);
+
       setIsInitialLoad(false);
 
       // Calculate and update completion percentage if needed
@@ -171,6 +181,9 @@ export default function AppraisalEditPage() {
           break;
         case 'CUSTOM':
           sections = CUSTOM_SECTIONS;
+          break;
+        case 'AIC_FORM':
+          sections = AIC_FORM_SECTIONS;
           break;
         default:
           sections = [];
@@ -276,11 +289,14 @@ export default function AppraisalEditPage() {
     }
   };
 
-  // Cleanup timer on unmount
+  // Cleanup timers on unmount
   useEffect(() => {
     return () => {
       if (saveTimerRef.current) {
         clearTimeout(saveTimerRef.current);
+      }
+      if (saveEffectiveAgeTimerRef.current) {
+        clearTimeout(saveEffectiveAgeTimerRef.current);
       }
     };
   }, []);
@@ -364,6 +380,53 @@ export default function AppraisalEditPage() {
           setSaveState('saved');
         } catch (error) {
           console.error('Error saving adjustments:', error);
+          setSaveState('unsaved');
+        } finally {
+          setSaving(false);
+        }
+      }, 2000);
+    }
+  };
+
+  const handleEffectiveAgeChange = (data: any) => {
+    setEffectiveAgeData(data);
+
+    // Clear existing timer
+    if (saveEffectiveAgeTimerRef.current) {
+      clearTimeout(saveEffectiveAgeTimerRef.current);
+    }
+
+    // Set state to unsaved
+    setSaveState('unsaved');
+
+    // Set new timer for auto-save
+    if (!isInitialLoad) {
+      console.log('⏰ Effective Age auto-save timer set for 2 seconds');
+      saveEffectiveAgeTimerRef.current = setTimeout(async () => {
+        try {
+          setSaving(true);
+          setSaveState('saving');
+          const supabase = createClient();
+
+          console.log('💾 Saving effective_age_data to Supabase:', JSON.stringify(data, null, 2));
+
+          const { error } = await supabase
+            .from('appraisals')
+            .update({
+              effective_age_data: data as any,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', id);
+
+          if (error) {
+            console.error('❌ Effective Age save error:', error);
+            throw error;
+          }
+
+          console.log('✅ Effective Age save successful');
+          setSaveState('saved');
+        } catch (error) {
+          console.error('Error saving effective age data:', error);
           setSaveState('unsaved');
         } finally {
           setSaving(false);
@@ -585,8 +648,8 @@ export default function AppraisalEditPage() {
                   allSectionsData={sectionsDataRef.current}
                 />
               </Box>
-            ) : (
-              // Render tool (Adjustments Calculator)
+            ) : currentToolTab === 0 ? (
+              // Render tool 0: Adjustments Calculator
               <Box>
                 <AdjustmentsForm
                   key={`adjustments-${adjustmentsReloadKey}`}
@@ -614,7 +677,22 @@ export default function AppraisalEditPage() {
                   }
                 />
               </Box>
-            )}
+            ) : currentToolTab === 1 ? (
+              // Render tool 1: Effective Age Calculator
+              <Box>
+                <EffectiveAgeCalculator
+                  data={effectiveAgeData || {}}
+                  onChange={handleEffectiveAgeChange}
+                  constructionYear={
+                    sectionsDataRef.current.description?.yearBuilt ||
+                    sectionsDataRef.current.sujet?.yearBuilt ||
+                    undefined
+                  }
+                  effectiveDate={appraisal.effective_date}
+                  onClose={() => setCurrentToolTab(-1)}
+                />
+              </Box>
+            ) : null}
           </Box>
         }
         preview={

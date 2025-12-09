@@ -131,6 +131,27 @@ function detectIssues(
     }
   }
 
+  // AIC Property Info validation
+  if (sectionId === 'aic_property_info') {
+    if (!formData.clientName || formData.clientName.trim() === '') {
+      issues.push({
+        severity: 'warning',
+        field: 'clientName',
+        message: 'Client name is missing',
+        suggestion: 'Enter the client name for the appraisal report'
+      });
+    }
+
+    if (!formData.propertyAddress || formData.propertyAddress.trim() === '') {
+      issues.push({
+        severity: 'error',
+        field: 'propertyAddress',
+        message: 'Property address is required',
+        suggestion: 'Please enter the full property address'
+      });
+    }
+  }
+
   // Direct Comparison validation
   if (sectionId === 'methode_parite') {
     const livingArea = parseFloat(formData.livingArea);
@@ -208,22 +229,31 @@ function detectIssues(
     }
   }
 
-  // Condo-specific validation
-  if (propertyType === 'condo') {
-    if (!formData.unitLocation || formData.unitLocation.trim() === '') {
+  // Condo-specific validation - only for aic_property_info section
+  if (propertyType === 'condo' && sectionId === 'aic_property_info') {
+    if (!formData.floorLevel) {
       issues.push({
         severity: 'warning',
-        field: 'unitLocation',
-        message: 'Unit location is missing',
-        suggestion: 'For condos, specify floor level and unit position'
+        field: 'floorLevel',
+        message: 'Floor level is missing',
+        suggestion: 'For condos, specify the floor level of the unit'
+      });
+    }
+
+    if (!formData.unitPosition) {
+      issues.push({
+        severity: 'info',
+        field: 'unitPosition',
+        message: 'Unit position not specified',
+        suggestion: 'Consider specifying the unit position (corner, end unit, interior, penthouse)'
       });
     }
 
     if (!formData.condoFees) {
       issues.push({
-        severity: 'info',
+        severity: 'warning',
         field: 'condoFees',
-        message: 'Condo fees not specified',
+        message: 'Condo fees are missing',
         suggestion: 'Monthly condo fees are important for condo valuations'
       });
     }

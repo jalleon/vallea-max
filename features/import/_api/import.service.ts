@@ -2,7 +2,7 @@
  * Main import service - orchestrates API calls and property creation
  */
 
-import { supabase } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/client';
 import { PropertyCreateInput } from '@/features/library/types/property.types';
 import { propertiesSupabaseService } from '@/features/library/_api/properties-supabase.service';
 import { ExtractedPropertyData, DocumentType, ImportSession } from '../types/import.types';
@@ -34,6 +34,7 @@ class ImportService {
 
     try {
       // Get auth session for API call
+      const supabase = createClient();
       const { data: { session: authSession } } = await supabase.auth.getSession();
 
       // Call API route for text processing
@@ -105,6 +106,7 @@ class ImportService {
 
     try {
       // Get auth session for API call
+      const supabase = createClient();
       const { data: { session: authSession } } = await supabase.auth.getSession();
 
       // Call API route for server-side PDF processing

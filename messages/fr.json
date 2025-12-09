@@ -1409,6 +1409,11 @@
         "title": "Évaluation personnalisée",
         "subtitle": "Format personnalisé",
         "description": "Créez une évaluation selon vos critères"
+      },
+      "aic_form": {
+        "title": "Formulaire AIC",
+        "subtitle": "Appraisal Institute of Canada (2024)",
+        "description": "Formulaire officiel AIC pour l'évaluation résidentielle"
       }
     },
 
@@ -1579,6 +1584,8 @@
       "landDescription": "Description du terrain",
       "landDescriptionPlaceholder": "Superficie, topographie, orientation, etc.",
 
+      "neighborhood": "Voisinage",
+      "neighborhood_site": "Voisinage / Site",
       "site": "Site",
       "repartitions_pieces": "Répartition des pièces",
       "techniques_cout": "Méthode du coût",
@@ -1635,6 +1642,40 @@
       "reserves_hypotheses": "Réserves et hypothèses",
       "sales": "Ventes",
       "zoning_plans": "Plans de zonage",
+
+      "transmittal_letter": "Lettre de transmission",
+      "executive_summary": "Sommaire exécutif",
+      "assignment": "Mandat",
+      "subject_property": "Propriété évaluée",
+      "highest_best_use": "Utilisation optimale",
+      "direct_comparison_approach": "Méthode de comparaison directe",
+      "cost_approach": "Méthode du coût",
+      "income_approach": "Méthode du revenu",
+      "market_rent": "Loyer marchand",
+      "reconciliation": "Conciliation",
+      "scope_certification": "Portée et certification",
+      "hypothetical_conditions": "Conditions hypothétiques",
+      "extraordinary_items": "Éléments extraordinaires",
+      "narrative_addendum": "Addenda narratif",
+      "photos_addendum": "Addenda photos",
+      "comparable_photos": "Photos des comparables",
+      "building_sketch": "Croquis du bâtiment",
+      "additional_sales": "Ventes additionnelles",
+      "zoning_map": "Carte de zonage",
+      "aerial_map": "Vue aérienne",
+      "site_map": "Plan de localisation",
+      "as_is_complete": "Tel quel / Complété",
+      "improvements": "Améliorations",
+
+      "aic_property_info": "Client / Évaluateur / Sujet",
+      "aic_assignment": "Mandat",
+
+      "aicGroups": {
+        "property_details": "Détails de la propriété",
+        "valuation_methods": "Méthodes d'évaluation",
+        "conclusion_certification": "Conclusion et certification",
+        "additional_sections": "Sections additionnelles"
+      },
 
       "referenceSheet": {
         "title": "Fiche de référence",
@@ -1938,6 +1979,7 @@
         "addComparable": "Ajouter un comparable",
         "removeComparable": "Retirer le comparable",
         "selectFromLibrary": "Sélectionner de la bibliothèque",
+        "loadFromLibrary": "Charger de la bibliothèque",
         "maxComparables": "Maximum 8 comparables",
         "imperial": "Impérial",
         "metric": "Métrique",

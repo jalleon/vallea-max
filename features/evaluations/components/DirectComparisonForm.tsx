@@ -570,6 +570,7 @@ export default function DirectComparisonForm({
       setLibraryProperties(properties || []);
     } catch (error) {
       console.error('Error loading properties:', error);
+      setLibraryProperties([]);
     }
   };
 

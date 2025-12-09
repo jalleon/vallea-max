@@ -113,3 +113,59 @@ export const CUSTOM_SECTIONS = [
   'zoning_plans',
   'maps'
 ];
+
+// AIC Form sections (Version 2024)
+// Merges new aic_ prefixed sections with original section IDs
+export const AIC_FORM_SECTIONS = [
+  // Property Details - Combined and individual sections
+  'aic_property_info',     // Combined: Client + Appraiser + Subject on one page
+  'aic_assignment',        // Assignment details
+  'executive_summary',     // Executive Summary (original component)
+  'neighborhood_site',     // Combined: Neighborhood + Site on one page
+  'improvements',          // Improvements
+  // Valuation Methods - Original sections (have existing components)
+  'highest_best_use',
+  'direct_comparison_approach',
+  'cost_approach',
+  'income_approach',
+  'market_rent',
+  // Conclusion and Certification - Original sections
+  'reconciliation',
+  'scope_certification',
+  // Additional Sections (Addendums) - Original sections
+  'extraordinary_items',
+  'hypothetical_conditions',
+  'photos_addendum',
+  'comparable_photos',
+  'building_sketch',
+  'additional_sales',
+  'zoning_map',
+  'aerial_map',
+  'site_map',
+  'as_is_complete'
+];
+
+// AIC Form section groups for sidebar navigation
+// Labels are handled via i18n in messages/en.json and messages/fr.json under evaluations.sections
+export const AIC_FORM_SECTION_GROUPS = [
+  {
+    id: 'property_details',
+    label: 'Property Details',
+    sections: ['aic_property_info', 'aic_assignment', 'executive_summary', 'neighborhood_site', 'improvements']
+  },
+  {
+    id: 'valuation_methods',
+    label: 'Valuation Methods',
+    sections: ['highest_best_use', 'direct_comparison_approach', 'cost_approach', 'income_approach', 'market_rent']
+  },
+  {
+    id: 'conclusion_certification',
+    label: 'Conclusion and Certification',
+    sections: ['reconciliation', 'scope_certification']
+  },
+  {
+    id: 'additional_sections',
+    label: 'Additional Sections',
+    sections: ['extraordinary_items', 'hypothetical_conditions', 'photos_addendum', 'comparable_photos', 'building_sketch', 'additional_sales', 'zoning_map', 'aerial_map', 'site_map', 'as_is_complete']
+  }
+];
