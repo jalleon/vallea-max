@@ -8,7 +8,7 @@ import { aiExtractionService } from '@/features/import/_api/ai-extraction.servic
 import { DocumentType } from '@/features/import/types/import.types';
 import { adminApiKeysService } from '@/features/admin/_api/admin-api-keys.service';
 import { usageTrackingService } from '@/features/admin/_api/usage-tracking.service';
-import { createRouteClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
@@ -17,8 +17,30 @@ export async function POST(request: NextRequest) {
   console.log('[ProcessText] Request received');
 
   try {
-    // Get authenticated user
-    const supabase = createRouteClient();
+    // Get auth token from request header (same as process-pdf route)
+    const authHeader = request.headers.get('authorization');
+
+    if (!authHeader) {
+      console.error('[ProcessText] No authorization header');
+      return NextResponse.json(
+        { error: 'Unauthorized. Please log in.' },
+        { status: 401 }
+      );
+    }
+
+    // Create Supabase client with the auth token
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        global: {
+          headers: {
+            Authorization: authHeader
+          }
+        }
+      }
+    );
+
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     console.log('[ProcessText] Auth check:', { hasUser: !!user, authError });
@@ -70,8 +92,8 @@ export async function POST(request: NextRequest) {
 
     // Only check/consume credits if using master key system
     if (!canUseOwnKeys) {
-      // Check if user has enough credits
-      const hasCredits = await usageTrackingService.hasEnoughCredits(user.id, creditsNeeded);
+      // Check if user has enough credits (pass supabase client)
+      const hasCredits = await usageTrackingService.hasEnoughCredits(user.id, creditsNeeded, supabase);
 
       if (!hasCredits) {
         return NextResponse.json(
@@ -145,7 +167,7 @@ export async function POST(request: NextRequest) {
 
     // Consume credits only if using master key system
     if (!canUseOwnKeys && creditsNeeded > 0) {
-      const creditsConsumed = await usageTrackingService.consumeCredits(user.id, creditsNeeded);
+      const creditsConsumed = await usageTrackingService.consumeCredits(user.id, creditsNeeded, supabase);
 
       if (!creditsConsumed) {
         console.error('[Text Processing] Failed to consume credits');
@@ -170,7 +192,7 @@ export async function POST(request: NextRequest) {
       success: true,
       error_message: undefined,
       processing_time_ms: processingTime,
-    });
+    }, supabase);
 
     console.log(`[Text Processing] Success! Credits used: ${creditsNeeded}, Processing time: ${processingTime}ms`);
 
@@ -184,29 +206,43 @@ export async function POST(request: NextRequest) {
 
     // Track failed usage
     try {
-      const supabase = createRouteClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const authHeader = request.headers.get('authorization');
+      if (authHeader) {
+        const errorSupabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          {
+            global: {
+              headers: {
+                Authorization: authHeader
+              }
+            }
+          }
+        );
 
-      if (user && body) {
-        const processingTime = Date.now() - startTime;
+        const { data: { user } } = await errorSupabase.auth.getUser();
 
-        await usageTrackingService.trackUsage({
-          user_id: user.id,
-          organization_id: user.user_metadata?.organization_id,
-          operation_type: 'text_extract',
-          document_type: body.documentType,
-          file_size_bytes: body.text?.length || 0,
-          page_count: undefined,
-          credits_used: 0,
-          provider_used: undefined,
-          model_used: undefined,
-          tokens_input: undefined,
-          tokens_output: undefined,
-          cost_estimate: undefined,
-          success: false,
-          error_message: error instanceof Error ? error.message : 'Unknown error',
-          processing_time_ms: processingTime,
-        });
+        if (user && body) {
+          const processingTime = Date.now() - startTime;
+
+          await usageTrackingService.trackUsage({
+            user_id: user.id,
+            organization_id: user.user_metadata?.organization_id,
+            operation_type: 'text_extract',
+            document_type: body.documentType,
+            file_size_bytes: body.text?.length || 0,
+            page_count: undefined,
+            credits_used: 0,
+            provider_used: undefined,
+            model_used: undefined,
+            tokens_input: undefined,
+            tokens_output: undefined,
+            cost_estimate: undefined,
+            success: false,
+            error_message: error instanceof Error ? error.message : 'Unknown error',
+            processing_time_ms: processingTime,
+          }, errorSupabase);
+        }
       }
     } catch (trackingError) {
       console.error('Failed to track error:', trackingError);

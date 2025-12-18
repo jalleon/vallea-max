@@ -60,7 +60,7 @@ function ImportPageContent() {
   const locale = useLocale();
   const router = useRouter();
   const { preferences } = useSettings();
-  const { startSingleImport, savePendingSession, clearPendingSession, state: importState } = useBackgroundImport();
+  const { startSingleImport, startTextImport, savePendingSession, clearPendingSession, state: importState } = useBackgroundImport();
 
   const [useOwnApiKeys, setUseOwnApiKeys] = useState(false);
 
@@ -217,7 +217,8 @@ function ImportPageContent() {
       // Process either text input or PDF file
       let result: ImportSession;
       if (useTextInput) {
-        result = await importService.processText(pastedText, documentType, apiKey, provider, model);
+        // Use background import for text to show progress in header
+        result = await startTextImport(pastedText, documentType, apiKey, provider, model);
       } else {
         // Use background import for PDF files to show progress in header
         result = await startSingleImport(selectedFile!, documentType, apiKey, provider, model);
