@@ -1,7 +1,4 @@
 import { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
-
-const supabase = createClient();
 
 export type PreferenceType =
   | 'appraiser_info'
@@ -9,16 +6,6 @@ export type PreferenceType =
   | 'company_info'
   | 'narrative_templates'
   | 'default_comparables_count';
-
-interface UserPreference {
-  id: string;
-  user_id: string;
-  organization_id: string;
-  preference_type: PreferenceType;
-  data: any;
-  created_at: string;
-  updated_at: string;
-}
 
 interface UseRememberedInputsReturn {
   preferences: Record<string, any>;
@@ -30,8 +17,11 @@ interface UseRememberedInputsReturn {
   clearAllPreferences: () => Promise<boolean>;
 }
 
+const STORAGE_KEY = 'valea_user_preferences';
+
 /**
  * Hook for managing user preferences for auto-populating form fields
+ * Uses localStorage for persistence (no database table required)
  * Supports multiple named variations per preference type
  *
  * Usage:
@@ -64,50 +54,39 @@ export function useRememberedInputs(): UseRememberedInputsReturn {
   const [preferences, setPreferences] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
 
-  // Load all preferences on mount
+  // Load preferences from localStorage on mount
   useEffect(() => {
     loadPreferences();
   }, []);
 
-  const loadPreferences = async () => {
+  const loadPreferences = () => {
     try {
       setLoading(true);
 
-      const { data, error } = await supabase
-        .from('user_preferences')
-        .select('*')
-        .order('updated_at', { ascending: false });
-
-      if (error) {
-        console.error('Error loading preferences:', error);
+      if (typeof window === 'undefined') {
+        setLoading(false);
         return;
       }
 
-      // Convert array to nested object:
-      // { 'company_info': { '_default': {...}, 'Office Montreal': {...} } }
-      const prefsMap: Record<string, any> = {};
-      (data as UserPreference[])?.forEach((pref) => {
-        const [baseType, variationName] = pref.preference_type.includes(':')
-          ? pref.preference_type.split(':')
-          : [pref.preference_type, '_default'];
-
-        if (!prefsMap[baseType]) {
-          prefsMap[baseType] = {};
-        }
-        prefsMap[baseType][variationName] = pref.data;
-      });
-
-      console.log('[DEBUG] Loaded preferences from DB:', {
-        totalRecords: data?.length,
-        companyInfoRecords: data?.filter(d => d.preference_type.startsWith('company_info')),
-        processedCompanyInfo: prefsMap.company_info
-      });
-
-      setPreferences(prefsMap);
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setPreferences(parsed);
+      }
     } catch (error) {
-      console.error('Error loading preferences:', error);
+      console.error('Error loading preferences from localStorage:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const saveToStorage = (prefs: Record<string, any>) => {
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+      }
+    } catch (error) {
+      console.error('Error saving preferences to localStorage:', error);
     }
   };
 
@@ -117,74 +96,18 @@ export function useRememberedInputs(): UseRememberedInputsReturn {
     variationName?: string
   ): Promise<boolean> => {
     try {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        console.error('No user found');
-        return false;
-      }
+      const key = variationName || '_default';
 
-      // Get organization_id from user metadata or profiles table
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('organization_id')
-        .eq('id', user.id)
-        .single();
+      const updated = {
+        ...preferences,
+        [type]: {
+          ...(preferences[type] || {}),
+          [key]: data
+        }
+      };
 
-      // Try to get organization_id from profile or user metadata
-      let organizationId = profile?.organization_id || user.user_metadata?.organization_id;
-
-      if (!organizationId) {
-        console.error('No organization_id found for user. Profile:', profile, 'User metadata:', user.user_metadata);
-        return false;
-      }
-
-      // Create composite key: "type:variationName" or just "type" for default
-      const preferenceKey = variationName ? `${type}:${variationName}` : type;
-
-      console.log('[DEBUG] Saving preference:', {
-        type,
-        variationName,
-        preferenceKey,
-        dataKeys: Object.keys(data),
-        existingVariations: Object.keys(preferences[type] || {})
-      });
-
-      // Upsert preference (insert or update)
-      const { error } = await supabase
-        .from('user_preferences')
-        .upsert({
-          user_id: user.id,
-          organization_id: organizationId,
-          preference_type: preferenceKey as any,
-          data: data,
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'user_id,organization_id,preference_type'
-        });
-
-      if (error) {
-        console.error('Error saving preference:', error);
-        return false;
-      }
-
-      console.log('[DEBUG] Saved successfully, updating local state');
-
-      // Update local state
-      setPreferences((prev) => {
-        const updated = {
-          ...prev,
-          [type]: {
-            ...(prev[type] || {}),
-            [variationName || '_default']: data
-          }
-        };
-        console.log('[DEBUG] Updated local state:', {
-          type,
-          newVariations: Object.keys(updated[type] || {})
-        });
-        return updated;
-      });
+      setPreferences(updated);
+      saveToStorage(updated);
 
       return true;
     } catch (error) {
@@ -215,42 +138,26 @@ export function useRememberedInputs(): UseRememberedInputsReturn {
     variationName?: string
   ): Promise<boolean> => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return false;
+      const updated = { ...preferences };
 
-      const preferenceKey = variationName ? `${type}:${variationName}` : type;
-
-      const { error } = await supabase
-        .from('user_preferences')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('preference_type', preferenceKey);
-
-      if (error) {
-        console.error('Error clearing preference:', error);
-        return false;
+      if (variationName) {
+        // Remove specific variation
+        if (updated[type]) {
+          const typePrefs = { ...updated[type] };
+          delete typePrefs[variationName];
+          updated[type] = typePrefs;
+        }
+      } else {
+        // Remove default variation
+        if (updated[type]) {
+          const typePrefs = { ...updated[type] };
+          delete typePrefs['_default'];
+          updated[type] = typePrefs;
+        }
       }
 
-      // Update local state
-      setPreferences((prev) => {
-        const newPrefs = { ...prev };
-        if (variationName) {
-          // Remove specific variation
-          if (newPrefs[type]) {
-            const typePrefs = { ...newPrefs[type] };
-            delete typePrefs[variationName];
-            newPrefs[type] = typePrefs;
-          }
-        } else {
-          // Remove default variation
-          if (newPrefs[type]) {
-            const typePrefs = { ...newPrefs[type] };
-            delete typePrefs['_default'];
-            newPrefs[type] = typePrefs;
-          }
-        }
-        return newPrefs;
-      });
+      setPreferences(updated);
+      saveToStorage(updated);
 
       return true;
     } catch (error) {
@@ -261,22 +168,10 @@ export function useRememberedInputs(): UseRememberedInputsReturn {
 
   const clearAllPreferences = async (): Promise<boolean> => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return false;
-
-      const { error } = await supabase
-        .from('user_preferences')
-        .delete()
-        .eq('user_id', user.id);
-
-      if (error) {
-        console.error('Error clearing all preferences:', error);
-        return false;
-      }
-
-      // Clear local state
       setPreferences({});
-
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(STORAGE_KEY);
+      }
       return true;
     } catch (error) {
       console.error('Error clearing all preferences:', error);
