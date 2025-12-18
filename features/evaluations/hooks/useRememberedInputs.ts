@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createClient } from '@/lib/supabase/client';
 
 export type PreferenceType =
   | 'appraiser_info'
@@ -17,11 +18,9 @@ interface UseRememberedInputsReturn {
   clearAllPreferences: () => Promise<boolean>;
 }
 
-const STORAGE_KEY = 'valea_user_preferences';
-
 /**
  * Hook for managing user preferences for auto-populating form fields
- * Uses localStorage for persistence (no database table required)
+ * Stores preferences in the user_preferences table in Supabase
  * Supports multiple named variations per preference type
  *
  * Usage:
@@ -54,39 +53,46 @@ export function useRememberedInputs(): UseRememberedInputsReturn {
   const [preferences, setPreferences] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
 
-  // Load preferences from localStorage on mount
+  // Load all preferences on mount
   useEffect(() => {
     loadPreferences();
   }, []);
 
-  const loadPreferences = () => {
+  const loadPreferences = async () => {
+    const supabase = createClient();
+
     try {
       setLoading(true);
 
-      if (typeof window === 'undefined') {
-        setLoading(false);
+      const { data, error } = await supabase
+        .from('user_preferences' as any)
+        .select('*')
+        .order('updated_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading preferences:', error);
         return;
       }
 
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        setPreferences(parsed);
-      }
+      // Convert array to nested object:
+      // { 'company_info': { '_default': {...}, 'Office Montreal': {...} } }
+      const prefsMap: Record<string, any> = {};
+      (data as any[])?.forEach((pref) => {
+        const [baseType, variationName] = pref.preference_type.includes(':')
+          ? pref.preference_type.split(':')
+          : [pref.preference_type, '_default'];
+
+        if (!prefsMap[baseType]) {
+          prefsMap[baseType] = {};
+        }
+        prefsMap[baseType][variationName] = pref.data;
+      });
+
+      setPreferences(prefsMap);
     } catch (error) {
-      console.error('Error loading preferences from localStorage:', error);
+      console.error('Error loading preferences:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const saveToStorage = (prefs: Record<string, any>) => {
-    try {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
-      }
-    } catch (error) {
-      console.error('Error saving preferences to localStorage:', error);
     }
   };
 
@@ -95,19 +101,59 @@ export function useRememberedInputs(): UseRememberedInputsReturn {
     data: any,
     variationName?: string
   ): Promise<boolean> => {
+    const supabase = createClient();
+
     try {
-      const key = variationName || '_default';
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('No user found');
+        return false;
+      }
 
-      const updated = {
-        ...preferences,
+      // Get organization_id from profiles table
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user.id)
+        .single();
+
+      const organizationId = profile?.organization_id || user.user_metadata?.organization_id;
+
+      if (!organizationId) {
+        console.error('No organization_id found for user');
+        return false;
+      }
+
+      // Create composite key: "type:variationName" or just "type" for default
+      const preferenceKey = variationName ? `${type}:${variationName}` : type;
+
+      // Upsert preference (insert or update)
+      const { error } = await supabase
+        .from('user_preferences' as any)
+        .upsert({
+          user_id: user.id,
+          organization_id: organizationId,
+          preference_type: preferenceKey,
+          data: data,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,organization_id,preference_type'
+        });
+
+      if (error) {
+        console.error('Error saving preference:', error);
+        return false;
+      }
+
+      // Update local state
+      setPreferences((prev) => ({
+        ...prev,
         [type]: {
-          ...(preferences[type] || {}),
-          [key]: data
+          ...(prev[type] || {}),
+          [variationName || '_default']: data
         }
-      };
-
-      setPreferences(updated);
-      saveToStorage(updated);
+      }));
 
       return true;
     } catch (error) {
@@ -137,27 +183,43 @@ export function useRememberedInputs(): UseRememberedInputsReturn {
     type: PreferenceType,
     variationName?: string
   ): Promise<boolean> => {
-    try {
-      const updated = { ...preferences };
+    const supabase = createClient();
 
-      if (variationName) {
-        // Remove specific variation
-        if (updated[type]) {
-          const typePrefs = { ...updated[type] };
-          delete typePrefs[variationName];
-          updated[type] = typePrefs;
-        }
-      } else {
-        // Remove default variation
-        if (updated[type]) {
-          const typePrefs = { ...updated[type] };
-          delete typePrefs['_default'];
-          updated[type] = typePrefs;
-        }
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return false;
+
+      const preferenceKey = variationName ? `${type}:${variationName}` : type;
+
+      const { error } = await supabase
+        .from('user_preferences' as any)
+        .delete()
+        .eq('user_id', user.id)
+        .eq('preference_type', preferenceKey);
+
+      if (error) {
+        console.error('Error clearing preference:', error);
+        return false;
       }
 
-      setPreferences(updated);
-      saveToStorage(updated);
+      // Update local state
+      setPreferences((prev) => {
+        const newPrefs = { ...prev };
+        if (variationName) {
+          if (newPrefs[type]) {
+            const typePrefs = { ...newPrefs[type] };
+            delete typePrefs[variationName];
+            newPrefs[type] = typePrefs;
+          }
+        } else {
+          if (newPrefs[type]) {
+            const typePrefs = { ...newPrefs[type] };
+            delete typePrefs['_default'];
+            newPrefs[type] = typePrefs;
+          }
+        }
+        return newPrefs;
+      });
 
       return true;
     } catch (error) {
@@ -167,11 +229,25 @@ export function useRememberedInputs(): UseRememberedInputsReturn {
   };
 
   const clearAllPreferences = async (): Promise<boolean> => {
+    const supabase = createClient();
+
     try {
-      setPreferences({});
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem(STORAGE_KEY);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return false;
+
+      const { error } = await supabase
+        .from('user_preferences' as any)
+        .delete()
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error clearing all preferences:', error);
+        return false;
       }
+
+      // Clear local state
+      setPreferences({});
+
       return true;
     } catch (error) {
       console.error('Error clearing all preferences:', error);
