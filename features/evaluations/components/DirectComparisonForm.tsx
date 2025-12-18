@@ -161,7 +161,7 @@ export default function DirectComparisonForm({
   const loadedPropertyIdRef = useRef<string | null>(null);
 
   // Helper to parse numeric values from formatted strings
-  const parseNumericValue = useCallback((value: string | number | undefined): number => {
+  const parseNumericValue = useCallback((value: string | number | null | undefined): number => {
     if (!value) return 0;
     const strValue = String(value).trim();
 
