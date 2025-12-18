@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
 export interface OrganizationSettings {
+  companyName?: string;
   companyAddress?: string;
   companyPhone?: string;
   companyWebsite?: string;
