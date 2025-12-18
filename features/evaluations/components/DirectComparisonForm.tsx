@@ -186,18 +186,18 @@ export default function DirectComparisonForm({
   // Recalculate all adjustment differences based on current data
   const recalculateAdjustments = useCallback(() => {
     setComparables(prev => prev.map(comp => {
-      const updatedComp = { ...comp };
+      const updatedComp: Record<string, any> = { ...comp };
 
       // Recalculate area differences
       ['livingArea', 'lotSize'].forEach(field => {
         const subjectVal = parseNumericValue(subject[field as keyof ComparableProperty]);
         const compVal = parseNumericValue(comp[field as keyof ComparableProperty]);
         const diff = Math.round((compVal - subjectVal) * 100) / 100;
-        const adjField = `adjustment${field.charAt(0).toUpperCase() + field.slice(1)}` as keyof ComparableProperty;
-        updatedComp[adjField] = diff as any;
+        const adjField = `adjustment${field.charAt(0).toUpperCase() + field.slice(1)}`;
+        updatedComp[adjField] = diff;
       });
 
-      return updatedComp;
+      return updatedComp as ComparableProperty;
     }));
   }, [subject, parseNumericValue]);
 
