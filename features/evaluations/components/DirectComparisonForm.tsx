@@ -1109,7 +1109,7 @@ export default function DirectComparisonForm({
 
     // Helper function to parse numeric value from formatted measurement strings
     // Always extract m² (metric) value for consistency
-    const parseNumericValue = (value: string | number | undefined): number => {
+    const parseNumericValue = (value: string | number | null | undefined): number => {
       if (!value) return 0;
       const strValue = String(value).trim();
 
