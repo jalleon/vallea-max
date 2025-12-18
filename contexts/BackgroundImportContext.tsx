@@ -43,6 +43,13 @@ interface BackgroundImportContextType {
     provider: 'deepseek' | 'openai' | 'anthropic',
     model: string | undefined
   ) => Promise<ImportSession>;
+  startTextImport: (
+    text: string,
+    documentType: DocumentType,
+    apiKey: string,
+    provider: 'deepseek' | 'openai' | 'anthropic',
+    model: string | undefined
+  ) => Promise<ImportSession>;
   savePendingSession: (session: ImportSession, step: number) => void;
   clearPendingSession: () => void;
   cancelImport: () => void;
@@ -297,6 +304,66 @@ export function BackgroundImportProvider({ children }: { children: React.ReactNo
     [state.isProcessing]
   );
 
+  const startTextImport = useCallback(
+    async (
+      text: string,
+      documentType: DocumentType,
+      apiKey: string,
+      provider: 'deepseek' | 'openai' | 'anthropic',
+      model: string | undefined
+    ): Promise<ImportSession> => {
+      // Prevent starting a new import if one is already running
+      if (state.isProcessing) {
+        throw new Error('An import is already in progress. Please wait for it to finish or cancel it.');
+      }
+
+      cancelRef.current = false;
+
+      setState({
+        isProcessing: true,
+        totalFiles: 1,
+        processedFiles: 0,
+        currentFileIndex: 0,
+        currentFileName: 'pasted-text.txt',
+        completedFiles: [],
+        error: null,
+        targetPropertyId: null,
+        duplicateDetected: false,
+        duplicateAddress: null,
+        pendingSession: null,
+        pendingStep: null,
+      });
+
+      try {
+        // Process the pasted text
+        const result = await importService.processText(text, documentType, apiKey, provider, model);
+
+        // Mark as complete
+        setState(prev => ({
+          ...prev,
+          processedFiles: 1,
+          completedFiles: ['pasted-text.txt'],
+          isProcessing: false,
+        }));
+
+        // Notify credit indicator to refresh
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('credits-updated'));
+        }
+
+        return result;
+      } catch (error) {
+        setState(prev => ({
+          ...prev,
+          isProcessing: false,
+          error: error instanceof Error ? error.message : 'Import failed',
+        }));
+        throw error;
+      }
+    },
+    [state.isProcessing]
+  );
+
   const savePendingSession = useCallback((session: ImportSession, step: number) => {
     setState(prev => ({
       ...prev,
@@ -344,6 +411,7 @@ export function BackgroundImportProvider({ children }: { children: React.ReactNo
         state,
         startBatchImport,
         startSingleImport,
+        startTextImport,
         savePendingSession,
         clearPendingSession,
         cancelImport,
