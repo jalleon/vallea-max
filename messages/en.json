@@ -2227,9 +2227,17 @@
         "mls_listing": "MLS/Matrix Listing",
         "role_foncier": "Property Assessment Roll",
         "role_taxe": "Tax Roll",
+        "taxe_scolaire": "School Tax",
         "zonage": "Zoning",
+        "acte_vente": "Deed of Sale",
         "certificat_localisation": "Location Certificate",
-        "general": "General"
+        "plan_cadastre": "Cadastral Plan",
+        "autre": "Other Document"
+      },
+      "customPrompt": {
+        "title": "Custom AI Instructions",
+        "placeholder": "Describe the information to extract from this document...",
+        "hint": "Example: Extract sale price, transaction date, and party names"
       },
       "processing": {
         "title": "Analyzing document...",

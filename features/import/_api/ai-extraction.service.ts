@@ -396,6 +396,38 @@ EXAMPLE OUTPUT 2:
 
 Return ONLY valid JSON in format: {"properties": [{...}]}`,
 
+  taxe_scolaire: `You are an expert Quebec school tax (Taxe scolaire) extraction assistant. Extract ONLY the address, school tax amount, and year. Return ONLY valid JSON.
+
+CRITICAL RULES:
+1. Remove ALL formatting from numbers (commas, spaces, $)
+2. Convert ALL monetary values to numbers only (no $ sign)
+3. Extract ONLY the three fields specified below
+4. Use null for missing/unavailable fields
+5. DO NOT populate the "extras" field - leave it as null
+
+REQUIRED FIELDS (ONLY THESE THREE):
+- "address" → Full street address from document
+- "schoolTax" → Total school tax amount from "Total taxes scolaires" or similar
+- "schoolTaxYear" → Tax year from "Compte de taxes scolaires YYYY" or document header
+- "extras" → ALWAYS set to null (do not populate this field)
+
+IGNORE ALL OTHER DATA - Do not extract matricule, city, postal code, evaluation, municipal tax, or any other fields.
+
+EXAMPLE INPUT:
+"Compte de taxes scolaires 2024-2025. Propriété: 123 Rue Saint-Denis, Montréal H2X 1K1. Matricule: 1234-56-7890. Valeur uniformisée: 450,000$. Taux de taxe: 0.10654. Taxe scolaire: 479.43$. Total taxes scolaires: 479.43$."
+
+EXAMPLE OUTPUT:
+{
+  "properties": [{
+    "address": "123 Rue Saint-Denis",
+    "schoolTax": 479.43,
+    "schoolTaxYear": 2024,
+    "extras": null
+  }]
+}
+
+Return ONLY valid JSON in format: {"properties": [{...}]}`,
+
   certificat_localisation: `You are an expert Quebec location certificate (Certificat de localisation/Certificat d'implantation) extraction assistant. Extract ALL surveying and property boundary information and return ONLY valid JSON.
 
 CRITICAL RULES:
@@ -446,14 +478,91 @@ EXAMPLE OUTPUT:
 
 Return ONLY valid JSON in format: {"properties": [{...}]}`,
 
-  general: `You are an expert Quebec real estate document extraction assistant. Extract ALL relevant property information from any type of real estate document and return ONLY valid JSON.
+  acte_vente: `You are an expert Quebec deed of sale (Acte de vente/Acte notarié) extraction assistant. Extract sale information from notarial documents and return ONLY valid JSON.
+
+CRITICAL RULES:
+1. Remove ALL formatting from numbers (commas, spaces, $)
+2. Convert ALL monetary values to numbers only (no $ sign)
+3. Extract sale details accurately
+4. Use null for missing/unavailable fields
+5. Dates must be in YYYY-MM-DD format
+
+REQUIRED FIELDS:
+- "address" → Full street address of the property
+- "city" → Municipality/City name
+- "municipality" → Borough or sector if applicable
+- "postalCode" → Postal code if present
+- "lotNumber" → Official lot number(s)
+- "matricule" → Property matricule if mentioned
+- "sellPrice" → Sale price from the deed
+- "acceptanceDate" → Date of sale/signing (YYYY-MM-DD format)
+- "propType" → Property type if mentioned
+- "surface" → Land area in m² if mentioned
+- "extras" → ALWAYS set to null (do not populate this field)
+
+EXAMPLE INPUT:
+"Acte de vente. Le 15 janvier 2024. Immeuble situé au 456 Rue Principale, Montréal (Rosemont), H1X 2B5. Lot 1234567. Matricule: 1234-56-7890. Superficie: 350 m². Prix de vente: 625,000$. Vendeur: Jean Dupont. Acheteur: Marie Tremblay. Notaire: Me Pierre Lavoie."
+
+EXAMPLE OUTPUT:
+{
+  "properties": [{
+    "address": "456 Rue Principale",
+    "city": "Montréal",
+    "municipality": "Rosemont",
+    "postalCode": "H1X 2B5",
+    "lotNumber": "1234567",
+    "matricule": "1234-56-7890",
+    "sellPrice": 625000,
+    "acceptanceDate": "2024-01-15",
+    "surface": 350,
+    "extras": null
+  }]
+}
+
+Return ONLY valid JSON in format: {"properties": [{...}]}`,
+
+  plan_cadastre: `You are an expert Quebec cadastral plan (Plan cadastre) extraction assistant. Extract lot and boundary information from cadastral documents and return ONLY valid JSON.
+
+CRITICAL RULES:
+1. Remove ALL formatting from numbers and measurements
+2. Convert measurements to m² for areas
+3. Extract lot numbers and dimensions accurately
+4. Use null for missing/unavailable fields
+5. DO NOT populate the "extras" field - leave it as null
+
+REQUIRED FIELDS:
+- "lotNumber" → Official lot number(s) from cadastre
+- "surface" → Total land area in m²
+- "frontage" → Frontage measurement in meters if available
+- "address" → Street address if shown
+- "city" → Municipality if shown
+- "municipality" → Arrondissement or sector if applicable
+- "extras" → ALWAYS set to null (do not populate this field)
+
+EXAMPLE INPUT:
+"Plan cadastre du Québec. Lot 2588106. Circonscription foncière: Chambly. Superficie: 578.9 m². Frontage: 22.86 m. Adresse: 231 Boul. Guimond, Longueuil."
+
+EXAMPLE OUTPUT:
+{
+  "properties": [{
+    "lotNumber": "2588106",
+    "surface": 578.9,
+    "frontage": 22.86,
+    "address": "231 Boul. Guimond",
+    "city": "Longueuil",
+    "extras": null
+  }]
+}
+
+Return ONLY valid JSON in format: {"properties": [{...}]}`,
+
+  autre: `You are an expert Quebec real estate document extraction assistant. The user will provide a CUSTOM PROMPT to guide the extraction.
 
 CRITICAL RULES:
 1. Remove ALL formatting from numbers (commas, spaces, $, m², pi²)
 2. Convert ALL monetary values to numbers only
-3. Identify document type if possible (mention in extras)
-4. Use null for missing/unavailable fields
-5. Be flexible - extract whatever information is available
+3. Use null for missing/unavailable fields
+4. Be flexible - extract whatever information is available based on user instructions
 
 COMMON FIELDS (extract if present):
 - "address" → Full street address
@@ -478,19 +587,10 @@ COMMON FIELDS (extract if present):
 - "bedrooms" → Number of bedrooms
 - "bathrooms" → Number of bathrooms
 - "stationnement" → Parking type
-- "extras" → Any additional information (include document type, dates, notes, special features, etc.)
-
-EXAMPLES OF GENERAL DOCUMENTS:
-- Purchase agreements (Promesse d'achat)
-- Notarial acts (Acte notarié)
-- Building permits (Permis de construction)
-- Inspection reports (Rapport d'inspection)
-- Insurance documents (Documents d'assurance)
-- Mortgage documents (Documents hypothécaires)
-- Any other real estate related documents
+- "extras" → Any additional information
 
 Return ONLY valid JSON in format: {"properties": [{...}]}
-Extract ALL available information and include document context in "extras" field.`,
+Extract information based on user's custom instructions.`,
 };
 
 class AIExtractionService {
@@ -503,7 +603,8 @@ class AIExtractionService {
     documentType: DocumentType,
     apiKey: string,
     provider: 'deepseek' | 'openai' | 'anthropic' = 'deepseek',
-    model?: string
+    model?: string,
+    customPrompt?: string
   ): Promise<ExtractedPropertyData[]> {
     try {
       if (!apiKey) {
@@ -529,7 +630,11 @@ class AIExtractionService {
         baseURL: baseURLs[provider],
       });
 
-      const systemPrompt = SYSTEM_PROMPTS[documentType];
+      // For "autre" document type, append custom prompt to base system prompt
+      let systemPrompt = SYSTEM_PROMPTS[documentType];
+      if (documentType === 'autre' && customPrompt) {
+        systemPrompt = `${systemPrompt}\n\nUSER INSTRUCTIONS:\n${customPrompt}`;
+      }
 
       // Use provided model or fall back to default
       const selectedModel = model || defaultModels[provider];

@@ -2288,9 +2288,17 @@
         "mls_listing": "Fiche MLS/Matrix",
         "role_foncier": "Rôle foncier",
         "role_taxe": "Rôle de taxe",
+        "taxe_scolaire": "Taxe scolaire",
         "zonage": "Zonage",
+        "acte_vente": "Acte de vente",
         "certificat_localisation": "Certificat de localisation",
-        "general": "Général"
+        "plan_cadastre": "Plan cadastre",
+        "autre": "Autre document"
+      },
+      "customPrompt": {
+        "title": "Instructions personnalisées pour l'IA",
+        "placeholder": "Décrivez les informations à extraire de ce document...",
+        "hint": "Exemple: Extraire le prix de vente, la date de transaction et les noms des parties"
       },
       "processing": {
         "title": "Analyse du document en cours...",

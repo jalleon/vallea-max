@@ -61,7 +61,9 @@
       "Bash(dir:*)",
       "Bash(timeout /t 8)",
       "Bash(cmd /c \"taskkill /F /PID 12476\")",
-      "Bash(git diff:*)"
+      "Bash(git diff:*)",
+      "Bash(git fetch:*)",
+      "Bash(git rev-list:*)"
     ],
     "deny": [],
     "ask": []
