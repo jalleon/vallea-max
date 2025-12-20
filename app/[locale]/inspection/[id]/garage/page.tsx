@@ -39,8 +39,8 @@ export default function GaragePage() {
   const t = useTranslations()
   const router = useRouter()
   const params = useParams()
-  const locale = params.locale as string
-  const propertyId = params.id as string
+  const locale = params?.locale as string
+  const propertyId = params?.id as string
 
   const [property, setProperty] = useState<Property | null>(null)
   const [loading, setLoading] = useState(true)

@@ -1,41 +1,29 @@
-'use client'
-
-import { useTranslation } from '@/hooks/useTranslation'
-import { Box, Typography, Button } from '@mui/material'
-import { useRouter } from 'next/navigation'
-
 export default function NotFound() {
-  const { t, locale } = useTranslation('common')
-  const router = useRouter()
-
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        textAlign: 'center',
-        p: 3,
-      }}
-    >
-      <Typography variant="h1" component="h1" gutterBottom>
-        404
-      </Typography>
-      <Typography variant="h5" component="h2" gutterBottom>
-        {t('notFound.title')}
-      </Typography>
-      <Typography variant="body1" color="text.secondary" paragraph>
-        {t('notFound.description')}
-      </Typography>
-      <Button
-        variant="contained"
-        onClick={() => router.push(`/${locale}/dashboard`)}
-        sx={{ mt: 2 }}
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '100vh',
+      flexDirection: 'column',
+      fontFamily: 'system-ui, sans-serif'
+    }}>
+      <h1 style={{ fontSize: '4rem', marginBottom: '1rem' }}>404</h1>
+      <p style={{ fontSize: '1.25rem', color: '#666', marginBottom: '2rem' }}>
+        Page not found / Page non trouvée
+      </p>
+      <a
+        href="/"
+        style={{
+          padding: '12px 24px',
+          backgroundColor: '#0070f3',
+          color: 'white',
+          textDecoration: 'none',
+          borderRadius: '8px'
+        }}
       >
-        {t('notFound.goHome')}
-      </Button>
-    </Box>
+        Go back home / Retour à l'accueil
+      </a>
+    </div>
   )
 }

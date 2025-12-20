@@ -75,16 +75,16 @@ export function InspectionFloatingNav({ inspectionId, currentCategory }: Inspect
 
   const handleNavigate = (categoryId: string) => {
     // Extract locale from pathname (e.g., /fr/inspection/... or /en/inspection/...)
-    const locale = pathname.split('/')[1]
+    const locale = pathname?.split('/')[1] || 'fr'
     router.push(`/${locale}/inspection/${inspectionId}/${categoryId}`)
     handleClose()
   }
 
   // Extract locale from pathname
-  const locale = pathname.split('/')[1]
+  const locale = pathname?.split('/')[1] || 'fr'
 
   // Don't show on main inspection page or category list page
-  if (pathname === `/${locale}/inspection/${inspectionId}` || pathname.includes('/categories')) {
+  if (pathname === `/${locale}/inspection/${inspectionId}` || pathname?.includes('/categories')) {
     return null
   }
 
@@ -123,7 +123,7 @@ export function InspectionFloatingNav({ inspectionId, currentCategory }: Inspect
     >
       {INSPECTION_CATEGORIES.map((category) => {
         const Icon = category.icon
-        const isActive = currentCategory === category.id || pathname.includes(`/${category.id}`)
+        const isActive = currentCategory === category.id || pathname?.includes(`/${category.id}`)
 
         return (
           <SpeedDialAction

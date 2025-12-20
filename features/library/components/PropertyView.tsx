@@ -84,7 +84,7 @@ export function PropertyView({
   const theme = useTheme()
   const router = useRouter()
   const params = useParams()
-  const locale = params.locale as string
+  const locale = params?.locale as string
   const t = useTranslations('library.view')
   const tCommon = useTranslations('common')
   const tInspection = useTranslations('inspection')

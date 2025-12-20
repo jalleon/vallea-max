@@ -71,7 +71,7 @@ export function MaterialHeader({ onMenuClick, drawerWidth, mobileOpen }: Materia
   }
 
   const handleLanguageChange = (newLocale: string) => {
-    const currentPath = pathname
+    const currentPath = pathname || '/'
     const segments = currentPath.split('/')
 
     // Replace the locale segment

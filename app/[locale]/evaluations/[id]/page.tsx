@@ -44,7 +44,7 @@ function TabPanel({ children, value, index }: TabPanelProps) {
 export default function AppraisalEditPage() {
   const router = useRouter();
   const params = useParams();
-  const id = params.id as string;
+  const id = params?.id as string;
   const t = useTranslations('evaluations.detail');
   const tSections = useTranslations('evaluations.sections');
   const tEval = useTranslations('evaluations');

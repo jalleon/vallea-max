@@ -42,7 +42,7 @@ export default function CreateInspectionPage() {
   const tCommon = useTranslations('common')
   const router = useRouter()
   const params = useParams()
-  const locale = params.locale as string
+  const locale = params?.locale as string
 
   const [formData, setFormData] = useState({
     address: '',

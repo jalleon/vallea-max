@@ -129,7 +129,7 @@ export default function LandingPage() {
   }
 
   const handleLanguageChange = (newLocale: string) => {
-    const newPathname = pathname.replace(`/${locale}`, `/${newLocale}`)
+    const newPathname = pathname?.replace(`/${locale}`, `/${newLocale}`) || `/${newLocale}`
     router.push(newPathname)
     handleLanguageClose()
   }

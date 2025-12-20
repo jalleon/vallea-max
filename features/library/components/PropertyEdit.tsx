@@ -65,7 +65,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
   const theme = useTheme()
   const router = useRouter()
   const params = useParams()
-  const locale = params.locale as string
+  const locale = params?.locale as string
   const t = useTranslations('library.form')
   const tTypes = useTranslations('library.propertyTypes')
   const tStatus = useTranslations('library.propertyStatus')

@@ -58,7 +58,10 @@
       "Bash(\"D:\\@github\\vallea_immobilier\\vallea-eval-projet.2.0\\vallea-max\\supabase\\migrations\\20251111043547_add_adjustments_data_field.sql\")",
       "Bash(kill:*)",
       "Bash(dir /b \"d:\\@github\\vallea_immobilier\\vallea-eval-projet.2.0\\vallea-max\\features\\evaluations\\components\\AICForm\")",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(timeout /t 8)",
+      "Bash(cmd /c \"taskkill /F /PID 12476\")",
+      "Bash(git diff:*)"
     ],
     "deny": [],
     "ask": []

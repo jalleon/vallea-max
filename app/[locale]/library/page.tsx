@@ -157,7 +157,7 @@ const PROPERTY_TYPES = ['Condo', 'Unifamiliale', 'Plex', 'Appartement', 'Semi-co
 export default function LibraryPage() {
   const t = useTranslations('library')
   const searchParams = useSearchParams()
-  const propertyIdParam = searchParams.get('propertyId')
+  const propertyIdParam = searchParams?.get('propertyId')
 
   const [properties, setProperties] = useState<Property[]>([])
   const [tableProperties, setTableProperties] = useState<any[]>([])

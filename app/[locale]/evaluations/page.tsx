@@ -47,7 +47,7 @@ import { useParams } from 'next/navigation'
 export default function EvaluationsPage() {
   const router = useRouter()
   const params = useParams()
-  const locale = params.locale as string
+  const locale = params?.locale as string
   const { user, loading: authLoading } = useAuth()
   const t = useTranslations('evaluations')
   const tTemplates = useTranslations('evaluations.templates')

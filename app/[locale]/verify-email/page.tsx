@@ -30,7 +30,7 @@ export default function VerifyEmailPage({ params }: { params: { locale: string }
 
   useEffect(() => {
     const verifyEmail = async () => {
-      const token = searchParams.get('token')
+      const token = searchParams?.get('token')
 
       if (!token) {
         setError(locale === 'fr' ? 'Token de vérification manquant' : 'Verification token missing')

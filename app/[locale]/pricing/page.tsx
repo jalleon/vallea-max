@@ -74,7 +74,7 @@ export default function PricingPage() {
   }
 
   const handleLanguageChange = (newLocale: string) => {
-    const newPathname = pathname.replace(`/${locale}`, `/${newLocale}`)
+    const newPathname = pathname?.replace(`/${locale}`, `/${newLocale}`) || `/${newLocale}`
     router.push(newPathname)
   }
 

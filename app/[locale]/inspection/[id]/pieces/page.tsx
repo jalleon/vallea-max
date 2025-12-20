@@ -83,8 +83,8 @@ export default function PiecesPage() {
   const router = useRouter()
   const params = useParams()
   const searchParams = useSearchParams()
-  const locale = params.locale as string
-  const propertyId = params.id as string
+  const locale = params?.locale as string
+  const propertyId = params?.id as string
 
   const [property, setProperty] = useState<Property | null>(null)
   const [selectedFloor, setSelectedFloor] = useState<string | null>(null)
@@ -112,7 +112,7 @@ export default function PiecesPage() {
       setProperty(prop)
 
       // Check if there's a floor query parameter
-      const floorParam = searchParams.get('floor')
+      const floorParam = searchParams?.get('floor')
 
       // Initialize inspection_pieces if not exists or default to RDC floor
       if (!prop.inspection_pieces || !prop.inspection_pieces.floors) {

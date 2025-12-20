@@ -13,10 +13,10 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
 
   // Extract locale from pathname (e.g., /en/dashboard -> en)
-  const locale = pathname.split('/')[1] || 'en'
+  const locale = pathname?.split('/')[1] || 'en'
 
   // Check if current path (without locale) is a public route
-  const pathWithoutLocale = pathname.replace(`/${locale}`, '') || '/'
+  const pathWithoutLocale = pathname?.replace(`/${locale}`, '') || '/'
   const isPublicRoute = PUBLIC_ROUTES.includes(pathWithoutLocale)
 
   useEffect(() => {

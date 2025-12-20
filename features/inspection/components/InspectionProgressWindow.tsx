@@ -106,7 +106,7 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
   const t = useTranslations()
   const router = useRouter()
   const params = useParams()
-  const locale = params.locale as string
+  const locale = params?.locale as string
   const [expandedCategories, setExpandedCategories] = useState<string[]>([])
 
   const toggleCategory = (categoryId: string) => {

@@ -23,7 +23,7 @@ export default function SignupSuccessPage() {
   const locale = useLocale()
   const { user, loading: authLoading } = useAuth()
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing')
-  const sessionId = searchParams.get('session_id')
+  const sessionId = searchParams?.get('session_id')
 
   useEffect(() => {
     if (!sessionId) {

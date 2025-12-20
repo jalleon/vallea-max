@@ -21,7 +21,7 @@ import { useTranslations } from 'next-intl';
 export default function NewEvaluationPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const templateParam = searchParams.get('template') as TemplateType | null;
+  const templateParam = searchParams?.get('template') as TemplateType | null;
   const t = useTranslations('evaluations');
   const tTemplates = useTranslations('evaluations.templates');
   const tWizard = useTranslations('evaluations.wizard');

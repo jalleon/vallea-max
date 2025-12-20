@@ -35,10 +35,10 @@ export default function RoomInspectionPage() {
   const t = useTranslations()
   const router = useRouter()
   const params = useParams()
-  const locale = params.locale as string
-  const propertyId = params.id as string
-  const floorId = params.floorId as string
-  const roomId = params.roomId as string
+  const locale = params?.locale as string
+  const propertyId = params?.id as string
+  const floorId = params?.floorId as string
+  const roomId = params?.roomId as string
 
   const [property, setProperty] = useState<Property | null>(null)
   const [roomData, setRoomData] = useState<Record<string, any>>({})

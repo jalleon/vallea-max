@@ -42,11 +42,11 @@ export default function SignupCheckoutPage() {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   // Get user info from URL params (passed from signup form)
-  const email = searchParams.get('email') || ''
-  const fullName = searchParams.get('name') || ''
-  const organizationName = searchParams.get('organization') || ''
-  const tempPassword = searchParams.get('temp') || ''
-  const verified = searchParams.get('verified') === 'true'
+  const email = searchParams?.get('email') || ''
+  const fullName = searchParams?.get('name') || ''
+  const organizationName = searchParams?.get('organization') || ''
+  const tempPassword = searchParams?.get('temp') || ''
+  const verified = searchParams?.get('verified') === 'true'
 
   const [selectedPlan, setSelectedPlan] = useState<PlanType>('monthly')
   const [selectedCredits, setSelectedCredits] = useState<CreditsBundleType | null>('standard')

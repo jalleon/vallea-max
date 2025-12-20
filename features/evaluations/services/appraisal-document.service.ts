@@ -367,9 +367,9 @@ export class AppraisalDocumentService {
     if (sectionData.description && typeof sectionData.description === 'string') {
       // Strip HTML tags and create paragraphs
       const text = sectionData.description.replace(/<[^>]*>/g, '');
-      const paragraphs = text.split('\n').filter(p => p.trim());
+      const paragraphs = text.split('\n').filter((p: string) => p.trim());
 
-      paragraphs.forEach(para => {
+      paragraphs.forEach((para: string) => {
         content.push(
           new Paragraph({
             text: para.trim(),

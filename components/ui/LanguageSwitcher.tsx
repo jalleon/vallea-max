@@ -20,7 +20,7 @@ export function LanguageSwitcher() {
   const handleChange = (newLocale: string) => {
     startTransition(() => {
       // Replace the locale in the pathname
-      const currentPathWithoutLocale = pathname.replace(/^\/[a-z]{2}/, '')
+      const currentPathWithoutLocale = (pathname || '/').replace(/^\/[a-z]{2}/, '')
       const newPath = newLocale === 'fr'
         ? currentPathWithoutLocale || '/'
         : `/${newLocale}${currentPathWithoutLocale}`
@@ -77,7 +77,7 @@ export function LanguageSwitcherCompact() {
   const toggleLanguage = () => {
     const newLocale = locale === 'fr' ? 'en' : 'fr'
     startTransition(() => {
-      const currentPathWithoutLocale = pathname.replace(/^\/[a-z]{2}/, '')
+      const currentPathWithoutLocale = (pathname || '/').replace(/^\/[a-z]{2}/, '')
       const newPath = newLocale === 'fr'
         ? currentPathWithoutLocale || '/'
         : `/${newLocale}${currentPathWithoutLocale}`

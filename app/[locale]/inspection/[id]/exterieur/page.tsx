@@ -102,8 +102,8 @@ export default function ExterieurPage() {
   const t = useTranslations()
   const router = useRouter()
   const params = useParams()
-  const locale = params.locale as string
-  const propertyId = params.id as string
+  const locale = params?.locale as string
+  const propertyId = params?.id as string
 
   // Get translated arrays
   const AMENAGEMENT_ITEMS = getAmenagementItems(t)
