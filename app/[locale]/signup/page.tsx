@@ -49,6 +49,7 @@ export default function SignupPage() {
   const supabase = createClient()
 
   const [fullName, setFullName] = useState('')
+  const [organizationName, setOrganizationName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -61,39 +62,50 @@ export default function SignupPage() {
     e.preventDefault()
     setError('')
     setSuccess(false)
+    setLoading(true)
 
     // Validation
     if (password !== confirmPassword) {
       setError(t('errors.passwordMismatch'))
+      setLoading(false)
       return
     }
 
     if (password.length < 6) {
       setError(t('errors.passwordTooShort'))
+      setLoading(false)
       return
     }
 
-    setLoading(true)
+    try {
+      // Send verification email
+      const response = await fetch('/api/auth/send-verification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          fullName,
+          organizationName,
+          tempPassword: btoa(password), // Base64 encode password temporarily
+          locale,
+        }),
+      })
 
-    // Clear any existing session first to avoid conflicts
-    await supabase.auth.signOut()
+      const data = await response.json()
 
-    const { error: signUpError } = await signUp(email, password, fullName)
-
-    if (signUpError) {
-      if (signUpError.message.includes('already registered')) {
-        setError(t('errors.emailExists'))
-      } else {
-        setError(signUpError.message)
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send verification email')
       }
-      setLoading(false)
-    } else {
+
       setSuccess(true)
+      setError('')
+    } catch (err: any) {
+      setError(err.message || 'An error occurred')
+      setSuccess(false)
+    } finally {
       setLoading(false)
-      // Auto-login after signup
-      setTimeout(() => {
-        router.push(`/${locale}/dashboard`)
-      }, 2000)
     }
   }
 
@@ -305,7 +317,9 @@ export default function SignupPage() {
 
               {success && (
                 <Alert severity="success" sx={{ mb: 3, borderRadius: '8px' }}>
-                  {t('success')}
+                  {locale === 'fr'
+                    ? 'Email de vérification envoyé! Veuillez vérifier votre boîte de réception et cliquer sur le lien pour continuer.'
+                    : 'Verification email sent! Please check your inbox and click the link to continue.'}
                 </Alert>
               )}
 
@@ -376,6 +390,26 @@ export default function SignupPage() {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   required
+                  sx={{
+                    mb: 2,
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                    },
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Person sx={{ color: '#6B7280' }} />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+
+                <TextField
+                  fullWidth
+                  label={locale === 'fr' ? 'Organisation (optionnel)' : 'Organization (optional)'}
+                  value={organizationName}
+                  onChange={(e) => setOrganizationName(e.target.value)}
                   sx={{
                     mb: 2,
                     '& .MuiOutlinedInput-root': {

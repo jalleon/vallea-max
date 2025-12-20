@@ -22,9 +22,10 @@ import { Property, PropertyCreateInput, PropertyUpdateInput, PropertyType, Prope
 import { PROPERTY_TYPES, PROPERTY_STATUSES, BASEMENT_TYPES } from '../constants/property.constants'
 import { formatCurrency, convertM2ToPi2, convertPi2ToM2 } from '@/lib/utils/formatting'
 import { useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 
 const propertySchema = z.object({
-  adresse: z.string().min(1, 'Adresse requise'),
+  adresse: z.string().min(1, 'Address required'),
   ville: z.string().optional(),
   municipalite: z.string().optional(),
   code_postal: z.string().optional(),
@@ -73,6 +74,10 @@ const propertyStatuses: PropertyStatus[] = [...PROPERTY_STATUSES]
 const basementTypes: BasementType[] = [...BASEMENT_TYPES]
 
 export function PropertyForm({ property, onSubmit, loading = false }: PropertyFormProps) {
+  const t = useTranslations('library.form')
+  const tTypes = useTranslations('library.propertyTypes')
+  const tStatus = useTranslations('library.propertyStatus')
+  const tBasement = useTranslations('library.basementTypes')
   const {
     control,
     handleSubmit,
@@ -142,7 +147,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
         {/* Basic Information */}
         <Grid item xs={12}>
           <Typography variant="h6" gutterBottom>
-            Informations de base
+            {t('basicInformation')}
           </Typography>
         </Grid>
 
@@ -153,7 +158,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Adresse *"
+                label={t('address') + ' *'}
                 fullWidth
                 error={!!errors.adresse}
                 helperText={errors.adresse?.message}
@@ -169,7 +174,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Ville"
+                label={t('city')}
                 fullWidth
               />
             )}
@@ -183,7 +188,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Municipalité/District"
+                label={t('municipality')}
                 fullWidth
               />
             )}
@@ -197,7 +202,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Code postal"
+                label={t('postalCode')}
                 fullWidth
               />
             )}
@@ -211,23 +216,23 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Province"
+                label={t('province')}
                 fullWidth
                 select
               >
-                <MenuItem value="QC">Québec</MenuItem>
-                <MenuItem value="ON">Ontario</MenuItem>
-                <MenuItem value="BC">Colombie-Britannique</MenuItem>
-                <MenuItem value="AB">Alberta</MenuItem>
-                <MenuItem value="MB">Manitoba</MenuItem>
-                <MenuItem value="SK">Saskatchewan</MenuItem>
-                <MenuItem value="NS">Nouvelle-Écosse</MenuItem>
-                <MenuItem value="NB">Nouveau-Brunswick</MenuItem>
-                <MenuItem value="PE">Île-du-Prince-Édouard</MenuItem>
-                <MenuItem value="NL">Terre-Neuve-et-Labrador</MenuItem>
-                <MenuItem value="YT">Yukon</MenuItem>
-                <MenuItem value="NT">Territoires du Nord-Ouest</MenuItem>
-                <MenuItem value="NU">Nunavut</MenuItem>
+                <MenuItem value="QC">{t('provinces.QC')}</MenuItem>
+                <MenuItem value="ON">{t('provinces.ON')}</MenuItem>
+                <MenuItem value="BC">{t('provinces.BC')}</MenuItem>
+                <MenuItem value="AB">{t('provinces.AB')}</MenuItem>
+                <MenuItem value="MB">{t('provinces.MB')}</MenuItem>
+                <MenuItem value="SK">{t('provinces.SK')}</MenuItem>
+                <MenuItem value="NS">{t('provinces.NS')}</MenuItem>
+                <MenuItem value="NB">{t('provinces.NB')}</MenuItem>
+                <MenuItem value="PE">{t('provinces.PE')}</MenuItem>
+                <MenuItem value="NL">{t('provinces.NL')}</MenuItem>
+                <MenuItem value="YT">{t('provinces.YT')}</MenuItem>
+                <MenuItem value="NT">{t('provinces.NT')}</MenuItem>
+                <MenuItem value="NU">{t('provinces.NU')}</MenuItem>
               </TextField>
             )}
           />
@@ -237,7 +242,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
         <Grid item xs={12}>
           <Divider sx={{ my: 2 }} />
           <Typography variant="h6" gutterBottom>
-            Détails de la propriété
+            {t('propertyDetails')}
           </Typography>
         </Grid>
 
@@ -247,10 +252,10 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
             control={control}
             render={({ field }) => (
               <FormControl fullWidth>
-                <InputLabel>Type de propriété</InputLabel>
-                <Select {...field} label="Type de propriété">
+                <InputLabel>{t('propertyType')}</InputLabel>
+                <Select {...field} label={t('propertyType')}>
                   {propertyTypes.map(type => (
-                    <MenuItem key={type} value={type}>{type}</MenuItem>
+                    <MenuItem key={type} value={type}>{tTypes(type)}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -265,9 +270,9 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Genre de propriété"
+                label={t('propertyGenre')}
                 fullWidth
-                placeholder="Ex: Détachée, Jumelée, En rangée..."
+                placeholder={t('propertyGenrePlaceholder')}
               />
             )}
           />
@@ -280,7 +285,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Année de construction"
+                label={t('constructionYear')}
                 type="number"
                 fullWidth
                 error={!!errors.annee_construction}
@@ -298,7 +303,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Zonage"
+                label={t('zoning')}
                 fullWidth
               />
             )}
@@ -309,7 +314,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
         <Grid item xs={12}>
           <Divider sx={{ my: 2 }} />
           <Typography variant="h6" gutterBottom>
-            Prix et vente
+            {t('pricingAndSale')}
           </Typography>
         </Grid>
 
@@ -320,7 +325,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Prix demandé"
+                label={t('askingPrice')}
                 type="number"
                 fullWidth
                 InputProps={{
@@ -339,7 +344,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Prix de vente"
+                label={t('salePrice')}
                 type="number"
                 fullWidth
                 InputProps={{
@@ -357,10 +362,10 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
             control={control}
             render={({ field }) => (
               <FormControl fullWidth>
-                <InputLabel>Statut</InputLabel>
-                <Select {...field} label="Statut">
+                <InputLabel>{t('status')}</InputLabel>
+                <Select {...field} label={t('status')}>
                   {propertyStatuses.map(status => (
-                    <MenuItem key={status} value={status}>{status}</MenuItem>
+                    <MenuItem key={status} value={status}>{tStatus(status)}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -375,7 +380,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Date de vente"
+                label={t('saleDate')}
                 type="date"
                 fullWidth
                 value={field.value ? field.value.toISOString().split('T')[0] : ''}
@@ -395,7 +400,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Numéro MLS"
+                label={t('mlsNumber')}
                 fullWidth
               />
             )}
@@ -406,7 +411,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
         <Grid item xs={12}>
           <Divider sx={{ my: 2 }} />
           <Typography variant="h6" gutterBottom>
-            Dimensions
+            {t('dimensions')}
           </Typography>
         </Grid>
 
@@ -417,7 +422,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Superficie terrain (m²)"
+                label={t('lotAreaM2')}
                 type="number"
                 fullWidth
                 InputProps={{
@@ -436,7 +441,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Superficie terrain (pi²)"
+                label={t('lotAreaPi2')}
                 type="number"
                 fullWidth
                 InputProps={{
@@ -455,7 +460,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Superficie habitable (m²)"
+                label={t('livingAreaM2')}
                 type="number"
                 fullWidth
                 InputProps={{
@@ -474,7 +479,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Superficie habitable (pi²)"
+                label={t('livingAreaPi2')}
                 type="number"
                 fullWidth
                 InputProps={{
@@ -490,7 +495,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
         <Grid item xs={12}>
           <Divider sx={{ my: 2 }} />
           <Typography variant="h6" gutterBottom>
-            Caractéristiques
+            {t('features')}
           </Typography>
         </Grid>
 
@@ -501,7 +506,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Nombre de chambres"
+                label={t('bedroomCount')}
                 type="number"
                 fullWidth
                 onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
@@ -517,7 +522,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Salles de bain"
+                label={t('bathroomCount')}
                 type="number"
                 fullWidth
                 inputProps={{ step: 0.5 }}
@@ -534,7 +539,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Salles d'eau"
+                label={t('powderRoomCount')}
                 type="number"
                 fullWidth
                 inputProps={{ step: 0.5 }}
@@ -550,10 +555,10 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
             control={control}
             render={({ field }) => (
               <FormControl fullWidth>
-                <InputLabel>Type de sous-sol</InputLabel>
-                <Select {...field} label="Type de sous-sol">
+                <InputLabel>{t('basementType')}</InputLabel>
+                <Select {...field} label={t('basementType')}>
                   {basementTypes.map(type => (
-                    <MenuItem key={type} value={type}>{type}</MenuItem>
+                    <MenuItem key={type} value={type}>{tBasement(type)}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -568,9 +573,9 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Stationnement"
+                label={t('parking')}
                 fullWidth
-                placeholder="Ex: Garage double, Extérieur..."
+                placeholder={t('parkingPlaceholder')}
               />
             )}
           />
@@ -583,7 +588,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Notes"
+                label={t('notes')}
                 multiline
                 rows={4}
                 fullWidth
@@ -596,7 +601,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
         <Grid item xs={12}>
           <Divider sx={{ my: 2 }} />
           <Typography variant="h6" gutterBottom>
-            Options
+            {t('options')}
           </Typography>
         </Grid>
 
@@ -607,7 +612,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
             render={({ field }) => (
               <FormControlLabel
                 control={<Switch {...field} checked={field.value || false} />}
-                label="Partagé avec l'équipe"
+                label={t('sharedWithTeam')}
               />
             )}
           />
@@ -620,7 +625,7 @@ export function PropertyForm({ property, onSubmit, loading = false }: PropertyFo
             render={({ field }) => (
               <FormControlLabel
                 control={<Switch {...field} checked={field.value || false} />}
-                label="Utiliser comme modèle"
+                label={t('useAsTemplate')}
               />
             )}
           />

@@ -16,6 +16,8 @@ import {
   Toolbar,
   useTheme,
   useMediaQuery,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material'
 import { CheckCircle, ArrowBack, Language as LanguageIcon } from '@mui/icons-material'
 import { useTranslations, useLocale } from 'next-intl'
@@ -34,6 +36,7 @@ export default function PricingPage() {
   const { user } = useAuth()
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'annual'>('annual')
 
   const handleSubscribe = async (planType: string) => {
     if (!user) {
@@ -231,93 +234,70 @@ export default function PricingPage() {
             </Alert>
           )}
 
-          {/* Pricing Cards */}
-          <Grid container spacing={4} justifyContent="center">
-            {/* Monthly Plan */}
-            <Grid item xs={12} md={5}>
-              <Card
-                sx={{
-                  height: '100%',
-                  position: 'relative',
-                  background: 'rgba(255, 255, 255, 0.7)',
-                  backdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(26, 31, 54, 0.08)',
-                  borderRadius: '16px',
-                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                  '&:hover': {
-                    transform: 'translateY(-8px)',
-                    boxShadow: '0 20px 48px rgba(0, 0, 0, 0.12)',
-                    border: '1px solid rgba(26, 31, 54, 0.15)',
+          {/* Billing Period Toggle */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 6 }}>
+            <ToggleButtonGroup
+              value={billingPeriod}
+              exclusive
+              onChange={(_, value) => value && setBillingPeriod(value)}
+              sx={{
+                bgcolor: 'rgba(255, 255, 255, 0.7)',
+                backdropFilter: 'blur(12px)',
+                borderRadius: '12px',
+                p: 0.5,
+                border: '1px solid rgba(26, 31, 54, 0.08)',
+                '& .MuiToggleButton-root': {
+                  border: 'none',
+                  borderRadius: '10px',
+                  px: 4,
+                  py: 1.5,
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                  fontWeight: 500,
+                  color: '#4A5568',
+                  '&.Mui-selected': {
+                    background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                    color: 'white',
+                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #0ea570 0%, #047857 100%)',
+                    },
                   },
-                }}
-              >
-                <CardContent sx={{ p: 5 }}>
-                  <Typography
-                    variant="h5"
-                    fontWeight={600}
-                    gutterBottom
-                    align="center"
-                    sx={{ color: '#1A1F36', mb: 3 }}
-                  >
-                    {t('monthly')}
-                  </Typography>
-                  <Box sx={{ textAlign: 'center', my: 4 }}>
-                    <Typography variant="h2" fontWeight={600} component="span" sx={{ color: '#1A1F36' }}>
-                      {STRIPE_PLANS.monthly.price}$
-                    </Typography>
-                    <Typography variant="h6" sx={{ color: '#4A5568' }} component="span">
-                      {' '}
-                      / {t('month')}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: '#6B7280', mt: 1 }}>
-                      CAD
-                    </Typography>
-                  </Box>
-                  <Stack spacing={2.5} sx={{ my: 4 }}>
-                    {benefits.map((benefit, index) => (
-                      <Stack direction="row" spacing={2} key={index}>
-                        <CheckCircle sx={{ fontSize: 20, mt: 0.2, color: '#10B981' }} />
-                        <Typography variant="body2" sx={{ color: '#4A5568', lineHeight: 1.7 }}>
-                          {benefit}
-                        </Typography>
-                      </Stack>
-                    ))}
-                  </Stack>
-                  <Button
-                    variant="outlined"
-                    size="large"
-                    fullWidth
-                    onClick={() => handleSubscribe('monthly')}
-                    disabled={loading === 'monthly'}
+                  '&:hover': {
+                    bgcolor: 'rgba(16, 185, 129, 0.05)',
+                  },
+                },
+              }}
+            >
+              <ToggleButton value="monthly">{t('monthly')}</ToggleButton>
+              <ToggleButton value="annual">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {t('annual')}
+                  <Box
                     sx={{
-                      mt: 2,
-                      py: 1.5,
-                      fontSize: '1rem',
-                      fontWeight: 500,
-                      borderRadius: '8px',
-                      borderColor: '#1A1F36',
-                      color: '#1A1F36',
-                      '&:hover': {
-                        borderColor: '#10B981',
-                        bgcolor: 'rgba(16, 185, 129, 0.05)',
-                      },
+                      bgcolor: billingPeriod === 'annual' ? 'rgba(255, 255, 255, 0.2)' : '#10B981',
+                      color: 'white',
+                      px: 1.5,
+                      py: 0.25,
+                      borderRadius: '6px',
+                      fontSize: '0.7rem',
+                      fontWeight: 600,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.03em',
                     }}
                   >
-                    {loading === 'monthly' ? (
-                      <CircularProgress size={24} />
-                    ) : (
-                      t('getStarted') || 'Get Started'
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
+                    {locale === 'fr' ? 'Économie 20%' : 'Save 20%'}
+                  </Box>
+                </Box>
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
 
-            {/* Annual Plan */}
-            <Grid item xs={12} md={5}>
+          {/* Single Pricing Card */}
+          <Grid container justifyContent="center">
+            <Grid item xs={12} md={6} lg={5}>
               <Card
                 sx={{
-                  height: '100%',
                   position: 'relative',
                   background: 'rgba(255, 255, 255, 0.9)',
                   backdropFilter: 'blur(12px)',
@@ -332,26 +312,28 @@ export default function PricingPage() {
                   },
                 }}
               >
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: 16,
-                    right: 16,
-                    background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-                    color: 'white',
-                    px: 3,
-                    py: 0.75,
-                    borderRadius: '8px',
-                    fontSize: '0.7rem',
-                    fontWeight: 600,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    zIndex: 1,
-                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
-                  }}
-                >
-                  {t('popular')}
-                </Box>
+                {billingPeriod === 'annual' && (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 16,
+                      right: 16,
+                      background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                      color: 'white',
+                      px: 3,
+                      py: 0.75,
+                      borderRadius: '8px',
+                      fontSize: '0.7rem',
+                      fontWeight: 600,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      zIndex: 1,
+                      boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                    }}
+                  >
+                    {t('popular')}
+                  </Box>
+                )}
                 <CardContent sx={{ p: 5 }}>
                   <Typography
                     variant="h5"
@@ -360,19 +342,26 @@ export default function PricingPage() {
                     align="center"
                     sx={{ color: '#1A1F36', mb: 3 }}
                   >
-                    {t('annual')}
+                    {locale === 'fr' ? 'Plan Professionnel' : 'Professional Plan'}
                   </Typography>
                   <Box sx={{ textAlign: 'center', my: 4 }}>
-                    <Typography variant="h2" fontWeight={600} component="span" sx={{ color: '#10B981' }}>
-                      {STRIPE_PLANS.annual.price}$
+                    <Typography
+                      variant="h2"
+                      fontWeight={600}
+                      component="span"
+                      sx={{ color: billingPeriod === 'annual' ? '#10B981' : '#1A1F36' }}
+                    >
+                      {billingPeriod === 'monthly' ? `${STRIPE_PLANS.monthly.price}$` : `${STRIPE_PLANS.annual.price}$`}
                     </Typography>
                     <Typography variant="h6" sx={{ color: '#4A5568' }} component="span">
                       {' '}
                       / {t('month')}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: '#10B981', fontWeight: 600, mt: 1 }}>
-                      {STRIPE_PLANS.annual.displayPrice}$ {t('billedAnnually')}
-                    </Typography>
+                    {billingPeriod === 'annual' && (
+                      <Typography variant="body2" sx={{ color: '#10B981', fontWeight: 600, mt: 1 }}>
+                        {STRIPE_PLANS.annual.displayPrice}$ {t('billedAnnually')}
+                      </Typography>
+                    )}
                     <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       CAD
                     </Typography>
@@ -386,19 +375,21 @@ export default function PricingPage() {
                         </Typography>
                       </Stack>
                     ))}
-                    <Stack direction="row" spacing={2}>
-                      <CheckCircle sx={{ fontSize: 20, mt: 0.2, color: '#10B981' }} />
-                      <Typography variant="body2" fontWeight={600} sx={{ color: '#10B981', lineHeight: 1.7 }}>
-                        {t('save240')}
-                      </Typography>
-                    </Stack>
+                    {billingPeriod === 'annual' && (
+                      <Stack direction="row" spacing={2}>
+                        <CheckCircle sx={{ fontSize: 20, mt: 0.2, color: '#10B981' }} />
+                        <Typography variant="body2" fontWeight={600} sx={{ color: '#10B981', lineHeight: 1.7 }}>
+                          {t('save240')}
+                        </Typography>
+                      </Stack>
+                    )}
                   </Stack>
                   <Button
                     variant="contained"
                     size="large"
                     fullWidth
-                    onClick={() => handleSubscribe('annual')}
-                    disabled={loading === 'annual'}
+                    onClick={() => handleSubscribe(billingPeriod)}
+                    disabled={loading === billingPeriod}
                     sx={{
                       mt: 2,
                       py: 1.5,
@@ -413,7 +404,7 @@ export default function PricingPage() {
                       },
                     }}
                   >
-                    {loading === 'annual' ? (
+                    {loading === billingPeriod ? (
                       <CircularProgress size={24} color="inherit" />
                     ) : (
                       t('getStarted') || 'Get Started'

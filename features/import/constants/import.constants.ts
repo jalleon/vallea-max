@@ -93,7 +93,7 @@ export const FIELD_MAPPINGS: Record<string, string> = {
 
   // Parking
   stationnement: 'stationnement',
-  parkingExtras: 'extras',
+  parkingExtras: 'ameliorations_hors_sol',
   garages: 'stationnement',
   parkingSpaces: 'stationnement',
 

@@ -30,6 +30,8 @@ import { useRouter, useParams } from 'next/navigation'
 import { propertiesSupabaseService } from '@/features/library/_api/properties-supabase.service'
 import { Property } from '@/features/library/types/property.types'
 import { MaterialDashboardLayout } from '@/components/layout/MaterialDashboardLayout'
+import { InspectionFloatingNav } from '@/features/inspection/components/InspectionFloatingNav'
+import { CategoryHeader } from '@/features/inspection/components/CategoryHeader'
 
 const FEET_TO_METERS = 0.3048
 
@@ -287,7 +289,7 @@ export default function GaragePage() {
 
   return (
     <MaterialDashboardLayout>
-      <Box sx={{ maxWidth: 1400, mx: 'auto', p: 3 }}>
+      <Box sx={{ maxWidth: 1400, mx: 'auto', p: 3, pb: { xs: 12, md: 3 } }}>
         {/* Breadcrumbs */}
         <Breadcrumbs separator={<NavigateNext fontSize="small" />} sx={{ mb: 3 }}>
           <Link
@@ -338,16 +340,22 @@ export default function GaragePage() {
           )}
         </Box>
 
-        {/* Header */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <IconButton onClick={() => router.push(`/${locale}/inspection/${propertyId}/categories`)} sx={{ bgcolor: 'grey.100' }}>
-              <ArrowBack />
-            </IconButton>
-            <Typography variant="h4" fontWeight={700}>
-              {t('inspection.garage.title')}
-            </Typography>
-          </Box>
+        {/* Category Header */}
+        <CategoryHeader
+          categoryName={t('inspection.garage.title')}
+          categoryColor="#4CAF50"
+          categoryIcon={DirectionsCar}
+          progress={property?.inspection_garage?.completedAt ? 100 : 0}
+          completedItems={property?.inspection_garage?.completedAt ? 1 : 0}
+          totalItems={1}
+          subtitle="Garage et stationnement"
+        />
+
+        {/* Back Button */}
+        <Box sx={{ mb: 3 }}>
+          <IconButton onClick={() => router.push(`/${locale}/inspection/${propertyId}/categories`)} sx={{ bgcolor: 'grey.100' }}>
+            <ArrowBack />
+          </IconButton>
         </Box>
 
         {/* Form */}
@@ -538,6 +546,9 @@ export default function GaragePage() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Floating Navigation */}
+      <InspectionFloatingNav inspectionId={propertyId} currentCategory="garage" />
     </MaterialDashboardLayout>
   )
 }

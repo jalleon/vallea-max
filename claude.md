@@ -260,6 +260,41 @@ npm run dev        # Development server
 npm run lint       # ESLint check
 ```
 
+### Environment Variables & Client Components
+
+**IMPORTANT: `process.env` in Client Components**
+
+In Next.js 14 App Router, `process.env.NEXT_PUBLIC_*` variables **do not work reliably in client components** during production builds, even when properly configured in Vercel.
+
+**Best Practice for Client-Side APIs (Google Maps, etc.):**
+
+✅ **DO**: Hardcode public API keys directly in client components
+```typescript
+// ✅ CORRECT - Hardcode the key
+<iframe src={`https://www.google.com/maps/embed/v1/place?key=AIzaSy...&q=${address}`} />
+```
+
+❌ **DON'T**: Use process.env in client components
+```typescript
+// ❌ INCORRECT - Won't work in production
+<iframe src={`https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&q=${address}`} />
+```
+
+**Why This Is Safe:**
+- API keys restricted by HTTP referrers are **designed to be public**
+- Google/Stripe/etc. expect these keys to be visible in browser source
+- HTTP referrer restrictions prevent unauthorized use
+- Standard industry practice (used by Google, Stripe, Vercel, etc.)
+
+**Google Maps API Key Configuration:**
+- Key: `AIzaSyDADvWmeRywpjT0oP_Fa8WrxV0Lnt-bEaw`
+- Restrictions: HTTP referrers
+  - `http://localhost:3001/*`
+  - `https://www.valeamax.com/*`
+  - `https://*.valeamax.com/*`
+  - `https://*.vercel.app/*`
+- Enabled APIs: Maps Embed API
+
 ---
 
 ## 📝 Naming Conventions

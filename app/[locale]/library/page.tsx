@@ -1,6 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import {
   Typography,
   Grid,
@@ -72,30 +74,31 @@ import { ProtectedRoute } from '../../../components/auth/ProtectedRoute'
 // Mock organization ID - in a real app this would come from auth context
 const MOCK_ORG_ID = 'mock-org-id'
 
-const stats = [
+// Stats configuration (titles will be translated dynamically)
+const statsConfig = [
   {
-    title: 'Total Propriétés',
+    key: 'totalProperties',
     value: '156',
     change: '+12',
     icon: Home,
     color: 'primary'
   },
   {
-    title: 'Valeur Portfolio',
+    key: 'portfolioValue',
     value: '47.2M $',
     change: '+8.3%',
     icon: AttachMoney,
     color: 'success'
   },
   {
-    title: 'Évaluations ce mois',
+    key: 'evaluationsThisMonth',
     value: '23',
     change: '+15%',
     icon: TrendingUp,
     color: 'info'
   },
   {
-    title: 'Nouvelles propriétés',
+    key: 'newProperties',
     value: '8',
     change: '+2',
     icon: Add,
@@ -152,6 +155,10 @@ const convertToTableFormat = (property: Property, index: number): any => {
 const PROPERTY_TYPES = ['Condo', 'Unifamiliale', 'Plex', 'Appartement', 'Semi-commercial', 'Terrain', 'Commercial', 'Autre'] as const
 
 export default function LibraryPage() {
+  const t = useTranslations('library')
+  const searchParams = useSearchParams()
+  const propertyIdParam = searchParams.get('propertyId')
+
   const [properties, setProperties] = useState<Property[]>([])
   const [tableProperties, setTableProperties] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -185,6 +192,18 @@ export default function LibraryPage() {
   useEffect(() => {
     loadProperties()
   }, [])
+
+  // Auto-open property view if propertyId is in URL
+  useEffect(() => {
+    if (propertyIdParam && properties.length > 0) {
+      const property = properties.find(p => p.id === propertyIdParam)
+      if (property) {
+        const index = properties.findIndex(p => p.id === propertyIdParam)
+        setViewPropertyIndex(index)
+        setViewProperty(property)
+      }
+    }
+  }, [propertyIdParam, properties])
 
   // Keyboard shortcut handler
   useEffect(() => {
@@ -538,10 +557,10 @@ export default function LibraryPage() {
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Box>
               <Typography variant="h4" fontWeight={700} gutterBottom>
-                Bibliothèque de Propriétés
+                {t('title')}
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Gérez vos propriétés immobilières
+                {t('subtitle')}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
@@ -553,7 +572,7 @@ export default function LibraryPage() {
                   onClick={handleDeleteSelected}
                   sx={{ borderRadius: 3, whiteSpace: 'nowrap' }}
                 >
-                  Supprimer ({selectedRows.length})
+                  {t('deleteSelected', { count: selectedRows.length })}
                 </Button>
               )}
               <Button
@@ -561,7 +580,7 @@ export default function LibraryPage() {
                 startIcon={<Download />}
                 sx={{ borderRadius: 3, whiteSpace: 'nowrap' }}
               >
-                Exporter
+                {t('export')}
               </Button>
               <Button
                 variant="contained"
@@ -569,7 +588,7 @@ export default function LibraryPage() {
                 sx={{ borderRadius: 3, whiteSpace: 'nowrap' }}
                 onClick={() => handleEdit()}
               >
-                Nouvelle Propriété
+                {t('newProperty')}
               </Button>
             </Box>
           </Box>
@@ -583,7 +602,7 @@ export default function LibraryPage() {
                 <TextField
                   fullWidth
                   size="small"
-                  placeholder="Rechercher par adresse, ville, MLS, ID..."
+                  placeholder={t('search.placeholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   InputProps={{
@@ -609,13 +628,13 @@ export default function LibraryPage() {
               </Grid>
               <Grid item xs={12} md={3}>
                 <FormControl fullWidth size="small">
-                  <InputLabel>Type</InputLabel>
+                  <InputLabel>{t('search.type')}</InputLabel>
                   <Select
                     value={typeFilter}
-                    label="Type"
+                    label={t('search.type')}
                     onChange={(e) => setTypeFilter(e.target.value)}
                   >
-                    <MenuItem value="">Tous les types</MenuItem>
+                    <MenuItem value="">{t('search.allTypes')}</MenuItem>
                     {PROPERTY_TYPES.map((type) => (
                       <MenuItem key={type} value={type}>
                         {type}
@@ -626,13 +645,13 @@ export default function LibraryPage() {
               </Grid>
               <Grid item xs={12} md={3}>
                 <FormControl fullWidth size="small">
-                  <InputLabel>Ville</InputLabel>
+                  <InputLabel>{t('search.city')}</InputLabel>
                   <Select
                     value={cityFilter}
-                    label="Ville"
+                    label={t('search.city')}
                     onChange={(e) => setCityFilter(e.target.value)}
                   >
-                    <MenuItem value="">Toutes les villes</MenuItem>
+                    <MenuItem value="">{t('search.allCities')}</MenuItem>
                     {availableCities.map((city) => (
                       <MenuItem key={city} value={city}>
                         {city}
@@ -651,7 +670,7 @@ export default function LibraryPage() {
                   onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
                   sx={{ borderRadius: 2 }}
                 >
-                  Filtres Avancés {showAdvancedFilters ? '▲' : '▼'}
+                  {t('search.advancedFilters')} {showAdvancedFilters ? '▲' : '▼'}
                 </Button>
               </Grid>
 
@@ -660,13 +679,13 @@ export default function LibraryPage() {
                 <>
                   <Grid item xs={12}>
                     <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-                      Date de vente
+                      {t('search.soldDate')}
                     </Typography>
                     <Grid container spacing={2}>
                       <Grid item xs={6}>
                         <TextField
                           fullWidth
-                          label="De"
+                          label={t('search.from')}
                           type="date"
                           value={dateFrom}
                           onChange={(e) => setDateFrom(e.target.value)}
@@ -677,7 +696,7 @@ export default function LibraryPage() {
                       <Grid item xs={6}>
                         <TextField
                           fullWidth
-                          label="À"
+                          label={t('search.to')}
                           type="date"
                           value={dateTo}
                           onChange={(e) => setDateTo(e.target.value)}
@@ -690,13 +709,13 @@ export default function LibraryPage() {
 
                   <Grid item xs={12} md={6}>
                     <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-                      Prix de vente
+                      {t('search.soldPrice')}
                     </Typography>
                     <Grid container spacing={2}>
                       <Grid item xs={6}>
                         <TextField
                           fullWidth
-                          label="Minimum"
+                          label={t('search.minimum')}
                           type="number"
                           value={priceFrom}
                           onChange={(e) => setPriceFrom(e.target.value)}
@@ -709,7 +728,7 @@ export default function LibraryPage() {
                       <Grid item xs={6}>
                         <TextField
                           fullWidth
-                          label="Maximum"
+                          label={t('search.maximum')}
                           type="number"
                           value={priceTo}
                           onChange={(e) => setPriceTo(e.target.value)}
@@ -724,13 +743,13 @@ export default function LibraryPage() {
 
                   <Grid item xs={12} md={6}>
                     <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-                      Année de construction
+                      {t('search.constructionYear')}
                     </Typography>
                     <Grid container spacing={2}>
                       <Grid item xs={6}>
                         <TextField
                           fullWidth
-                          label="De"
+                          label={t('search.from')}
                           type="number"
                           value={yearFrom}
                           onChange={(e) => setYearFrom(e.target.value)}
@@ -740,7 +759,7 @@ export default function LibraryPage() {
                       <Grid item xs={6}>
                         <TextField
                           fullWidth
-                          label="À"
+                          label={t('search.to')}
                           type="number"
                           value={yearTo}
                           onChange={(e) => setYearTo(e.target.value)}
@@ -756,14 +775,14 @@ export default function LibraryPage() {
                 <Grid item xs={12}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Typography variant="body2" color="text.secondary">
-                      {filteredProperties.length} résultat{filteredProperties.length !== 1 ? 's' : ''} trouvé{filteredProperties.length !== 1 ? 's' : ''}
+                      {t('search.resultsFound', { count: filteredProperties.length })}
                     </Typography>
                     <Button
                       size="small"
                       onClick={handleClearFilters}
                       startIcon={<Clear />}
                     >
-                      Effacer les filtres
+                      {t('search.clearFilters')}
                     </Button>
                   </Box>
                 </Grid>
@@ -777,7 +796,7 @@ export default function LibraryPage() {
           <Card sx={{ p: 4, textAlign: 'center' }}>
             <CircularProgress size={40} />
             <Typography variant="body1" sx={{ mt: 2 }}>
-              Loading properties...
+              {t('search.loadingProperties')}
             </Typography>
           </Card>
         )}
@@ -787,7 +806,7 @@ export default function LibraryPage() {
           <Card sx={{ p: 3, mb: 3 }}>
             <Alert severity="error" action={
               <Button size="small" onClick={loadProperties}>
-                Retry
+                {t('search.retry')}
               </Button>
             }>
               {error}
@@ -816,7 +835,7 @@ export default function LibraryPage() {
                       direction={orderBy === 'idNo' ? order : 'asc'}
                       onClick={() => handleRequestSort('idNo')}
                     >
-                      ID No.
+                      {t('table.idNo')}
                     </TableSortLabel>
                   </TableCell>
                   <TableCell sx={{ fontWeight: 600, width: 'auto', py: 1, bgcolor: 'background.paper' }}>
@@ -825,7 +844,7 @@ export default function LibraryPage() {
                       direction={orderBy === 'address' ? order : 'asc'}
                       onClick={() => handleRequestSort('address')}
                     >
-                      Adresse
+                      {t('table.address')}
                     </TableSortLabel>
                   </TableCell>
                   <TableCell sx={{ fontWeight: 600, minWidth: 120, py: 1, bgcolor: 'background.paper' }}>
@@ -834,7 +853,7 @@ export default function LibraryPage() {
                       direction={orderBy === 'city' ? order : 'asc'}
                       onClick={() => handleRequestSort('city')}
                     >
-                      Ville
+                      {t('table.city')}
                     </TableSortLabel>
                   </TableCell>
                   <TableCell sx={{ fontWeight: 600, minWidth: 130, py: 1, bgcolor: 'background.paper' }}>
@@ -844,7 +863,7 @@ export default function LibraryPage() {
                       onClick={() => handleRequestSort('soldPrice')}
                     >
                       <Box component="span" sx={{ whiteSpace: 'normal', lineHeight: 1.2 }}>
-                        Prix vente/<br />Valeur eff.
+                        {t('table.soldPrice')}
                       </Box>
                     </TableSortLabel>
                   </TableCell>
@@ -854,7 +873,7 @@ export default function LibraryPage() {
                       direction={orderBy === 'soldDate' ? order : 'asc'}
                       onClick={() => handleRequestSort('soldDate')}
                     >
-                      Date Vente / Effective
+                      {t('table.soldDate')}
                     </TableSortLabel>
                   </TableCell>
                   <TableCell sx={{ fontWeight: 600, minWidth: 150, py: 1, bgcolor: 'background.paper' }}>
@@ -863,7 +882,7 @@ export default function LibraryPage() {
                       direction={orderBy === 'propertyType' ? order : 'asc'}
                       onClick={() => handleRequestSort('propertyType')}
                     >
-                      Type
+                      {t('table.type')}
                     </TableSortLabel>
                   </TableCell>
                   <TableCell sx={{ fontWeight: 600, minWidth: 100, py: 1, bgcolor: 'background.paper' }}>
@@ -872,7 +891,7 @@ export default function LibraryPage() {
                       direction={orderBy === 'status' ? order : 'asc'}
                       onClick={() => handleRequestSort('status')}
                     >
-                      Statut
+                      {t('table.status')}
                     </TableSortLabel>
                   </TableCell>
                   <TableCell sx={{ fontWeight: 600, minWidth: 110, py: 1, bgcolor: 'background.paper' }}>
@@ -881,7 +900,7 @@ export default function LibraryPage() {
                       direction={orderBy === 'constructionYear' ? order : 'asc'}
                       onClick={() => handleRequestSort('constructionYear')}
                     >
-                      Année constr.
+                      {t('table.constructionYear')}
                     </TableSortLabel>
                   </TableCell>
                   <TableCell sx={{ fontWeight: 600, minWidth: 100, py: 1, bgcolor: 'background.paper' }}>
@@ -890,7 +909,7 @@ export default function LibraryPage() {
                       direction={orderBy === 'source' ? order : 'asc'}
                       onClick={() => handleRequestSort('source')}
                     >
-                      Source
+                      {t('table.source')}
                     </TableSortLabel>
                   </TableCell>
                   <TableCell sx={{ fontWeight: 600, minWidth: 130, py: 1, bgcolor: 'background.paper' }}>
@@ -899,10 +918,10 @@ export default function LibraryPage() {
                       direction={orderBy === 'matrixMls' ? order : 'asc'}
                       onClick={() => handleRequestSort('matrixMls')}
                     >
-                      Matrix/MLS No.
+                      {t('table.matrixMls')}
                     </TableSortLabel>
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 600, minWidth: 120, py: 1, bgcolor: 'background.paper' }}>Actions</TableCell>
+                  <TableCell sx={{ fontWeight: 600, minWidth: 120, py: 1, bgcolor: 'background.paper' }}>{t('table.actions')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -1039,17 +1058,17 @@ export default function LibraryPage() {
                     </TableCell>
                     <TableCell>
                       <Box sx={{ display: 'flex', gap: 0.5 }} onClick={(e) => e.stopPropagation()}>
-                        <Tooltip title="Voir détails">
+                        <Tooltip title={t('table.viewDetails')}>
                           <IconButton size="small" color="primary" onClick={() => handleView(property)}>
                             <Visibility fontSize="small" />
                           </IconButton>
                         </Tooltip>
-                        <Tooltip title="Modifier">
+                        <Tooltip title={t('table.edit')}>
                           <IconButton size="small" color="info" onClick={() => handleEdit(property)}>
                             <Edit fontSize="small" />
                           </IconButton>
                         </Tooltip>
-                        <Tooltip title="Supprimer">
+                        <Tooltip title={t('table.delete')}>
                           <IconButton
                             size="small"
                             color="error"
@@ -1079,8 +1098,8 @@ export default function LibraryPage() {
                 setRowsPerPage(parseInt(e.target.value, 10))
                 setPage(0)
               }}
-              labelRowsPerPage="Lignes par page:"
-              labelDisplayedRows={({ from, to, count }) => `${from}-${to} sur ${count}`}
+              labelRowsPerPage={t('table.rowsPerPage')}
+              labelDisplayedRows={({ from, to, count }) => t('table.displayedRows', { from, to, count })}
             />
           </Card>
         )}
@@ -1093,20 +1112,19 @@ export default function LibraryPage() {
           fullWidth
         >
           <DialogTitle>
-            Confirmer la suppression
+            {t('dialogs.confirmDeleteTitle')}
           </DialogTitle>
           <DialogContent>
             <DialogContentText>
-              Êtes-vous sûr de vouloir supprimer {selectedRows.length} propriété(s) sélectionnée(s) ?
-              Cette action est irréversible.
+              {t('dialogs.confirmDeleteMessage', { count: selectedRows.length })}
             </DialogContentText>
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setDeleteDialogOpen(false)}>
-              Annuler
+              {t('dialogs.cancel')}
             </Button>
             <Button onClick={confirmDelete} color="error" variant="contained">
-              Supprimer
+              {t('dialogs.delete')}
             </Button>
           </DialogActions>
         </Dialog>
@@ -1184,32 +1202,32 @@ export default function LibraryPage() {
           maxWidth="sm"
           fullWidth
         >
-          <DialogTitle>Adresse existante détectée</DialogTitle>
+          <DialogTitle>{t('dialogs.duplicateTitle')}</DialogTitle>
           <DialogContent>
             <DialogContentText sx={{ mb: 2 }}>
-              Une propriété avec la même adresse existe déjà dans votre bibliothèque:
+              {t('dialogs.duplicateMessage')}
             </DialogContentText>
             {duplicateProperty && (
               <Box sx={{ p: 2, bgcolor: 'grey.100', borderRadius: 1, mb: 2 }}>
                 <Typography variant="subtitle2" color="text.secondary">
-                  Propriété existante:
+                  {t('dialogs.existingProperty')}
                 </Typography>
                 <Typography variant="body1" sx={{ fontWeight: 600 }}>
                   {duplicateProperty.adresse}, {duplicateProperty.ville}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Type: {duplicateProperty.type_propriete}
-                  {duplicateProperty.prix_vente && ` • Prix: ${duplicateProperty.prix_vente.toLocaleString()}$`}
+                  {t('dialogs.propertyType')}: {duplicateProperty.type_propriete}
+                  {duplicateProperty.prix_vente && ` • ${t('dialogs.propertyPrice')}: ${duplicateProperty.prix_vente.toLocaleString()}$`}
                 </Typography>
               </Box>
             )}
             <DialogContentText>
-              Voulez-vous <strong>fusionner</strong> les informations avec la propriété existante ou créer un <strong>doublon</strong>?
+              {t('dialogs.mergeOrCreateQuestion')}
             </DialogContentText>
             <DialogContentText sx={{ mt: 2, fontSize: '0.875rem', color: 'text.secondary' }}>
-              <strong>Fusionner:</strong> Les nouvelles valeurs remplaceront les champs vides de la propriété existante.
+              <strong>{t('dialogs.mergeOption')}:</strong> {t('dialogs.mergeDescription')}
               <br />
-              <strong>Créer un doublon:</strong> Une nouvelle propriété distincte sera créée.
+              <strong>{t('dialogs.createDuplicateOption')}:</strong> {t('dialogs.createDuplicateDescription')}
             </DialogContentText>
           </DialogContent>
           <DialogActions>
@@ -1220,20 +1238,20 @@ export default function LibraryPage() {
                 setPendingPropertyData(null)
               }}
             >
-              Annuler
+              {t('dialogs.cancel')}
             </Button>
             <Button
               onClick={handleCreateDuplicate}
               variant="outlined"
             >
-              Créer un doublon
+              {t('dialogs.createDuplicateButton')}
             </Button>
             <Button
               onClick={handleMergeProperty}
               variant="contained"
               color="primary"
             >
-              Fusionner
+              {t('dialogs.mergeButton')}
             </Button>
           </DialogActions>
         </Dialog>

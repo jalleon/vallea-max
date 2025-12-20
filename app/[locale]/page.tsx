@@ -26,6 +26,11 @@ import {
   useMediaQuery,
   Menu,
   MenuItem,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material'
 import {
   Assessment,
@@ -44,7 +49,10 @@ import {
   CompareArrows,
   Description,
   Language as LanguageIcon,
+  ExpandMore,
 } from '@mui/icons-material'
+import WaitlistForm from '@/components/landing/WaitlistForm'
+import DemoRequestForm from '@/components/landing/DemoRequestForm'
 
 export default function LandingPage() {
   const t = useTranslations('landing')
@@ -56,13 +64,22 @@ export default function LandingPage() {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [langMenuAnchor, setLangMenuAnchor] = useState<null | HTMLElement>(null)
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'annual'>('annual')
+
+  // Toggle to show/hide pricing section (set to true when ready to launch pricing)
+  const SHOW_PRICING = false
 
   const features = [
     {
-      icon: <SmartToy sx={{ fontSize: 48 }} />,
-      title: t('features.aiPdf.title'),
-      description: t('features.aiPdf.description'),
+      icon: <Description sx={{ fontSize: 48 }} />,
+      title: t('features.reports.title'),
+      description: t('features.reports.description'),
       highlight: true,
+    },
+    {
+      icon: <SmartToy sx={{ fontSize: 48 }} />,
+      title: t('features.dataImport.title'),
+      description: t('features.dataImport.description'),
     },
     {
       icon: <Dashboard sx={{ fontSize: 48 }} />,
@@ -81,13 +98,8 @@ export default function LandingPage() {
     },
     {
       icon: <TrendingUp sx={{ fontSize: 48 }} />,
-      title: t('features.analytics.title'),
-      description: t('features.analytics.description'),
-    },
-    {
-      icon: <Cloud sx={{ fontSize: 48 }} />,
-      title: t('features.cloud.title'),
-      description: t('features.cloud.description'),
+      title: t('features.dashboard.title'),
+      description: t('features.dashboard.description'),
     },
   ]
 
@@ -182,6 +194,7 @@ export default function LandingPage() {
                     letterSpacing: '0.03em',
                     display: 'block',
                     mt: -0.5,
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   {locale === 'fr' ? 'Évaluation immobilière' : 'Real Estate Valuation'}
@@ -191,27 +204,45 @@ export default function LandingPage() {
 
             {/* Desktop Navigation */}
             {!isMobile && (
-              <Stack direction="row" spacing={1} sx={{ mr: 2 }}>
+              <Stack direction="row" spacing={0.5} sx={{ ml: 3, mr: 2 }}>
                 <Button
                   color="inherit"
                   onClick={() => handleScroll('features')}
-                  sx={{ color: 'text.primary' }}
+                  sx={{ color: 'text.primary', lineHeight: 1.2 }}
                 >
                   {t('nav.features')}
                 </Button>
                 <Button
                   color="inherit"
                   onClick={() => handleScroll('screenshots')}
-                  sx={{ color: 'text.primary' }}
+                  sx={{ color: 'text.primary', lineHeight: 1.2 }}
                 >
                   {t('nav.screenshots')}
                 </Button>
                 <Button
                   color="inherit"
-                  onClick={() => handleScroll('pricing')}
-                  sx={{ color: 'text.primary' }}
+                  onClick={() => handleScroll('demo')}
+                  sx={{ color: 'text.primary', lineHeight: 1.2 }}
                 >
                   {t('nav.pricing')}
+                </Button>
+                <Button
+                  color="inherit"
+                  onClick={() => handleScroll('demo')}
+                  sx={{
+                    color: 'text.primary',
+                    fontWeight: 600,
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {t('nav.demo')}
+                </Button>
+                <Button
+                  color="inherit"
+                  onClick={() => handleScroll('waitlist')}
+                  sx={{ color: 'text.primary', lineHeight: 1.2 }}
+                >
+                  {t('nav.waitlist')}
                 </Button>
               </Stack>
             )}
@@ -222,14 +253,14 @@ export default function LandingPage() {
                 <Button
                   variant="outlined"
                   onClick={() => router.push('/login')}
-                  sx={{ textTransform: 'none' }}
+                  sx={{ textTransform: 'none', lineHeight: 1.2 }}
                 >
                   {t('nav.login')}
                 </Button>
                 <Button
                   variant="contained"
                   onClick={() => router.push('/login')}
-                  sx={{ textTransform: 'none' }}
+                  sx={{ textTransform: 'none', lineHeight: 1.2 }}
                 >
                   {t('nav.signup')}
                 </Button>
@@ -266,8 +297,21 @@ export default function LandingPage() {
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
-              <ListItemButton onClick={() => handleScroll('pricing')}>
+              <ListItemButton onClick={() => handleScroll('demo')}>
                 <ListItemText primary={t('nav.pricing')} />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => handleScroll('demo')}>
+                <ListItemText
+                  primary={t('nav.demo')}
+                  sx={{ fontWeight: 600 }}
+                />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => handleScroll('waitlist')}>
+                <ListItemText primary={t('nav.waitlist')} />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -346,7 +390,7 @@ export default function LandingPage() {
                 <Button
                   variant="contained"
                   size="large"
-                  onClick={() => router.push('/login')}
+                  onClick={() => handleScroll('demo')}
                   sx={{
                     bgcolor: '#10B981',
                     color: 'white',
@@ -370,7 +414,7 @@ export default function LandingPage() {
                 <Button
                   variant="outlined"
                   size="large"
-                  onClick={() => router.push('/pricing')}
+                  onClick={() => handleScroll('waitlist')}
                   sx={{
                     borderColor: 'rgba(232, 226, 213, 0.5)',
                     borderWidth: 1.5,
@@ -555,6 +599,124 @@ export default function LandingPage() {
             </Grid>
           ))}
         </Grid>
+        </Container>
+      </Box>
+
+      {/* How It Works Section */}
+      <Box
+        sx={{
+          background: 'linear-gradient(135deg, #1A1F36 0%, #232A44 50%, #2D3561 100%)',
+          py: { xs: 8, md: 14 },
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: `
+              radial-gradient(circle at 0 0, rgba(232, 226, 213, 0.15) 2.5px, transparent 2.5px),
+              radial-gradient(circle at 25% 25%, rgba(16, 185, 129, 0.06) 0%, transparent 50%),
+              radial-gradient(circle at 75% 75%, rgba(245, 158, 11, 0.05) 0%, transparent 50%)
+            `,
+            backgroundSize: '41px 41px, auto, auto',
+            backgroundPosition: '0 -15px, 0 0, 0 0',
+            pointerEvents: 'none',
+          },
+        }}
+      >
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+          <Box sx={{ textAlign: 'center', mb: 10 }}>
+            <Typography
+              variant="h2"
+              sx={{
+                fontSize: { xs: '2rem', md: '3rem' },
+                fontWeight: 400,
+                mb: 2,
+                color: '#E8E2D5',
+                fontFamily: 'var(--font-fraunces)',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {t('howItWorks.title')}
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{
+                maxWidth: 700,
+                mx: 'auto',
+                color: 'rgba(232, 226, 213, 0.75)',
+                fontWeight: 300,
+                fontSize: '1.15rem',
+                lineHeight: 1.7,
+              }}
+            >
+              {t('howItWorks.subtitle')}
+            </Typography>
+          </Box>
+
+          <Grid container spacing={4}>
+            {[1, 2, 3, 4].map((step) => (
+              <Grid item xs={12} md={6} key={step}>
+                <Card
+                  sx={{
+                    height: '100%',
+                    background: 'rgba(232, 226, 213, 0.08)',
+                    backdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(232, 226, 213, 0.15)',
+                    borderRadius: '16px',
+                    transition: 'all 0.4s ease',
+                    '&:hover': {
+                      transform: 'translateY(-8px)',
+                      boxShadow: '0 20px 48px rgba(0, 0, 0, 0.3)',
+                      border: '1px solid rgba(232, 226, 213, 0.25)',
+                    },
+                  }}
+                >
+                  <CardContent sx={{ p: 4 }}>
+                    <Box
+                      sx={{
+                        width: 56,
+                        height: 56,
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                        color: 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '1.5rem',
+                        fontWeight: 700,
+                        mb: 3,
+                        boxShadow: '0 8px 24px rgba(16, 185, 129, 0.3)',
+                      }}
+                    >
+                      {step}
+                    </Box>
+                    <Typography
+                      variant="h6"
+                      fontWeight={600}
+                      gutterBottom
+                      sx={{ color: '#E8E2D5', mb: 1.5 }}
+                    >
+                      {t(`howItWorks.step${step}.title`)}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'rgba(232, 226, 213, 0.7)',
+                        lineHeight: 1.7,
+                        fontSize: '0.95rem',
+                      }}
+                    >
+                      {t(`howItWorks.step${step}.description`)}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
         </Container>
       </Box>
 
@@ -777,11 +939,9 @@ export default function LandingPage() {
         </Container>
       </Box>
 
-      {/* Pricing Section */}
+      {/* AI-Powered Section */}
       <Box
-        id="pricing"
         sx={{
-          background: 'linear-gradient(to bottom, #E8E2D5 0%, #F5F3EE 50%, #E8E2D5 100%)',
           py: { xs: 8, md: 14 },
           position: 'relative',
           overflow: 'hidden',
@@ -792,10 +952,210 @@ export default function LandingPage() {
             left: 0,
             right: 0,
             bottom: 0,
+            backgroundImage: 'url(/backgrounds/bg12.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            filter: 'brightness(0.5)',
+            zIndex: 0,
+          },
+        }}
+      >
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+          <Box sx={{ textAlign: 'center', mb: 10 }}>
+            <Typography
+              variant="h2"
+              sx={{
+                fontSize: { xs: '2rem', md: '3rem' },
+                fontWeight: 400,
+                mb: 2,
+                fontFamily: 'var(--font-fraunces)',
+                color: '#E8E2D5',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {t('aiPowered.title')}
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{
+                maxWidth: 750,
+                mx: 'auto',
+                color: 'rgba(232, 226, 213, 0.85)',
+                fontWeight: 300,
+                fontSize: '1.15rem',
+                lineHeight: 1.7,
+              }}
+            >
+              {t('aiPowered.subtitle')}
+            </Typography>
+          </Box>
+
+          <Grid container spacing={4}>
+            {[1, 2, 3].map((feature) => (
+              <Grid item xs={12} md={4} key={feature}>
+                <Card
+                  sx={{
+                    height: '100%',
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                    border: '1px solid rgba(232, 226, 213, 0.2)',
+                    background: 'rgba(255, 255, 255, 0.95)',
+                    backdropFilter: 'blur(12px)',
+                    borderRadius: '16px',
+                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.15)',
+                    '&:hover': {
+                      transform: 'translateY(-8px)',
+                      boxShadow: '0 20px 48px rgba(0, 0, 0, 0.3)',
+                      border: '1px solid rgba(16, 185, 129, 0.4)',
+                    },
+                  }}
+                >
+                  <CardContent sx={{ p: 4, textAlign: 'center' }}>
+                    <Box
+                      sx={{
+                        color: '#10B981',
+                        mb: 3,
+                        display: 'inline-flex',
+                        p: 2.5,
+                        borderRadius: '16px',
+                        background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.15) 100%)',
+                      }}
+                    >
+                      {feature === 1 && <PictureAsPdf sx={{ fontSize: 48 }} />}
+                      {feature === 2 && <Cloud sx={{ fontSize: 48 }} />}
+                      {feature === 3 && <SmartToy sx={{ fontSize: 48 }} />}
+                    </Box>
+                    <Typography
+                      variant="h6"
+                      fontWeight={600}
+                      gutterBottom
+                      sx={{ color: '#1A1F36', mb: 1.5, fontSize: '1.15rem' }}
+                    >
+                      {t(`aiPowered.feature${feature}.title`)}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: '#4A5568',
+                        lineHeight: 1.7,
+                        fontSize: '0.95rem',
+                      }}
+                    >
+                      {t(`aiPowered.feature${feature}.description`)}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+
+          <Typography
+            variant="h6"
+            align="center"
+            sx={{
+              mt: 8,
+              color: 'rgba(232, 226, 213, 0.9)',
+              fontWeight: 400,
+              fontSize: '1.1rem',
+              fontStyle: 'italic',
+              maxWidth: 800,
+              mx: 'auto',
+            }}
+          >
+            {t('aiPowered.tagline')}
+          </Typography>
+        </Container>
+      </Box>
+
+      {/* Demo Request Section */}
+      <Box
+        id="demo"
+        sx={{
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          py: { xs: 10, md: 14 },
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
             backgroundImage: `
+              radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+              radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+              repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 40px,
+                rgba(255, 255, 255, 0.03) 40px,
+                rgba(255, 255, 255, 0.03) 80px
+              )
+            `,
+            pointerEvents: 'none',
+          },
+        }}
+      >
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
+          <Box sx={{ textAlign: 'center', mb: 6 }}>
+            <Typography
+              variant="h2"
+              sx={{
+                fontSize: { xs: '2rem', md: '3rem' },
+                fontWeight: 400,
+                mb: 2,
+                color: 'white',
+                fontFamily: 'var(--font-fraunces)',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {t('demo.title')}
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{
+                maxWidth: 600,
+                mx: 'auto',
+                color: 'rgba(255, 255, 255, 0.95)',
+                fontWeight: 300,
+                fontSize: '1.15rem',
+                lineHeight: 1.7,
+                mb: 4,
+              }}
+            >
+              {t('demo.subtitle')}
+            </Typography>
+          </Box>
+
+          <DemoRequestForm />
+        </Container>
+      </Box>
+
+      {/* Pricing Section - Hidden during development, set SHOW_PRICING to true when ready */}
+      {SHOW_PRICING && (
+        <Box
+          id="pricing"
+          sx={{
+            background: 'linear-gradient(to bottom, #E8E2D5 0%, #F5F3EE 50%, #E8E2D5 100%)',
+            py: { xs: 8, md: 14 },
+            position: 'relative',
+            overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: `
+              radial-gradient(circle, rgba(16, 185, 129, 0.08) 1px, transparent 1px),
+              radial-gradient(circle, rgba(245, 158, 11, 0.06) 1px, transparent 1px),
               radial-gradient(circle at 25% 25%, rgba(16, 185, 129, 0.04) 0%, transparent 45%),
               radial-gradient(circle at 75% 75%, rgba(245, 158, 11, 0.04) 0%, transparent 45%)
             `,
+            backgroundSize: '40px 40px, 60px 60px, 100% 100%, 100% 100%',
+            backgroundPosition: '0 0, 20px 20px, 0 0, 0 0',
             pointerEvents: 'none',
           },
         }}
@@ -830,86 +1190,72 @@ export default function LandingPage() {
             </Typography>
           </Box>
 
-          <Grid container spacing={4} justifyContent="center">
-            {/* Monthly Plan */}
-            <Grid item xs={12} md={5}>
-              <Card
-                sx={{
-                  height: '100%',
-                  position: 'relative',
-                  background: 'rgba(255, 255, 255, 0.7)',
-                  backdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(26, 31, 54, 0.08)',
-                  borderRadius: '16px',
-                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                  '&:hover': {
-                    transform: 'translateY(-8px)',
-                    boxShadow: '0 20px 48px rgba(0, 0, 0, 0.12)',
-                    border: '1px solid rgba(26, 31, 54, 0.15)',
+          {/* Billing Period Toggle */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 6 }}>
+            <ToggleButtonGroup
+              value={billingPeriod}
+              exclusive
+              onChange={(_, value) => value && setBillingPeriod(value)}
+              sx={{
+                bgcolor: 'rgba(255, 255, 255, 0.7)',
+                backdropFilter: 'blur(12px)',
+                borderRadius: '12px',
+                p: 0.5,
+                border: '1px solid rgba(26, 31, 54, 0.08)',
+                '& .MuiToggleButton-root': {
+                  border: 'none',
+                  borderRadius: '10px',
+                  px: 4,
+                  py: 1.5,
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                  fontWeight: 500,
+                  color: '#4A5568',
+                  '&.Mui-selected': {
+                    background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                    color: 'white',
+                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #0ea570 0%, #047857 100%)',
+                    },
                   },
-                }}
-              >
-                <CardContent sx={{ p: 5 }}>
-                  <Typography
-                    variant="h5"
-                    fontWeight={600}
-                    gutterBottom
-                    align="center"
-                    sx={{ color: '#1A1F36', mb: 3 }}
-                  >
-                    {tPricing('monthly')}
-                  </Typography>
-                  <Box sx={{ textAlign: 'center', my: 4 }}>
-                    <Typography variant="h2" fontWeight={600} component="span" sx={{ color: '#1A1F36' }}>
-                      100$
-                    </Typography>
-                    <Typography variant="h6" sx={{ color: '#4A5568' }} component="span">
-                      {' '}/ {tPricing('month')}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: '#6B7280', mt: 1 }}>
-                      CAD
-                    </Typography>
-                  </Box>
-                  <Stack spacing={2.5} sx={{ my: 4 }}>
-                    {benefits.map((benefit, index) => (
-                      <Stack direction="row" spacing={2} key={index}>
-                        <CheckCircle sx={{ fontSize: 20, mt: 0.2, color: '#10B981' }} />
-                        <Typography variant="body2" sx={{ color: '#4A5568', lineHeight: 1.7 }}>
-                          {benefit}
-                        </Typography>
-                      </Stack>
-                    ))}
-                  </Stack>
-                  <Button
-                    variant="outlined"
-                    size="large"
-                    fullWidth
-                    onClick={() => router.push('/login')}
+                  '&:hover': {
+                    bgcolor: 'rgba(16, 185, 129, 0.05)',
+                  },
+                },
+              }}
+            >
+              <ToggleButton value="monthly">
+                {tPricing('monthly')}
+              </ToggleButton>
+              <ToggleButton value="annual">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {tPricing('annual')}
+                  <Box
                     sx={{
-                      mt: 2,
-                      py: 1.5,
-                      fontSize: '1rem',
-                      fontWeight: 500,
-                      borderRadius: '8px',
-                      borderColor: '#1A1F36',
-                      color: '#1A1F36',
-                      '&:hover': {
-                        borderColor: '#10B981',
-                        bgcolor: 'rgba(16, 185, 129, 0.05)',
-                      },
+                      bgcolor: billingPeriod === 'annual' ? 'rgba(255, 255, 255, 0.2)' : '#10B981',
+                      color: billingPeriod === 'annual' ? 'white' : 'white',
+                      px: 1.5,
+                      py: 0.25,
+                      borderRadius: '6px',
+                      fontSize: '0.7rem',
+                      fontWeight: 600,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.03em',
                     }}
                   >
-                    {tPricing('getStarted')}
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
+                    {locale === 'fr' ? 'Économie 20%' : 'Save 20%'}
+                  </Box>
+                </Box>
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
 
-            {/* Annual Plan */}
-            <Grid item xs={12} md={5}>
+          {/* Single Pricing Card */}
+          <Grid container justifyContent="center">
+            <Grid item xs={12} md={6} lg={5}>
               <Card
                 sx={{
-                  height: '100%',
                   position: 'relative',
                   background: 'rgba(255, 255, 255, 0.9)',
                   backdropFilter: 'blur(12px)',
@@ -924,26 +1270,28 @@ export default function LandingPage() {
                   },
                 }}
               >
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: 16,
-                    right: 16,
-                    background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-                    color: 'white',
-                    px: 3,
-                    py: 0.75,
-                    borderRadius: '8px',
-                    fontSize: '0.7rem',
-                    fontWeight: 600,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    zIndex: 1,
-                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
-                  }}
-                >
-                  {tPricing('popular')}
-                </Box>
+                {billingPeriod === 'annual' && (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 16,
+                      right: 16,
+                      background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                      color: 'white',
+                      px: 3,
+                      py: 0.75,
+                      borderRadius: '8px',
+                      fontSize: '0.7rem',
+                      fontWeight: 600,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      zIndex: 1,
+                      boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                    }}
+                  >
+                    {tPricing('popular')}
+                  </Box>
+                )}
                 <CardContent sx={{ p: 5 }}>
                   <Typography
                     variant="h5"
@@ -952,18 +1300,25 @@ export default function LandingPage() {
                     align="center"
                     sx={{ color: '#1A1F36', mb: 3 }}
                   >
-                    {tPricing('annual')}
+                    {locale === 'fr' ? 'Plan Professionnel' : 'Professional Plan'}
                   </Typography>
                   <Box sx={{ textAlign: 'center', my: 4 }}>
-                    <Typography variant="h2" fontWeight={600} component="span" sx={{ color: '#10B981' }}>
-                      80$
+                    <Typography
+                      variant="h2"
+                      fontWeight={600}
+                      component="span"
+                      sx={{ color: billingPeriod === 'annual' ? '#10B981' : '#1A1F36' }}
+                    >
+                      {billingPeriod === 'monthly' ? '99$' : '79$'}
                     </Typography>
                     <Typography variant="h6" sx={{ color: '#4A5568' }} component="span">
                       {' '}/ {tPricing('month')}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: '#10B981', fontWeight: 600, mt: 1 }}>
-                      960$ {tPricing('billedAnnually')}
-                    </Typography>
+                    {billingPeriod === 'annual' && (
+                      <Typography variant="body2" sx={{ color: '#10B981', fontWeight: 600, mt: 1 }}>
+                        948$ {tPricing('billedAnnually')}
+                      </Typography>
+                    )}
                     <Typography variant="body2" sx={{ color: '#6B7280' }}>
                       CAD
                     </Typography>
@@ -977,12 +1332,14 @@ export default function LandingPage() {
                         </Typography>
                       </Stack>
                     ))}
-                    <Stack direction="row" spacing={2}>
-                      <CheckCircle sx={{ fontSize: 20, mt: 0.2, color: '#10B981' }} />
-                      <Typography variant="body2" fontWeight={600} sx={{ color: '#10B981', lineHeight: 1.7 }}>
-                        {tPricing('save240')}
-                      </Typography>
-                    </Stack>
+                    {billingPeriod === 'annual' && (
+                      <Stack direction="row" spacing={2}>
+                        <CheckCircle sx={{ fontSize: 20, mt: 0.2, color: '#10B981' }} />
+                        <Typography variant="body2" fontWeight={600} sx={{ color: '#10B981', lineHeight: 1.7 }}>
+                          {tPricing('save240')}
+                        </Typography>
+                      </Stack>
+                    )}
                   </Stack>
                   <Button
                     variant="contained"
@@ -1020,11 +1377,137 @@ export default function LandingPage() {
           </Typography>
         </Container>
       </Box>
+      )}
 
-      {/* CTA Section */}
+      {/* FAQ Section */}
       <Box
         sx={{
-          background: 'linear-gradient(135deg, #1A1F36 0%, #232A44 50%, #2D3561 100%)',
+          py: { xs: 8, md: 14 },
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: 'url(/backgrounds/bg9.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            filter: 'brightness(0.5)',
+            zIndex: 0,
+          },
+        }}
+      >
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
+          <Box sx={{ textAlign: 'center', mb: 10 }}>
+            <Typography
+              variant="h2"
+              sx={{
+                fontSize: { xs: '2rem', md: '3rem' },
+                fontWeight: 400,
+                mb: 2,
+                fontFamily: 'var(--font-fraunces)',
+                color: '#E8E2D5',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {t('faq.title')}
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{
+                maxWidth: 700,
+                mx: 'auto',
+                color: 'rgba(232, 226, 213, 0.85)',
+                fontWeight: 300,
+                fontSize: '1.15rem',
+                lineHeight: 1.7,
+              }}
+            >
+              {t('faq.subtitle')}
+            </Typography>
+          </Box>
+
+          <Stack spacing={2}>
+            {[1, 2, 3, 4].map((q) => (
+              <Accordion
+                key={q}
+                sx={{
+                  background: 'rgba(255, 255, 255, 0.98)',
+                  backdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(232, 226, 213, 0.2)',
+                  borderRadius: '16px !important',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                  '&:before': {
+                    display: 'none',
+                  },
+                  '&.Mui-expanded': {
+                    margin: 0,
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.25)',
+                    border: '1px solid rgba(16, 185, 129, 0.3)',
+                  },
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                <AccordionSummary
+                  expandIcon={<ExpandMore sx={{ color: '#10B981' }} />}
+                  sx={{
+                    px: 4,
+                    py: 2,
+                    '&.Mui-expanded': {
+                      minHeight: 'auto',
+                    },
+                    '& .MuiAccordionSummary-content': {
+                      my: 1,
+                      '&.Mui-expanded': {
+                        my: 1,
+                      },
+                    },
+                  }}
+                >
+                  <Typography
+                    variant="h6"
+                    fontWeight={600}
+                    sx={{
+                      color: '#1A1F36',
+                      fontSize: '1.1rem',
+                    }}
+                  >
+                    {t(`faq.q${q}.question`)}
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails
+                  sx={{
+                    px: 4,
+                    pb: 3,
+                    pt: 0,
+                  }}
+                >
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      color: '#4A5568',
+                      lineHeight: 1.7,
+                      fontSize: '0.95rem',
+                    }}
+                  >
+                    {t(`faq.q${q}.answer`)}
+                  </Typography>
+                </AccordionDetails>
+              </Accordion>
+            ))}
+          </Stack>
+        </Container>
+      </Box>
+
+      {/* Waitlist Section */}
+      <Box
+        id="waitlist"
+        sx={{
+          background: 'linear-gradient(135deg, #059669 0%, #10B981 50%, #34D399 100%)',
           py: { xs: 10, md: 14 },
           position: 'relative',
           overflow: 'hidden',
@@ -1036,91 +1519,52 @@ export default function LandingPage() {
             right: 0,
             bottom: 0,
             backgroundImage: `
-              radial-gradient(ellipse at 50% 50%, rgba(16, 185, 129, 0.08) 0%, transparent 60%),
-              radial-gradient(circle at 20% 80%, rgba(245, 158, 11, 0.06) 0%, transparent 50%)
+              radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+              radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+              repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 40px,
+                rgba(255, 255, 255, 0.03) 40px,
+                rgba(255, 255, 255, 0.03) 80px
+              )
             `,
             pointerEvents: 'none',
           },
         }}
       >
-        <Container maxWidth="md" sx={{ textAlign: 'center', position: 'relative', zIndex: 1 }}>
-          <Typography
-            variant="h2"
-            sx={{
-              fontSize: { xs: '2rem', md: '3rem' },
-              fontWeight: 400,
-              mb: 3,
-              color: '#E8E2D5',
-              fontFamily: 'var(--font-fraunces)',
-              letterSpacing: '-0.01em',
-            }}
-          >
-            {t('cta.title')}
-          </Typography>
-          <Typography
-            variant="h6"
-            sx={{
-              mb: 6,
-              maxWidth: 600,
-              mx: 'auto',
-              color: 'rgba(232, 226, 213, 0.8)',
-              fontWeight: 300,
-              fontSize: '1.15rem',
-              lineHeight: 1.7,
-            }}
-          >
-            {t('cta.subtitle')}
-          </Typography>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} justifyContent="center">
-          <Button
-            variant="contained"
-            size="large"
-            onClick={() => router.push('/login')}
-            sx={{
-              px: 6,
-              py: 2,
-              fontSize: '1.1rem',
-              fontWeight: 500,
-              borderRadius: '8px',
-              background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-              color: 'white',
-              border: 'none',
-              boxShadow: '0 8px 24px rgba(16, 185, 129, 0.3)',
-              '&:hover': {
-                background: 'linear-gradient(135deg, #0ea570 0%, #047857 100%)',
-                transform: 'translateY(-2px)',
-                boxShadow: '0 12px 32px rgba(16, 185, 129, 0.4)',
-              },
-              transition: 'all 0.3s ease',
-            }}
-            endIcon={<ArrowForward />}
-          >
-            {t('cta.primary')}
-          </Button>
-          <Button
-            variant="outlined"
-            size="large"
-            onClick={() => handleScroll('pricing')}
-            sx={{
-              px: 6,
-              py: 2,
-              fontSize: '1.1rem',
-              fontWeight: 500,
-              borderRadius: '8px',
-              borderColor: 'rgba(232, 226, 213, 0.5)',
-              borderWidth: 1.5,
-              color: '#E8E2D5',
-              backdropFilter: 'blur(8px)',
-              '&:hover': {
-                borderColor: '#E8E2D5',
-                borderWidth: 1.5,
-                bgcolor: 'rgba(232, 226, 213, 0.1)',
-              },
-            }}
-          >
-            {t('cta.secondary')}
-          </Button>
-        </Stack>
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
+          <Box sx={{ textAlign: 'center', mb: 6 }}>
+            <Typography
+              variant="h2"
+              sx={{
+                fontSize: { xs: '2rem', md: '3rem' },
+                fontWeight: 400,
+                mb: 2,
+                color: 'white',
+                fontFamily: 'var(--font-fraunces)',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {t('waitlist.title')}
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{
+                maxWidth: 600,
+                mx: 'auto',
+                color: 'rgba(255, 255, 255, 0.95)',
+                fontWeight: 300,
+                fontSize: '1.15rem',
+                lineHeight: 1.7,
+                mb: 4,
+              }}
+            >
+              {t('waitlist.subtitle')}
+            </Typography>
+          </Box>
+
+          <WaitlistForm />
         </Container>
       </Box>
 
@@ -1193,11 +1637,31 @@ export default function LandingPage() {
                   color: 'rgba(232, 226, 213, 0.6)',
                   lineHeight: 1.7,
                   fontSize: '0.9rem',
+                  mb: 2,
                 }}
               >
                 {locale === 'fr'
                   ? 'Plateforme professionnelle d\'évaluation immobilière avec intelligence artificielle.'
                   : 'Professional real estate appraisal platform with artificial intelligence.'}
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'rgba(232, 226, 213, 0.6)',
+                  fontSize: '0.9rem',
+                }}
+              >
+                <a
+                  href="mailto:contact@valeamax.com"
+                  style={{
+                    color: '#10B981',
+                    textDecoration: 'none',
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+                  onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+                >
+                  contact@valeamax.com
+                </a>
               </Typography>
             </Grid>
 
@@ -1252,7 +1716,7 @@ export default function LandingPage() {
                   {t('nav.screenshots')}
                 </Button>
                 <Button
-                  onClick={() => handleScroll('pricing')}
+                  onClick={() => handleScroll('demo')}
                   sx={{
                     justifyContent: 'flex-start',
                     color: 'rgba(232, 226, 213, 0.6)',
@@ -1267,6 +1731,24 @@ export default function LandingPage() {
                   }}
                 >
                   {t('nav.pricing')}
+                </Button>
+                <Button
+                  onClick={() => handleScroll('waitlist')}
+                  sx={{
+                    justifyContent: 'flex-start',
+                    color: 'rgba(232, 226, 213, 0.6)',
+                    textTransform: 'none',
+                    fontSize: '0.9rem',
+                    p: 0,
+                    minWidth: 0,
+                    fontWeight: 600,
+                    '&:hover': {
+                      color: '#10B981',
+                      bgcolor: 'transparent',
+                    },
+                  }}
+                >
+                  {t('nav.waitlist')}
                 </Button>
               </Stack>
             </Grid>
@@ -1442,3 +1924,4 @@ export default function LandingPage() {
     </Box>
   )
 }
+

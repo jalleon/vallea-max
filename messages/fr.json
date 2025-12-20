@@ -39,9 +39,46 @@
     },
     "menu": {
       "aiApiKeys": "Clés API IA"
+    },
+    "nav": {
+      "navigation": "Navigation",
+      "dashboard": {
+        "label": "Tableau de bord",
+        "description": "Vue d'ensemble et analytiques"
+      },
+      "library": {
+        "label": "Bibliothèque",
+        "description": "Gestion des propriétés"
+      },
+      "import": {
+        "label": "Importer",
+        "description": "Import PDF et données"
+      },
+      "evaluations": {
+        "label": "Évaluations",
+        "description": "RPS, NAS et personnalisées"
+      },
+      "adjustments": {
+        "label": "Ajustements",
+        "description": "Calculs comparatifs"
+      },
+      "reports": {
+        "label": "Rapports",
+        "description": "Documents professionnels"
+      },
+      "inspection": {
+        "label": "Inspections"
+      },
+      "performance": {
+        "title": "Performance du mois",
+        "growth": "+15.3%",
+        "completed": "{count} évaluations complétées"
+      },
+      "collapse": "Réduire la barre latérale",
+      "expand": "Agrandir la barre latérale",
+      "tagline": "Évaluation Immobilière"
     }
   },
-
   "auth": {
     "login": {
       "title": "Connexion",
@@ -77,7 +114,6 @@
     },
     "logout": "Déconnexion"
   },
-
   "navigation": {
     "dashboard": "Tableau de bord",
     "library": "Bibliothèque",
@@ -88,7 +124,6 @@
     "reports": "Rapports",
     "settings": "Paramètres"
   },
-
   "library": {
     "title": "Bibliothèque de Propriétés",
     "subtitle": "Gérez votre portefeuille immobilier et créez de nouvelles fiches",
@@ -97,7 +132,14 @@
     "deleteSelected": "Supprimer ({count})",
     "confirmDelete": "Êtes-vous sûr de vouloir supprimer {count, plural, =1 {cette propriété} other {ces # propriétés}}?",
     "deleteMessage": "Cette action est irréversible.",
-
+    "loadingProperties": "Chargement des propriétés...",
+    "retry": "Réessayer",
+    "stats": {
+      "totalProperties": "Total Propriétés",
+      "portfolioValue": "Valeur Portfolio",
+      "evaluationsThisMonth": "Évaluations ce mois",
+      "newProperties": "Nouvelles propriétés"
+    },
     "search": {
       "placeholder": "Rechercher par adresse, ville, MLS, ID...",
       "advancedFilters": "Filtres Avancés",
@@ -113,56 +155,343 @@
       "minimum": "Minimum",
       "maximum": "Maximum",
       "clearFilters": "Effacer les filtres",
-      "resultsFound": "{count} résultat{count, plural, =0 {} =1 {} other {s}} trouvé{count, plural, =0 {} =1 {} other {s}}"
+      "resultsFound": "{count} résultat{count, plural, =0 {} =1 {} other {s}} trouvé{count, plural, =0 {} =1 {} other {s}}",
+      "loadingProperties": "Chargement des propriétés..."
     },
-
     "table": {
       "idNo": "ID No",
       "address": "Adresse",
       "city": "Ville",
       "saleDate": "Date Vente",
+      "soldDate": "Date Vente",
       "salePrice": "Prix Vente",
+      "soldPrice": "Prix Vente",
+      "salePriceOrEffValue": "Prix vente / Valeur eff.",
+      "saleDateOrEffective": "Date Vente / Effective",
       "type": "Type",
       "yearBuilt": "Année Const.",
+      "constructionYear": "Année Const.",
       "source": "Source",
       "mlsNo": "Matrix/MLS No",
+      "matrixMls": "Matrix/MLS #",
       "actions": "Actions",
       "viewDetails": "Voir détails",
       "edit": "Modifier",
       "delete": "Supprimer",
+      "duplicate": "Dupliquer",
       "rowsPerPage": "Lignes par page:",
-      "displayedRows": "{from}-{to} sur {count}"
+      "displayedRows": "{from}-{to} sur {count}",
+      "status": "Statut",
+      "listPrice": "Liste"
     },
-
+    "dialogs": {
+      "confirmDeleteTitle": "Confirmer la suppression",
+      "confirmDeleteMessage": "Êtes-vous sûr de vouloir supprimer {count} propriété(s) sélectionnée(s) ?",
+      "deleteAction": "Cette action est irréversible.",
+      "duplicateTitle": "Adresse existante détectée",
+      "duplicateMessage": "Une propriété avec la même adresse existe déjà dans votre bibliothèque:",
+      "duplicateExisting": "Propriété existante:",
+      "duplicatePrompt": "Voulez-vous fusionner les informations avec la propriété existante ou créer un doublon?",
+      "duplicateMergeNote": "Fusionner: Les nouvelles valeurs remplaceront les champs vides de la propriété existante.",
+      "duplicateCreateNote": "Créer un doublon: Une nouvelle propriété distincte sera créée.",
+      "duplicateMerge": "Fusionner",
+      "duplicateCreate": "Créer un doublon",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "mergeOrCreateQuestion": "Fusionner ou créer ?",
+      "mergeButton": "Fusionner",
+      "mergeOption": "Fusionner",
+      "mergeDescription": "Les nouvelles valeurs remplaceront les champs vides de la propriété existante.",
+      "createDuplicateOption": "Créer un doublon",
+      "createDuplicateDescription": "Une nouvelle propriété distincte sera créée avec les mêmes informations.",
+      "createDuplicateButton": "Créer un doublon"
+    },
+    "form": {
+      "basicInformation": "Informations de base",
+      "propertyDetails": "Détails de la propriété",
+      "pricingAndSale": "Prix et vente",
+      "dimensions": "Dimensions",
+      "features": "Caractéristiques",
+      "options": "Options",
+      "address": "Adresse",
+      "addressRequired": "Adresse requise",
+      "city": "Ville",
+      "municipality": "Municipalité/District",
+      "postalCode": "Code postal",
+      "province": "Province",
+      "propertyType": "Type de propriété",
+      "propertyGenre": "Genre de propriété",
+      "propertyGenrePlaceholder": "Ex: Détachée, Jumelée, En rangée...",
+      "constructionYear": "Année de construction",
+      "zoning": "Zonage",
+      "askingPrice": "Prix demandé",
+      "salePrice": "Prix de vente",
+      "status": "Statut",
+      "saleDate": "Date de vente",
+      "mlsNumber": "Numéro MLS",
+      "lotAreaM2": "Superficie terrain (m²)",
+      "lotAreaPi2": "Superficie terrain (pi²)",
+      "livingAreaM2": "Superficie habitable (m²)",
+      "livingAreaPi2": "Superficie habitable (pi²)",
+      "bedroomCount": "Nombre de chambres",
+      "bathroomCount": "Salles de bain",
+      "powderRoomCount": "Salles d'eau",
+      "basementType": "Type de sous-sol",
+      "parking": "Stationnement",
+      "parkingPlaceholder": "Ex: Garage double, Extérieur...",
+      "notes": "Notes",
+      "sharedWithTeam": "Partagé avec l'équipe",
+      "useAsTemplate": "Utiliser comme modèle",
+      "provinces": {
+        "QC": "Québec",
+        "ON": "Ontario",
+        "BC": "Colombie-Britannique",
+        "AB": "Alberta",
+        "MB": "Manitoba",
+        "SK": "Saskatchewan",
+        "NS": "Nouvelle-Écosse",
+        "NB": "Nouveau-Brunswick",
+        "PE": "Île-du-Prince-Édouard",
+        "NL": "Terre-Neuve-et-Labrador",
+        "YT": "Yukon",
+        "NT": "Territoires du Nord-Ouest",
+        "NU": "Nunavut"
+      },
+      "idNo": "ID No",
+      "daysOnMarket": "Jours sur marché",
+      "appraisalType": "Type d'évaluation",
+      "occupancy": "Occupancy",
+      "rentInPlace": "Loyer en place",
+      "condoFees": "Frais de condo",
+      "floorNumber": "Étage #",
+      "unitNumber": "No. d'unité",
+      "monthlyRent": "Loyer mensuel",
+      "occupant": "Occupant",
+      "buildingType": "Type de bâtiment",
+      "location": "Localisation",
+      "condoType": "Type de copropriété",
+      "chronologicalAge": "Chrono. Age",
+      "effectiveAge": "Eff. Age",
+      "roomCount": "Nombre de pièces",
+      "garageType": "Type de garage",
+      "garageDimension": "Dimension garage",
+      "roofing": "Toiture",
+      "extras": "Extras",
+      "improvementsAboveGround": "Améliorations hors-sol",
+      "lotNumber": "Numéro de lot",
+      "cadastre": "Matricule",
+      "unit": "Unité",
+      "additionalLot": "Lot additionnel",
+      "lotType": "Type de lot",
+      "date": "Date",
+      "land": "Terrain",
+      "building": "Bâtiment",
+      "total": "Total",
+      "year": "Année",
+      "amount": "Montant",
+      "permittedUses": "Usages permis",
+      "frontageM": "Frontage (m)",
+      "frontagePi": "Frontage (pi)",
+      "depthM": "Profondeur (m)",
+      "depthPi": "Profondeur (pi)",
+      "buildingPerimeterM": "Périmètre du bâtiment (m)",
+      "buildingPerimeterPi": "Périmètre du bâtiment (pi)",
+      "floor": "Étage",
+      "areaM2": "Superficie (m²)",
+      "areaPi2": "Superficie (pi²)",
+      "habitable": "Habitable",
+      "effectiveDate": "Date effective",
+      "generalInformation": "Information générale",
+      "buildingCharacteristics": "Caractéristiques du bâtiment",
+      "municipalData": "Données municipales",
+      "areas": "Superficies",
+      "areaByFloor": "Superficie par étage",
+      "addAdditionalLot": "Ajouter un lot additionnel"
+    },
+    "view": {
+      "generalInformation": "Informations générales",
+      "areas": "Superficies",
+      "buildingCharacteristics": "Caractéristiques du bâtiment",
+      "municipalData": "Données municipales",
+      "inspection": "Inspection",
+      "quickActions": "Actions rapides",
+      "startInspection": "Commencer inspection",
+      "continueInspection": "Continuer inspection ({percent}%)",
+      "viewInspection": "Voir inspection",
+      "newAppraisal": "Nouvelle évaluation",
+      "adjustments": "Ajustements",
+      "idNo": "ID No",
+      "address": "Adresse",
+      "city": "Ville",
+      "district": "Arrondissement",
+      "postalCode": "Code postal",
+      "province": "Province",
+      "evaluationValue": "Valeur d'évaluation",
+      "effectiveDate": "Date effective",
+      "evaluationType": "Type d'évaluation",
+      "constructionYear": "Année construction",
+      "zoning": "Zonage",
+      "occupancy": "Occupancy",
+      "propertyType": "Type de propriété",
+      "propertyGenre": "Genre de propriété",
+      "currentRent": "Loyer en place",
+      "salePrice": "Prix de vente",
+      "askingPrice": "Prix demandé",
+      "saleDate": "Date de vente",
+      "daysOnMarket": "Jours marché",
+      "status": "Statut",
+      "mlsNo": "#MLS",
+      "condoFees": "Frais de condo",
+      "floorNumber": "Étage #",
+      "unitRents": "Loyer par unité",
+      "ownerOccupied": "Occupé par propriétaire",
+      "lotArea": "Superficie de terrain",
+      "buildingPerimeter": "Périmètre du bâtiment",
+      "areaByFloor": "Superficie par étage",
+      "floor": "Étage",
+      "areaM2": "Superficie (m²)",
+      "areaPi2": "Superficie (pi²)",
+      "type": "Type",
+      "totalLivingArea": "Total superficie habitable (hors-sol)",
+      "totalBasementArea": "Total superficie sous-sol",
+      "roomCount": "Nombre de pièces",
+      "bedroomCount": "Nombre de chambres",
+      "bathroomCount": "Salle de bain",
+      "powderRoomCount": "Salle d'eau",
+      "parking": "Stationnement",
+      "garageType": "Type de garage",
+      "garageDimension": "Dimension garage",
+      "basementType": "Type de sous-sol",
+      "roofing": "Toiture",
+      "extras": "Extras",
+      "aboveGroundImprovements": "Améliorations hors sol",
+      "lotNumber": "Numéro de lot",
+      "matricule": "Matricule",
+      "additionalLots": "Lots additionnels",
+      "municipalEvaluation": "Évaluation municipale",
+      "date": "Date",
+      "land": "Terrain",
+      "building": "Bâtiment",
+      "total": "Total",
+      "municipalTaxes": "Taxes municipales",
+      "year": "Année",
+      "amount": "Montant",
+      "schoolTaxes": "Taxes scolaires",
+      "livingArea": "Aire habitable",
+      "zoningPermittedUses": "Zonage - Usages permis",
+      "inspectionDate": "Date d'inspection",
+      "roomsInspected": "Pièces inspectées",
+      "floors": "Étages",
+      "completedCategories": "Catégories complétées",
+      "floorDetails": "Détails par étage",
+      "noRoomsInspected": "Aucune pièce inspectée",
+      "completed": "Complété",
+      "inProgress": "En cours",
+      "notStarted": "Non commencé",
+      "overallProgress": "Progrès global",
+      "navigationHint": "Utilisez ← → pour naviguer entre les propriétés",
+      "close": "Fermer",
+      "modify": "Modifier",
+      "buildingType": "Type de bâtiment",
+      "location": "Localisation",
+      "condoType": "Type de copropriété",
+      "chronoAge": "Chrono. Age",
+      "effAge": "Eff. Age",
+      "frontageDepth": "Frontage / Profondeur",
+      "unit": "Unité",
+      "lot": "Lot",
+      "lotType": "Type"
+    },
     "propertyTypes": {
       "Condo": "Condo",
       "Unifamiliale": "Unifamiliale",
+      "Duplex": "Duplex",
+      "Triplex": "Triplex",
+      "Quadriplex+": "Quadriplex+",
       "Plex": "Plex",
       "Appartement": "Appartement",
       "Semi-commercial": "Semi-commercial",
-      "Terrain": "Terrain",
       "Commercial": "Commercial",
+      "Terrain": "Terrain",
       "Autre": "Autre"
     },
-
     "propertyStatus": {
       "Vendu": "Vendu",
       "À vendre": "À vendre",
       "Actif": "Actif",
+      "Sujet": "Sujet",
       "Retiré": "Retiré",
       "Conditionnel": "Conditionnel",
       "Expiré": "Expiré"
     },
-
+    "basementTypes": {
+      "Aucun": "Aucun",
+      "Complet": "Complet",
+      "Partiel": "Partiel",
+      "Complet aménagé": "Complet aménagé",
+      "Complet non-aménagé": "Complet non-aménagé",
+      "Partiel aménagé": "Partiel aménagé",
+      "Partiel non-aménagé": "Partiel non-aménagé",
+      "Vide sanitaire": "Vide sanitaire",
+      "Dalle de béton": "Dalle de béton"
+    },
+    "propertyGenre": {
+      "Plain-pied": "Plain-pied",
+      "À étages": "À étages",
+      "1 Étage": "1 Étage",
+      "Un étage et demi": "Un étage et demi",
+      "Deux étages": "Deux étages",
+      "Deux étages et demi": "Deux étages et demi",
+      "Trois étages": "Trois étages",
+      "Paliers multiples": "Paliers multiples",
+      "Mobile": "Mobile",
+      "Maison de ville": "Maison de ville",
+      "Tour d'appartement": "Tour d'appartement",
+      "Terrain vacant": "Terrain vacant"
+    },
+    "buildingType": {
+      "Isolé": "Isolé",
+      "Semi-détaché": "Semi-détaché",
+      "En rangée": "En rangée",
+      "En rangée sur coin": "En rangée sur coin"
+    },
+    "parkingTypes": {
+      "Allée": "Allée",
+      "Garage": "Garage",
+      "Abri d'auto": "Abri d'auto",
+      "Rue": "Rue",
+      "Aucun": "Aucun"
+    },
+    "garageTypes": {
+      "Attaché": "Attaché",
+      "Détaché": "Détaché",
+      "Intégré": "Intégré",
+      "Au sous-sol": "Au sous-sol",
+      "Abri d'auto": "Abri d'auto"
+    },
+    "condoLocation": {
+      "Coin": "Coin",
+      "Centre": "Centre"
+    },
+    "condoType": {
+      "Divise": "Divise",
+      "Indivise": "Indivise"
+    },
     "notifications": {
       "created": "Propriété créée avec succès",
       "updated": "Propriété mise à jour avec succès",
       "deleted": "Propriété supprimée avec succès",
       "duplicated": "Propriété dupliquée avec succès",
-      "error": "Une erreur est survenue. Veuillez réessayer."
+      "merged": "Propriété fusionnée avec succès",
+      "error": "Une erreur est survenue. Veuillez réessayer.",
+      "deletedCount": "Supprimé {count} propriétés avec succès",
+      "saveFailed": "Échec de l'enregistrement de la propriété"
+    },
+    "empty": {
+      "noProperties": "Aucune propriété trouvée",
+      "addFirstProperty": "Ajoutez votre première propriété pour commencer."
     }
   },
-
   "dashboard": {
     "title": "Mon Tableau de bord",
     "welcome": "Bonjour {name} - Vue de votre activité personnelle",
@@ -193,7 +522,6 @@
       "aheadOfGoals": "Vous êtes en avance sur vos objectifs"
     }
   },
-
   "settings": {
     "title": "Paramètres",
     "language": "Langue",
@@ -292,7 +620,6 @@
       }
     }
   },
-
   "inspection": {
     "title": "Inspections",
     "createNew": "Créer nouvelle inspection",
@@ -877,7 +1204,6 @@
       "notes": "Notes"
     }
   },
-
   "errors": {
     "404": "Page non trouvée",
     "500": "Erreur du serveur",
@@ -886,7 +1212,6 @@
     "unauthorized": "Non autorisé",
     "forbidden": "Accès interdit"
   },
-
   "pricing": {
     "title": "Choisissez votre forfait",
     "subtitle": "Sélectionnez le forfait parfait pour vos besoins d'évaluation immobilière",
@@ -899,52 +1224,61 @@
     "getStarted": "Commencer",
     "save240": "Économisez 240$/an (20% de rabais)",
     "footer": "Tous les forfaits incluent un essai gratuit de 14 jours. Annulez à tout moment.",
-    "billedAnnually": "facturé annuellement"
+    "billedAnnually": "facturé annuellement",
+    "benefits": {
+      "unlimited": "Propriétés et rapports illimités",
+      "reporting": "Rapports d'évaluation professionnels",
+      "support": "Support prioritaire par email",
+      "mobile": "Application mobile (iOS et Android)",
+      "export": "Export PDF et Excel",
+      "updates": "Mises à jour et nouvelles fonctionnalités"
+    }
   },
-
   "landing": {
     "nav": {
       "features": "Fonctionnalités",
       "screenshots": "Captures d'écran",
       "pricing": "Tarifs",
+      "demo": "Demander une démo",
+      "waitlist": "Liste d'attente",
       "login": "Connexion",
       "signup": "S'inscrire"
     },
     "hero": {
       "title": "Évaluations immobilières professionnelles simplifiées",
-      "subtitle": "Valea Max vous aide à gérer vos évaluations immobilières avec précision et efficacité. Inspections détaillées, rapports complets et analyses de marché pilotées par l'IA.",
+      "subtitle": "Valea Max vous aide à gérer vos évaluations immobilières avec précision et efficacité. Inspections détaillées, rapports complets et automatisation intelligente.",
       "cta": {
-        "primary": "Commencer gratuitement",
-        "secondary": "Voir les forfaits"
+        "primary": "Demander une démo",
+        "secondary": "Rejoindre la liste d'attente"
       }
     },
     "features": {
       "title": "Tout ce dont vous avez besoin",
       "subtitle": "Des outils professionnels pour des évaluations immobilières de qualité",
       "newBadge": "Nouveau",
-      "aiPdf": {
-        "title": "Lecteur PDF intelligent avec IA",
-        "description": "Importez des PDF de comparables et laissez notre IA extraire automatiquement toutes les données. Ajoutez plusieurs propriétés à votre bibliothèque en quelques secondes."
+      "reports": {
+        "title": "Rapports professionnels",
+        "description": "Complétez des rapports d'évaluation complets avec facilité. Remplissez automatiquement les PDFs dynamiques des grandes AMC avec notre plugin desktop et tirez parti de l'IA pour générer des rapports professionnels plus rapidement."
+      },
+      "dataImport": {
+        "title": "Importation intelligente de données",
+        "description": "Importez des données immobilières depuis des PDFs MLS/Matrix ou directement depuis les sites web MLS/Matrix avec notre extension de navigateur. Notre IA extrait avec précision toutes les données de comparables pertinentes incluant les informations municipales et ajoute les dossiers de vente à votre bibliothèque en quelques secondes."
       },
       "propertyLibrary": {
         "title": "Bibliothèque de propriétés",
-        "description": "Gérez votre portefeuille immobilier avec des recherches avancées, des filtres dynamiques et des exports PDF/Excel. Toutes vos données au même endroit."
+        "description": "Gérez un nombre illimité de propriétés avec des recherches avancées, des filtres dynamiques et des exports PDF/Excel. Toutes vos données immobilières au même endroit."
       },
       "inspections": {
         "title": "Inspections détaillées",
-        "description": "Créez des rapports d'inspection complets avec des photos, des mesures et des notes. Suivi des progrès en temps réel par catégorie."
+        "description": "Effectuez des inspections complètes pièce par pièce avec mesures et notes. Interface optimisée pour tablette avec suivi des progrès en temps réel par catégorie."
       },
       "comparables": {
         "title": "Analyse de comparables",
-        "description": "Trouvez et comparez des propriétés similaires avec des ajustements automatiques. Analyses de marché précises pour des évaluations fiables."
+        "description": "Trouvez et comparez des propriétés similaires avec facilité. Les calculs clés sont effectués automatiquement pour des évaluations précises et fiables."
       },
-      "analytics": {
-        "title": "Analyses de marché",
-        "description": "Accédez à des données de marché actualisées et des analyses comparatives pour des évaluations précises basées sur des données réelles."
-      },
-      "cloud": {
-        "title": "Accès cloud sécurisé",
-        "description": "Accédez à vos données depuis n'importe où avec notre plateforme cloud. Synchronisation en temps réel et sauvegardes automatiques."
+      "dashboard": {
+        "title": "Tableau de bord de performance",
+        "description": "Suivez votre activité d'évaluation et vos indicateurs de performance. Analysez votre portefeuille immobilier avec des statistiques en temps réel et des informations sur votre productivité."
       }
     },
     "screenshots": {
@@ -990,20 +1324,97 @@
     },
     "footer": {
       "rights": "Tous droits réservés."
+    },
+    "waitlist": {
+      "title": "Rejoignez la Liste d'Attente",
+      "subtitle": "Soyez parmi les premiers à essayer Valea Max",
+      "namePlaceholder": "Nom complet",
+      "emailPlaceholder": "Adresse email",
+      "submitButton": "Rejoindre la liste",
+      "success": "Merci! Vous êtes maintenant sur la liste d'attente.",
+      "error": "Une erreur est survenue. Veuillez réessayer.",
+      "alreadyExists": "Cet email est déjà sur la liste d'attente."
+    },
+    "demo": {
+      "title": "Demander une Démo",
+      "subtitle": "Découvrez Valea Max en action. Planifiez une démo personnalisée avec notre équipe.",
+      "namePlaceholder": "Nom complet",
+      "emailPlaceholder": "Email professionnel",
+      "companyPlaceholder": "Nom de l'entreprise (optionnel)",
+      "phonePlaceholder": "Numéro de téléphone (optionnel)",
+      "messagePlaceholder": "Parlez-nous de vos besoins (optionnel)",
+      "submitButton": "Demander une Démo",
+      "success": "Merci! Nous vous contacterons dans les 24 heures pour planifier votre démo.",
+      "error": "Une erreur est survenue. Veuillez réessayer.",
+      "alreadyExists": "Nous avons déjà reçu votre demande de démo. Nous vous contacterons bientôt!"
+    },
+    "howItWorks": {
+      "title": "Comment Ça Fonctionne",
+      "subtitle": "Évaluations professionnelles simplifiées avec l'automatisation IA",
+      "step1": {
+        "title": "Créez Votre Bibliothèque",
+        "description": "Créez des propriétés manuellement ou importez des données existantes"
+      },
+      "step2": {
+        "title": "Utilisez l'IA au Besoin",
+        "description": "Numérisez des PDF pour extraire les détails (1 crédit), importez depuis des sites web (1 crédit), ou générez des sections automatiquement (1 crédit)"
+      },
+      "step3": {
+        "title": "Complétez les Inspections",
+        "description": "Optimisé pour tablette pour le travail sur le terrain (aucun crédit requis)"
+      },
+      "step4": {
+        "title": "Générez les Rapports Finaux",
+        "description": "Exportez des évaluations professionnelles conformes CUSPAP/OEAQ"
+      }
+    },
+    "aiPowered": {
+      "title": "Automatisation IA, Paiement à l'Utilisation",
+      "subtitle": "Utilisez l'IA pour numériser des documents, extraire des données et générer du contenu professionnel. Chaque opération IA utilise 1 crédit (fichiers de plus de 2 Mo peuvent utiliser 2 à 4 crédits).",
+      "feature1": {
+        "title": "Numériser des PDF",
+        "description": "Extraire automatiquement les données immobilières (1 crédit par numérisation)"
+      },
+      "feature2": {
+        "title": "Importer depuis des URLs",
+        "description": "Récupérer les données des sites web (1 crédit par importation)"
+      },
+      "feature3": {
+        "title": "Contenu Généré par IA",
+        "description": "Remplir automatiquement les sections de rapport avec précision (1 crédit par génération)"
+      },
+      "tagline": "Les crédits alimentent votre assistant IA - utilisez-les quand vous avez besoin d'automatisation, sautez-les quand ce n'est pas nécessaire."
+    },
+    "faq": {
+      "title": "Questions Fréquemment Posées",
+      "subtitle": "Tout ce que vous devez savoir sur Valea Max et les crédits",
+      "q1": {
+        "question": "Comment fonctionnent les crédits?",
+        "answer": "Les crédits alimentent vos fonctionnalités IA. Chaque opération IA (numérisation PDF, importation de site web, génération de contenu) utilise 1 crédit. Les fichiers de plus de 2 Mo peuvent utiliser 2 à 4 crédits. Vous avez le contrôle - utilisez l'IA quand vous avez besoin de rapidité, entrez les données manuellement quand vous ne le faites pas."
+      },
+      "q2": {
+        "question": "Les crédits expirent-ils?",
+        "answer": "Non, les crédits n'expirent jamais. Achetez-les une fois et utilisez-les quand vous en avez besoin."
+      },
+      "q3": {
+        "question": "Puis-je utiliser Valea Max sans crédits?",
+        "answer": "Oui! Vous pouvez créer des propriétés, effectuer des inspections et générer des rapports manuellement sans utiliser de crédits. Les crédits ne sont nécessaires que pour les fonctionnalités d'automatisation IA."
+      },
+      "q4": {
+        "question": "Quels formats de fichiers sont supportés?",
+        "answer": "Nous supportons les documents PDF pour l'extraction de données. Vous pouvez également importer des données depuis MLS et les sites d'annonces immobilières."
+      }
     }
   },
-
   "import": {
     "title": "Assistant d'importation",
     "subtitle": "Importez des propriétés depuis des PDF ou des sites d'annonces",
-
     "steps": {
       "source": "Choisir la source",
       "upload": "Téléverser le document",
       "review": "Réviser les données",
       "confirmation": "Confirmation"
     },
-
     "source": {
       "title": "Choisir la source d'importation",
       "pdf": {
@@ -1018,7 +1429,6 @@
         "requirement": "Nécessite l'extension Valea Browser Helper"
       }
     },
-
     "upload": {
       "title": "Téléverser et analyser le document",
       "dropzone": {
@@ -1045,7 +1455,6 @@
         "priority": "Fournisseur de {priority} priorité. Modifiez dans Paramètres → Clés API IA."
       }
     },
-
     "review": {
       "title": "Réviser et ajuster les données extraites",
       "titleMultiple": "{count} propriétés trouvées",
@@ -1075,7 +1484,6 @@
         "importAll": "Importer ({count})"
       }
     },
-
     "duplicate": {
       "title": "Adresse déjà existante",
       "message": "Une propriété avec l'adresse '{address}' existe déjà dans votre bibliothèque.",
@@ -1086,7 +1494,6 @@
         "createDuplicate": "Créer un doublon"
       }
     },
-
     "success": {
       "title": "Propriété créée avec succès!",
       "summary": "Résumé de l'importation",
@@ -1099,7 +1506,6 @@
         "viewProperty": "Voir la propriété"
       }
     },
-
     "errors": {
       "fileTooBig": "Le fichier est trop volumineux (max 10MB)",
       "invalidType": "Type de fichier non supporté",
@@ -1107,7 +1513,6 @@
       "noText": "Aucun texte trouvé dans le document",
       "aiError": "Erreur lors de l'analyse IA"
     },
-
     "batch": {
       "title": "Import de documents multiples",
       "subtitle": "Téléversez plusieurs PDFs et assignez les types de documents",

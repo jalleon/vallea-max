@@ -115,17 +115,88 @@ export async function POST(request: Request) {
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   console.log('Processing checkout.session.completed:', session.id)
 
-  const userId = session.metadata?.userId || session.client_reference_id
+  const supabaseAdmin = getSupabaseAdmin()
+  let userId = session.metadata?.userId || session.client_reference_id
+  const isSignupFlow = session.metadata?.signupFlow === 'true'
+
+  // If this is a signup flow, create the user account first
+  if (isSignupFlow) {
+    console.log('Signup flow detected - creating user account')
+
+    const email = session.metadata?.email
+    const fullName = session.metadata?.fullName
+    const organizationName = session.metadata?.organizationName
+    const tempPassword = session.metadata?.tempPassword
+    const locale = session.metadata?.locale || 'fr'
+    const creditsAmount = parseInt(session.metadata?.creditsAmount || '0')
+
+    if (!email || !tempPassword) {
+      console.error('Missing email or password in signup metadata')
+      throw new Error('Missing required signup information')
+    }
+
+    // Decode password (was base64 encoded)
+    const password = atob(tempPassword)
+
+    // Create user account via Supabase Auth
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true, // Auto-confirm since they paid
+      user_metadata: {
+        full_name: fullName,
+        locale,
+      }
+    })
+
+    if (authError) {
+      console.error('Error creating user account:', authError)
+      throw authError
+    }
+
+    userId = authData.user.id
+    console.log(`User account created: ${userId}`)
+
+    // Update profile with full name and organization
+    const { error: profileError } = await supabaseAdmin.from('profiles').update({
+      full_name: fullName,
+      organization_name: organizationName || null,
+      updated_at: new Date().toISOString()
+    }).eq('id', userId)
+
+    if (profileError) {
+      console.error('Error updating profile:', profileError)
+      // Don't throw - this is not critical enough to fail the webhook
+    } else {
+      console.log(`Profile updated for user ${userId}`)
+    }
+
+    // Add AI credits if purchased
+    if (creditsAmount > 0) {
+      const { error: creditsError } = await supabaseAdmin
+        .from('users')
+        .update({
+          scan_credits_quota: creditsAmount,
+          scan_credits_used: 0
+        })
+        .eq('id', userId)
+
+      if (creditsError) {
+        console.error('Error adding credits:', creditsError)
+      } else {
+        console.log(`Added ${creditsAmount} AI credits to user ${userId}`)
+      }
+    }
+  }
 
   if (!userId) {
     console.error('No user ID found in checkout session')
-    return
+    throw new Error('No user ID found')
   }
 
   const planType = session.metadata?.planType || 'monthly'
 
   // Create or update subscription record
-  const supabaseAdmin = getSupabaseAdmin()
   const { error } = await supabaseAdmin
     .from('user_subscriptions')
     .upsert({
@@ -145,12 +216,14 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   console.log(`Subscription created for user ${userId}`)
+
+  // Get user info for welcome email
   const { data: user } = await supabaseAdmin.auth.admin.getUserById(userId)
 
   if (user?.user) {
     const userEmail = user.user.email
     const userName = user.user.user_metadata?.full_name || userEmail?.split('@')[0] || 'User'
-    const locale = user.user.user_metadata?.locale || 'fr' // Default to French
+    const locale = user.user.user_metadata?.locale || 'fr'
 
     try {
       await emailService.sendWelcomeEmail(userEmail!, userName, locale)

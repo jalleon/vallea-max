@@ -39,9 +39,46 @@
     },
     "menu": {
       "aiApiKeys": "AI API Keys"
+    },
+    "nav": {
+      "navigation": "Navigation",
+      "dashboard": {
+        "label": "Dashboard",
+        "description": "Overview and analytics"
+      },
+      "library": {
+        "label": "Library",
+        "description": "Property management"
+      },
+      "import": {
+        "label": "Import",
+        "description": "PDF and data import"
+      },
+      "evaluations": {
+        "label": "Appraisals",
+        "description": "RPS, NAS and custom"
+      },
+      "adjustments": {
+        "label": "Adjustments",
+        "description": "Comparative calculations"
+      },
+      "reports": {
+        "label": "Reports",
+        "description": "Professional documents"
+      },
+      "inspection": {
+        "label": "Inspections"
+      },
+      "performance": {
+        "title": "Monthly Performance",
+        "growth": "+15.3%",
+        "completed": "{count} appraisals completed"
+      },
+      "collapse": "Collapse sidebar",
+      "expand": "Expand sidebar",
+      "tagline": "Real Estate Appraisal"
     }
   },
-
   "auth": {
     "login": {
       "title": "Login",
@@ -77,7 +114,6 @@
     },
     "logout": "Logout"
   },
-
   "navigation": {
     "dashboard": "Dashboard",
     "library": "Library",
@@ -88,7 +124,6 @@
     "reports": "Reports",
     "settings": "Settings"
   },
-
   "library": {
     "title": "Property Library",
     "subtitle": "Manage your real estate portfolio and create new property records",
@@ -97,7 +132,14 @@
     "deleteSelected": "Delete ({count})",
     "confirmDelete": "Are you sure you want to delete {count, plural, =1 {this property} other {these # properties}}?",
     "deleteMessage": "This action cannot be undone.",
-
+    "loadingProperties": "Loading properties...",
+    "retry": "Retry",
+    "stats": {
+      "totalProperties": "Total Properties",
+      "portfolioValue": "Portfolio Value",
+      "evaluationsThisMonth": "Appraisals this month",
+      "newProperties": "New properties"
+    },
     "search": {
       "placeholder": "Search by address, city, MLS, ID...",
       "advancedFilters": "Advanced Filters",
@@ -113,56 +155,343 @@
       "minimum": "Minimum",
       "maximum": "Maximum",
       "clearFilters": "Clear filters",
-      "resultsFound": "{count} result{count, plural, =0 {s} =1 {} other {s}} found"
+      "resultsFound": "{count} result{count, plural, =0 {s} =1 {} other {s}} found",
+      "loadingProperties": "Loading properties..."
     },
-
     "table": {
       "idNo": "ID No",
       "address": "Address",
       "city": "City",
       "saleDate": "Sale Date",
+      "soldDate": "Sold Date",
       "salePrice": "Sale Price",
+      "soldPrice": "Sold Price",
+      "salePriceOrEffValue": "Sale Price / Eff. Value",
+      "saleDateOrEffective": "Sale Date / Effective",
       "type": "Type",
       "yearBuilt": "Year Built",
+      "constructionYear": "Construction Year",
       "source": "Source",
       "mlsNo": "Matrix/MLS No",
+      "matrixMls": "Matrix/MLS #",
       "actions": "Actions",
       "viewDetails": "View details",
       "edit": "Edit",
       "delete": "Delete",
+      "duplicate": "Duplicate",
       "rowsPerPage": "Rows per page:",
-      "displayedRows": "{from}-{to} of {count}"
+      "displayedRows": "{from}-{to} of {count}",
+      "status": "Status",
+      "listPrice": "List"
     },
-
+    "dialogs": {
+      "confirmDeleteTitle": "Confirm Deletion",
+      "confirmDeleteMessage": "Are you sure you want to delete {count} selected property(ies)?",
+      "deleteAction": "This action is irreversible.",
+      "duplicateTitle": "Existing Address Detected",
+      "duplicateMessage": "A property with the same address already exists in your library:",
+      "duplicateExisting": "Existing property:",
+      "duplicatePrompt": "Would you like to merge the information with the existing property or create a duplicate?",
+      "duplicateMergeNote": "Merge: New values will fill empty fields in the existing property.",
+      "duplicateCreateNote": "Create duplicate: A new separate property will be created.",
+      "duplicateMerge": "Merge",
+      "duplicateCreate": "Create Duplicate",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "mergeOrCreateQuestion": "Merge or Create?",
+      "mergeButton": "Merge",
+      "mergeOption": "Merge",
+      "mergeDescription": "New values will fill empty fields in the existing property.",
+      "createDuplicateOption": "Create Duplicate",
+      "createDuplicateDescription": "A new separate property will be created with the same information.",
+      "createDuplicateButton": "Create Duplicate"
+    },
+    "form": {
+      "basicInformation": "Basic Information",
+      "propertyDetails": "Property Details",
+      "pricingAndSale": "Pricing and Sale",
+      "dimensions": "Dimensions",
+      "features": "Features",
+      "options": "Options",
+      "address": "Address",
+      "addressRequired": "Address required",
+      "city": "City",
+      "municipality": "Municipality/District",
+      "postalCode": "Postal Code",
+      "province": "Province",
+      "propertyType": "Property Type",
+      "propertyGenre": "Property Genre",
+      "propertyGenrePlaceholder": "Ex: Detached, Semi-detached, Row...",
+      "constructionYear": "Construction Year",
+      "zoning": "Zoning",
+      "askingPrice": "Asking Price",
+      "salePrice": "Sale Price",
+      "status": "Status",
+      "saleDate": "Sale Date",
+      "mlsNumber": "MLS Number",
+      "lotAreaM2": "Lot Area (m²)",
+      "lotAreaPi2": "Lot Area (ft²)",
+      "livingAreaM2": "Living Area (m²)",
+      "livingAreaPi2": "Living Area (ft²)",
+      "bedroomCount": "Number of Bedrooms",
+      "bathroomCount": "Bathrooms",
+      "powderRoomCount": "Powder Rooms",
+      "basementType": "Basement Type",
+      "parking": "Parking",
+      "parkingPlaceholder": "Ex: Double garage, Outdoor...",
+      "notes": "Notes",
+      "sharedWithTeam": "Shared with team",
+      "useAsTemplate": "Use as template",
+      "provinces": {
+        "QC": "Quebec",
+        "ON": "Ontario",
+        "BC": "British Columbia",
+        "AB": "Alberta",
+        "MB": "Manitoba",
+        "SK": "Saskatchewan",
+        "NS": "Nova Scotia",
+        "NB": "New Brunswick",
+        "PE": "Prince Edward Island",
+        "NL": "Newfoundland and Labrador",
+        "YT": "Yukon",
+        "NT": "Northwest Territories",
+        "NU": "Nunavut"
+      },
+      "idNo": "ID No",
+      "daysOnMarket": "Days on Market",
+      "appraisalType": "Appraisal Type",
+      "occupancy": "Occupancy",
+      "rentInPlace": "Rent in Place",
+      "condoFees": "Condo Fees",
+      "floorNumber": "Floor #",
+      "unitNumber": "Unit No.",
+      "monthlyRent": "Monthly Rent",
+      "occupant": "Occupant",
+      "buildingType": "Building Type",
+      "location": "Location",
+      "condoType": "Condo Type",
+      "chronologicalAge": "Chrono. Age",
+      "effectiveAge": "Eff. Age",
+      "roomCount": "Number of Rooms",
+      "garageType": "Garage Type",
+      "garageDimension": "Garage Dimension",
+      "roofing": "Roofing",
+      "extras": "Extras",
+      "improvementsAboveGround": "Improvements Above Ground",
+      "lotNumber": "Lot Number",
+      "cadastre": "Cadastre",
+      "unit": "Unit",
+      "additionalLot": "Additional Lot",
+      "lotType": "Lot Type",
+      "date": "Date",
+      "land": "Land",
+      "building": "Building",
+      "total": "Total",
+      "year": "Year",
+      "amount": "Amount",
+      "permittedUses": "Permitted Uses",
+      "frontageM": "Frontage (m)",
+      "frontagePi": "Frontage (ft)",
+      "depthM": "Depth (m)",
+      "depthPi": "Depth (ft)",
+      "buildingPerimeterM": "Building Perimeter (m)",
+      "buildingPerimeterPi": "Building Perimeter (ft)",
+      "floor": "Floor",
+      "areaM2": "Area (m²)",
+      "areaPi2": "Area (ft²)",
+      "habitable": "Habitable",
+      "effectiveDate": "Effective Date",
+      "generalInformation": "General Information",
+      "buildingCharacteristics": "Building Characteristics",
+      "municipalData": "Municipal Data",
+      "areas": "Areas",
+      "areaByFloor": "Area by Floor",
+      "addAdditionalLot": "Add additional lot"
+    },
+    "view": {
+      "generalInformation": "General Information",
+      "areas": "Areas",
+      "buildingCharacteristics": "Building Characteristics",
+      "municipalData": "Municipal Data",
+      "inspection": "Inspection",
+      "quickActions": "Quick Actions",
+      "startInspection": "Start inspection",
+      "continueInspection": "Continue inspection ({percent}%)",
+      "viewInspection": "View inspection",
+      "newAppraisal": "New appraisal",
+      "adjustments": "Adjustments",
+      "idNo": "ID No",
+      "address": "Address",
+      "city": "City",
+      "district": "District",
+      "postalCode": "Postal Code",
+      "province": "Province",
+      "evaluationValue": "Appraisal Value",
+      "effectiveDate": "Effective Date",
+      "evaluationType": "Appraisal Type",
+      "constructionYear": "Construction Year",
+      "zoning": "Zoning",
+      "occupancy": "Occupancy",
+      "propertyType": "Property Type",
+      "propertyGenre": "Property Genre",
+      "currentRent": "Current Rent",
+      "salePrice": "Sale Price",
+      "askingPrice": "Asking Price",
+      "saleDate": "Sale Date",
+      "daysOnMarket": "Days on Market",
+      "status": "Status",
+      "mlsNo": "MLS#",
+      "condoFees": "Condo Fees",
+      "floorNumber": "Floor #",
+      "unitRents": "Rent by Unit",
+      "ownerOccupied": "Owner Occupied",
+      "lotArea": "Lot Area",
+      "buildingPerimeter": "Building Perimeter",
+      "areaByFloor": "Area by Floor",
+      "floor": "Floor",
+      "areaM2": "Area (m²)",
+      "areaPi2": "Area (ft²)",
+      "type": "Type",
+      "totalLivingArea": "Total living area (above ground)",
+      "totalBasementArea": "Total basement area",
+      "roomCount": "Room Count",
+      "bedroomCount": "Bedroom Count",
+      "bathroomCount": "Bathroom Count",
+      "powderRoomCount": "Powder Room Count",
+      "parking": "Parking",
+      "garageType": "Garage Type",
+      "garageDimension": "Garage Dimension",
+      "basementType": "Basement Type",
+      "roofing": "Roofing",
+      "extras": "Extras",
+      "aboveGroundImprovements": "Above Ground Improvements",
+      "lotNumber": "Lot Number",
+      "matricule": "Matricule",
+      "additionalLots": "Additional Lots",
+      "municipalEvaluation": "Municipal Evaluation",
+      "date": "Date",
+      "land": "Land",
+      "building": "Building",
+      "total": "Total",
+      "municipalTaxes": "Municipal Taxes",
+      "year": "Year",
+      "amount": "Amount",
+      "schoolTaxes": "School Taxes",
+      "livingArea": "Living Area",
+      "zoningPermittedUses": "Zoning - Permitted Uses",
+      "inspectionDate": "Inspection Date",
+      "roomsInspected": "Rooms Inspected",
+      "floors": "Floors",
+      "completedCategories": "Completed Categories",
+      "floorDetails": "Floor Details",
+      "noRoomsInspected": "No rooms inspected",
+      "completed": "Completed",
+      "inProgress": "In Progress",
+      "notStarted": "Not Started",
+      "overallProgress": "Overall Progress",
+      "navigationHint": "Use ← → to navigate between properties",
+      "close": "Close",
+      "modify": "Modify",
+      "buildingType": "Building Type",
+      "location": "Location",
+      "condoType": "Condo Type",
+      "chronoAge": "Chrono. Age",
+      "effAge": "Eff. Age",
+      "frontageDepth": "Frontage / Depth",
+      "unit": "Unit",
+      "lot": "Lot",
+      "lotType": "Type"
+    },
     "propertyTypes": {
       "Condo": "Condo",
       "Unifamiliale": "Single Family",
+      "Duplex": "Duplex",
+      "Triplex": "Triplex",
+      "Quadriplex+": "Quadriplex+",
       "Plex": "Plex",
       "Appartement": "Apartment",
       "Semi-commercial": "Semi-commercial",
-      "Terrain": "Land",
       "Commercial": "Commercial",
+      "Terrain": "Land",
       "Autre": "Other"
     },
-
     "propertyStatus": {
       "Vendu": "Sold",
       "À vendre": "For Sale",
       "Actif": "Active",
+      "Sujet": "Conditional",
       "Retiré": "Withdrawn",
       "Conditionnel": "Conditional",
       "Expiré": "Expired"
     },
-
+    "basementTypes": {
+      "Aucun": "None",
+      "Complet": "Full",
+      "Partiel": "Partial",
+      "Complet aménagé": "Full Finished",
+      "Complet non-aménagé": "Full Unfinished",
+      "Partiel aménagé": "Partial Finished",
+      "Partiel non-aménagé": "Partial Unfinished",
+      "Vide sanitaire": "Crawl Space",
+      "Dalle de béton": "Concrete Slab"
+    },
+    "propertyGenre": {
+      "Plain-pied": "Bungalow",
+      "À étages": "Multi-level",
+      "1 Étage": "1 Storey",
+      "Un étage et demi": "One and a Half Storey",
+      "Deux étages": "Two Storey",
+      "Deux étages et demi": "Two and a Half Storey",
+      "Trois étages": "Three Storey",
+      "Paliers multiples": "Split-level",
+      "Mobile": "Mobile",
+      "Maison de ville": "Townhouse",
+      "Tour d'appartement": "Apartment Tower",
+      "Terrain vacant": "Vacant Land"
+    },
+    "buildingType": {
+      "Isolé": "Detached",
+      "Semi-détaché": "Semi-detached",
+      "En rangée": "Row House",
+      "En rangée sur coin": "End Unit Row"
+    },
+    "parkingTypes": {
+      "Allée": "Driveway",
+      "Garage": "Garage",
+      "Abri d'auto": "Carport",
+      "Rue": "Street",
+      "Aucun": "None"
+    },
+    "garageTypes": {
+      "Attaché": "Attached",
+      "Détaché": "Detached",
+      "Intégré": "Integrated",
+      "Au sous-sol": "In Basement",
+      "Abri d'auto": "Carport"
+    },
+    "condoLocation": {
+      "Coin": "Corner",
+      "Centre": "Center"
+    },
+    "condoType": {
+      "Divise": "Divided",
+      "Indivise": "Undivided"
+    },
     "notifications": {
       "created": "Property created successfully",
       "updated": "Property updated successfully",
       "deleted": "Property deleted successfully",
       "duplicated": "Property duplicated successfully",
-      "error": "An error occurred. Please try again."
+      "merged": "Property merged successfully",
+      "error": "An error occurred. Please try again.",
+      "deletedCount": "Deleted {count} properties successfully",
+      "saveFailed": "Failed to save property"
+    },
+    "empty": {
+      "noProperties": "No properties found",
+      "addFirstProperty": "Add your first property to get started."
     }
   },
-
   "dashboard": {
     "title": "My Dashboard",
     "welcome": "Hello {name} - Your personal activity view",
@@ -193,7 +522,6 @@
       "aheadOfGoals": "You are ahead of your goals"
     }
   },
-
   "settings": {
     "title": "Settings",
     "language": "Language",
@@ -292,7 +620,6 @@
       }
     }
   },
-
   "inspection": {
     "title": "Inspections",
     "createNew": "Create New Inspection",
@@ -755,7 +1082,6 @@
       "notes": "Notes"
     }
   },
-
   "errors": {
     "404": "Page not found",
     "500": "Server error",
@@ -764,7 +1090,6 @@
     "unauthorized": "Unauthorized",
     "forbidden": "Access forbidden"
   },
-
   "pricing": {
     "title": "Choose Your Plan",
     "subtitle": "Select the perfect plan for your real estate appraisal needs",
@@ -777,52 +1102,61 @@
     "getStarted": "Get Started",
     "save240": "Save $240/year (20% discount)",
     "footer": "All plans include a 14-day free trial. Cancel anytime.",
-    "billedAnnually": "billed annually"
+    "billedAnnually": "billed annually",
+    "benefits": {
+      "unlimited": "Unlimited properties and reports",
+      "reporting": "Professional appraisal reports",
+      "support": "Priority email support",
+      "mobile": "Mobile app (iOS and Android)",
+      "export": "PDF and Excel export",
+      "updates": "Updates and new features"
+    }
   },
-
   "landing": {
     "nav": {
       "features": "Features",
       "screenshots": "Screenshots",
       "pricing": "Pricing",
+      "demo": "Request Demo",
+      "waitlist": "Waitlist",
       "login": "Login",
       "signup": "Sign Up"
     },
     "hero": {
       "title": "Professional Real Estate Appraisals Made Simple",
-      "subtitle": "Valea Max helps you manage your property appraisals with precision and efficiency. Detailed inspections, comprehensive reports, and AI-powered market analysis.",
+      "subtitle": "Valea Max helps you manage your property appraisals with precision and efficiency. Detailed inspections, comprehensive reports, and intelligent automation.",
       "cta": {
-        "primary": "Start Free Trial",
-        "secondary": "View Pricing"
+        "primary": "Request a Demo",
+        "secondary": "Join the Waitlist"
       }
     },
     "features": {
       "title": "Everything You Need",
       "subtitle": "Professional tools for quality real estate appraisals",
       "newBadge": "New",
-      "aiPdf": {
-        "title": "Smart AI PDF Reader",
-        "description": "Import comparable PDFs and let our AI automatically extract all data. Add multiple properties to your library in seconds."
+      "reports": {
+        "title": "Professional Reports",
+        "description": "Complete comprehensive appraisal reports with ease. Auto-fill dynamic PDFs from major AMCs with our desktop plugin and leverage AI for faster professional report generation."
+      },
+      "dataImport": {
+        "title": "Smart Data Import",
+        "description": "Import property data from MLS/Matrix PDFs or directly from MLS/Matrix listing websites with our browser extension. Our AI accurately extracts all relevant comparable data including municipality information and adds sale records to your library in seconds."
       },
       "propertyLibrary": {
         "title": "Property Library",
-        "description": "Manage your real estate portfolio with advanced search, dynamic filters, and PDF/Excel exports. All your data in one place."
+        "description": "Manage unlimited properties with advanced search, dynamic filters, and PDF/Excel exports. All your real estate data in one place."
       },
       "inspections": {
         "title": "Detailed Inspections",
-        "description": "Create comprehensive inspection reports with photos, measurements, and notes. Real-time progress tracking by category."
+        "description": "Conduct comprehensive room-by-room inspections with measurements and notes. Tablet-optimized interface with real-time progress tracking by category."
       },
       "comparables": {
         "title": "Comparable Analysis",
-        "description": "Find and compare similar properties with automatic adjustments. Accurate market analysis for reliable appraisals."
+        "description": "Find and compare similar properties with ease. Key calculations done automatically for accurate and reliable appraisals."
       },
-      "analytics": {
-        "title": "Market Analytics",
-        "description": "Access up-to-date market data and comparative analysis for accurate appraisals based on real data."
-      },
-      "cloud": {
-        "title": "Secure Cloud Access",
-        "description": "Access your data from anywhere with our cloud platform. Real-time sync and automatic backups."
+      "dashboard": {
+        "title": "Performance Dashboard",
+        "description": "Track your appraisal activity and performance metrics. Analyze your property portfolio with real-time statistics and productivity insights."
       }
     },
     "screenshots": {
@@ -868,20 +1202,97 @@
     },
     "footer": {
       "rights": "All rights reserved."
+    },
+    "waitlist": {
+      "title": "Join the Waitlist",
+      "subtitle": "Be among the first to try Valea Max",
+      "namePlaceholder": "Full name",
+      "emailPlaceholder": "Email address",
+      "submitButton": "Join waitlist",
+      "success": "Thank you! You're now on the waitlist.",
+      "error": "An error occurred. Please try again.",
+      "alreadyExists": "This email is already on the waitlist."
+    },
+    "demo": {
+      "title": "Request a Demo",
+      "subtitle": "See Valea Max in action. Schedule a personalized demo with our team.",
+      "namePlaceholder": "Full name",
+      "emailPlaceholder": "Work email",
+      "companyPlaceholder": "Company name (optional)",
+      "phonePlaceholder": "Phone number (optional)",
+      "messagePlaceholder": "Tell us about your needs (optional)",
+      "submitButton": "Request Demo",
+      "success": "Thank you! We'll contact you within 24 hours to schedule your demo.",
+      "error": "An error occurred. Please try again.",
+      "alreadyExists": "We've already received your demo request. We'll be in touch soon!"
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "subtitle": "Professional appraisals made simple with AI-powered automation",
+      "step1": {
+        "title": "Build Your Property Library",
+        "description": "Manually create properties or import from existing data"
+      },
+      "step2": {
+        "title": "Use AI When You Need It",
+        "description": "Scan PDFs to extract property details (1 credit), import data from websites (1 credit), or generate report sections automatically (1 credit)"
+      },
+      "step3": {
+        "title": "Complete Inspections",
+        "description": "Tablet-optimized for field work (no credits needed)"
+      },
+      "step4": {
+        "title": "Generate Final Reports",
+        "description": "Export professional CUSPAP/OEAQ-compliant appraisals"
+      }
+    },
+    "aiPowered": {
+      "title": "AI-Powered Automation, Pay As You Go",
+      "subtitle": "Use AI to scan documents, extract data, and generate professional content. Each AI operation uses 1 credit (larger files 2MB+ may use 2-4 credits).",
+      "feature1": {
+        "title": "Scan PDFs",
+        "description": "Extract property data automatically (1 credit per scan)"
+      },
+      "feature2": {
+        "title": "Import from URLs",
+        "description": "Pull data from websites (1 credit per import)"
+      },
+      "feature3": {
+        "title": "AI-Generated Content",
+        "description": "Auto-fill report sections with accuracy (1 credit per generation)"
+      },
+      "tagline": "Credits power your AI assistant - use them when you need automation, skip them when you don't."
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "subtitle": "Everything you need to know about Valea Max and credits",
+      "q1": {
+        "question": "How do credits work?",
+        "answer": "Credits power your AI features. Each AI operation (PDF scan, website import, content generation) uses 1 credit. Larger files over 2MB may use 2-4 credits. You're in control - use AI when you need speed, enter data manually when you don't."
+      },
+      "q2": {
+        "question": "Do credits expire?",
+        "answer": "No, credits never expire. Buy them once and use them whenever you need them."
+      },
+      "q3": {
+        "question": "Can I use Valea Max without credits?",
+        "answer": "Yes! You can create properties, conduct inspections, and generate reports manually without using any credits. Credits are only needed for AI-powered automation features."
+      },
+      "q4": {
+        "question": "What file formats are supported?",
+        "answer": "We support PDF documents for data extraction. You can also import data from MLS and real estate listing websites."
+      }
     }
   },
-
   "import": {
     "title": "Import Wizard",
     "subtitle": "Import properties from PDFs or listing websites",
-
     "steps": {
       "source": "Choose Source",
       "upload": "Upload Document",
       "review": "Review Data",
       "confirmation": "Confirmation"
     },
-
     "source": {
       "title": "Choose import source",
       "pdf": {
@@ -896,7 +1307,6 @@
         "requirement": "Requires Valea Browser Helper extension"
       }
     },
-
     "upload": {
       "title": "Upload and analyze document",
       "dropzone": {
@@ -923,7 +1333,6 @@
         "priority": "{priority} priority provider. Change in Settings → AI API Keys."
       }
     },
-
     "review": {
       "title": "Review and adjust extracted data",
       "titleMultiple": "{count} properties found",
@@ -953,7 +1362,6 @@
         "importAll": "Import ({count})"
       }
     },
-
     "duplicate": {
       "title": "Address Already Exists",
       "message": "A property with the address '{address}' already exists in your library.",
@@ -964,7 +1372,6 @@
         "createDuplicate": "Create Duplicate"
       }
     },
-
     "success": {
       "title": "Property created successfully!",
       "summary": "Import Summary",
@@ -977,7 +1384,6 @@
         "viewProperty": "View Property"
       }
     },
-
     "errors": {
       "fileTooBig": "File is too large (max 10MB)",
       "invalidType": "Unsupported file type",
@@ -985,7 +1391,6 @@
       "noText": "No text found in document",
       "aiError": "AI analysis error"
     },
-
     "batch": {
       "title": "Multiple Documents Import",
       "subtitle": "Upload multiple PDFs and assign document types",
