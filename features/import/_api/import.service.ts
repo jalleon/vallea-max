@@ -19,7 +19,8 @@ class ImportService {
     documentType: DocumentType,
     apiKey: string,
     provider: 'deepseek' | 'openai' | 'anthropic' = 'deepseek',
-    model?: string
+    model?: string,
+    customPrompt?: string
   ): Promise<ImportSession> {
     const session: ImportSession = {
       id: crypto.randomUUID(),
@@ -51,6 +52,7 @@ class ImportService {
           apiKey,
           provider,
           model,
+          customPrompt,
         }),
       });
 
@@ -90,7 +92,8 @@ class ImportService {
     documentType: DocumentType,
     apiKey: string,
     provider: 'deepseek' | 'openai' | 'anthropic' = 'deepseek',
-    model?: string
+    model?: string,
+    customPrompt?: string
   ): Promise<ImportSession> {
     const session: ImportSession = {
       id: crypto.randomUUID(),
@@ -115,6 +118,9 @@ class ImportService {
       formData.append('provider', provider);
       if (model) {
         formData.append('model', model);
+      }
+      if (customPrompt) {
+        formData.append('customPrompt', customPrompt);
       }
 
       const response = await fetch('/api/import/process-pdf', {

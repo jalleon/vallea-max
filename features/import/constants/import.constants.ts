@@ -17,17 +17,29 @@ export const DOCUMENT_TYPES: Record<DocumentType, { label: string; labelEn: stri
     label: 'Rôle de taxe',
     labelEn: 'Tax Roll',
   },
+  taxe_scolaire: {
+    label: 'Taxe scolaire',
+    labelEn: 'School Tax',
+  },
   zonage: {
     label: 'Zonage',
     labelEn: 'Zoning',
+  },
+  acte_vente: {
+    label: 'Acte de vente',
+    labelEn: 'Deed of Sale',
   },
   certificat_localisation: {
     label: 'Certificat de localisation',
     labelEn: 'Location Certificate',
   },
-  general: {
-    label: 'Général',
-    labelEn: 'General',
+  plan_cadastre: {
+    label: 'Plan cadastre',
+    labelEn: 'Cadastral Plan',
+  },
+  autre: {
+    label: 'Autre document',
+    labelEn: 'Other Document',
   },
 };
 

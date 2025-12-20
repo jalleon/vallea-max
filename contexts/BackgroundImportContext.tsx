@@ -41,14 +41,16 @@ interface BackgroundImportContextType {
     documentType: DocumentType,
     apiKey: string,
     provider: 'deepseek' | 'openai' | 'anthropic',
-    model: string | undefined
+    model: string | undefined,
+    customPrompt?: string
   ) => Promise<ImportSession>;
   startTextImport: (
     text: string,
     documentType: DocumentType,
     apiKey: string,
     provider: 'deepseek' | 'openai' | 'anthropic',
-    model: string | undefined
+    model: string | undefined,
+    customPrompt?: string
   ) => Promise<ImportSession>;
   savePendingSession: (session: ImportSession, step: number) => void;
   clearPendingSession: () => void;
@@ -250,7 +252,8 @@ export function BackgroundImportProvider({ children }: { children: React.ReactNo
       documentType: DocumentType,
       apiKey: string,
       provider: 'deepseek' | 'openai' | 'anthropic',
-      model: string | undefined
+      model: string | undefined,
+      customPrompt?: string
     ): Promise<ImportSession> => {
       // Prevent starting a new import if one is already running
       if (state.isProcessing) {
@@ -276,7 +279,7 @@ export function BackgroundImportProvider({ children }: { children: React.ReactNo
 
       try {
         // Process the PDF file
-        const result = await importService.processPDF(file, documentType, apiKey, provider, model);
+        const result = await importService.processPDF(file, documentType, apiKey, provider, model, customPrompt);
 
         // Mark as complete
         setState(prev => ({
@@ -310,7 +313,8 @@ export function BackgroundImportProvider({ children }: { children: React.ReactNo
       documentType: DocumentType,
       apiKey: string,
       provider: 'deepseek' | 'openai' | 'anthropic',
-      model: string | undefined
+      model: string | undefined,
+      customPrompt?: string
     ): Promise<ImportSession> => {
       // Prevent starting a new import if one is already running
       if (state.isProcessing) {
@@ -336,7 +340,7 @@ export function BackgroundImportProvider({ children }: { children: React.ReactNo
 
       try {
         // Process the pasted text
-        const result = await importService.processText(text, documentType, apiKey, provider, model);
+        const result = await importService.processText(text, documentType, apiKey, provider, model, customPrompt);
 
         // Mark as complete
         setState(prev => ({

@@ -53,7 +53,8 @@
       "Bash(cp:*)",
       "Bash(git revert:*)",
       "Bash(nul)",
-      "Bash(del nul 2)"
+      "Bash(del nul 2)",
+      "Bash(git fetch:*)"
     ],
     "deny": [],
     "ask": []

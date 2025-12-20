@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     }
 
     body = await request.json();
-    const { text, documentType } = body;
+    const { text, documentType, customPrompt } = body;
     let { apiKey, provider, model } = body;
 
     if (!text || typeof text !== 'string') {
@@ -138,7 +138,8 @@ export async function POST(request: NextRequest) {
       documentType as DocumentType,
       apiKey,
       provider || 'deepseek',
-      model
+      model,
+      customPrompt
     );
 
     // Process each property

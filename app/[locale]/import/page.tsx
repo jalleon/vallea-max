@@ -70,6 +70,7 @@ function ImportPageContent() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [useTextInput, setUseTextInput] = useState(false); // Toggle between PDF and text input
   const [pastedText, setPastedText] = useState(''); // Store pasted text
+  const [customPrompt, setCustomPrompt] = useState(''); // Custom prompt for "autre" document type
   const [processing, setProcessing] = useState(false);
   const [session, setSession] = useState<ImportSession | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -216,12 +217,13 @@ function ImportPageContent() {
     try {
       // Process either text input or PDF file
       let result: ImportSession;
+      const promptToUse = documentType === 'autre' ? customPrompt : undefined;
       if (useTextInput) {
         // Use background import for text to show progress in header
-        result = await startTextImport(pastedText, documentType, apiKey, provider, model);
+        result = await startTextImport(pastedText, documentType, apiKey, provider, model, promptToUse);
       } else {
         // Use background import for PDF files to show progress in header
-        result = await startSingleImport(selectedFile!, documentType, apiKey, provider, model);
+        result = await startSingleImport(selectedFile!, documentType, apiKey, provider, model, promptToUse);
       }
 
       // Check for duplicates in all extracted properties
@@ -467,6 +469,31 @@ function ImportPageContent() {
               </Grid>
             ))}
           </Grid>
+
+          {/* Custom Prompt for "autre" document type */}
+          {documentType === 'autre' && (
+            <Box sx={{ mt: 3 }}>
+              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+                {t('upload.customPrompt.title')}
+              </Typography>
+              <TextField
+                fullWidth
+                multiline
+                rows={3}
+                placeholder={t('upload.customPrompt.placeholder')}
+                value={customPrompt}
+                onChange={(e) => setCustomPrompt(e.target.value)}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '12px',
+                  }
+                }}
+              />
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                {t('upload.customPrompt.hint')}
+              </Typography>
+            </Box>
+          )}
         </CardContent>
       </Card>
 

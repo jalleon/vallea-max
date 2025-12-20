@@ -65,6 +65,7 @@ export async function POST(request: NextRequest) {
     let apiKey = formData.get('apiKey') as string;
     let provider = (formData.get('provider') as 'deepseek' | 'openai' | 'anthropic') || 'deepseek';
     let model = formData.get('model') as string | undefined;
+    const customPrompt = formData.get('customPrompt') as string | undefined;
 
     console.log('[PDF Processing] File:', file.name, 'Size:', file.size, 'bytes');
 
@@ -168,7 +169,8 @@ export async function POST(request: NextRequest) {
       documentType,
       apiKey,
       provider,
-      model
+      model,
+      customPrompt
     );
 
     // Process each property
