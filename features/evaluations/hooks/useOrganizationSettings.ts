@@ -40,14 +40,15 @@ export function useOrganizationSettings() {
       }
 
       // Load organization settings (using 'as any' since column may not be in generated types yet)
-      const { data: orgData } = await supabase
-        .from('organizations' as any)
+      const result = await supabase
+        .from('organizations')
         .select('appraisal_settings')
         .eq('id', profile.organization_id)
         .single();
 
+      const orgData = result.data as { appraisal_settings?: OrganizationSettings } | null;
       if (orgData?.appraisal_settings) {
-        setSettings(orgData.appraisal_settings as OrganizationSettings);
+        setSettings(orgData.appraisal_settings);
       }
     } catch (error) {
       console.error('Error loading organization settings:', error);
@@ -74,13 +75,13 @@ export function useOrganizationSettings() {
         return { success: false, error: 'Organization not found' };
       }
 
-      // Save settings (using 'as any' since column may not be in generated types yet)
+      // Save settings (cast to any since column may not be in generated types yet)
       const { error } = await supabase
-        .from('organizations' as any)
+        .from('organizations')
         .update({
-          appraisal_settings: newSettings,
+          appraisal_settings: newSettings as any,
           updated_at: new Date().toISOString()
-        })
+        } as any)
         .eq('id', profile.organization_id);
 
       if (error) {
