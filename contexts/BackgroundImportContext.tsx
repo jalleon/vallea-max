@@ -313,12 +313,8 @@ export function BackgroundImportProvider({ children }: { children: React.ReactNo
       documentType: DocumentType,
       apiKey: string,
       provider: 'deepseek' | 'openai' | 'anthropic',
-<<<<<<< HEAD
-      model: string | undefined
-=======
       model: string | undefined,
       customPrompt?: string
->>>>>>> origin/main
     ): Promise<ImportSession> => {
       // Prevent starting a new import if one is already running
       if (state.isProcessing) {
@@ -344,11 +340,7 @@ export function BackgroundImportProvider({ children }: { children: React.ReactNo
 
       try {
         // Process the pasted text
-<<<<<<< HEAD
-        const result = await importService.processText(text, documentType, apiKey, provider, model);
-=======
         const result = await importService.processText(text, documentType, apiKey, provider, model, customPrompt);
->>>>>>> origin/main
 
         // Mark as complete
         setState(prev => ({
