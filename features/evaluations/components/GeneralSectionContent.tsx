@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import {
   TextField,
   Typography,
@@ -16,6 +16,8 @@ import {
   InputAdornment
 } from '@mui/material';
 import { useTranslations } from 'next-intl';
+import { useRememberedInputs } from '../hooks/useRememberedInputs';
+import TextFieldWithHistory from './TextFieldWithHistory';
 
 interface GeneralSectionContentProps {
   formData: any;
@@ -35,6 +37,42 @@ export default function GeneralSectionContent({
   allSectionsData
 }: GeneralSectionContentProps) {
   const tGen = useTranslations('evaluations.sections.generalSection');
+
+  // Hook for save/load field values
+  const { savePreference, getAllVariations, clearPreference, preferences } = useRememberedInputs();
+
+  // Get saved variations for general section
+  const generalVariations = useMemo(() => {
+    console.log('[GeneralSection] Computing generalVariations, preferences changed');
+    return getAllVariations('section_general');
+  }, [preferences, getAllVariations]);
+
+  // Helper to get all saveable general fields
+  const getGeneralFieldsData = () => ({
+    evaluationPurpose: formData.evaluationPurpose || '',
+    propertyRightEvaluated: formData.propertyRightEvaluated || '',
+    summaryDescription: formData.summaryDescription || '',
+    favorableFactors: formData.favorableFactors || '',
+    unfavorableFactors: formData.unfavorableFactors || '',
+    sectorComments: formData.sectorComments || '',
+    marketComments: formData.marketComments || '',
+    zoningComments: formData.zoningComments || '',
+    additionalComments: formData.additionalComments || ''
+  });
+
+  // Save variation handler
+  const handleSaveVariation = async (variationName: string, data: any) => {
+    console.log('[GeneralSection] Saving variation:', { variationName, data });
+    const result = await savePreference('section_general', data, variationName);
+    console.log('[GeneralSection] Save result:', result);
+  };
+
+  // Delete variation handler
+  const handleDeleteVariation = async (variationName: string) => {
+    if (confirm(`Delete variation "${variationName}"?`)) {
+      await clearPreference('section_general', variationName);
+    }
+  };
 
   // Auto-populate on first load
   useEffect(() => {
@@ -156,13 +194,19 @@ export default function GeneralSectionContent({
             <Typography variant="body2" sx={{ fontWeight: 600 }}>But de l'évaluation</Typography>
           </Box>
           <Box sx={{ p: 1 }}>
-            <TextField
+            <TextFieldWithHistory
               fullWidth
               multiline
               rows={2}
               size="small"
               value={formData.evaluationPurpose || ''}
-              onChange={(e) => handleFieldChange('evaluationPurpose', e.target.value)}
+              onChange={(val) => handleFieldChange('evaluationPurpose', val)}
+              savedVariations={generalVariations}
+              fieldKey="evaluationPurpose"
+              onDeleteVariation={handleDeleteVariation}
+              onSaveVariation={handleSaveVariation}
+              getAllFieldsData={getGeneralFieldsData}
+              groupLabel="Général Info"
               placeholder="Estimer la valeur marchande aux fins de financement hypothécaire"
               sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
             />
@@ -274,13 +318,19 @@ export default function GeneralSectionContent({
             <Typography variant="body2" sx={{ fontWeight: 600 }}>Description sommaire</Typography>
           </Box>
           <Box sx={{ p: 1 }}>
-            <TextField
+            <TextFieldWithHistory
               fullWidth
               multiline
               rows={3}
               size="small"
               value={formData.summaryDescription || ''}
-              onChange={(e) => handleFieldChange('summaryDescription', e.target.value)}
+              onChange={(val) => handleFieldChange('summaryDescription', val)}
+              savedVariations={generalVariations}
+              fieldKey="summaryDescription"
+              onDeleteVariation={handleDeleteVariation}
+              onSaveVariation={handleSaveVariation}
+              getAllFieldsData={getGeneralFieldsData}
+              groupLabel="Général Info"
               placeholder="Le sujet est une propriété..."
               sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
             />
@@ -416,13 +466,19 @@ export default function GeneralSectionContent({
             <Typography variant="body2" sx={{ fontWeight: 600 }}>Facteurs favorables</Typography>
           </Box>
           <Box sx={{ p: 1 }}>
-            <TextField
+            <TextFieldWithHistory
               fullWidth
               multiline
               rows={2}
               size="small"
               value={formData.favorableFactors || ''}
-              onChange={(e) => handleFieldChange('favorableFactors', e.target.value)}
+              onChange={(val) => handleFieldChange('favorableFactors', val)}
+              savedVariations={generalVariations}
+              fieldKey="favorableFactors"
+              onDeleteVariation={handleDeleteVariation}
+              onSaveVariation={handleSaveVariation}
+              getAllFieldsData={getGeneralFieldsData}
+              groupLabel="Général Info"
               placeholder="L'emplacement du sujet..."
               sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
             />
@@ -435,13 +491,19 @@ export default function GeneralSectionContent({
             <Typography variant="body2" sx={{ fontWeight: 600 }}>Facteurs défavorables</Typography>
           </Box>
           <Box sx={{ p: 1 }}>
-            <TextField
+            <TextFieldWithHistory
               fullWidth
               multiline
               rows={2}
               size="small"
               value={formData.unfavorableFactors || ''}
-              onChange={(e) => handleFieldChange('unfavorableFactors', e.target.value)}
+              onChange={(val) => handleFieldChange('unfavorableFactors', val)}
+              savedVariations={generalVariations}
+              fieldKey="unfavorableFactors"
+              onDeleteVariation={handleDeleteVariation}
+              onSaveVariation={handleSaveVariation}
+              getAllFieldsData={getGeneralFieldsData}
+              groupLabel="Général Info"
               placeholder="Aucun facteur défavorable..."
               sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
             />
@@ -551,13 +613,19 @@ export default function GeneralSectionContent({
         {/* Commentaire(s) */}
         <Box sx={{ p: 1.5 }}>
           <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '11px', color: 'text.secondary', display: 'block', mb: 0.5 }}>Commentaire(s)</Typography>
-          <TextField
+          <TextFieldWithHistory
             fullWidth
             multiline
             rows={3}
             size="small"
             value={formData.sectorComments || ''}
-            onChange={(e) => handleFieldChange('sectorComments', e.target.value)}
+            onChange={(val) => handleFieldChange('sectorComments', val)}
+            savedVariations={generalVariations}
+            fieldKey="sectorComments"
+            onDeleteVariation={handleDeleteVariation}
+            onSaveVariation={handleSaveVariation}
+            getAllFieldsData={getGeneralFieldsData}
+            groupLabel="Général Info"
             placeholder="Le sujet est situé..."
             sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
           />
@@ -634,13 +702,19 @@ export default function GeneralSectionContent({
           </Typography>
         </Box>
         <Box sx={{ p: 1.5 }}>
-          <TextField
+          <TextFieldWithHistory
             fullWidth
             multiline
             rows={4}
             size="small"
             value={formData.additionalComments || ''}
-            onChange={(e) => handleFieldChange('additionalComments', e.target.value)}
+            onChange={(val) => handleFieldChange('additionalComments', val)}
+            savedVariations={generalVariations}
+            fieldKey="additionalComments"
+            onDeleteVariation={handleDeleteVariation}
+            onSaveVariation={handleSaveVariation}
+            getAllFieldsData={getGeneralFieldsData}
+            groupLabel="Général Info"
             placeholder="Nous considérons et présumons..."
             sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
           />

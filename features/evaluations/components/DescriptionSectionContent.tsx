@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import {
   TextField,
   Typography,
@@ -11,8 +12,11 @@ import {
   RadioGroup,
   FormControlLabel,
   InputAdornment,
-  Autocomplete
+  Autocomplete,
+  Paper
 } from '@mui/material';
+import { useRememberedInputs } from '../hooks/useRememberedInputs';
+import TextFieldWithHistory from './TextFieldWithHistory';
 
 interface DescriptionSectionContentProps {
   formData: any;
@@ -31,6 +35,33 @@ export default function DescriptionSectionContent({
   setFormData,
   allSectionsData
 }: DescriptionSectionContentProps) {
+  // Hook for save/load field values
+  const { savePreference, getAllVariations, clearPreference, preferences } = useRememberedInputs();
+
+  // Get saved variations for description section
+  const descriptionVariations = useMemo(() => getAllVariations('section_description'), [preferences]);
+
+  // Helper to get all saveable description fields
+  const getDescriptionFieldsData = () => ({
+    generalObservations: formData.generalObservations || '',
+    exteriorAmenities: formData.exteriorAmenities || '',
+    dependencies: formData.dependencies || '',
+    basementDescription: formData.basementDescription || '',
+    groundFloorDescription: formData.groundFloorDescription || '',
+    upperFloorDescription: formData.upperFloorDescription || ''
+  });
+
+  // Save variation handler
+  const handleSaveVariation = async (variationName: string, data: any) => {
+    await savePreference('section_description', data, variationName);
+  };
+
+  // Delete variation handler
+  const handleDeleteVariation = async (variationName: string) => {
+    if (confirm(`Delete variation "${variationName}"?`)) {
+      await clearPreference('section_description', variationName);
+    }
+  };
 
   // Dropdown options
   const topographyOptions = [
@@ -1390,13 +1421,19 @@ export default function DescriptionSectionContent({
             <Typography variant="body2" sx={{ fontWeight: 600 }}>Observations et état général</Typography>
           </Box>
           <Box sx={{ p: 1 }}>
-            <TextField
+            <TextFieldWithHistory
               fullWidth
               multiline
               rows={6}
               size="small"
               value={formData.generalObservations || ''}
-              onChange={(e) => handleFieldChange('generalObservations', e.target.value)}
+              onChange={(val) => handleFieldChange('generalObservations', val)}
+              savedVariations={descriptionVariations}
+              fieldKey="generalObservations"
+              onDeleteVariation={handleDeleteVariation}
+              onSaveVariation={handleSaveVariation}
+              getAllFieldsData={getDescriptionFieldsData}
+              groupLabel="Description Info"
               placeholder="*La visite des lieux nous a permis de constater que la condition générale du sujet est jugée bonne..."
               sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
             />

@@ -6,7 +6,17 @@ export type PreferenceType =
   | 'adjustment_rates'
   | 'company_info'
   | 'narrative_templates'
-  | 'default_comparables_count';
+  | 'default_comparables_count'
+  // Section-specific types for double-click save/load
+  | 'section_general'
+  | 'section_description'
+  | 'section_reference_sheet'
+  | 'section_cout_parite'
+  | 'section_neighborhood'
+  | 'section_site'
+  | 'section_improvements'
+  | 'section_highest_use'
+  | 'section_reconciliation';
 
 interface UseRememberedInputsReturn {
   preferences: Record<string, any>;
@@ -74,12 +84,16 @@ export function useRememberedInputs(): UseRememberedInputsReturn {
         return;
       }
 
+      console.log('[useRememberedInputs] Loaded preferences from DB:', data?.length, 'items');
+
       // Convert array to nested object:
       // { 'company_info': { '_default': {...}, 'Office Montreal': {...} } }
       const prefsMap: Record<string, any> = {};
       (data as any[])?.forEach((pref) => {
-        const [baseType, variationName] = pref.preference_type.includes(':')
-          ? pref.preference_type.split(':')
+        // Split on first colon only (variation name may contain colons)
+        const colonIndex = pref.preference_type.indexOf(':');
+        const [baseType, variationName] = colonIndex !== -1
+          ? [pref.preference_type.substring(0, colonIndex), pref.preference_type.substring(colonIndex + 1)]
           : [pref.preference_type, '_default'];
 
         if (!prefsMap[baseType]) {
@@ -129,7 +143,14 @@ export function useRememberedInputs(): UseRememberedInputsReturn {
       const preferenceKey = variationName ? `${type}:${variationName}` : type;
 
       // Upsert preference (insert or update)
-      const { error } = await supabase
+      console.log('[useRememberedInputs] Upserting preference:', {
+        preferenceKey,
+        userId: user.id,
+        organizationId,
+        dataKeys: Object.keys(data)
+      });
+
+      const { error, data: upsertedData } = await supabase
         .from('user_preferences' as any)
         .upsert({
           user_id: user.id,
@@ -139,7 +160,10 @@ export function useRememberedInputs(): UseRememberedInputsReturn {
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'user_id,organization_id,preference_type'
-        });
+        })
+        .select();
+
+      console.log('[useRememberedInputs] Upsert result:', { error, upsertedData });
 
       if (error) {
         console.error('Error saving preference:', error);
@@ -172,11 +196,14 @@ export function useRememberedInputs(): UseRememberedInputsReturn {
 
   const getAllVariations = (type: PreferenceType): { name: string; data: any }[] => {
     const typePrefs = preferences[type];
+    console.log('[useRememberedInputs] getAllVariations for', type, ':', typePrefs ? Object.keys(typePrefs).length : 0, 'items');
     if (!typePrefs) return [];
 
-    return Object.entries(typePrefs)
+    const variations = Object.entries(typePrefs)
       .filter(([name]) => name !== '_default')
       .map(([name, data]) => ({ name, data }));
+    console.log('[useRememberedInputs] Returning', variations.length, 'variations for', type);
+    return variations;
   };
 
   const clearPreference = async (

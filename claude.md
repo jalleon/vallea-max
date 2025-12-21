@@ -454,6 +454,104 @@ directComparisonData={sectionsData.methode_parite || {}}
 
 ---
 
-**Last Updated**: 2025-10-09
+## 💾 TextFieldWithHistory - Double-Click Save/Load Feature
+
+### Overview
+All text fields in evaluation sections should support **double-click save/load** functionality. This allows users to save frequently used values and quickly load them in future appraisals.
+
+### Key Components
+- **TextFieldWithHistory** (`features/evaluations/components/TextFieldWithHistory.tsx`) - Reusable TextField with double-click popover
+- **useRememberedInputs** (`features/evaluations/hooks/useRememberedInputs.ts`) - Hook for managing user preferences in DB
+
+### How It Works
+1. User fills in form fields
+2. User double-clicks any field in a group
+3. Popover appears with options to:
+   - **Save** current values as a named variation
+   - **Load** previously saved variations
+   - **Delete** saved variations
+4. When loading, all related fields in the group are populated
+
+### Implementation Pattern
+
+**1. Add PreferenceType (if new section category)**
+```typescript
+// In useRememberedInputs.ts
+export type PreferenceType =
+  | 'appraiser_info'
+  | 'company_info'
+  | 'section_description'  // Add new types as needed
+  | 'section_general'
+  | ...
+```
+
+**2. Use in Section Component**
+```typescript
+import { useRememberedInputs } from '../hooks/useRememberedInputs';
+import TextFieldWithHistory from './TextFieldWithHistory';
+
+function MySectionContent({ formData, handleFieldChange }) {
+  const { savePreference, getAllVariations, clearPreference, preferences } = useRememberedInputs();
+
+  // Get variations reactively (updates when preferences change)
+  const myVariations = useMemo(() => getAllVariations('my_section_type'), [preferences]);
+
+  // Define which fields are saved together
+  const getFieldsData = () => ({
+    field1: formData.field1 || '',
+    field2: formData.field2 || '',
+  });
+
+  // Save handler
+  const handleSaveVariation = async (variationName: string, data: any) => {
+    await savePreference('my_section_type', data, variationName);
+  };
+
+  // Delete handler
+  const handleDeleteVariation = async (variationName: string) => {
+    if (confirm(`Delete variation "${variationName}"?`)) {
+      await clearPreference('my_section_type', variationName);
+    }
+  };
+
+  return (
+    <TextFieldWithHistory
+      value={formData.field1 || ''}
+      onChange={(val) => handleFieldChange('field1', val)}
+      savedVariations={myVariations}
+      fieldKey="field1"
+      onDeleteVariation={handleDeleteVariation}
+      onSaveVariation={handleSaveVariation}
+      getAllFieldsData={getFieldsData}
+      groupLabel="My Section"
+    />
+  );
+}
+```
+
+### Database Storage
+- Table: `user_preferences`
+- Composite key: `type:variationName` (e.g., `company_info:Montreal Office`)
+- Stored in JSONB `data` column with all field values
+
+### Grouping Strategy
+Fields should be grouped logically:
+- **Company Info**: companyName, companyAddress, companyPhone, companyWebsite, companyLogoUrl
+- **Appraiser Info**: appraiserName, appraiserTitle
+- **Section-specific**: Group by logical data that changes together
+
+### When Adding New Templates
+**IMPORTANT**: All new appraisal template sections MUST:
+1. Import and use `TextFieldWithHistory` for text inputs
+2. Import and use `useRememberedInputs` hook
+3. Define appropriate field groups
+4. Add new `PreferenceType` if needed
+5. Wire up save/load/delete handlers
+
+This ensures consistent UX across all templates and sections.
+
+---
+
+**Last Updated**: 2025-12-21
 **Project**: Valea Max - Real Estate Appraisal Platform
 **Version**: 2.3+

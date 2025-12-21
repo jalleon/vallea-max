@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import {
   TextField,
   Typography,
@@ -8,6 +8,8 @@ import {
   InputAdornment
 } from '@mui/material';
 import { useTranslations } from 'next-intl';
+import { useRememberedInputs } from '../hooks/useRememberedInputs';
+import TextFieldWithHistory from './TextFieldWithHistory';
 
 interface ReferenceSheetSectionContentProps {
   formData: any;
@@ -27,6 +29,35 @@ export default function ReferenceSheetSectionContent({
   allSectionsData
 }: ReferenceSheetSectionContentProps) {
   const tRef = useTranslations('evaluations.sections.referenceSheet');
+
+  // Hook for save/load field values
+  const { savePreference, getAllVariations, clearPreference, preferences } = useRememberedInputs();
+
+  // Get saved variations for reference sheet section - separate group for mandant info
+  const mandantVariations = useMemo(() => getAllVariations('section_reference_sheet'), [preferences]);
+
+  // Helper to get all saveable mandant fields
+  const getMandantFieldsData = () => ({
+    mandantName: formData.mandantName || '',
+    mandantCompany: formData.mandantCompany || '',
+    mandantAddress: formData.mandantAddress || '',
+    mandantCity: formData.mandantCity || '',
+    mandantPhone: formData.mandantPhone || '',
+    mandantEmail: formData.mandantEmail || '',
+    purpose: formData.purpose || ''
+  });
+
+  // Save variation handler
+  const handleSaveVariation = async (variationName: string, data: any) => {
+    await savePreference('section_reference_sheet', data, variationName);
+  };
+
+  // Delete variation handler
+  const handleDeleteVariation = async (variationName: string) => {
+    if (confirm(`Delete variation "${variationName}"?`)) {
+      await clearPreference('section_reference_sheet', variationName);
+    }
+  };
 
   // Auto-populate on first load
   useEffect(() => {
@@ -92,13 +123,19 @@ export default function ReferenceSheetSectionContent({
             <Typography variant="body2" sx={{ fontWeight: 600 }}>{tRef('purposeAndScope')}</Typography>
           </Box>
           <Box sx={{ p: 1 }}>
-            <TextField
+            <TextFieldWithHistory
               fullWidth
               multiline
               rows={2}
               size="small"
               value={formData.purpose || ''}
-              onChange={(e) => handleFieldChange('purpose', e.target.value)}
+              onChange={(val) => handleFieldChange('purpose', val)}
+              savedVariations={mandantVariations}
+              fieldKey="purpose"
+              onDeleteVariation={handleDeleteVariation}
+              onSaveVariation={handleSaveVariation}
+              getAllFieldsData={getMandantFieldsData}
+              groupLabel="Mandant Info"
               placeholder={tRef('purposePlaceholder')}
               sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
             />
@@ -238,11 +275,17 @@ export default function ReferenceSheetSectionContent({
             <Typography variant="body2" sx={{ fontWeight: 600 }}>{tRef('mandantName')}</Typography>
           </Box>
           <Box sx={{ p: 1 }}>
-            <TextField
+            <TextFieldWithHistory
               fullWidth
               size="small"
               value={formData.mandantName || ''}
-              onChange={(e) => handleFieldChange('mandantName', e.target.value)}
+              onChange={(val) => handleFieldChange('mandantName', val)}
+              savedVariations={mandantVariations}
+              fieldKey="mandantName"
+              onDeleteVariation={handleDeleteVariation}
+              onSaveVariation={handleSaveVariation}
+              getAllFieldsData={getMandantFieldsData}
+              groupLabel="Mandant Info"
               placeholder="Nationwide Appraisal Services"
               sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
             />
@@ -263,11 +306,17 @@ export default function ReferenceSheetSectionContent({
             <Typography variant="body2" sx={{ fontWeight: 600 }}>{tRef('mandantCompany')}</Typography>
           </Box>
           <Box sx={{ p: 1 }}>
-            <TextField
+            <TextFieldWithHistory
               fullWidth
               size="small"
               value={formData.mandantCompany || ''}
-              onChange={(e) => handleFieldChange('mandantCompany', e.target.value)}
+              onChange={(val) => handleFieldChange('mandantCompany', val)}
+              savedVariations={mandantVariations}
+              fieldKey="mandantCompany"
+              onDeleteVariation={handleDeleteVariation}
+              onSaveVariation={handleSaveVariation}
+              getAllFieldsData={getMandantFieldsData}
+              groupLabel="Mandant Info"
               placeholder="Mouvement Desjardins"
               sx={{ '& .MuiInputBase-input': { fontSize: '14px' } }}
             />

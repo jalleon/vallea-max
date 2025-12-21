@@ -83,11 +83,17 @@ export default function TextFieldWithHistory({
   const handleSaveClick = () => {
     if (onSaveVariation && getAllFieldsData) {
       const allData = getAllFieldsData();
-      // Use the current field value as the variation name
-      const variationName = value.trim();
+      // Use the current field value as the variation name (first 100 chars, no newlines)
+      const rawVariationName = value.trim();
+      // Sanitize: replace newlines with spaces, limit to 100 chars for display
+      const variationName = rawVariationName
+        .replace(/[\r\n]+/g, ' ')
+        .substring(0, 100)
+        .trim();
       console.log('[DEBUG] Save clicked:', {
         fieldKey,
         variationName,
+        rawLength: rawVariationName.length,
         allData,
         willSave: !!variationName
       });
