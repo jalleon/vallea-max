@@ -5,16 +5,30 @@
 export type TemplateType = 'RPS' | 'NAS' | 'CUSTOM' | 'AIC_FORM';
 
 export type PropertyType =
-  | 'condo'
-  | 'single_family'
-  | 'duplex'
-  | 'triplex'
-  | 'quadriplex_plus'
-  | 'apartment'
-  | 'semi_commercial'
+  | 'condo_residentiel'
+  | 'plex'
+  | 'multifamilial'
+  | 'residentiel_commercial'
+  | 'residentiel_commercial_bureau'
+  | 'residentiel_bureau'
   | 'commercial'
-  | 'land'
-  | 'other';
+  | 'commercial_bureau'
+  | 'bureau'
+  | 'industriel'
+  | 'industriel_bureau'
+  | 'condo_commercial'
+  | 'condo_bureau'
+  | 'condo_industriel'
+  | 'parc_maisons_mobiles'
+  | 'terrain';
+
+export type ValuationApproach =
+  | 'methode_parite'
+  | 'methode_cout'
+  | 'flux_monetaire'
+  | 'capitalisation_directe'
+  | 'grm'
+  | 'methode_residuelle';
 
 export type PropertyGenre =
   | 'plain_pied'
@@ -76,6 +90,8 @@ export interface CreateAppraisalRequest {
 export interface WizardStep1Data {
   propertyType: PropertyType | null;
   propertyGenre: PropertyGenre | null;
+  valuationApproaches: ValuationApproach[];
+  surPlan: boolean;
 }
 
 export interface WizardStep2Data {

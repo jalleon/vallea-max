@@ -2,19 +2,48 @@
  * Constants for evaluation types and options
  */
 
-import { PropertyType, PropertyGenre, ValueType } from '../types/evaluation.types';
+import { PropertyType, PropertyGenre, ValueType, ValuationApproach } from '../types/evaluation.types';
 
 export const PROPERTY_TYPES: Array<{ value: PropertyType; label: string }> = [
-  { value: 'condo', label: 'Condo' },
-  { value: 'single_family', label: 'Unifamiliale' },
-  { value: 'duplex', label: 'Duplex' },
-  { value: 'triplex', label: 'Triplex' },
-  { value: 'quadriplex_plus', label: 'Quadriplex+' },
-  { value: 'apartment', label: 'Appartement' },
-  { value: 'semi_commercial', label: 'Semi-Commercial' },
+  { value: 'condo_residentiel', label: 'Condo résidentiel' },
+  { value: 'plex', label: 'Plex' },
+  { value: 'multifamilial', label: 'Multifamilial' },
+  { value: 'residentiel_commercial', label: 'Résidentiel/commercial' },
+  { value: 'residentiel_commercial_bureau', label: 'Résidentiel/commercial/bureau' },
+  { value: 'residentiel_bureau', label: 'Résidentiel/bureau' },
   { value: 'commercial', label: 'Commercial' },
-  { value: 'land', label: 'Terrain' },
-  { value: 'other', label: 'Autre' }
+  { value: 'commercial_bureau', label: 'Commercial/bureau' },
+  { value: 'bureau', label: 'Bureau' },
+  { value: 'industriel', label: 'Industriel' },
+  { value: 'industriel_bureau', label: 'Industriel/bureau' },
+  { value: 'condo_commercial', label: 'Condo commercial' },
+  { value: 'condo_bureau', label: 'Condo bureau' },
+  { value: 'condo_industriel', label: 'Condo industriel' },
+  { value: 'parc_maisons_mobiles', label: 'Parc de maisons mobiles' },
+  { value: 'terrain', label: 'Terrain' }
+];
+
+// Property types that should hide the genre field (non-residential types)
+export const PROPERTY_TYPES_HIDING_GENRE: PropertyType[] = [
+  'commercial',
+  'commercial_bureau',
+  'bureau',
+  'industriel',
+  'industriel_bureau',
+  'condo_commercial',
+  'condo_bureau',
+  'condo_industriel',
+  'parc_maisons_mobiles',
+  'terrain'
+];
+
+export const VALUATION_APPROACHES: Array<{ value: ValuationApproach; label: string }> = [
+  { value: 'methode_parite', label: 'Méthode de parité (comparaison directe)' },
+  { value: 'methode_cout', label: 'Méthode du coût' },
+  { value: 'flux_monetaire', label: 'Flux monétaire' },
+  { value: 'capitalisation_directe', label: 'Capitalisation directe' },
+  { value: 'grm', label: 'Multiplicateur de revenu brut (GRM)' },
+  { value: 'methode_residuelle', label: 'Méthode résiduelle' }
 ];
 
 export const PROPERTY_GENRES: Array<{ value: PropertyGenre; label: string }> = [

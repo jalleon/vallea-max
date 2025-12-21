@@ -206,7 +206,11 @@
       "duplicateCreate": "Create Duplicate",
       "cancel": "Cancel",
       "delete": "Delete",
-      "mergeOrCreateQuestion": "Merge or Create?"
+      "mergeOrCreateQuestion": "Merge or Create?",
+      "mergeOption": "Merge with existing",
+      "mergeDescription": "New data will be merged with the existing property",
+      "createDuplicateOption": "Create duplicate",
+      "createDuplicateDescription": "A new property will be created with the same information"
     },
 
     "form": {
@@ -1316,7 +1320,9 @@
         "propertyType": "Property type",
         "propertyGenre": "Property genre",
         "propertyTypeRequired": "Property type is required",
-        "propertyGenreRequired": "Property genre is required"
+        "propertyGenreRequired": "Property genre is required",
+        "valuationApproaches": "Valuation approaches",
+        "surPlan": "Off-plan appraisal (building not yet constructed)"
       },
 
       "step2": {
@@ -1362,12 +1368,34 @@
     },
 
     "propertySelector": {
-      "searchPlaceholder": "Search by address, city or postal code...",
+      "searchPlaceholder": "Search by address, city, postal code, status or source...",
       "noProperties": "No properties in your library",
       "noPropertiesDescription": "To use this option, you must first create at least one property in the Library module.",
       "alternative": "Alternative",
       "useManualEntry": "Select \"Enter manually\" above to enter the address directly.",
-      "noResults": "No properties found for \"{query}\""
+      "noResults": "No properties found for \"{query}\"",
+      "noAddressSpecified": "Address not specified",
+      "livingArea": "Living area",
+      "landArea": "Land area",
+      "yearBuilt": "Year built",
+      "status": {
+        "sujet": "Subject",
+        "vendu": "Sold",
+        "actif": "Active"
+      },
+      "source": {
+        "mls": "MLS",
+        "centris": "Centris",
+        "manual": "Manual",
+        "import": "Import"
+      },
+      "units": {
+        "sqft": "sq ft"
+      },
+      "filter": {
+        "all": "All",
+        "label": "Filter by status"
+      }
     },
 
     "detail": {
@@ -1904,6 +1932,25 @@
         "grossAdjustmentPercent": "Gross Adjustment %",
         "netAdjustmentPercent": "Net Adjustment %",
 
+        "searchPlaceholder": "Search by address, city, MLS or matricule...",
+        "noPropertiesAvailable": "No properties available in library",
+        "noAddressSpecified": "Address not specified",
+        "landArea": "Land Area",
+        "yearBuilt": "Year Built",
+        "noSaleInfo": "No sale info",
+        "units": {
+          "sqft": "sq ft"
+        },
+        "status": {
+          "sujet": "Subject",
+          "vendu": "Sold",
+          "actif": "Active"
+        },
+        "filter": {
+          "label": "Filter by status",
+          "all": "All"
+        },
+
         "ageFormat": "Format: ##A/##C (Age/Condition)",
         "roomFormat": "Format: Total/Bedrooms/Bathrooms",
         "bathroomFormat": "Format: Baths:Powder (ex: 2:1)",
@@ -2085,7 +2132,56 @@
       "semi_commercial": "Semi-Commercial",
       "commercial": "Commercial",
       "land": "Land",
-      "other": "Other"
+      "other": "Other",
+      "condo_residentiel": "Residential Condo",
+      "plex": "Plex",
+      "multifamilial": "Multifamily",
+      "residentiel_commercial": "Residential/Commercial",
+      "residentiel_commercial_bureau": "Residential/Commercial/Office",
+      "residentiel_bureau": "Residential/Office",
+      "commercial_bureau": "Commercial/Office",
+      "bureau": "Office",
+      "industriel": "Industrial",
+      "industriel_bureau": "Industrial/Office",
+      "condo_commercial": "Commercial Condo",
+      "condo_bureau": "Office Condo",
+      "condo_industriel": "Industrial Condo",
+      "parc_maisons_mobiles": "Mobile Home Park",
+      "terrain": "Land"
+    },
+
+    "sidebarGroups": {
+      "main": "Client & Appraiser Info",
+      "property": "Property Details",
+      "valuation": "Valuation Methods",
+      "conclusion": "Conclusion & Certification",
+      "other": "Additional Sections",
+      "tools": "Tools & Calculators"
+    },
+
+    "tools": {
+      "adjustmentsCalculator": "Adjustments Calculator",
+      "effectiveAgeCalculator": "Effective Age Calculator"
+    },
+
+    "sidebar": {
+      "sections": "Sections",
+      "overallProgress": "Overall Progress",
+      "searchSections": "Search sections...",
+      "noSectionsFound": "No sections found",
+      "completed": "Completed",
+      "inProgress": "In Progress",
+      "notStarted": "Not Started",
+      "legend": "Legend"
+    },
+
+    "valuationApproaches": {
+      "methode_parite": "Sales Comparison Approach",
+      "methode_cout": "Cost Approach",
+      "flux_monetaire": "Discounted Cash Flow",
+      "capitalisation_directe": "Direct Capitalization",
+      "grm": "Gross Rent Multiplier (GRM)",
+      "methode_residuelle": "Residual Method"
     },
 
     "propertyGenres": {

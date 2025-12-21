@@ -59,6 +59,9 @@ export default function SectionsSidebar({
   currentToolIndex = -1
 }: SectionsSidebarProps) {
   const t = useTranslations('evaluations.sections');
+  const tSidebar = useTranslations('evaluations.sidebar');
+  const tGroups = useTranslations('evaluations.sidebarGroups');
+  const tTools = useTranslations('evaluations.tools');
   const tCommon = useTranslations('common');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
@@ -230,41 +233,8 @@ export default function SectionsSidebar({
   };
 
   const getGroupLabel = (groupKey: string) => {
-    // Map internal group keys to i18n keys for AIC groups
-    const aicGroupMapping: Record<string, string> = {
-      'main': 'property_details', // Main info maps to property details group
-      'property': 'property_details',
-      'valuation': 'valuation_methods',
-      'conclusion': 'conclusion_certification',
-      'other': 'additional_sections'
-    };
-
-    // Try to get translated label from aicGroups
-    const aicKey = aicGroupMapping[groupKey];
-    if (aicKey) {
-      const translated = t(`aicGroups.${aicKey}` as any);
-      if (translated && !translated.startsWith('aicGroups.')) {
-        return translated;
-      }
-    }
-
-    // Fallback to hardcoded values
-    switch (groupKey) {
-      case 'main':
-        return 'Client & Appraiser Info';
-      case 'property':
-        return 'Property Details';
-      case 'valuation':
-        return 'Valuation Methods';
-      case 'conclusion':
-        return 'Conclusion & Certification';
-      case 'other':
-        return 'Additional Sections';
-      case 'tools':
-        return 'Tools & Calculators';
-      default:
-        return groupKey;
-    }
+    // Use translated labels from sidebarGroups
+    return tGroups(groupKey as any);
   };
 
   const getGroupStats = (groupSections: Section[]) => {
@@ -278,8 +248,8 @@ export default function SectionsSidebar({
 
     const isExpanded = expandedGroups['tools'];
     const tools = [
-      { id: 0, label: 'Adjustments Calculator', icon: <Calculate sx={{ fontSize: 20 }} /> },
-      { id: 1, label: 'Effective Age Calculator', icon: <Build sx={{ fontSize: 20 }} /> }
+      { id: 0, label: tTools('adjustmentsCalculator'), icon: <Calculate sx={{ fontSize: 20 }} /> },
+      { id: 1, label: tTools('effectiveAgeCalculator'), icon: <Build sx={{ fontSize: 20 }} /> }
     ];
 
     return (
@@ -473,7 +443,7 @@ export default function SectionsSidebar({
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <Description sx={{ color: 'primary.main' }} />
           <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '16px' }}>
-            Sections
+            {tSidebar('sections')}
           </Typography>
         </Box>
 
@@ -481,7 +451,7 @@ export default function SectionsSidebar({
         <Box sx={{ mb: 2 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
             <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
-              Overall Progress
+              {tSidebar('overallProgress')}
             </Typography>
             <Chip
               label={`${completionPercentage}%`}
@@ -527,7 +497,7 @@ export default function SectionsSidebar({
         <TextField
           fullWidth
           size="small"
-          placeholder="Search sections..."
+          placeholder={tSidebar('searchSections')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           InputProps={{
@@ -559,7 +529,7 @@ export default function SectionsSidebar({
         {searchQuery && Object.values(filteredGroups).every((group) => group.length === 0) && (
           <Box sx={{ textAlign: 'center', py: 4 }}>
             <Typography variant="body2" color="text.secondary">
-              No sections found
+              {tSidebar('noSectionsFound')}
             </Typography>
           </Box>
         )}
@@ -568,25 +538,25 @@ export default function SectionsSidebar({
       {/* Footer - Legend */}
       <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider', bgcolor: 'background.default' }}>
         <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mb: 1 }}>
-          Legend
+          {tSidebar('legend')}
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <CheckCircle sx={{ fontSize: 16, color: 'success.main' }} />
             <Typography variant="caption" color="text.secondary">
-              Completed
+              {tSidebar('completed')}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Warning sx={{ fontSize: 16, color: 'warning.main' }} />
             <Typography variant="caption" color="text.secondary">
-              In Progress
+              {tSidebar('inProgress')}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <RadioButtonUnchecked sx={{ fontSize: 16, color: 'action.disabled' }} />
             <Typography variant="caption" color="text.secondary">
-              Not Started
+              {tSidebar('notStarted')}
             </Typography>
           </Box>
         </Box>

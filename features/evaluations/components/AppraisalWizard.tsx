@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { ArrowBack, ArrowForward, CheckCircle } from '@mui/icons-material';
 import { TemplateType, WizardStep1Data, WizardStep2Data } from '../types/evaluation.types';
+import { PROPERTY_TYPES_HIDING_GENRE } from '../constants/evaluation.constants';
 import WizardStep1 from './WizardStep1';
 import WizardStep2 from './WizardStep2';
 import WizardStep3 from './WizardStep3';
@@ -37,7 +38,9 @@ export default function AppraisalWizard({ templateType, onComplete, onCancel, cr
   ];
   const [step1Data, setStep1Data] = useState<WizardStep1Data>({
     propertyType: null,
-    propertyGenre: null
+    propertyGenre: null,
+    valuationApproaches: [],
+    surPlan: false
   });
   const [step2Data, setStep2Data] = useState<WizardStep2Data>({
     clientName: '',
@@ -68,7 +71,11 @@ export default function AppraisalWizard({ templateType, onComplete, onCancel, cr
   };
 
   const canProceedStep1 = () => {
-    return step1Data.propertyType !== null && step1Data.propertyGenre !== null;
+    if (step1Data.propertyType === null) return false;
+    // Genre is only required if property type doesn't hide it
+    const genreRequired = !PROPERTY_TYPES_HIDING_GENRE.includes(step1Data.propertyType);
+    if (genreRequired && step1Data.propertyGenre === null) return false;
+    return true;
   };
 
   const canProceedStep2 = () => {

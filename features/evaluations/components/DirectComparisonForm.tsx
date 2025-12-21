@@ -16,7 +16,12 @@ import {
   Grid,
   Chip,
   ToggleButtonGroup,
-  ToggleButton
+  ToggleButton,
+  FormControl,
+  Select,
+  MenuItem,
+  InputLabel,
+  alpha
 } from '@mui/material';
 import { Add, Delete, Search, SquareFoot, Straighten, Refresh } from '@mui/icons-material';
 import { useTranslations } from 'next-intl';
@@ -152,6 +157,37 @@ export default function DirectComparisonForm({
   const [propertySearchQuery, setPropertySearchQuery] = useState('');
   const [selectedProperties, setSelectedProperties] = useState<Set<string>>(new Set());
   const [multiSelectMode, setMultiSelectMode] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+
+  // Status priority for sorting (Sujet first, then Vendu, then others)
+  const STATUS_PRIORITY: Record<string, number> = {
+    'Sujet': 1,
+    'Vendu': 2,
+    'Actif': 3
+  };
+
+  // Status color mapping
+  const STATUS_COLORS: Record<string, string> = {
+    'Sujet': '#7c3aed',  // Purple
+    'Vendu': '#059669',  // Green
+    'Actif': '#2563eb'   // Blue
+  };
+
+  // Sort by status priority
+  const sortByStatus = (a: any, b: any) => {
+    const priorityA = STATUS_PRIORITY[a.status] || 99;
+    const priorityB = STATUS_PRIORITY[b.status] || 99;
+    return priorityA - priorityB;
+  };
+
+  // Get status label for i18n
+  const getStatusLabel = (status: string) => {
+    const statusKey = status?.toLowerCase();
+    if (statusKey === 'sujet') return t('status.sujet');
+    if (statusKey === 'vendu') return t('status.vendu');
+    if (statusKey === 'actif') return t('status.actif');
+    return status;
+  };
 
   const isCondo = subjectPropertyType === 'condo';
 
@@ -1400,45 +1436,83 @@ export default function DirectComparisonForm({
           </Typography>
         </DialogTitle>
         <DialogContent sx={{ p: 0 }}>
-          {/* Search Bar */}
-          <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'background.default' }}>
-            <TextField
-              fullWidth
-              size="small"
-              placeholder="Search by address, city, MLS number, or matricule..."
-              value={propertySearchQuery}
-              onChange={(e) => setPropertySearchQuery(e.target.value)}
-              InputProps={{
-                startAdornment: <Search sx={{ mr: 1, color: 'text.secondary' }} />,
-                sx: { bgcolor: 'background.paper' }
-              }}
-            />
+          {/* Search Bar with Status Filter */}
+          <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'background.default' }}>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <TextField
+                fullWidth
+                size="small"
+                placeholder={t('searchPlaceholder')}
+                value={propertySearchQuery}
+                onChange={(e) => setPropertySearchQuery(e.target.value)}
+                InputProps={{
+                  startAdornment: <Search sx={{ mr: 1, color: 'text.secondary' }} />,
+                  sx: { bgcolor: 'background.paper' }
+                }}
+              />
+              <FormControl size="small" sx={{ minWidth: 160 }}>
+                <InputLabel>{t('filter.label')}</InputLabel>
+                <Select
+                  value={statusFilter}
+                  label={t('filter.label')}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  sx={{ bgcolor: 'background.paper' }}
+                >
+                  <MenuItem value="all">
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      {t('filter.all')}
+                    </Box>
+                  </MenuItem>
+                  {['Sujet', 'Vendu', 'Actif'].map((status) => (
+                    <MenuItem key={status} value={status}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box
+                          sx={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: '50%',
+                            bgcolor: STATUS_COLORS[status]
+                          }}
+                        />
+                        {getStatusLabel(status)}
+                      </Box>
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
           </Box>
 
           {/* Property List */}
           <Box sx={{ p: 2, overflowY: 'auto', height: 'calc(80vh - 240px)' }}>
             {libraryProperties.length === 0 ? (
-              <Alert severity="info" sx={{ mt: 2 }}>No properties available in library</Alert>
+              <Alert severity="info" sx={{ mt: 2 }}>{t('noPropertiesAvailable')}</Alert>
             ) : (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {libraryProperties
                   .filter(property => {
+                    // Status filter
+                    if (statusFilter !== 'all' && property.status !== statusFilter) return false;
+                    // Search filter
                     if (!propertySearchQuery) return true;
                     const query = propertySearchQuery.toLowerCase();
                     return (
                       property.adresse?.toLowerCase().includes(query) ||
                       property.ville?.toLowerCase().includes(query) ||
                       property.numero_mls?.toLowerCase().includes(query) ||
-                      property.matricule?.toLowerCase().includes(query)
+                      property.matricule?.toLowerCase().includes(query) ||
+                      property.status?.toLowerCase().includes(query) ||
+                      property.source?.toLowerCase().includes(query)
                     );
                   })
+                  .sort(sortByStatus)
                   .map((property) => {
                     // Format living area
                     let livingAreaDisplay = '';
                     if (property.aire_habitable_pi2) {
-                      livingAreaDisplay = `${property.aire_habitable_pi2.toLocaleString()} pi²`;
+                      livingAreaDisplay = `${property.aire_habitable_pi2.toLocaleString()} ${t('units.sqft')}`;
                     } else if (property.superficie_habitable_pi2) {
-                      livingAreaDisplay = `${property.superficie_habitable_pi2.toLocaleString()} pi²`;
+                      livingAreaDisplay = `${property.superficie_habitable_pi2.toLocaleString()} ${t('units.sqft')}`;
                     }
 
                     // Format lot size
@@ -1446,124 +1520,208 @@ export default function DirectComparisonForm({
                     if (property.superficie_terrain_m2) {
                       lotSizeDisplay = `${property.superficie_terrain_m2} m²`;
                     } else if (property.superficie_terrain_pi2) {
-                      lotSizeDisplay = `${property.superficie_terrain_pi2.toLocaleString()} pi²`;
+                      lotSizeDisplay = `${property.superficie_terrain_pi2.toLocaleString()} ${t('units.sqft')}`;
                     }
+
+                    const statusColor = STATUS_COLORS[property.status] || '#6b7280';
 
                     return (
                       <Paper
                         key={property.id}
                         elevation={0}
                         sx={{
-                          p: 2.5,
+                          p: 0,
                           border: '1px solid',
-                          borderColor: 'divider',
+                          borderColor: alpha(statusColor, 0.3),
+                          borderRadius: 2,
                           cursor: 'pointer',
                           transition: 'all 0.2s',
+                          overflow: 'hidden',
+                          bgcolor: alpha(statusColor, 0.03),
                           '&:hover': {
-                            borderColor: 'primary.main',
-                            bgcolor: 'action.hover',
-                            transform: 'translateY(-1px)',
-                            boxShadow: 2
+                            borderColor: statusColor,
+                            bgcolor: alpha(statusColor, 0.08),
+                            transform: 'translateY(-2px)',
+                            boxShadow: `0 4px 12px ${alpha(statusColor, 0.2)}`
                           }
                         }}
                         onClick={() => {
                           handlePropertySelect(property);
                           setPropertySearchQuery('');
+                          setStatusFilter('all');
                         }}
                       >
-                        <Grid container spacing={2}>
-                          {/* Left Column - Main Info */}
-                          <Grid item xs={12} md={6}>
-                            <Typography variant="h6" fontWeight={600} gutterBottom>
-                              {property.adresse}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" gutterBottom>
-                              {property.ville}, {property.province} {property.code_postal}
-                            </Typography>
-                            {property.numero_mls && (
-                              <Chip
-                                label={`MLS: ${property.numero_mls}`}
-                                size="small"
-                                sx={{ mt: 1, mr: 1 }}
-                              />
-                            )}
-                            {property.type_propriete && (
-                              <Chip
-                                label={property.type_propriete}
-                                size="small"
-                                color="primary"
-                                variant="outlined"
-                                sx={{ mt: 1 }}
-                              />
-                            )}
-                          </Grid>
+                        <Box sx={{ display: 'flex' }}>
+                          {/* Status Indicator */}
+                          <Box
+                            sx={{
+                              width: 6,
+                              background: `linear-gradient(180deg, ${statusColor} 0%, ${alpha(statusColor, 0.6)} 100%)`,
+                              flexShrink: 0
+                            }}
+                          />
+                          <Box sx={{ flex: 1, p: 2 }}>
+                            <Grid container spacing={2}>
+                              {/* Left Column - Main Info */}
+                              <Grid item xs={12} md={5}>
+                                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, mb: 1 }}>
+                                  {/* Status Icon */}
+                                  <Box
+                                    sx={{
+                                      width: 36,
+                                      height: 36,
+                                      borderRadius: '50%',
+                                      background: `linear-gradient(135deg, ${statusColor} 0%, ${alpha(statusColor, 0.7)} 100%)`,
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      flexShrink: 0,
+                                      boxShadow: `0 2px 8px ${alpha(statusColor, 0.4)}`
+                                    }}
+                                  >
+                                    <Typography sx={{ color: 'white', fontWeight: 700, fontSize: '0.75rem' }}>
+                                      {property.status?.charAt(0) || '?'}
+                                    </Typography>
+                                  </Box>
+                                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                                    <Typography variant="subtitle1" fontWeight={600} sx={{ lineHeight: 1.2, mb: 0.5 }}>
+                                      {property.adresse || t('noAddressSpecified')}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                      {property.ville}{property.code_postal ? `, ${property.code_postal}` : ''}
+                                    </Typography>
+                                  </Box>
+                                </Box>
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, mt: 1 }}>
+                                  {/* Status Badge */}
+                                  <Chip
+                                    label={getStatusLabel(property.status)}
+                                    size="small"
+                                    sx={{
+                                      bgcolor: alpha(statusColor, 0.15),
+                                      color: statusColor,
+                                      fontWeight: 600,
+                                      fontSize: '0.7rem',
+                                      height: 22,
+                                      '& .MuiChip-label': { px: 1 }
+                                    }}
+                                  />
+                                  {/* Source Badge */}
+                                  {property.source && (
+                                    <Chip
+                                      label={property.source.toUpperCase()}
+                                      size="small"
+                                      variant="outlined"
+                                      sx={{
+                                        fontSize: '0.65rem',
+                                        height: 22,
+                                        '& .MuiChip-label': { px: 1 }
+                                      }}
+                                    />
+                                  )}
+                                  {/* MLS Badge */}
+                                  {property.numero_mls && (
+                                    <Chip
+                                      label={`MLS: ${property.numero_mls}`}
+                                      size="small"
+                                      variant="outlined"
+                                      sx={{
+                                        fontSize: '0.65rem',
+                                        height: 22,
+                                        '& .MuiChip-label': { px: 1 }
+                                      }}
+                                    />
+                                  )}
+                                </Box>
+                              </Grid>
 
-                          {/* Right Column - Details */}
-                          <Grid item xs={12} md={6}>
-                            <Grid container spacing={1.5}>
-                              {property.prix_vente && (
-                                <Grid item xs={6}>
-                                  <Typography variant="caption" color="text.secondary" display="block">
-                                    Sale Price
-                                  </Typography>
-                                  <Typography variant="body1" fontWeight={600} color="success.main">
-                                    ${property.prix_vente.toLocaleString()}
-                                  </Typography>
+                              {/* Center Column - Sale Info (Prominent) */}
+                              <Grid item xs={6} md={3}>
+                                <Box sx={{
+                                  bgcolor: alpha(statusColor, 0.08),
+                                  borderRadius: 1.5,
+                                  p: 1.5,
+                                  height: '100%',
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  justifyContent: 'center'
+                                }}>
+                                  {property.prix_vente && (
+                                    <Box sx={{ mb: 1 }}>
+                                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                                        {t('salePrice')}
+                                      </Typography>
+                                      <Typography variant="h6" fontWeight={700} sx={{ color: statusColor, lineHeight: 1.2 }}>
+                                        ${property.prix_vente.toLocaleString()}
+                                      </Typography>
+                                    </Box>
+                                  )}
+                                  {property.date_vente && (
+                                    <Box>
+                                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                                        {t('saleDate')}
+                                      </Typography>
+                                      <Typography variant="body2" fontWeight={600}>
+                                        {new Date(property.date_vente).toLocaleDateString()}
+                                      </Typography>
+                                    </Box>
+                                  )}
+                                  {!property.prix_vente && !property.date_vente && (
+                                    <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                                      {t('noSaleInfo')}
+                                    </Typography>
+                                  )}
+                                </Box>
+                              </Grid>
+
+                              {/* Right Column - Property Details */}
+                              <Grid item xs={6} md={4}>
+                                <Grid container spacing={1}>
+                                  {livingAreaDisplay && (
+                                    <Grid item xs={6}>
+                                      <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.65rem' }}>
+                                        {t('livingArea')}
+                                      </Typography>
+                                      <Typography variant="body2" fontWeight={500}>
+                                        {livingAreaDisplay}
+                                      </Typography>
+                                    </Grid>
+                                  )}
+                                  {lotSizeDisplay && (
+                                    <Grid item xs={6}>
+                                      <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.65rem' }}>
+                                        {t('landArea')}
+                                      </Typography>
+                                      <Typography variant="body2" fontWeight={500}>
+                                        {lotSizeDisplay}
+                                      </Typography>
+                                    </Grid>
+                                  )}
+                                  {property.annee_construction && (
+                                    <Grid item xs={6}>
+                                      <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.65rem' }}>
+                                        {t('yearBuilt')}
+                                      </Typography>
+                                      <Typography variant="body2" fontWeight={500}>
+                                        {property.annee_construction}
+                                      </Typography>
+                                    </Grid>
+                                  )}
+                                  {property.nombre_chambres !== null && property.nombre_chambres !== undefined && (
+                                    <Grid item xs={6}>
+                                      <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.65rem' }}>
+                                        {t('bedrooms')}
+                                      </Typography>
+                                      <Typography variant="body2" fontWeight={500}>
+                                        {property.nombre_chambres}
+                                      </Typography>
+                                    </Grid>
+                                  )}
                                 </Grid>
-                              )}
-                              {property.date_vente && (
-                                <Grid item xs={6}>
-                                  <Typography variant="caption" color="text.secondary" display="block">
-                                    Sale Date
-                                  </Typography>
-                                  <Typography variant="body2">
-                                    {new Date(property.date_vente).toLocaleDateString()}
-                                  </Typography>
-                                </Grid>
-                              )}
-                              {livingAreaDisplay && (
-                                <Grid item xs={6}>
-                                  <Typography variant="caption" color="text.secondary" display="block">
-                                    Living Area
-                                  </Typography>
-                                  <Typography variant="body2">
-                                    {livingAreaDisplay}
-                                  </Typography>
-                                </Grid>
-                              )}
-                              {lotSizeDisplay && (
-                                <Grid item xs={6}>
-                                  <Typography variant="caption" color="text.secondary" display="block">
-                                    Lot Size
-                                  </Typography>
-                                  <Typography variant="body2">
-                                    {lotSizeDisplay}
-                                  </Typography>
-                                </Grid>
-                              )}
-                              {property.nombre_chambres !== null && property.nombre_chambres !== undefined && (
-                                <Grid item xs={6}>
-                                  <Typography variant="caption" color="text.secondary" display="block">
-                                    Bedrooms
-                                  </Typography>
-                                  <Typography variant="body2">
-                                    {property.nombre_chambres}
-                                  </Typography>
-                                </Grid>
-                              )}
-                              {(property.salle_bain || property.salle_eau) && (
-                                <Grid item xs={6}>
-                                  <Typography variant="caption" color="text.secondary" display="block">
-                                    Bathrooms
-                                  </Typography>
-                                  <Typography variant="body2">
-                                    {property.salle_bain || 0}:{property.salle_eau || 0}
-                                  </Typography>
-                                </Grid>
-                              )}
+                              </Grid>
                             </Grid>
-                          </Grid>
-                        </Grid>
+                          </Box>
+                        </Box>
                       </Paper>
                     );
                   })}

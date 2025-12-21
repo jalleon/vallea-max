@@ -206,7 +206,11 @@
       "duplicateCreate": "Créer un doublon",
       "cancel": "Annuler",
       "delete": "Supprimer",
-      "mergeOrCreateQuestion": "Fusionner ou créer ?"
+      "mergeOrCreateQuestion": "Fusionner ou créer ?",
+      "mergeOption": "Fusionner avec l'existante",
+      "mergeDescription": "Les nouvelles données seront fusionnées avec la propriété existante",
+      "createDuplicateOption": "Créer un doublon",
+      "createDuplicateDescription": "Une nouvelle propriété sera créée avec les mêmes informations"
     },
 
     "form": {
@@ -1438,7 +1442,9 @@
         "propertyType": "Type de propriété",
         "propertyGenre": "Genre de propriété",
         "propertyTypeRequired": "Le type de propriété est requis",
-        "propertyGenreRequired": "Le genre de propriété est requis"
+        "propertyGenreRequired": "Le genre de propriété est requis",
+        "valuationApproaches": "Approches d'évaluation",
+        "surPlan": "Évaluation sur plan (bâtiment non construit)"
       },
 
       "step2": {
@@ -1484,12 +1490,34 @@
     },
 
     "propertySelector": {
-      "searchPlaceholder": "Rechercher par adresse, ville ou code postal...",
+      "searchPlaceholder": "Rechercher par adresse, ville, code postal, statut ou source...",
       "noProperties": "Aucune propriété dans votre bibliothèque",
       "noPropertiesDescription": "Pour utiliser cette option, vous devez d'abord créer au moins une propriété dans le module Bibliothèque.",
       "alternative": "Alternative",
       "useManualEntry": "Sélectionnez \"Entrer manuellement\" ci-dessus pour saisir l'adresse directement.",
-      "noResults": "Aucune propriété trouvée pour \"{query}\""
+      "noResults": "Aucune propriété trouvée pour \"{query}\"",
+      "noAddressSpecified": "Adresse non spécifiée",
+      "livingArea": "Superficie habitable",
+      "landArea": "Superficie terrain",
+      "yearBuilt": "Année de construction",
+      "status": {
+        "sujet": "Sujet",
+        "vendu": "Vendu",
+        "actif": "Actif"
+      },
+      "source": {
+        "mls": "MLS",
+        "centris": "Centris",
+        "manual": "Manuel",
+        "import": "Import"
+      },
+      "units": {
+        "sqft": "pi²"
+      },
+      "filter": {
+        "all": "Tous",
+        "label": "Filtrer par statut"
+      }
     },
 
     "detail": {
@@ -2026,6 +2054,25 @@
         "grossAdjustmentPercent": "% Rajustement brut",
         "netAdjustmentPercent": "% Rajustement net",
 
+        "searchPlaceholder": "Rechercher par adresse, ville, MLS ou matricule...",
+        "noPropertiesAvailable": "Aucune propriété disponible dans la bibliothèque",
+        "noAddressSpecified": "Adresse non spécifiée",
+        "landArea": "Superficie du terrain",
+        "yearBuilt": "Année de construction",
+        "noSaleInfo": "Aucune info de vente",
+        "units": {
+          "sqft": "pi²"
+        },
+        "status": {
+          "sujet": "Sujet",
+          "vendu": "Vendu",
+          "actif": "Actif"
+        },
+        "filter": {
+          "label": "Filtrer par statut",
+          "all": "Tous"
+        },
+
         "ageFormat": "Format: ##A/##É (Âge/État)",
         "roomFormat": "Format: Total/Chambres/Salle de bain",
         "bathroomFormat": "Format: Bains:Lavabos (ex: 2:1)",
@@ -2212,7 +2259,56 @@
       "semi_commercial": "Semi-Commercial",
       "commercial": "Commercial",
       "land": "Terrain",
-      "other": "Autre"
+      "other": "Autre",
+      "condo_residentiel": "Condo résidentiel",
+      "plex": "Plex",
+      "multifamilial": "Multifamilial",
+      "residentiel_commercial": "Résidentiel/commercial",
+      "residentiel_commercial_bureau": "Résidentiel/commercial/bureau",
+      "residentiel_bureau": "Résidentiel/bureau",
+      "commercial_bureau": "Commercial/bureau",
+      "bureau": "Bureau",
+      "industriel": "Industriel",
+      "industriel_bureau": "Industriel/bureau",
+      "condo_commercial": "Condo commercial",
+      "condo_bureau": "Condo bureau",
+      "condo_industriel": "Condo industriel",
+      "parc_maisons_mobiles": "Parc de maisons mobiles",
+      "terrain": "Terrain"
+    },
+
+    "sidebarGroups": {
+      "main": "Informations Client et Évaluateur",
+      "property": "Détails de la propriété",
+      "valuation": "Méthodes d'évaluation",
+      "conclusion": "Conclusion et Certification",
+      "other": "Sections supplémentaires",
+      "tools": "Outils et Calculatrices"
+    },
+
+    "tools": {
+      "adjustmentsCalculator": "Calculateur d'ajustements",
+      "effectiveAgeCalculator": "Calculateur d'âge effectif"
+    },
+
+    "sidebar": {
+      "sections": "Sections",
+      "overallProgress": "Progression globale",
+      "searchSections": "Rechercher des sections...",
+      "noSectionsFound": "Aucune section trouvée",
+      "completed": "Complété",
+      "inProgress": "En cours",
+      "notStarted": "Non commencé",
+      "legend": "Légende"
+    },
+
+    "valuationApproaches": {
+      "methode_parite": "Méthode de parité (comparaison directe)",
+      "methode_cout": "Méthode du coût",
+      "flux_monetaire": "Flux monétaire",
+      "capitalisation_directe": "Capitalisation directe",
+      "grm": "Multiplicateur de revenu brut (GRM)",
+      "methode_residuelle": "Méthode résiduelle"
     },
 
     "propertyGenres": {
