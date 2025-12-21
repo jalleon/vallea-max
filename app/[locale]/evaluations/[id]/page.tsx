@@ -580,7 +580,7 @@ export default function AppraisalEditPage() {
                 size="small"
                 startIcon={<Refresh />}
                 onClick={handleReloadSubjectProperty}
-                sx={{ textTransform: 'none' }}
+                sx={{ textTransform: 'none', height: 24, fontSize: '0.8125rem', py: 0 }}
               >
                 {t('reloadSubjectProperty')}
               </Button>
