@@ -159,10 +159,10 @@ export default function DirectComparisonForm({
   const [multiSelectMode, setMultiSelectMode] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  // Status priority for sorting (Sujet first, then Vendu, then others)
+  // Status priority for sorting (Vendu first, then Sujet, then others)
   const STATUS_PRIORITY: Record<string, number> = {
-    'Sujet': 1,
-    'Vendu': 2,
+    'Vendu': 1,
+    'Sujet': 2,
     'Actif': 3
   };
 
