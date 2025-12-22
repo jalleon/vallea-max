@@ -50,6 +50,8 @@ import {
   Description,
   Language as LanguageIcon,
   ExpandMore,
+  ChevronLeft,
+  ChevronRight,
 } from '@mui/icons-material'
 import WaitlistForm from '@/components/landing/WaitlistForm'
 import DemoRequestForm from '@/components/landing/DemoRequestForm'
@@ -65,6 +67,16 @@ export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [langMenuAnchor, setLangMenuAnchor] = useState<null | HTMLElement>(null)
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'annual'>('annual')
+
+  // Screenshot carousel states
+  const [libraryIndex, setLibraryIndex] = useState(0)
+  const [importsIndex, setImportsIndex] = useState(0)
+  const [reportsIndex, setReportsIndex] = useState(0)
+
+  // Screenshot image arrays
+  const libraryImages = ['/screenshots/PropertyEdit.jpg', '/screenshots/propertyView.jpg', '/screenshots/library.jpg']
+  const importsImages = ['/screenshots/imports.jpg', '/screenshots/imports2.jpg']
+  const reportsImages = ['/screenshots/evaluation.jpg', '/screenshots/evaluation2.jpg']
 
   // Toggle to show/hide pricing section (set to true when ready to launch pricing)
   const SHOW_PRICING = false
@@ -437,20 +449,28 @@ export default function LandingPage() {
               </Stack>
             </Grid>
             <Grid item xs={12} md={5} sx={{ display: { xs: 'none', md: 'block' } }}>
-              {/* Placeholder for future hero visualization */}
+              {/* Hero screenshot */}
               <Box
                 sx={{
                   height: 400,
-                  background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(245, 158, 11, 0.08) 100%)',
                   borderRadius: '16px',
-                  border: '1px solid rgba(232, 226, 213, 0.1)',
-                  backdropFilter: 'blur(8px)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  border: '1px solid rgba(232, 226, 213, 0.2)',
+                  overflow: 'hidden',
+                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4)',
+                  position: 'relative',
                 }}
               >
-                <Assessment sx={{ fontSize: 120, color: 'rgba(232, 226, 213, 0.3)' }} />
+                <Box
+                  component="img"
+                  src="/screenshots/dashboard.jpg"
+                  alt="Valea Max Dashboard"
+                  sx={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    objectPosition: 'top left',
+                  }}
+                />
               </Box>
             </Grid>
           </Grid>
@@ -796,14 +816,44 @@ export default function LandingPage() {
                 <Box
                   sx={{
                     height: 300,
-                    background: 'linear-gradient(135deg, rgba(79, 70, 229, 0.08) 0%, rgba(124, 58, 237, 0.12) 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    position: 'relative',
                     borderBottom: '1px solid rgba(232, 226, 213, 0.1)',
+                    overflow: 'hidden',
                   }}
                 >
-                  <Dashboard sx={{ fontSize: 100, color: 'rgba(232, 226, 213, 0.4)' }} />
+                  <Box
+                    component="img"
+                    src={libraryImages[libraryIndex]}
+                    alt="Property Library"
+                    sx={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top left' }}
+                  />
+                  {/* Blur overlay for top-right corner */}
+                  <Box sx={{ position: 'absolute', top: 0, right: 0, width: 77, height: 30, backdropFilter: 'blur(8px)', background: 'linear-gradient(to left, rgba(255,255,255,0.3) 0%, transparent 100%)' }} />
+                  {/* Navigation arrows */}
+                  <IconButton
+                    onClick={() => setLibraryIndex((prev) => (prev - 1 + libraryImages.length) % libraryImages.length)}
+                    sx={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', bgcolor: 'rgba(0,0,0,0.5)', color: 'white', '&:hover': { bgcolor: 'rgba(0,0,0,0.7)' } }}
+                    size="small"
+                  >
+                    <ChevronLeft />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => setLibraryIndex((prev) => (prev + 1) % libraryImages.length)}
+                    sx={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', bgcolor: 'rgba(0,0,0,0.5)', color: 'white', '&:hover': { bgcolor: 'rgba(0,0,0,0.7)' } }}
+                    size="small"
+                  >
+                    <ChevronRight />
+                  </IconButton>
+                  {/* Dots indicator */}
+                  <Box sx={{ position: 'absolute', bottom: 8, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 0.5 }}>
+                    {libraryImages.map((_, i) => (
+                      <Box
+                        key={i}
+                        onClick={() => setLibraryIndex(i)}
+                        sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: i === libraryIndex ? 'white' : 'rgba(255,255,255,0.4)', cursor: 'pointer', transition: 'all 0.2s' }}
+                      />
+                    ))}
+                  </Box>
                 </Box>
                 <CardContent sx={{ p: 3 }}>
                   <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: '#E8E2D5' }}>
@@ -836,14 +886,19 @@ export default function LandingPage() {
                 <Box
                   sx={{
                     height: 300,
-                    background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.15) 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
                     borderBottom: '1px solid rgba(232, 226, 213, 0.1)',
+                    overflow: 'hidden',
+                    position: 'relative',
                   }}
                 >
-                  <Assessment sx={{ fontSize: 100, color: 'rgba(232, 226, 213, 0.4)' }} />
+                  <Box
+                    component="img"
+                    src="/screenshots/inspection.jpg"
+                    alt="Inspection Module"
+                    sx={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top left' }}
+                  />
+                  {/* Blur overlay for top-right corner */}
+                  <Box sx={{ position: 'absolute', top: 0, right: 0, width: 77, height: 30, backdropFilter: 'blur(8px)', background: 'linear-gradient(to left, rgba(255,255,255,0.3) 0%, transparent 100%)' }} />
                 </Box>
                 <CardContent sx={{ p: 3 }}>
                   <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: '#E8E2D5' }}>
@@ -876,14 +931,44 @@ export default function LandingPage() {
                 <Box
                   sx={{
                     height: 300,
-                    background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.15) 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    position: 'relative',
                     borderBottom: '1px solid rgba(232, 226, 213, 0.1)',
+                    overflow: 'hidden',
                   }}
                 >
-                  <PictureAsPdf sx={{ fontSize: 100, color: 'rgba(232, 226, 213, 0.4)' }} />
+                  <Box
+                    component="img"
+                    src={importsImages[importsIndex]}
+                    alt="PDF Reader"
+                    sx={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top left' }}
+                  />
+                  {/* Blur overlay for top-right corner */}
+                  <Box sx={{ position: 'absolute', top: 0, right: 0, width: 77, height: 30, backdropFilter: 'blur(8px)', background: 'linear-gradient(to left, rgba(255,255,255,0.3) 0%, transparent 100%)' }} />
+                  {/* Navigation arrows */}
+                  <IconButton
+                    onClick={() => setImportsIndex((prev) => (prev - 1 + importsImages.length) % importsImages.length)}
+                    sx={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', bgcolor: 'rgba(0,0,0,0.5)', color: 'white', '&:hover': { bgcolor: 'rgba(0,0,0,0.7)' } }}
+                    size="small"
+                  >
+                    <ChevronLeft />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => setImportsIndex((prev) => (prev + 1) % importsImages.length)}
+                    sx={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', bgcolor: 'rgba(0,0,0,0.5)', color: 'white', '&:hover': { bgcolor: 'rgba(0,0,0,0.7)' } }}
+                    size="small"
+                  >
+                    <ChevronRight />
+                  </IconButton>
+                  {/* Dots indicator */}
+                  <Box sx={{ position: 'absolute', bottom: 8, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 0.5 }}>
+                    {importsImages.map((_, i) => (
+                      <Box
+                        key={i}
+                        onClick={() => setImportsIndex(i)}
+                        sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: i === importsIndex ? 'white' : 'rgba(255,255,255,0.4)', cursor: 'pointer', transition: 'all 0.2s' }}
+                      />
+                    ))}
+                  </Box>
                 </Box>
                 <CardContent sx={{ p: 3 }}>
                   <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: '#E8E2D5' }}>
@@ -916,14 +1001,44 @@ export default function LandingPage() {
                 <Box
                   sx={{
                     height: 300,
-                    background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(109, 40, 217, 0.15) 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    position: 'relative',
+                    overflow: 'hidden',
                     borderBottom: '1px solid rgba(232, 226, 213, 0.1)',
                   }}
                 >
-                  <Description sx={{ fontSize: 100, color: 'rgba(232, 226, 213, 0.4)' }} />
+                  <Box
+                    component="img"
+                    src={reportsImages[reportsIndex]}
+                    alt="Reports"
+                    sx={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top left' }}
+                  />
+                  {/* Blur overlay for top-right corner */}
+                  <Box sx={{ position: 'absolute', top: 0, right: 0, width: 77, height: 30, backdropFilter: 'blur(8px)', background: 'linear-gradient(to left, rgba(255,255,255,0.3) 0%, transparent 100%)' }} />
+                  {/* Navigation arrows */}
+                  <IconButton
+                    onClick={() => setReportsIndex((prev) => (prev - 1 + reportsImages.length) % reportsImages.length)}
+                    sx={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', bgcolor: 'rgba(0,0,0,0.5)', color: 'white', '&:hover': { bgcolor: 'rgba(0,0,0,0.7)' } }}
+                    size="small"
+                  >
+                    <ChevronLeft />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => setReportsIndex((prev) => (prev + 1) % reportsImages.length)}
+                    sx={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', bgcolor: 'rgba(0,0,0,0.5)', color: 'white', '&:hover': { bgcolor: 'rgba(0,0,0,0.7)' } }}
+                    size="small"
+                  >
+                    <ChevronRight />
+                  </IconButton>
+                  {/* Dots indicator */}
+                  <Box sx={{ position: 'absolute', bottom: 8, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 0.5 }}>
+                    {reportsImages.map((_, i) => (
+                      <Box
+                        key={i}
+                        onClick={() => setReportsIndex(i)}
+                        sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: i === reportsIndex ? 'white' : 'rgba(255,255,255,0.4)', cursor: 'pointer', transition: 'all 0.2s' }}
+                      />
+                    ))}
+                  </Box>
                 </Box>
                 <CardContent sx={{ p: 3 }}>
                   <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: '#E8E2D5' }}>
