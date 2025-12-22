@@ -1212,6 +1212,22 @@ export default function LandingPage() {
           },
         }}
       >
+        {/* Background image - positioned absolute on left */}
+        <Box
+          component="img"
+          src="/images/7.png"
+          alt=""
+          sx={{
+            display: { xs: 'none', md: 'block' },
+            position: 'absolute',
+            left: -330,
+            top: -20,
+            width: 1100,
+            height: 'auto',
+            opacity: 0.4,
+            pointerEvents: 'none',
+          }}
+        />
         <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
           <Box sx={{ textAlign: 'center', mb: 6 }}>
             <Typography
