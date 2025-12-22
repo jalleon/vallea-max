@@ -1136,9 +1136,9 @@ export default function LandingPage() {
                         background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.15) 100%)',
                       }}
                     >
-                      {feature === 1 && <PictureAsPdf sx={{ fontSize: 48 }} />}
-                      {feature === 2 && <Cloud sx={{ fontSize: 48 }} />}
-                      {feature === 3 && <SmartToy sx={{ fontSize: 48 }} />}
+                      {feature === 1 && <Box component="img" src="/icons/31.png" alt="" sx={{ width: 64, height: 64, objectFit: 'contain' }} />}
+                      {feature === 2 && <Box component="img" src="/icons/7.png" alt="" sx={{ width: 64, height: 64, objectFit: 'contain' }} />}
+                      {feature === 3 && <Box component="img" src="/icons/14.png" alt="" sx={{ width: 64, height: 64, objectFit: 'contain' }} />}
                     </Box>
                     <Typography
                       variant="h6"
