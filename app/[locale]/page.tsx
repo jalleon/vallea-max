@@ -83,33 +83,33 @@ export default function LandingPage() {
 
   const features = [
     {
-      icon: <Description sx={{ fontSize: 48 }} />,
+      icon: <Box component="img" src="/icons/3.png" alt="" sx={{ width: 64, height: 64, objectFit: 'contain' }} />,
       title: t('features.reports.title'),
       description: t('features.reports.description'),
       highlight: true,
     },
     {
-      icon: <SmartToy sx={{ fontSize: 48 }} />,
+      icon: <Box component="img" src="/icons/16.png" alt="" sx={{ width: 64, height: 64, objectFit: 'contain' }} />,
       title: t('features.dataImport.title'),
       description: t('features.dataImport.description'),
     },
     {
-      icon: <Dashboard sx={{ fontSize: 48 }} />,
+      icon: <Box component="img" src="/icons/24.png" alt="" sx={{ width: 64, height: 64, objectFit: 'contain' }} />,
       title: t('features.propertyLibrary.title'),
       description: t('features.propertyLibrary.description'),
     },
     {
-      icon: <Assessment sx={{ fontSize: 48 }} />,
+      icon: <Box component="img" src="/icons/37.png" alt="" sx={{ width: 64, height: 64, objectFit: 'contain' }} />,
       title: t('features.inspections.title'),
       description: t('features.inspections.description'),
     },
     {
-      icon: <CompareArrows sx={{ fontSize: 48 }} />,
+      icon: <Box component="img" src="/icons/46.png" alt="" sx={{ width: 64, height: 64, objectFit: 'contain' }} />,
       title: t('features.comparables.title'),
       description: t('features.comparables.description'),
     },
     {
-      icon: <TrendingUp sx={{ fontSize: 48 }} />,
+      icon: <Box component="img" src="/icons/30.png" alt="" sx={{ width: 64, height: 64, objectFit: 'contain' }} />,
       title: t('features.dashboard.title'),
       description: t('features.dashboard.description'),
     },
