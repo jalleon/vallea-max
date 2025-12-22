@@ -1416,8 +1416,9 @@
     },
 
     "sections": {
-      "markComplete": "Mark as complete",
+      "markComplete": "Complete",
       "sectionCompleted": "Section completed",
+      "completed": "Completed",
       "fillFields": "Fill in the fields for this section and mark as completed when done",
       "inDevelopment": "Section under development",
       "content": "Section content",
@@ -1539,6 +1540,8 @@
       "general": "General",
       "description": "Description",
       "cout_parite": "Cost and comparison",
+      "methode_cout": "Cost Approach",
+      "methode_comparaison": "Direct Comparison Approach",
       "conclusion_comparaison": "Conclusion and comparison",
       "methode_revenu": "Income approach",
       "loyer_marchand": "Market rent",

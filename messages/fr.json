@@ -1538,8 +1538,9 @@
     },
 
     "sections": {
-      "markComplete": "Marquer comme complété",
+      "markComplete": "Compléter",
       "sectionCompleted": "Section complétée",
+      "completed": "Complété",
       "fillFields": "Remplissez les champs de cette section et marquez comme complétée une fois terminé",
       "inDevelopment": "Section en cours de développement",
       "content": "Contenu de la section",
@@ -1661,6 +1662,8 @@
       "general": "Général",
       "description": "Description",
       "cout_parite": "Coût et parité",
+      "methode_cout": "Méthode du coût",
+      "methode_comparaison": "Méthode de comparaison directe",
       "conclusion_comparaison": "Conclusion et comparaison",
       "methode_revenu": "Méthode du revenu",
       "loyer_marchand": "Loyer marchand",

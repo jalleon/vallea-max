@@ -157,6 +157,7 @@ export default function SectionsSidebar({
         'technique_parite',
         'cout_parite',
         'methode_cout',
+        'methode_comparaison',
         'techniques_cout',
         'methode_revenu',
         'loyer_marchand',

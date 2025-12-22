@@ -18,7 +18,7 @@ import {
   Button,
   Divider
 } from '@mui/material';
-import { CheckCircle, Circle, Save, Upload } from '@mui/icons-material';
+import { CheckCircle, Circle, Save } from '@mui/icons-material';
 import { TemplateType } from '../types/evaluation.types';
 import { useTranslations } from 'next-intl';
 import DirectComparisonForm from './DirectComparisonForm';
@@ -31,7 +31,8 @@ import ReferenceSheetSectionContent from './ReferenceSheetSectionContent';
 import GeneralSectionContent from './GeneralSectionContent';
 import DescriptionSectionContent from './DescriptionSectionContent';
 import CoutPariteSectionContent from './CoutPariteSectionContent';
-import ImportFromPreviousDialog from './ImportFromPreviousDialog';
+import CostApproachSectionContent from './CostApproachSectionContent';
+import DirectComparisonSectionContent from './DirectComparisonSectionContent';
 import SmartValidationWarnings from './SmartValidationWarnings';
 // AIC Form Components
 import TransmittalLetterSection from './AICForm/TransmittalLetterSection';
@@ -72,7 +73,6 @@ export default function AppraisalSectionForm({
   const [formData, setFormData] = useState(data);
   const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
   const [snippetsDialogOpen, setSnippetsDialogOpen] = useState(false);
-  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [currentNarrativeField, setCurrentNarrativeField] = useState<string>('');
 
   console.log('🔍 AppraisalSectionForm - sectionId:', sectionId);
@@ -209,6 +209,10 @@ export default function AppraisalSectionForm({
           return renderDescriptionSection();
         case 'cout_parite':
           return renderCoutPariteSection();
+        case 'methode_cout':
+          return renderCostApproachSection();
+        case 'methode_comparaison':
+          return renderDirectComparisonSection();
         case 'conclusion_comparaison':
           return renderNarrativeSection('description', 'Provide conclusion and final reconciliation...');
         case 'informations_generales':
@@ -929,6 +933,32 @@ export default function AppraisalSectionForm({
   const renderCoutPariteSection = () => {
     return (
       <CoutPariteSectionContent
+        formData={formData}
+        handleFieldChange={handleFieldChange}
+        appraisalData={appraisalData}
+        onChange={onChange}
+        setFormData={setFormData}
+        allSectionsData={allSectionsData}
+      />
+    );
+  };
+
+  const renderCostApproachSection = () => {
+    return (
+      <CostApproachSectionContent
+        formData={formData}
+        handleFieldChange={handleFieldChange}
+        appraisalData={appraisalData}
+        onChange={onChange}
+        setFormData={setFormData}
+        allSectionsData={allSectionsData}
+      />
+    );
+  };
+
+  const renderDirectComparisonSection = () => {
+    return (
+      <DirectComparisonSectionContent
         formData={formData}
         handleFieldChange={handleFieldChange}
         appraisalData={appraisalData}
@@ -1988,42 +2018,22 @@ export default function AppraisalSectionForm({
     </Grid>
   );
 
-  const handleImportData = (importedData: any) => {
-    // Merge imported data with existing form data
-    const updatedData = {
-      ...formData,
-      ...importedData
-    };
-    setFormData(updatedData);
-    onChange(updatedData);
-  };
-
   return (
     <Box>
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="body2" color="text.secondary">
           {t('fillFields')}
         </Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={<Upload />}
-            onClick={() => setImportDialogOpen(true)}
-            sx={{ textTransform: 'none' }}
-          >
-            Import from Previous
-          </Button>
-          <Button
-            variant={formData.completed ? 'outlined' : 'contained'}
-            color={formData.completed ? 'success' : 'primary'}
-            startIcon={formData.completed ? <CheckCircle /> : <Circle />}
-            onClick={handleMarkComplete}
-            sx={{ textTransform: 'none' }}
-          >
-            {formData.completed ? t('sectionCompleted') : t('markComplete')}
-          </Button>
-        </Box>
+        <Button
+          variant={formData.completed ? 'outlined' : 'contained'}
+          color={formData.completed ? 'success' : 'primary'}
+          size="small"
+          startIcon={formData.completed ? <CheckCircle sx={{ fontSize: 16 }} /> : <Circle sx={{ fontSize: 16 }} />}
+          onClick={handleMarkComplete}
+          sx={{ textTransform: 'none', py: 0.5, px: 1.5, minHeight: 28, fontSize: '0.8125rem' }}
+        >
+          {formData.completed ? t('completed') : t('markComplete')}
+        </Button>
       </Box>
 
       <Divider sx={{ mb: 3 }} />
@@ -2071,14 +2081,6 @@ export default function AppraisalSectionForm({
           }
           setSnippetsDialogOpen(false);
         }}
-      />
-
-      {/* Import from Previous Dialog */}
-      <ImportFromPreviousDialog
-        open={importDialogOpen}
-        onClose={() => setImportDialogOpen(false)}
-        onImport={handleImportData}
-        currentSectionId={sectionId}
       />
     </Box>
   );

@@ -439,12 +439,18 @@ export default function AppraisalEditPage() {
     if (!adjustmentsData || !adjustmentsData.comparables) return;
 
     // Find the Direct Comparison section in sectionsDataRef (use ref for latest data)
-    // Check both methode_parite (residential) and cout_parite (semicommercial)
+    // Check methode_parite (residential), methode_comparaison (custom), and cout_parite (legacy)
     let directComparisonSection = sectionsDataRef.current.methode_parite;
     let sectionKey = 'methode_parite';
 
     if (!directComparisonSection || !directComparisonSection.comparables) {
-      // Try cout_parite for semicommercial templates
+      // Try methode_comparaison for custom templates
+      directComparisonSection = sectionsDataRef.current.methode_comparaison;
+      sectionKey = 'methode_comparaison';
+    }
+
+    if (!directComparisonSection || !directComparisonSection.comparables) {
+      // Try cout_parite for legacy semicommercial templates
       directComparisonSection = sectionsDataRef.current.cout_parite;
       sectionKey = 'cout_parite';
     }
@@ -557,14 +563,28 @@ export default function AppraisalEditPage() {
               </Typography>
               <Chip
                 label={t(`status.${appraisal.status}`)}
-                color={appraisal.status === 'draft' ? 'warning' : 'success'}
                 size="small"
+                sx={appraisal.status === 'draft' ? {
+                  bgcolor: '#ffebee',
+                  color: '#d32f2f',
+                  border: '1px solid #d32f2f',
+                  '& .MuiChip-label': { fontWeight: 500 }
+                } : {
+                  bgcolor: 'success.light',
+                  color: 'success.contrastText'
+                }}
               />
               <Chip
                 label={getTemplateName()}
-                color="primary"
-                variant="outlined"
                 size="small"
+                sx={appraisal.template_type === 'CUSTOM' ? {
+                  bgcolor: '#ed6c02',
+                  color: 'white',
+                  '& .MuiChip-label': { fontWeight: 500 }
+                } : {
+                  bgcolor: 'primary.main',
+                  color: 'primary.contrastText'
+                }}
               />
             </Box>
 
@@ -663,6 +683,7 @@ export default function AppraisalEditPage() {
                   onChange={handleAdjustmentsChange}
                   directComparisonData={
                     sectionsDataRef.current.methode_parite ||
+                    sectionsDataRef.current.methode_comparaison ||
                     sectionsDataRef.current.cout_parite ||
                     {}
                   }
@@ -672,6 +693,7 @@ export default function AppraisalEditPage() {
                   onClose={() => setCurrentToolTab(-1)}
                   measurementSystem={
                     sectionsDataRef.current.methode_parite?.measurementSystem ||
+                    sectionsDataRef.current.methode_comparaison?.measurementSystem ||
                     sectionsDataRef.current.cout_parite?.measurementSystem ||
                     'imperial'
                   }
