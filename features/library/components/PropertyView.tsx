@@ -56,7 +56,18 @@ import {
   MeetingRoom,
   WbSunny
 } from '@mui/icons-material'
-import { Property } from '../types/property.types'
+import { Property, PropertyType } from '../types/property.types'
+
+// Helper to check if property type is a condo type
+const isCondoType = (type?: PropertyType): boolean => {
+  return type === 'condo_residentiel' || type === 'condo_commercial' ||
+         type === 'condo_bureau' || type === 'condo_industriel'
+}
+
+// Helper to check if property type is a multi-unit type
+const isMultiUnitType = (type?: PropertyType): boolean => {
+  return type === 'plex' || type === 'multifamilial'
+}
 import { formatCurrency, formatDate, formatMeasurement } from '@/lib/utils/formatting'
 import { useRouter, useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -749,7 +760,7 @@ export function PropertyView({
                       </Grid>
 
                       {/* Line 3: 12 columns total to match line 2 */}
-                      {(property.status === 'Vendu' || property.status === 'Actif') && !(property.type_propriete === 'Duplex' || property.type_propriete === 'Triplex' || property.type_propriete === 'Quadriplex+') && (
+                      {(property.status === 'Vendu' || property.status === 'Actif') && !isMultiUnitType(property.type_propriete) && (
                         <Grid item xs={12} md={1.5}>
                           <Typography variant="body2" color="text.secondary">{t('occupancy')}</Typography>
                           <Chip
@@ -812,7 +823,7 @@ export function PropertyView({
                           {property.numero_mls && <ContentCopy sx={{ fontSize: 16, color: 'action.active' }} />}
                         </Box>
                       </Grid>
-                      {property.type_propriete === 'Condo' && (
+                      {isCondoType(property.type_propriete) && (
                         <>
                           <Grid item xs={12} md={2}>
                             <Typography variant="body2" color="text.secondary">{t('condoFees')}</Typography>
@@ -834,7 +845,7 @@ export function PropertyView({
                   )}
 
                   {/* Conditional fields for multi-unit properties */}
-                  {(property.type_propriete === 'Duplex' || property.type_propriete === 'Triplex' || property.type_propriete === 'Quadriplex+') && property.unit_rents && property.unit_rents.length > 0 && (
+                  {isMultiUnitType(property.type_propriete) && property.unit_rents && property.unit_rents.length > 0 && (
                     <Grid item xs={12}>
                       <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(0,0,0,0.02)', borderRadius: 1 }}>
                         <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
@@ -1022,7 +1033,7 @@ export function PropertyView({
               <CardContent sx={{ p: 3, bgcolor: 'rgba(76, 175, 80, 0.04)' }}>
                 <Grid container spacing={2}>
                   {/* Line 1 - Conditional based on property type */}
-                  {property.type_propriete === 'Condo' ? (
+                  {isCondoType(property.type_propriete) ? (
                     <>
                       <Grid item xs={12} md={2.4}>
                         <Typography variant="body2" color="text.secondary">{t('buildingType')}</Typography>

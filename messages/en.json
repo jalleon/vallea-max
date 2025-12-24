@@ -305,7 +305,14 @@
       "floor": "Floor",
       "areaM2": "Area (m²)",
       "areaPi2": "Area (ft²)",
-      "habitable": "Habitable"
+      "habitable": "Habitable",
+      "generalInformation": "General Information",
+      "floorNumber": "Floor",
+      "buildingCharacteristics": "Building Characteristics",
+      "municipalData": "Municipal Data",
+      "areas": "Areas",
+      "areaByFloor": "Area by Floor",
+      "addAdditionalLot": "Add Lot"
     },
 
     "view": {
@@ -403,17 +410,22 @@
     },
 
     "propertyTypes": {
-      "Condo": "Condo",
-      "Unifamiliale": "Single Family",
-      "Duplex": "Duplex",
-      "Triplex": "Triplex",
-      "Quadriplex+": "Quadriplex+",
-      "Plex": "Plex",
-      "Appartement": "Apartment",
-      "Semi-commercial": "Semi-commercial",
-      "Commercial": "Commercial",
-      "Terrain": "Land",
-      "Autre": "Other"
+      "condo_residentiel": "Residential Condo",
+      "plex": "Plex",
+      "multifamilial": "Multifamily",
+      "residentiel_commercial": "Residential/Commercial",
+      "residentiel_commercial_bureau": "Residential/Commercial/Office",
+      "residentiel_bureau": "Residential/Office",
+      "commercial": "Commercial",
+      "commercial_bureau": "Commercial/Office",
+      "bureau": "Office",
+      "industriel": "Industrial",
+      "industriel_bureau": "Industrial/Office",
+      "condo_commercial": "Commercial Condo",
+      "condo_bureau": "Office Condo",
+      "condo_industriel": "Industrial Condo",
+      "parc_maisons_mobiles": "Mobile Home Park",
+      "terrain": "Land"
     },
 
     "propertyStatus": {
@@ -436,6 +448,54 @@
       "Partiel non-aménagé": "Partial Unfinished",
       "Vide sanitaire": "Crawl Space",
       "Dalle de béton": "Concrete Slab"
+    },
+
+    "propertyGenre": {
+      "Plain-pied": "Bungalow",
+      "À étages": "Multi-story",
+      "1 Étage": "1 Story",
+      "Un étage et demi": "1.5 Story",
+      "Deux étages": "2 Story",
+      "Deux étages et demi": "2.5 Story",
+      "Trois étages": "3 Story",
+      "Paliers multiples": "Split Level",
+      "Mobile": "Mobile",
+      "Maison de ville": "Townhouse",
+      "Tour d'appartement": "Apartment Tower",
+      "Terrain vacant": "Vacant Land"
+    },
+
+    "buildingType": {
+      "Isolé": "Detached",
+      "Semi-détaché": "Semi-detached",
+      "En rangée": "Row",
+      "En rangée sur coin": "Corner Row"
+    },
+
+    "parkingTypes": {
+      "Allée": "Driveway",
+      "Garage": "Garage",
+      "Abri d'auto": "Carport",
+      "Rue": "Street",
+      "Aucun": "None"
+    },
+
+    "garageTypes": {
+      "Attaché": "Attached",
+      "Détaché": "Detached",
+      "Intégré": "Built-in",
+      "Au sous-sol": "Basement",
+      "Abri d'auto": "Carport"
+    },
+
+    "condoLocation": {
+      "Coin": "Corner",
+      "Centre": "Center"
+    },
+
+    "condoType": {
+      "Divise": "Divided",
+      "Indivise": "Undivided"
     },
 
     "notifications": {

@@ -1,16 +1,22 @@
 // Shared property constants to ensure consistency across types and schemas
 
 export const PROPERTY_TYPES = [
-  'Condo',
-  'Unifamiliale',
-  'Duplex',
-  'Triplex',
-  'Quadriplex+',
-  'Appartement',
-  'Semi-commercial',
-  'Commercial',
-  'Terrain',
-  'Autre'
+  'condo_residentiel',
+  'plex',
+  'multifamilial',
+  'residentiel_commercial',
+  'residentiel_commercial_bureau',
+  'residentiel_bureau',
+  'commercial',
+  'commercial_bureau',
+  'bureau',
+  'industriel',
+  'industriel_bureau',
+  'condo_commercial',
+  'condo_bureau',
+  'condo_industriel',
+  'parc_maisons_mobiles',
+  'terrain'
 ] as const
 
 export const PROPERTY_STATUSES = [

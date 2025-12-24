@@ -46,6 +46,7 @@ import {
   Visibility
 } from '@mui/icons-material'
 import { Property, PropertyCreateInput, PropertyType, PropertyStatus, BasementType, ParkingType, FloorType, FloorArea, OccupancyType, EvaluationType, UnitRent, AdditionalLot } from '../types/property.types'
+import { PROPERTY_TYPES } from '../constants/property.constants'
 import { v4 as uuidv4 } from 'uuid'
 import { useRouter, useParams } from 'next/navigation'
 import { calculateInspectionProgress, getCompletedCategories, getCategoryTranslationKey } from '@/features/inspection/utils/progress.utils'
@@ -66,16 +67,18 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
   const router = useRouter()
   const params = useParams()
   const locale = params?.locale as string
-  const t = useTranslations('library.form')
-  const tTypes = useTranslations('library.propertyTypes')
-  const tStatus = useTranslations('library.propertyStatus')
-  const tBasement = useTranslations('library.basementTypes')
-  const tGenre = useTranslations('library.propertyGenre')
-  const tBuilding = useTranslations('library.buildingType')
-  const tParking = useTranslations('library.parkingTypes')
-  const tGarage = useTranslations('library.garageTypes')
-  const tCondoLoc = useTranslations('library.condoLocation')
-  const tCondoType = useTranslations('library.condoType')
+  const tLib = useTranslations('library')
+  // Create convenience accessors for nested translations
+  const t = (key: string) => tLib(`form.${key}`)
+  const tTypes = (key: string) => tLib(`propertyTypes.${key}`)
+  const tStatus = (key: string) => tLib(`propertyStatus.${key}`)
+  const tBasement = (key: string) => tLib(`basementTypes.${key}`)
+  const tGenre = (key: string) => tLib(`propertyGenre.${key}`)
+  const tBuilding = (key: string) => tLib(`buildingType.${key}`)
+  const tParking = (key: string) => tLib(`parkingTypes.${key}`)
+  const tGarage = (key: string) => tLib(`garageTypes.${key}`)
+  const tCondoLoc = (key: string) => tLib(`condoLocation.${key}`)
+  const tCondoType = (key: string) => tLib(`condoType.${key}`)
 
   // Helper functions for currency formatting
   const formatCurrencyDisplay = (value: number | undefined): string => {
@@ -333,10 +336,22 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
 
   // Helper to get number of units based on property type
   const getUnitCount = (type?: PropertyType): number => {
-    if (type === 'Duplex') return 2
-    if (type === 'Triplex') return 3
-    if (type === 'Quadriplex+') return 4
+    // 'plex' covers duplex, triplex, quadruplex - default to 4 units
+    if (type === 'plex') return 4
+    // 'multifamilial' covers 5+ unit buildings - default to 6 units
+    if (type === 'multifamilial') return 6
     return 0
+  }
+
+  // Helper to check if property type is a condo type
+  const isCondoType = (type?: PropertyType): boolean => {
+    return type === 'condo_residentiel' || type === 'condo_commercial' ||
+           type === 'condo_bureau' || type === 'condo_industriel'
+  }
+
+  // Helper to check if property type is a multi-unit type
+  const isMultiUnitType = (type?: PropertyType): boolean => {
+    return type === 'plex' || type === 'multifamilial'
   }
 
   useEffect(() => {
@@ -736,7 +751,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
     }
   }
 
-  const propertyTypes: PropertyType[] = ['Condo', 'Unifamiliale', 'Duplex', 'Triplex', 'Quadriplex+', 'Appartement', 'Semi-commercial', 'Commercial', 'Terrain', 'Autre']
+  const propertyTypes = PROPERTY_TYPES
   const propertyStatuses: PropertyStatus[] = ['Vendu', 'Sujet', 'Actif']
   const basementTypes: BasementType[] = ['Aucun', 'Complet aménagé', 'Complet non-aménagé', 'Partiel aménagé', 'Partiel non-aménagé', 'Vide sanitaire', 'Dalle de béton']
   const parkingTypes: ParkingType[] = ['Allée', 'Garage', 'Abri d\'auto', 'Rue', 'Aucun']
@@ -1014,7 +1029,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
 
                     {/* Occupancy fields for Sujet and Vendu statuses, excluding multi-unit properties */}
                     {(formData.status === 'Sujet' || formData.status === 'Vendu') &&
-                     !(formData.type_propriete === 'Duplex' || formData.type_propriete === 'Triplex' || formData.type_propriete === 'Quadriplex+') && (
+                     !isMultiUnitType(formData.type_propriete) && (
                       <>
                         <Grid item xs={12} md={3}>
                           <FormControl fullWidth size="small">
@@ -1054,7 +1069,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     )}
 
                     {/* Conditional field for Condo */}
-                    {formData.type_propriete === 'Condo' && (
+                    {isCondoType(formData.type_propriete) && (
                       <Grid item xs={12} md={3}>
                         <TextField
                           fullWidth
@@ -1076,7 +1091,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     )}
 
                     {/* Conditional fields for multi-unit properties */}
-                    {(formData.type_propriete === 'Duplex' || formData.type_propriete === 'Triplex' || formData.type_propriete === 'Quadriplex+') && (
+                    {isMultiUnitType(formData.type_propriete) && (
                       <Grid item xs={12}>
                         <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(0,0,0,0.02)', borderRadius: 1 }}>
                           <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
@@ -1219,7 +1234,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                     </Grid>
 
                     {/* Conditional Condo fields between Type de bâtiment and Année de construction */}
-                    {formData.type_propriete === 'Condo' && (
+                    {isCondoType(formData.type_propriete) && (
                       <>
                         <Grid item xs={12} md={1.6}>
                           <FormControl fullWidth size="small">
@@ -1314,7 +1329,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
                       />
                     </Grid>
                     {/* Force line break for non-Condo properties */}
-                    {formData.type_propriete !== 'Condo' && <Grid item xs={12} sx={{ height: 0, padding: 0 }} />}
+                    {!isCondoType(formData.type_propriete) && <Grid item xs={12} sx={{ height: 0, padding: 0 }} />}
                     {/* Row 2 - Room counts (all 4 fields on same line) */}
                     <Grid item xs={12} md={3}>
                       <TextField
