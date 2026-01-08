@@ -43,7 +43,8 @@ import {
   AttachMoney,
   Search as InspectionIcon,
   AccountBalance,
-  Visibility
+  Visibility,
+  PhotoCamera
 } from '@mui/icons-material'
 import { Property, PropertyCreateInput, PropertyType, PropertyStatus, BasementType, ParkingType, FloorType, FloorArea, OccupancyType, EvaluationType, UnitRent, AdditionalLot } from '../types/property.types'
 import { PROPERTY_TYPES } from '../constants/property.constants'
@@ -53,6 +54,8 @@ import { calculateInspectionProgress, getCompletedCategories, getCategoryTransla
 import { useTranslations } from 'next-intl'
 import { CheckCircle } from '@mui/icons-material'
 import { formatNumber } from '@/lib/utils/formatting'
+import { PropertyPhotoUpload } from './PropertyPhotoUpload'
+import { MediaReference } from '@/types/common.types'
 
 interface PropertyEditProps {
   property: Property | null
@@ -317,6 +320,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
 
   const [floorAreas, setFloorAreas] = useState<FloorArea[]>([])
   const [additionalLots, setAdditionalLots] = useState<AdditionalLot[]>([])
+  const [photos, setPhotos] = useState<MediaReference[]>([])
   const [newFloor, setNewFloor] = useState({
     floor: 'Rez-de-chaussée' as FloorType,
     area_m2: 0,
@@ -454,11 +458,13 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
 
         notes: property.notes || '',
         is_template: property.is_template,
-        is_shared: property.is_shared
+        is_shared: property.is_shared,
+        media_references: property.media_references || []
       })
       setFloorAreas(property.floor_areas || [])
       setUnitRents(property.unit_rents || [])
       setAdditionalLots(property.additional_lots || [])
+      setPhotos(property.media_references || [])
     } else {
       // Reset for new property
       setFormData({
@@ -497,9 +503,11 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
         floor_areas: [],
         notes: '',
         is_template: false,
-        is_shared: false
+        is_shared: false,
+        media_references: []
       })
       setFloorAreas([])
+      setPhotos([])
     }
   }, [property])
 
@@ -687,7 +695,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
       setValidationError('')
 
       // Sanitize data: convert empty strings to null for all fields
-      const sanitizedData: any = { ...formData }
+      const sanitizedData: any = { ...formData, media_references: photos }
 
       // Note: valeur_evaluation and date_effective are UI-only fields that map to prix_vente and date_vente
       // They are already removed from formData initialization, so no need to delete them here
@@ -696,6 +704,8 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
 
       // Convert empty strings to null for all fields to avoid database type errors
       Object.keys(sanitizedData).forEach(key => {
+        // Skip arrays like media_references
+        if (Array.isArray(sanitizedData[key])) return
         if (sanitizedData[key] === '') {
           sanitizedData[key] = null
         }
@@ -725,7 +735,7 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
       setValidationError('')
 
       // Sanitize data: convert empty strings to null for all fields
-      const sanitizedData: any = { ...formData }
+      const sanitizedData: any = { ...formData, media_references: photos }
 
       // Note: valeur_evaluation and date_effective are UI-only fields that map to prix_vente and date_vente
       delete sanitizedData.valeur_evaluation
@@ -733,6 +743,8 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
 
       // Convert empty strings to null for all fields to avoid database type errors
       Object.keys(sanitizedData).forEach(key => {
+        // Skip arrays like media_references
+        if (Array.isArray(sanitizedData[key])) return
         if (sanitizedData[key] === '') {
           sanitizedData[key] = null
         }
@@ -780,6 +792,41 @@ export function PropertyEdit({ property, open, onClose, onSave, onSaveAndView }:
         )}
         <Box sx={{ mt: 2 }}>
           <Grid container spacing={3}>
+            {/* Photos de la propriété */}
+            <Grid item xs={12}>
+              <Card
+                elevation={0}
+                sx={{
+                  border: `1px solid ${theme.palette.divider}`,
+                  background: `linear-gradient(135deg, ${theme.palette.info.main}08 0%, ${theme.palette.info.main}15 100%)`
+                }}
+              >
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <PhotoCamera sx={{ color: theme.palette.info.main, mr: 1 }} />
+                    <Typography variant="h6" sx={{ color: theme.palette.info.main, fontWeight: 600 }}>
+                      {t('photos')}
+                    </Typography>
+                  </Box>
+                  <PropertyPhotoUpload
+                    photos={photos}
+                    onPhotosChange={setPhotos}
+                    propertyId={property?.id}
+                    maxPhotos={10}
+                    translations={{
+                      uploadPhotos: t('uploadPhotos'),
+                      dragDrop: t('dragDropPhotos'),
+                      maxPhotos: t('maxPhotosInfo'),
+                      uploadingPhotos: t('uploadingPhotos'),
+                      mainPhoto: t('mainPhoto'),
+                      deletePhoto: t('deletePhoto'),
+                      setAsMain: t('setAsMainPhoto')
+                    }}
+                  />
+                </CardContent>
+              </Card>
+            </Grid>
+
             {/* Information générale */}
             <Grid item xs={12}>
               <Card

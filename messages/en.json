@@ -312,7 +312,15 @@
       "municipalData": "Municipal Data",
       "areas": "Areas",
       "areaByFloor": "Area by Floor",
-      "addAdditionalLot": "Add Lot"
+      "addAdditionalLot": "Add Lot",
+      "photos": "Property Photos",
+      "uploadPhotos": "Upload Photos",
+      "dragDropPhotos": "Drag and drop photos here or click to select",
+      "maxPhotosInfo": "{current}/{max} photos",
+      "uploadingPhotos": "Uploading",
+      "mainPhoto": "Main Photo",
+      "deletePhoto": "Delete Photo",
+      "setAsMainPhoto": "Set as Main Photo"
     },
 
     "view": {
@@ -411,7 +419,8 @@
       "viewPhotos": "View Photos",
       "noPhotoAvailable": "No photo available",
       "clickToAddPhoto": "Click to add a photo",
-      "floorNumber": "Floor"
+      "floorNumber": "Floor",
+      "photoOf": "Photo {current} of {total}"
     },
 
     "propertyTypes": {

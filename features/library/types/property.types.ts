@@ -264,6 +264,9 @@ export interface PropertyCreateInput {
   aire_habitable_m2?: number
   aire_habitable_pi2?: number
 
+  // Media
+  media_references?: MediaReference[]
+
   source?: string
   notes?: string
   is_template?: boolean

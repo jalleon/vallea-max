@@ -59,6 +59,7 @@ import {
   ImageNotSupported
 } from '@mui/icons-material'
 import { Property, PropertyType } from '../types/property.types'
+import { PropertyPhotoGallery } from './PropertyPhotoGallery'
 
 // Helper to check if property type is a condo type
 const isCondoType = (type?: PropertyType): boolean => {
@@ -563,65 +564,16 @@ export function PropertyView({
             }}
           >
             {property.media_references && property.media_references.length > 0 ? (
-              <Box
-                sx={{
-                  width: '100%',
-                  height: '100%',
-                  borderRadius: 2,
-                  overflow: 'hidden',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                  position: 'relative',
-                  '&:hover .photo-overlay': {
-                    opacity: 1
-                  }
+              <PropertyPhotoGallery
+                photos={property.media_references}
+                translations={{
+                  propertyPhoto: t('propertyPhoto'),
+                  viewPhotos: t('viewPhotos'),
+                  noPhotoAvailable: t('noPhotoAvailable'),
+                  photoOf: t('photoOf')
                 }}
-              >
-                <img
-                  src={property.media_references[0].thumbnail || property.media_references[0].reference}
-                  alt={t('propertyPhoto')}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover'
-                  }}
-                />
-                {property.media_references.length > 1 && (
-                  <Chip
-                    label={`+${property.media_references.length - 1}`}
-                    size="small"
-                    sx={{
-                      position: 'absolute',
-                      bottom: 8,
-                      right: 8,
-                      bgcolor: 'rgba(0,0,0,0.7)',
-                      color: 'white',
-                      fontWeight: 600,
-                      fontSize: '0.75rem'
-                    }}
-                  />
-                )}
-                <Box
-                  className="photo-overlay"
-                  sx={{
-                    position: 'absolute',
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    p: 1,
-                    background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
-                    opacity: 0,
-                    transition: 'opacity 0.2s',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <Typography variant="caption" sx={{ color: 'white' }}>
-                    <PhotoCamera sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
-                    {t('viewPhotos')}
-                  </Typography>
-                </Box>
-              </Box>
+                onEdit={onEdit}
+              />
             ) : (
               <Box
                 sx={{

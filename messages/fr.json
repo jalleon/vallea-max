@@ -312,7 +312,15 @@
       "municipalData": "Données municipales",
       "areas": "Superficies",
       "areaByFloor": "Superficie par étage",
-      "addAdditionalLot": "Ajouter un lot"
+      "addAdditionalLot": "Ajouter un lot",
+      "photos": "Photos de la propriété",
+      "uploadPhotos": "Téléverser des photos",
+      "dragDropPhotos": "Glissez-déposez vos photos ici ou cliquez pour sélectionner",
+      "maxPhotosInfo": "{current}/{max} photos",
+      "uploadingPhotos": "Téléversement en cours",
+      "mainPhoto": "Photo principale",
+      "deletePhoto": "Supprimer la photo",
+      "setAsMainPhoto": "Définir comme photo principale"
     },
 
     "view": {
@@ -411,7 +419,8 @@
       "viewPhotos": "Voir les photos",
       "noPhotoAvailable": "Aucune photo disponible",
       "clickToAddPhoto": "Cliquez pour ajouter une photo",
-      "floorNumber": "Étage"
+      "floorNumber": "Étage",
+      "photoOf": "Photo {current} sur {total}"
     },
 
     "propertyTypes": {
