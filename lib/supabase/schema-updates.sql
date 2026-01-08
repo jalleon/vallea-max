@@ -25,18 +25,41 @@ CREATE INDEX IF NOT EXISTS idx_floor_areas_property ON floor_areas(property_id);
 ALTER TABLE floor_areas ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policy for floor_areas
-CREATE POLICY "Users see property floor areas" ON floor_areas
+-- SECURITY: Uses users table lookup instead of auth.jwt()/user_metadata
+CREATE POLICY "Users can view floor areas in their organization" ON floor_areas
   FOR SELECT USING (
     property_id IN (
       SELECT id FROM properties
-      WHERE organization_id = (SELECT organization_id FROM users WHERE id = auth.uid())
+      WHERE organization_id IN (SELECT organization_id FROM users WHERE id = auth.uid())
     )
   );
 
-CREATE POLICY "Users manage property floor areas" ON floor_areas
-  FOR ALL USING (
+CREATE POLICY "Users can create floor areas in their organization" ON floor_areas
+  FOR INSERT WITH CHECK (
     property_id IN (
       SELECT id FROM properties
-      WHERE organization_id = (SELECT organization_id FROM users WHERE id = auth.uid())
+      WHERE organization_id IN (SELECT organization_id FROM users WHERE id = auth.uid())
+    )
+  );
+
+CREATE POLICY "Users can update floor areas in their organization" ON floor_areas
+  FOR UPDATE USING (
+    property_id IN (
+      SELECT id FROM properties
+      WHERE organization_id IN (SELECT organization_id FROM users WHERE id = auth.uid())
+    )
+  )
+  WITH CHECK (
+    property_id IN (
+      SELECT id FROM properties
+      WHERE organization_id IN (SELECT organization_id FROM users WHERE id = auth.uid())
+    )
+  );
+
+CREATE POLICY "Users can delete floor areas in their organization" ON floor_areas
+  FOR DELETE USING (
+    property_id IN (
+      SELECT id FROM properties
+      WHERE organization_id IN (SELECT organization_id FROM users WHERE id = auth.uid())
     )
   );
