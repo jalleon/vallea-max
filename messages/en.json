@@ -406,7 +406,12 @@
       "frontageDepth": "Frontage / Depth",
       "unit": "Unit",
       "lot": "Lot",
-      "lotType": "Type"
+      "lotType": "Type",
+      "propertyPhoto": "Property Photo",
+      "viewPhotos": "View Photos",
+      "noPhotoAvailable": "No photo available",
+      "clickToAddPhoto": "Click to add a photo",
+      "floorNumber": "Floor"
     },
 
     "propertyTypes": {

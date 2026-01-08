@@ -406,7 +406,12 @@
       "frontageDepth": "Frontage / Profondeur",
       "unit": "Unité",
       "lot": "Lot",
-      "lotType": "Type"
+      "lotType": "Type",
+      "propertyPhoto": "Photo de la propriété",
+      "viewPhotos": "Voir les photos",
+      "noPhotoAvailable": "Aucune photo disponible",
+      "clickToAddPhoto": "Cliquez pour ajouter une photo",
+      "floorNumber": "Étage"
     },
 
     "propertyTypes": {

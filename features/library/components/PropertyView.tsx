@@ -54,7 +54,9 @@ import {
   Storage,
   Build,
   MeetingRoom,
-  WbSunny
+  WbSunny,
+  PhotoCamera,
+  ImageNotSupported
 } from '@mui/icons-material'
 import { Property, PropertyType } from '../types/property.types'
 
@@ -488,7 +490,7 @@ export function PropertyView({
       </DialogTitle>
       <DialogContent sx={{ p: 0, bgcolor: '#f8fafc' }}>
 
-        {/* Two-column layout: Price Banner + Google Maps */}
+        {/* Three-column layout: Price Banner + Property Photo + Google Maps */}
         <Box sx={{
           borderBottom: `1px solid ${theme.palette.divider}`,
           display: 'flex',
@@ -498,7 +500,7 @@ export function PropertyView({
           <Box
             sx={{
               p: 2.5,
-              flex: '0 0 50%',
+              flex: '0 0 35%',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
@@ -548,26 +550,142 @@ export function PropertyView({
             </Box>
           </Box>
 
+          {/* Middle Column - Property Photo */}
+          <Box
+            sx={{
+              flex: '0 0 30%',
+              height: 180,
+              py: 1.5,
+              px: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            {property.media_references && property.media_references.length > 0 ? (
+              <Box
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  position: 'relative',
+                  '&:hover .photo-overlay': {
+                    opacity: 1
+                  }
+                }}
+              >
+                <img
+                  src={property.media_references[0].thumbnail || property.media_references[0].reference}
+                  alt={t('propertyPhoto')}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
+                />
+                {property.media_references.length > 1 && (
+                  <Chip
+                    label={`+${property.media_references.length - 1}`}
+                    size="small"
+                    sx={{
+                      position: 'absolute',
+                      bottom: 8,
+                      right: 8,
+                      bgcolor: 'rgba(0,0,0,0.7)',
+                      color: 'white',
+                      fontWeight: 600,
+                      fontSize: '0.75rem'
+                    }}
+                  />
+                )}
+                <Box
+                  className="photo-overlay"
+                  sx={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    p: 1,
+                    background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
+                    opacity: 0,
+                    transition: 'opacity 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <Typography variant="caption" sx={{ color: 'white' }}>
+                    <PhotoCamera sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
+                    {t('viewPhotos')}
+                  </Typography>
+                </Box>
+              </Box>
+            ) : (
+              <Box
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: 2,
+                  border: `2px dashed ${theme.palette.divider}`,
+                  bgcolor: 'rgba(255,255,255,0.5)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 1,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  '&:hover': {
+                    borderColor: theme.palette.primary.main,
+                    bgcolor: 'rgba(255,255,255,0.8)'
+                  }
+                }}
+                onClick={onEdit}
+              >
+                <ImageNotSupported sx={{ fontSize: 40, color: theme.palette.text.disabled }} />
+                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', px: 2 }}>
+                  {t('noPhotoAvailable')}
+                </Typography>
+                <Typography variant="caption" color="primary" sx={{ fontWeight: 600 }}>
+                  {t('clickToAddPhoto')}
+                </Typography>
+              </Box>
+            )}
+          </Box>
+
           {/* Right Column - Google Maps */}
           <Box
             sx={{
-              flex: '0 0 50%',
-              height: 160,
+              flex: '0 0 35%',
+              height: 180,
+              py: 1.5,
               pr: 3,
               display: 'flex',
               alignItems: 'center',
               position: 'relative'
             }}
           >
-            <iframe
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              loading="lazy"
-              allowFullScreen
-              referrerPolicy="no-referrer-when-downgrade"
-              src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyDADvWmeRywpjT0oP_Fa8WrxV0Lnt-bEaw&q=${encodeURIComponent(`${property.adresse}, ${property.ville || ''}, ${property.code_postal || ''}`)}`}
-            />
+            <Box
+              sx={{
+                width: '100%',
+                height: '100%',
+                borderRadius: 2,
+                overflow: 'hidden',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+              }}
+            >
+              <iframe
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                loading="lazy"
+                allowFullScreen
+                referrerPolicy="no-referrer-when-downgrade"
+                src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyDADvWmeRywpjT0oP_Fa8WrxV0Lnt-bEaw&q=${encodeURIComponent(`${property.adresse}, ${property.ville || ''}, ${property.code_postal || ''}`)}`}
+              />
+            </Box>
           </Box>
         </Box>
 
