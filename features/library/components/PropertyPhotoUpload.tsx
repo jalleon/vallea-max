@@ -22,6 +22,7 @@ import {
 import { MediaReference } from '@/types/common.types'
 import { v4 as uuidv4 } from 'uuid'
 import { supabase } from '@/lib/supabase/client'
+import { compressImage } from '@/lib/utils/imageCompression'
 
 interface PropertyPhotoUploadProps {
   photos: MediaReference[]
@@ -71,11 +72,18 @@ export function PropertyPhotoUpload({
       const newPhotos: MediaReference[] = []
 
       for (let i = 0; i < filesToUpload.length; i++) {
-        const file = filesToUpload[i]
+        let file = filesToUpload[i]
 
         // Validate file type
         if (!file.type.startsWith('image/')) {
           continue
+        }
+
+        // Compress image if needed (to under 250KB)
+        try {
+          file = await compressImage(file)
+        } catch (compressError) {
+          console.warn('Image compression failed, using original:', compressError)
         }
 
         // Generate unique filename
