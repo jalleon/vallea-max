@@ -170,8 +170,8 @@ export default function InspectionPage() {
   }
 
   const getPropertyImage = (property: Property) => {
-    if (property.photos && property.photos.length > 0) {
-      return property.photos[0].reference || property.photos[0].thumbnail
+    if (property.media_references && property.media_references.length > 0) {
+      return property.media_references[0].reference || property.media_references[0].thumbnail
     }
     return null
   }
