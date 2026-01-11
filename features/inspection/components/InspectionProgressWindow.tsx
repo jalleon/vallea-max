@@ -1,14 +1,10 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Box,
   Paper,
   Typography,
-  LinearProgress,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
   Chip,
   IconButton,
   Collapse,
@@ -17,7 +13,8 @@ import {
   CardContent,
   CardActionArea,
   Grid,
-  Button
+  Button,
+  keyframes
 } from '@mui/material'
 import {
   ExpandMore,
@@ -30,21 +27,70 @@ import {
   Check,
   KeyboardArrowUp,
   KeyboardArrowDown,
-  Assessment,
   Countertops,
   Kitchen,
   Bathtub,
   Shower,
-  Chair,
   Bed,
   Weekend,
   MeetingRoom,
-  ArrowForward
+  ArrowForward,
+  PlayArrow
 } from '@mui/icons-material'
 import { useTranslations } from 'next-intl'
 import { useRouter, useParams } from 'next/navigation'
 import { Property } from '@/features/library/types/property.types'
 import { propertiesSupabaseService } from '@/features/library/_api/properties-supabase.service'
+
+// Premium animations
+const fadeInUp = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`
+
+const scaleIn = keyframes`
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+`
+
+const shimmer = keyframes`
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+`
+
+const pulse = keyframes`
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+`
+
+const float = keyframes`
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+`
 
 interface InspectionProgressWindowProps {
   property: Property
@@ -57,7 +103,8 @@ const CATEGORIES = [
     name: 'Pièces',
     description: 'Inspection pièce par pièce',
     icon: Layers,
-    color: '#2196F3',
+    color: '#3B82F6',
+    gradient: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
     weight: 0.25
   },
   {
@@ -65,7 +112,8 @@ const CATEGORIES = [
     name: 'Bâtiment',
     description: 'Structure et éléments fixes',
     icon: Home,
-    color: '#FF9800',
+    color: '#F59E0B',
+    gradient: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
     weight: 0.25
   },
   {
@@ -73,7 +121,8 @@ const CATEGORIES = [
     name: 'Garage',
     description: 'Garage et stationnement',
     icon: DirectionsCar,
-    color: '#4CAF50',
+    color: '#10B981',
+    gradient: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
     weight: 0.15
   },
   {
@@ -81,15 +130,17 @@ const CATEGORIES = [
     name: 'Mécanique',
     description: 'Systèmes mécaniques',
     icon: Settings,
-    color: '#9C27B0',
+    color: '#8B5CF6',
+    gradient: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
     weight: 0.15
   },
   {
     id: 'divers',
     name: 'Divers',
-    description: 'Éléments additionnels (optionnel)',
+    description: 'Éléments additionnels',
     icon: Build,
-    color: '#607D8B',
+    color: '#6B7280',
+    gradient: 'linear-gradient(135deg, #6B7280 0%, #4B5563 100%)',
     weight: 0.00
   },
   {
@@ -97,7 +148,8 @@ const CATEGORIES = [
     name: 'Extérieur',
     description: 'Aménagements extérieurs',
     icon: Landscape,
-    color: '#795548',
+    color: '#78716C',
+    gradient: 'linear-gradient(135deg, #78716C 0%, #57534E 100%)',
     weight: 0.20
   }
 ]
@@ -108,6 +160,11 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
   const params = useParams()
   const locale = params?.locale as string
   const [expandedCategories, setExpandedCategories] = useState<string[]>([])
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const toggleCategory = (categoryId: string) => {
     setExpandedCategories(prev =>
@@ -127,103 +184,42 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
     let bathrooms = 0
     let powderRooms = 0
     let totalRooms = 0
-
-    // Room types to EXCLUDE from total count
     const excludedRoomTypes = ['salle_bain', 'salle_eau', 'vestibule', 'solarium']
 
-    // Helper function to check if a room has been filled (has any data besides type)
     const isRoomCompleted = (roomData: any): boolean => {
       if (!roomData) return false
-
-      // Check if room has any fields filled besides 'type' and 'customValues'
       const filledFields = Object.entries(roomData).filter(([key, value]) => {
         if (key === 'type' || key === 'customValues' || key === 'completedAt') return false
-
-        // Check if value is not empty
-        if (Array.isArray(value)) {
-          return value.length > 0
-        }
+        if (Array.isArray(value)) return value.length > 0
         return value !== null && value !== undefined && value !== ''
       })
-
       return filledFields.length > 0
     }
 
     Object.entries(property.inspection_pieces.floors).forEach(([floorId, floor]) => {
-      // Exclude basement (sous_sol) from bedroom and total room counts
       const isBasement = floorId === 'sous_sol' || floor.name?.toLowerCase().includes('sous-sol')
-
       Object.entries(floor.rooms || {}).forEach(([_, roomData]: [string, any]) => {
-        // Only count rooms that have been completed/filled
         if (!isRoomCompleted(roomData)) return
-
         const roomType = roomData.type
-
-        // Count bedrooms (excluding basement)
-        if (roomType === 'chambre' && !isBasement) {
-          bedrooms++
-        }
-
-        // Count bathrooms (including basement)
-        if (roomType === 'salle_bain') {
-          bathrooms++
-        }
-
-        // Count powder rooms (including basement)
-        if (roomType === 'salle_eau') {
-          powderRooms++
-        }
-
-        // Count total rooms (excluding basement and excluded room types)
-        if (!isBasement && !excludedRoomTypes.includes(roomType)) {
-          totalRooms++
-        }
+        if (roomType === 'chambre' && !isBasement) bedrooms++
+        if (roomType === 'salle_bain') bathrooms++
+        if (roomType === 'salle_eau') powderRooms++
+        if (!isBasement && !excludedRoomTypes.includes(roomType)) totalRooms++
       })
     })
 
     return { bedrooms, bathrooms, powderRooms, totalRooms }
   }
 
-  // Update library record with room counts
-  const updateLibraryRecordCounts = async () => {
-    const counts = calculateRoomCounts()
-
-    try {
-      const updatedProperty = await propertiesSupabaseService.updateProperty(property.id, {
-        nombre_chambres: counts.bedrooms,
-        salle_bain: counts.bathrooms,
-        salle_eau: counts.powderRooms
-      })
-
-      // Notify parent component if callback provided
-      if (onPropertyUpdate) {
-        onPropertyUpdate(updatedProperty)
-      }
-
-      console.log('Library record updated:', counts)
-      return updatedProperty
-    } catch (error) {
-      console.error('Error updating library record:', error)
-      throw error
-    }
-  }
-
   const isCategoryCompleted = (categoryId: string): boolean => {
     switch (categoryId) {
-      case 'pieces':
-        return (property.inspection_pieces?.completedRooms || 0) >= 2
-      case 'batiment':
-        return !!property.inspection_batiment
-      case 'garage':
-        return !!property.inspection_garage
-      case 'mecanique':
-        return !!property.inspection_mecanique
-      case 'divers':
-        return !!property.inspection_divers
-      case 'exterieur':
-        return !!property.inspection_exterieur
-      default:
-        return false
+      case 'pieces': return (property.inspection_pieces?.completedRooms || 0) >= 2
+      case 'batiment': return !!property.inspection_batiment
+      case 'garage': return !!property.inspection_garage
+      case 'mecanique': return !!property.inspection_mecanique
+      case 'divers': return !!property.inspection_divers
+      case 'exterieur': return !!property.inspection_exterieur
+      default: return false
     }
   }
 
@@ -239,92 +235,37 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
 
   const overallProgress = calculateOverallProgress()
   const roomCounts = calculateRoomCounts()
-
-  // Helper to count completed categories
-  const getCompletedCategories = (): number => {
-    return CATEGORIES.filter(cat => isCategoryCompleted(cat.id)).length
-  }
-
-  const completedCount = getCompletedCategories()
-
-  const getMaterialIcon = (fieldName: string) => {
-    switch (fieldName.toLowerCase()) {
-      case 'plancher':
-      case 'flooring':
-        return <Layers sx={{ fontSize: 14, mr: 0.5 }} />
-      case 'armoires':
-      case 'cabinets':
-        return <Kitchen sx={{ fontSize: 14, mr: 0.5 }} />
-      case 'comptoirs':
-      case 'counters':
-        return <Countertops sx={{ fontSize: 14, mr: 0.5 }} />
-      case 'dosseret':
-      case 'backsplash':
-        return <Home sx={{ fontSize: 14, mr: 0.5 }} />
-      case 'murs':
-      case 'walls':
-        return <Weekend sx={{ fontSize: 14, mr: 0.5 }} />
-      case 'plafond':
-      case 'ceiling':
-        return <ExpandMore sx={{ fontSize: 14, mr: 0.5 }} />
-      default:
-        return null
-    }
-  }
+  const completedCount = CATEGORIES.filter(cat => isCategoryCompleted(cat.id)).length
 
   const getRoomTypeLabel = (roomType: string) => {
     const roomTranslations: Record<string, string> = {
-      'cuisine': 'Cuisine',
-      'salon': 'Salon',
-      'salle_a_manger': 'Salle à manger',
-      'chambre': 'Chambre',
-      'bureau': 'Bureau',
-      'salle_sejour': 'Salle de séjour',
-      'salle_bain': 'Salle de bain',
-      'salle_eau': 'Salle d\'eau',
-      'salle_familiale': 'Salle familiale',
-      'buanderie': 'Buanderie',
-      'rangement': 'Rangement',
-      'salle_mecanique': 'Salle mécanique',
-      'vestibule': 'Vestibule',
-      'solarium': 'Solarium'
+      'cuisine': 'Cuisine', 'salon': 'Salon', 'salle_a_manger': 'Salle à manger',
+      'chambre': 'Chambre', 'bureau': 'Bureau', 'salle_sejour': 'Salle de séjour',
+      'salle_bain': 'Salle de bain', 'salle_eau': "Salle d'eau",
+      'salle_familiale': 'Salle familiale', 'buanderie': 'Buanderie',
+      'rangement': 'Rangement', 'salle_mecanique': 'Salle mécanique',
+      'vestibule': 'Vestibule', 'solarium': 'Solarium'
     }
     return roomTranslations[roomType] || roomType
   }
 
   const getFieldLabel = (fieldName: string) => {
     const fieldTranslations: Record<string, string> = {
-      'plancher': 'Plancher',
-      'armoires': 'Armoires',
-      'comptoirs': 'Comptoirs',
-      'dosseret': 'Dosseret',
-      'murs': 'Murs',
-      'plafond': 'Plafond',
-      'grandeur': 'Grandeur',
-      'nombreAppareils': 'Appareils',
-      'notes': 'Notes'
+      'plancher': 'Plancher', 'armoires': 'Armoires', 'comptoirs': 'Comptoirs',
+      'dosseret': 'Dosseret', 'murs': 'Murs', 'plafond': 'Plafond',
+      'grandeur': 'Grandeur', 'nombreAppareils': 'Appareils', 'notes': 'Notes'
     }
     const label = fieldTranslations[fieldName] || fieldName
-    // Capitalize first letter
     return label.charAt(0).toUpperCase() + label.slice(1)
   }
 
-  // Helper to translate values that might be translation keys
   const translateValue = (value: any): string => {
-    // Ensure value is a string
-    if (typeof value !== 'string') {
-      return String(value)
-    }
-
-    // Check if value looks like a translation key (contains dots and starts with 'inspection')
+    if (typeof value !== 'string') return String(value)
     if (value.includes('.') && value.startsWith('inspection')) {
       try {
         const translated = t(value)
-        // If translation returns the same key, it means translation doesn't exist
         return translated !== value ? translated : value
-      } catch {
-        return value
-      }
+      } catch { return value }
     }
     return value
   }
@@ -338,7 +279,6 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
           const roomsData = Object.entries(floor.rooms || {})
           if (roomsData.length === 0) return null
 
-          // Count room types to add numbering for duplicates
           const roomTypeCounts: Record<string, number> = {}
           const roomTypeIndices: Record<string, number> = {}
 
@@ -347,31 +287,26 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
             roomTypeCounts[roomType] = (roomTypeCounts[roomType] || 0) + 1
           })
 
-          // Collect room types and their materials
-          const roomsWithMaterials: Array<{ roomType: string; materials: Array<{ icon: any; label: string; value: string }> }> = []
+          const roomsWithMaterials: Array<{ roomType: string; materials: Array<{ label: string; value: string }> }> = []
 
           roomsData.forEach(([roomId, roomData]: [string, any]) => {
             const customValues = roomData.customValues || {}
             const roomType = roomData.type
             let roomTypeLabel = getRoomTypeLabel(roomType)
 
-            // Add numbering if there are multiple rooms of the same type
             if (roomTypeCounts[roomType] > 1) {
               roomTypeIndices[roomType] = (roomTypeIndices[roomType] || 0) + 1
               roomTypeLabel = `${roomTypeLabel} #${roomTypeIndices[roomType]}`
             }
 
-            // Collect materials for this room
-            const materials: Array<{ icon: any; label: string; value: string }> = []
+            const materials: Array<{ label: string; value: string }> = []
             Object.entries(roomData).forEach(([key, value]) => {
               if (key === 'type' || key === 'completedAt' || key === 'customValues') return
 
               let displayValue: string
               if (Array.isArray(value) && value.length > 0) {
                 displayValue = value.map(v => {
-                  if (v === 'other' && customValues[key]) {
-                    return customValues[key]
-                  }
+                  if (v === 'other' && customValues[key]) return customValues[key]
                   return translateValue(v)
                 }).join(', ')
               } else if (!value || (Array.isArray(value) && value.length === 0)) {
@@ -380,11 +315,7 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
                 displayValue = translateValue(value)
               }
 
-              materials.push({
-                icon: getMaterialIcon(getFieldLabel(key)),
-                label: getFieldLabel(key),
-                value: displayValue
-              })
+              materials.push({ label: getFieldLabel(key), value: displayValue })
             })
 
             if (materials.length > 0) {
@@ -395,31 +326,49 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
           if (roomsWithMaterials.length === 0) return null
 
           return (
-            <Box key={floorId} sx={{ mb: 1.5 }}>
-              {/* Line 1: Icon + Floor name */}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-                <Layers sx={{ fontSize: 16, color: '#2196F3' }} />
-                <Typography variant="body2" fontWeight={700} sx={{ color: '#2196F3', fontSize: '13px' }}>
+            <Box key={floorId} sx={{ mb: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                <Box sx={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: '50%',
+                  bgcolor: '#3B82F6'
+                }} />
+                <Typography sx={{
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  color: '#1E293B',
+                  letterSpacing: '-0.01em'
+                }}>
                   {floor.name}
                 </Typography>
               </Box>
 
-              {/* Line 2+: Horizontal layout - room types as columns with materials underneath */}
               <Box sx={{ pl: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                 {roomsWithMaterials.map((room, idx) => (
-                  <Box key={idx} sx={{ minWidth: '120px' }}>
-                    {/* Room type header */}
-                    <Typography variant="caption" fontWeight={600} sx={{ fontSize: '12px', color: 'text.primary', display: 'block', mb: 0.5 }}>
+                  <Box key={idx} sx={{
+                    minWidth: '140px',
+                    p: 1.5,
+                    bgcolor: '#F8FAFC',
+                    borderRadius: '8px',
+                    border: '1px solid #E2E8F0'
+                  }}>
+                    <Typography sx={{
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      color: '#334155',
+                      mb: 0.5
+                    }}>
                       {room.roomType}
                     </Typography>
-                    {/* Materials list vertically */}
                     {room.materials.map((material, matIdx) => (
-                      <Box key={matIdx} sx={{ display: 'flex', alignItems: 'center', mb: 0.25 }}>
-                        {material.icon}
-                        <Typography variant="caption" sx={{ fontSize: '11px', color: 'text.secondary' }}>
-                          {material.label}: {material.value}
-                        </Typography>
-                      </Box>
+                      <Typography key={matIdx} sx={{
+                        fontSize: '11px',
+                        color: '#64748B',
+                        lineHeight: 1.4
+                      }}>
+                        {material.label}: {material.value}
+                      </Typography>
                     ))}
                   </Box>
                 ))}
@@ -431,665 +380,444 @@ export function InspectionProgressWindow({ property, onPropertyUpdate }: Inspect
     )
   }
 
-  const renderBatimentDetails = () => {
-    const batimentData = property.inspection_batiment
-    if (!batimentData) return null
-
-    const subcategories = [
-      { id: 'fondation_mur_toiture', name: t('inspection.batiment.fondationMurToiture') },
-      { id: 'portes_fenetres', name: t('inspection.batiment.portesFenetres') },
-      { id: 'corniche_lucarnes_cheminee', name: t('inspection.batiment.cornicheLucarnesCheminee') }
-    ]
-
-    return (
-      <Box sx={{ mt: 1 }}>
-        {/* Line 1: Category name */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-          <Home sx={{ fontSize: 16, color: '#FF9800' }} />
-          <Typography variant="body2" fontWeight={700} sx={{ color: '#FF9800', fontSize: '13px' }}>
-            {t('inspection.categories.batiment')}
-          </Typography>
-        </Box>
-
-        {/* Horizontal layout - subcategories as columns */}
-        <Box sx={{ pl: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-          {subcategories.map((subcat) => {
-            const subcatData = (batimentData as any)[subcat.id]
-            if (!subcatData) return null
-
-            // Collect fields for this subcategory
-            const fields: Array<{ label: string; value: string }> = []
-            Object.entries(subcatData).forEach(([key, value]) => {
-              if (key === 'notes' || key === 'customValues' || key === 'completedAt' || !value) return
-
-              let displayValue: string
-              if (Array.isArray(value)) {
-                displayValue = value.map(v => translateValue(v)).join(', ')
-              } else {
-                displayValue = translateValue(value)
-              }
-              const label = key.replace(/_/g, ' ')
-              const capitalizedLabel = label.charAt(0).toUpperCase() + label.slice(1)
-              fields.push({ label: capitalizedLabel, value: displayValue })
-            })
-
-            if (fields.length === 0) return null
-
-            return (
-              <Box key={subcat.id} sx={{ minWidth: '180px' }}>
-                {/* Subcategory name header */}
-                <Typography variant="caption" fontWeight={600} sx={{ fontSize: '12px', color: 'text.primary', display: 'block', mb: 0.5 }}>
-                  {subcat.name}
-                </Typography>
-                {/* Fields list vertically */}
-                {fields.map((field, idx) => (
-                  <Typography key={idx} variant="caption" sx={{ fontSize: '11px', color: 'text.secondary', display: 'block', mb: 0.25 }}>
-                    {field.label}: {field.value}
-                  </Typography>
-                ))}
-              </Box>
-            )
-          })}
-        </Box>
-      </Box>
-    )
-  }
-
-  const renderGarageDetails = () => {
-    const garageData = property.inspection_garage
-    if (!garageData) return null
-
-    // Collect fields
-    const fields: Array<{ label: string; value: string }> = []
-    Object.entries(garageData).forEach(([key, value]) => {
-      if (key === 'notes' || key === 'customValues' || key === 'dimensions' || key === 'completedAt' || !value) return
-
-      let displayValue = value
-      if (Array.isArray(value)) {
-        displayValue = value.map(v => translateValue(v)).join(', ')
-      } else {
-        displayValue = translateValue(displayValue)
-      }
-      const label = key.replace(/_/g, ' ')
-      const capitalizedLabel = label.charAt(0).toUpperCase() + label.slice(1)
-      fields.push({ label: capitalizedLabel, value: displayValue })
-    })
-
-    if (fields.length === 0) return null
-
-    return (
-      <Box sx={{ mt: 1 }}>
-        {/* Line 1: Category name */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-          <DirectionsCar sx={{ fontSize: 16, color: '#4CAF50' }} />
-          <Typography variant="body2" fontWeight={700} sx={{ color: '#4CAF50', fontSize: '13px' }}>
-            {t('inspection.categories.garage')}
-          </Typography>
-        </Box>
-        {/* Line 2: All fields inline on same line */}
-        <Box sx={{ pl: 2 }}>
-          <Typography variant="caption" sx={{ fontSize: '11px', color: 'text.secondary' }}>
-            {fields.map((field, idx) => (
-              <span key={idx}>
-                {field.label}: {field.value}
-                {idx < fields.length - 1 ? ', ' : ''}
-              </span>
-            ))}
-          </Typography>
-        </Box>
-      </Box>
-    )
-  }
-
-  const renderMecaniqueDetails = () => {
-    const mecaniqueData = property.inspection_mecanique
-    if (!mecaniqueData) return null
-
-    const subcategories = [
-      { id: 'chauffage_ventilation', name: t('inspection.mecanique.chauffageVentilation') },
-      { id: 'plomberie', name: t('inspection.mecanique.plomberie') },
-      { id: 'electricite', name: t('inspection.mecanique.electricite') }
-    ]
-
-    return (
-      <Box sx={{ mt: 1 }}>
-        {/* Line 1: Category name */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-          <Settings sx={{ fontSize: 16, color: '#9C27B0' }} />
-          <Typography variant="body2" fontWeight={700} sx={{ color: '#9C27B0', fontSize: '13px' }}>
-            {t('inspection.categories.mecanique')}
-          </Typography>
-        </Box>
-
-        {/* Horizontal layout - subcategories as columns */}
-        <Box sx={{ pl: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-          {subcategories.map((subcat) => {
-            const subcatData = (mecaniqueData as any)[subcat.id]
-            if (!subcatData) return null
-
-            // Collect fields for this subcategory
-            const fields: Array<{ label: string; value: string }> = []
-            Object.entries(subcatData).forEach(([key, value]) => {
-              if (key === 'notes' || key === 'customValues' || key === 'completedAt' || !value) return
-
-              let displayValue: string
-              if (Array.isArray(value)) {
-                displayValue = value.map(v => translateValue(v)).join(', ')
-              } else {
-                displayValue = translateValue(value)
-              }
-              const label = key.replace(/_/g, ' ')
-              const capitalizedLabel = label.charAt(0).toUpperCase() + label.slice(1)
-              fields.push({ label: capitalizedLabel, value: displayValue })
-            })
-
-            if (fields.length === 0) return null
-
-            return (
-              <Box key={subcat.id} sx={{ minWidth: '180px' }}>
-                {/* Subcategory name header */}
-                <Typography variant="caption" fontWeight={600} sx={{ fontSize: '12px', color: 'text.primary', display: 'block', mb: 0.5 }}>
-                  {subcat.name}
-                </Typography>
-                {/* Fields list vertically */}
-                {fields.map((field, idx) => (
-                  <Typography key={idx} variant="caption" sx={{ fontSize: '11px', color: 'text.secondary', display: 'block', mb: 0.25 }}>
-                    {field.label}: {field.value}
-                  </Typography>
-                ))}
-              </Box>
-            )
-          })}
-        </Box>
-      </Box>
-    )
-  }
-
-  const renderExterieurDetails = () => {
-    const exterieurData = property.inspection_exterieur
-    if (!exterieurData) return null
-
-    const subcategories = [
-      { id: 'amenagement_installations_entree', name: t('inspection.exterieur.amenagementInstallationsEntree') },
-      { id: 'piscine_spa', name: t('inspection.exterieur.piscineSpa') }
-    ]
-
-    return (
-      <Box sx={{ mt: 1 }}>
-        {/* Line 1: Category name */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-          <Landscape sx={{ fontSize: 16, color: '#795548' }} />
-          <Typography variant="body2" fontWeight={700} sx={{ color: '#795548', fontSize: '13px' }}>
-            {t('inspection.categories.exterieur')}
-          </Typography>
-        </Box>
-
-        {/* Horizontal layout - subcategories as columns */}
-        <Box sx={{ pl: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-          {subcategories.map((subcat) => {
-            const subcatData = (exterieurData as any)[subcat.id]
-            if (!subcatData) return null
-
-            // Collect fields for this subcategory
-            const fields: Array<{ label: string; value: string }> = []
-            Object.entries(subcatData).forEach(([key, value]) => {
-              if (key === 'notes' || key === 'customValues' || key === 'dimensions' || key === 'lengths' || key === 'completedAt' || !value) return
-
-              let displayValue: string
-              if (Array.isArray(value)) {
-                displayValue = value.join(', ')
-              } else {
-                displayValue = String(value)
-              }
-              fields.push({ label: key.replace(/_/g, ' '), value: displayValue })
-            })
-
-            if (fields.length === 0) return null
-
-            return (
-              <Box key={subcat.id} sx={{ minWidth: '180px' }}>
-                {/* Subcategory name header */}
-                <Typography variant="caption" fontWeight={600} sx={{ fontSize: '12px', color: 'text.primary', display: 'block', mb: 0.5 }}>
-                  {subcat.name}
-                </Typography>
-                {/* Fields list vertically */}
-                {fields.map((field, idx) => (
-                  <Typography key={idx} variant="caption" sx={{ fontSize: '11px', color: 'text.secondary', display: 'block', mb: 0.25 }}>
-                    {field.label}: {field.value}
-                  </Typography>
-                ))}
-              </Box>
-            )
-          })}
-        </Box>
-      </Box>
-    )
-  }
-
-  const renderDiversDetails = () => {
-    const diversData = property.inspection_divers
-    if (!diversData) return null
-
-    const subcategories = [
-      { id: 'services', name: t('inspection.divers.services') },
-      { id: 'voisinage', name: t('inspection.divers.voisinage') },
-      { id: 'foyer', name: t('inspection.divers.foyer') },
-      { id: 'divers', name: t('inspection.divers.diversSub') }
-    ]
-
-    return (
-      <Box sx={{ mt: 1 }}>
-        {/* Line 1: Category name */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-          <Build sx={{ fontSize: 16, color: '#607D8B' }} />
-          <Typography variant="body2" fontWeight={700} sx={{ color: '#607D8B', fontSize: '13px' }}>
-            {t('inspection.categories.divers')}
-          </Typography>
-        </Box>
-
-        {/* Horizontal layout - subcategories as columns */}
-        <Box sx={{ pl: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-          {subcategories.map((subcat) => {
-            const subcatData = (diversData as any)[subcat.id]
-            if (!subcatData) return null
-
-            // Collect fields for this subcategory
-            const fields: Array<{ label: string; value: string }> = []
-            Object.entries(subcatData).forEach(([key, value]) => {
-              if (key === 'notes' || key === 'customValues' || key === 'completedAt' || !value) return
-
-              let displayValue: string
-              if (Array.isArray(value)) {
-                displayValue = value.map(v => translateValue(v)).join(', ')
-              } else {
-                displayValue = translateValue(value)
-              }
-              const label = key.replace(/_/g, ' ')
-              const capitalizedLabel = label.charAt(0).toUpperCase() + label.slice(1)
-              fields.push({ label: capitalizedLabel, value: displayValue })
-            })
-
-            if (fields.length === 0) return null
-
-            return (
-              <Box key={subcat.id} sx={{ minWidth: '180px' }}>
-                {/* Subcategory name header */}
-                <Typography variant="caption" fontWeight={600} sx={{ fontSize: '12px', color: 'text.primary', display: 'block', mb: 0.5 }}>
-                  {subcat.name}
-                </Typography>
-                {/* Fields list vertically */}
-                {fields.map((field, idx) => (
-                  <Typography key={idx} variant="caption" sx={{ fontSize: '11px', color: 'text.secondary', display: 'block', mb: 0.25 }}>
-                    {field.label}: {field.value}
-                  </Typography>
-                ))}
-              </Box>
-            )
-          })}
-        </Box>
-      </Box>
-    )
-  }
-
   const renderCategoryDetails = (categoryId: string) => {
     switch (categoryId) {
-      case 'pieces':
-        return renderPiecesDetails()
-      case 'batiment':
-        return renderBatimentDetails()
-      case 'garage':
-        return renderGarageDetails()
-      case 'mecanique':
-        return renderMecaniqueDetails()
-      case 'exterieur':
-        return renderExterieurDetails()
-      case 'divers':
-        return renderDiversDetails()
-      default:
-        return null
+      case 'pieces': return renderPiecesDetails()
+      default: return null
     }
   }
 
   return (
-    <Paper elevation={0} sx={{ borderRadius: '16px', overflow: 'hidden', mb: 3, border: '1px solid', borderColor: 'divider' }}>
-      {/* Layered & Depth Header - Waves + Topology + Floating Orbs */}
+    <Paper
+      elevation={0}
+      sx={{
+        borderRadius: '24px',
+        overflow: 'hidden',
+        mb: 4,
+        border: '1px solid rgba(0,0,0,0.06)',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
+        opacity: mounted ? 1 : 0,
+        animation: mounted ? `${fadeInUp} 0.6s ease-out` : 'none'
+      }}
+    >
+      {/* Premium Header */}
       <Box
         sx={{
           position: 'relative',
-          p: 3,
+          p: { xs: 3, md: 4 },
           color: 'white',
           overflow: 'hidden',
-          // Base: Ocean blue gradient
-          background: 'linear-gradient(135deg, #0EA5E9 0%, #2563EB 50%, #1E40AF 100%)'
+          background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #334155 100%)',
+          minHeight: 200
         }}
       >
-        {/* Layer 1: Layered waves - Stacked semi-transparent curves (stronger) */}
+        {/* Animated gradient mesh background */}
         <Box
           sx={{
             position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
+            inset: 0,
             background: `
-              radial-gradient(ellipse 150% 80% at 50% 120%, rgba(14, 165, 233, 0.5) 0%, transparent 50%),
-              radial-gradient(ellipse 140% 70% at 50% 110%, rgba(37, 99, 235, 0.4) 0%, transparent 50%),
-              radial-gradient(ellipse 130% 60% at 50% 100%, rgba(30, 64, 175, 0.35) 0%, transparent 50%)
+              radial-gradient(ellipse 80% 50% at 20% 40%, rgba(59, 130, 246, 0.3) 0%, transparent 50%),
+              radial-gradient(ellipse 60% 40% at 80% 60%, rgba(139, 92, 246, 0.25) 0%, transparent 50%),
+              radial-gradient(ellipse 50% 30% at 50% 80%, rgba(16, 185, 129, 0.2) 0%, transparent 50%)
             `,
-            pointerEvents: 'none',
+            animation: `${pulse} 8s ease-in-out infinite`,
             zIndex: 1
           }}
         />
 
-        {/* Layer 2: 3D Topology map - Contour lines suggesting elevation (more visible) */}
+        {/* Grid pattern overlay */}
         <Box
           sx={{
             position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
+            inset: 0,
             backgroundImage: `
-              repeating-radial-gradient(circle at 30% 40%, transparent 0px, transparent 30px, rgba(255,255,255,0.12) 30px, rgba(255,255,255,0.12) 31px),
-              repeating-radial-gradient(circle at 70% 60%, transparent 0px, transparent 40px, rgba(255,255,255,0.15) 40px, rgba(255,255,255,0.15) 41px)
+              linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)
             `,
-            pointerEvents: 'none',
+            backgroundSize: '32px 32px',
             zIndex: 2
           }}
         />
 
-        {/* Layer 3: Floating particles/orbs - Soft bokeh-like elements */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: `
-              radial-gradient(circle 60px at 15% 25%, rgba(255, 255, 255, 0.15), transparent),
-              radial-gradient(circle 80px at 85% 70%, rgba(255, 255, 255, 0.12), transparent),
-              radial-gradient(circle 50px at 50% 15%, rgba(255, 255, 255, 0.1), transparent),
-              radial-gradient(circle 70px at 75% 85%, rgba(255, 255, 255, 0.08), transparent),
-              radial-gradient(circle 40px at 25% 75%, rgba(255, 255, 255, 0.1), transparent)
-            `,
-            pointerEvents: 'none',
-            zIndex: 3
-          }}
-        />
-        <Box sx={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', gap: 3, flexWrap: { xs: 'wrap', md: 'nowrap' } }}>
-          {/* Large Circular Progress */}
-          <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+        {/* Content */}
+        <Box sx={{
+          position: 'relative',
+          zIndex: 10,
+          display: 'flex',
+          alignItems: 'center',
+          gap: { xs: 3, md: 5 },
+          flexWrap: { xs: 'wrap', md: 'nowrap' }
+        }}>
+          {/* Circular Progress - Enhanced */}
+          <Box
+            sx={{
+              position: 'relative',
+              display: 'inline-flex',
+              animation: mounted ? `${scaleIn} 0.8s ease-out 0.2s both` : 'none'
+            }}
+          >
+            {/* Glow effect */}
+            <Box
+              sx={{
+                position: 'absolute',
+                inset: -10,
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(59, 130, 246, 0.4) 0%, transparent 70%)',
+                filter: 'blur(20px)',
+                animation: `${pulse} 3s ease-in-out infinite`
+              }}
+            />
+
+            {/* Background track */}
+            <CircularProgress
+              variant="determinate"
+              value={100}
+              size={140}
+              thickness={4}
+              sx={{
+                color: 'rgba(255,255,255,0.1)',
+                position: 'absolute'
+              }}
+            />
+
+            {/* Progress indicator */}
             <CircularProgress
               variant="determinate"
               value={overallProgress}
-              size={120}
-              thickness={6}
+              size={140}
+              thickness={4}
               sx={{
-                background: 'rgba(255, 255, 255, 0.2)',
-                borderRadius: '50%',
                 '& .MuiCircularProgress-circle': {
                   strokeLinecap: 'round',
-                  stroke: 'url(#progressGradient)'
+                  stroke: 'url(#progressGradientPremium)',
+                  filter: 'drop-shadow(0 0 8px rgba(59, 130, 246, 0.5))'
                 }
               }}
             />
             <svg width={0} height={0}>
               <defs>
-                <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#FCD34D" />
-                  <stop offset="50%" stopColor="#F59E0B" />
-                  <stop offset="100%" stopColor="#EF4444" />
+                <linearGradient id="progressGradientPremium" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#60A5FA" />
+                  <stop offset="50%" stopColor="#A78BFA" />
+                  <stop offset="100%" stopColor="#34D399" />
                 </linearGradient>
               </defs>
             </svg>
+
             <Box
               sx={{
                 position: 'absolute',
-                top: 0,
-                left: 0,
-                bottom: 0,
-                right: 0,
+                inset: 0,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}
             >
-              <Typography variant="h3" fontWeight={700} color="white">
-                {overallProgress}%
+              <Typography
+                sx={{
+                  fontSize: '42px',
+                  fontWeight: 800,
+                  color: 'white',
+                  letterSpacing: '-0.02em',
+                  lineHeight: 1
+                }}
+              >
+                {overallProgress}
               </Typography>
-              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.9)', fontWeight: 500 }}>
-                Complété
+              <Typography sx={{
+                fontSize: '14px',
+                fontWeight: 500,
+                color: 'rgba(255,255,255,0.7)',
+                letterSpacing: '0.05em',
+                textTransform: 'uppercase',
+                mt: 0.5
+              }}>
+                pour cent
               </Typography>
             </Box>
           </Box>
 
-          {/* Title and Glass-morphism Room Count Chips */}
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="h4" fontWeight={800} gutterBottom sx={{ color: '#FCD34D' }}>
+          {/* Title and Stats */}
+          <Box sx={{
+            flex: 1,
+            animation: mounted ? `${fadeInUp} 0.6s ease-out 0.3s both` : 'none'
+          }}>
+            <Typography
+              sx={{
+                fontSize: { xs: '24px', md: '32px' },
+                fontWeight: 800,
+                color: 'white',
+                letterSpacing: '-0.02em',
+                mb: 1,
+                lineHeight: 1.2
+              }}
+            >
               {t('inspection.progress.title')}
             </Typography>
-            <Typography variant="body1" sx={{ color: 'white', mb: 2 }}>
-              {completedCount} / {CATEGORIES.length} catégories complétées
+
+            <Typography sx={{
+              fontSize: '15px',
+              color: 'rgba(255,255,255,0.6)',
+              mb: 3
+            }}>
+              {completedCount} sur {CATEGORIES.length} catégories complétées
             </Typography>
+
+            {/* Room count chips */}
             <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
-              {/* Glass-morphism chips with backdrop blur and hover scale */}
-              <Chip
-                icon={<Bed sx={{ color: '#FCD34D !important' }} />}
-                label={`${roomCounts.bedrooms} ${t('inspection.rooms.bedrooms')}`}
-                sx={{
-                  bgcolor: 'rgba(255,255,255,0.2)',
-                  color: 'white',
-                  backdropFilter: 'blur(10px)',
-                  fontWeight: 600,
-                  transition: 'all 0.2s ease',
-                  '&:hover': {
-                    transform: 'scale(1.05)',
-                    bgcolor: 'rgba(255,255,255,0.3)'
-                  }
-                }}
-              />
-              <Chip
-                icon={<Bathtub sx={{ color: '#8B5CF6 !important' }} />}
-                label={`${roomCounts.bathrooms} ${t('inspection.rooms.bathrooms')}`}
-                sx={{
-                  bgcolor: 'rgba(255,255,255,0.2)',
-                  color: 'white',
-                  backdropFilter: 'blur(10px)',
-                  fontWeight: 600,
-                  transition: 'all 0.2s ease',
-                  '&:hover': {
-                    transform: 'scale(1.05)',
-                    bgcolor: 'rgba(255,255,255,0.3)'
-                  }
-                }}
-              />
-              <Chip
-                icon={<Shower sx={{ color: '#34D399 !important' }} />}
-                label={`${roomCounts.powderRooms} ${t('inspection.rooms.powderRooms')}`}
-                sx={{
-                  bgcolor: 'rgba(255,255,255,0.2)',
-                  color: 'white',
-                  backdropFilter: 'blur(10px)',
-                  fontWeight: 600,
-                  transition: 'all 0.2s ease',
-                  '&:hover': {
-                    transform: 'scale(1.05)',
-                    bgcolor: 'rgba(255,255,255,0.3)'
-                  }
-                }}
-              />
-              <Chip
-                icon={<MeetingRoom sx={{ color: '#F59E0B !important' }} />}
-                label={`${roomCounts.totalRooms} ${t('inspection.rooms.totalRooms')}`}
-                sx={{
-                  bgcolor: 'rgba(255,255,255,0.2)',
-                  color: 'white',
-                  backdropFilter: 'blur(10px)',
-                  fontWeight: 600,
-                  transition: 'all 0.2s ease',
-                  '&:hover': {
-                    transform: 'scale(1.05)',
-                    bgcolor: 'rgba(255,255,255,0.3)'
-                  }
-                }}
-              />
+              {[
+                { icon: Bed, count: roomCounts.bedrooms, label: t('inspection.rooms.bedrooms'), color: '#3B82F6' },
+                { icon: Bathtub, count: roomCounts.bathrooms, label: t('inspection.rooms.bathrooms'), color: '#8B5CF6' },
+                { icon: Shower, count: roomCounts.powderRooms, label: t('inspection.rooms.powderRooms'), color: '#10B981' },
+                { icon: MeetingRoom, count: roomCounts.totalRooms, label: t('inspection.rooms.totalRooms'), color: '#F59E0B' }
+              ].map((item, idx) => (
+                <Box
+                  key={idx}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    px: 2,
+                    py: 1,
+                    bgcolor: 'rgba(255,255,255,0.08)',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    backdropFilter: 'blur(10px)',
+                    transition: 'all 0.2s ease',
+                    cursor: 'default',
+                    '&:hover': {
+                      bgcolor: 'rgba(255,255,255,0.12)',
+                      transform: 'translateY(-2px)'
+                    }
+                  }}
+                >
+                  <item.icon sx={{ fontSize: 18, color: item.color }} />
+                  <Typography sx={{
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    color: 'white'
+                  }}>
+                    {item.count}
+                  </Typography>
+                  <Typography sx={{
+                    fontSize: '13px',
+                    color: 'rgba(255,255,255,0.6)'
+                  }}>
+                    {item.label}
+                  </Typography>
+                </Box>
+              ))}
             </Box>
           </Box>
         </Box>
       </Box>
 
       {/* Section Title */}
-      <Box sx={{ px: 2, pt: 3, pb: 1 }}>
-        <Typography variant="h5" fontWeight={700} sx={{ color: 'text.primary' }}>
+      <Box sx={{ px: 3, pt: 4, pb: 2 }}>
+        <Typography sx={{
+          fontSize: '20px',
+          fontWeight: 700,
+          color: '#0F172A',
+          letterSpacing: '-0.01em'
+        }}>
           Catégories d'inspection
+        </Typography>
+        <Typography sx={{
+          fontSize: '14px',
+          color: '#64748B',
+          mt: 0.5
+        }}>
+          Sélectionnez une catégorie pour commencer ou continuer l'inspection
         </Typography>
       </Box>
 
-      {/* Premium Category Cards - Grid Layout */}
-      <Box sx={{ px: 2, pb: 2 }}>
+      {/* Category Cards Grid */}
+      <Box sx={{ px: 3, pb: 3 }}>
         <Grid container spacing={2}>
-          {CATEGORIES.map((category) => {
+          {CATEGORIES.map((category, index) => {
             const Icon = category.icon
             const isCompleted = isCategoryCompleted(category.id)
             const isExpanded = expandedCategories.includes(category.id)
 
             return (
-              <Grid item xs={12} sm={6} key={category.id}>
+              <Grid item xs={12} sm={6} md={4} key={category.id}>
                 <Card
                   sx={{
                     borderRadius: '16px',
                     position: 'relative',
-                    overflow: 'hidden',
+                    overflow: 'visible',
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    border: `2px solid ${isExpanded ? category.color : isCompleted ? category.color : 'transparent'}`,
-                    bgcolor: isCompleted ? `${category.color}15` : 'white',
-                    boxShadow: isExpanded ? `0 8px 24px ${category.color}40` : isCompleted ? `0 4px 12px ${category.color}25` : 1,
+                    border: '1px solid',
+                    borderColor: isCompleted ? category.color : 'rgba(0,0,0,0.08)',
+                    bgcolor: 'white',
+                    boxShadow: isCompleted
+                      ? `0 4px 20px ${category.color}25`
+                      : '0 2px 8px rgba(0,0,0,0.04)',
+                    animation: mounted ? `${fadeInUp} 0.5s ease-out ${0.1 + index * 0.08}s both` : 'none',
                     '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: `0 12px 32px ${category.color}30`
+                      transform: 'translateY(-6px)',
+                      boxShadow: `0 12px 32px ${category.color}20`,
+                      borderColor: category.color
                     }
                   }}
                 >
-                  {/* Top Color Bar */}
-                  <Box
-                    sx={{
-                      height: '6px',
-                      background: `linear-gradient(90deg, ${category.color} 0%, ${category.color}80 100%)`,
-                      borderTopLeftRadius: '16px',
-                      borderTopRightRadius: '16px'
-                    }}
-                  />
+                  {/* Completion badge */}
+                  {isCompleted && (
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: -8,
+                        right: -8,
+                        width: 32,
+                        height: 32,
+                        borderRadius: '50%',
+                        background: category.gradient,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: `0 4px 12px ${category.color}50`,
+                        zIndex: 10,
+                        animation: `${scaleIn} 0.3s ease-out`
+                      }}
+                    >
+                      <Check sx={{ fontSize: 18, color: 'white' }} />
+                    </Box>
+                  )}
 
                   <CardActionArea
                     onClick={() => router.push(`/${locale}/inspection/${property.id}/${category.id}`)}
-                    sx={{
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
+                    sx={{ p: 2.5 }}
                   >
-                    <CardContent sx={{ p: 2, py: 2, width: '100%', textAlign: 'center', position: 'relative' }}>
-                      {/* Completion badge - positioned top right with category color */}
-                      {isCompleted && (
-                        <Box
-                          sx={{
-                            position: 'absolute',
-                            top: 8,
-                            right: 8,
-                            width: 32,
-                            height: 32,
-                            borderRadius: '50%',
-                            bgcolor: category.color,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            boxShadow: `0 2px 8px ${category.color}60`
-                          }}
-                        >
-                          <Check sx={{ fontSize: 20, color: 'white', fontWeight: 'bold' }} />
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                      {/* Icon container */}
+                      <Box
+                        sx={{
+                          width: 52,
+                          height: 52,
+                          borderRadius: '14px',
+                          background: isCompleted ? category.gradient : `${category.color}10`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'all 0.3s ease',
+                          flexShrink: 0
+                        }}
+                      >
+                        <Icon sx={{
+                          fontSize: 26,
+                          color: isCompleted ? 'white' : category.color
+                        }} />
+                      </Box>
+
+                      {/* Text content */}
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography sx={{
+                          fontSize: '16px',
+                          fontWeight: 700,
+                          color: '#0F172A',
+                          letterSpacing: '-0.01em',
+                          mb: 0.25
+                        }}>
+                          {category.name}
+                        </Typography>
+                        <Typography sx={{
+                          fontSize: '13px',
+                          color: '#64748B',
+                          lineHeight: 1.4
+                        }}>
+                          {category.description}
+                        </Typography>
+
+                        {/* Status indicator */}
+                        <Box sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          mt: 1.5
+                        }}>
+                          {isCompleted ? (
+                            <Chip
+                              label="Complété"
+                              size="small"
+                              sx={{
+                                height: 24,
+                                bgcolor: `${category.color}15`,
+                                color: category.color,
+                                fontWeight: 600,
+                                fontSize: '11px',
+                                '& .MuiChip-label': { px: 1.5 }
+                              }}
+                            />
+                          ) : (
+                            <Box sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 0.5,
+                              color: '#94A3B8',
+                              fontSize: '12px'
+                            }}>
+                              <PlayArrow sx={{ fontSize: 14 }} />
+                              Commencer
+                            </Box>
+                          )}
                         </Box>
-                      )}
+                      </Box>
 
-                      {/* Large Icon - no background box */}
-                      <Icon sx={{ fontSize: 48, color: category.color, mb: 1 }} />
-
-                      <Typography variant="h6" fontWeight={700} sx={{ mb: 0.25, fontSize: '1rem' }}>
-                        {category.name}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: '0.75rem' }}>
-                        {category.description}
-                      </Typography>
-                    </CardContent>
+                      {/* Arrow indicator */}
+                      <ArrowForward sx={{
+                        fontSize: 20,
+                        color: '#CBD5E1',
+                        transition: 'all 0.2s ease',
+                        '.MuiCardActionArea-root:hover &': {
+                          color: category.color,
+                          transform: 'translateX(4px)'
+                        }
+                      }} />
+                    </Box>
                   </CardActionArea>
 
-                  {/* Expand/Collapse Arrow */}
-                  {renderCategoryDetails(category.id) && (
-                    <Box sx={{ position: 'absolute', bottom: 8, right: 8, zIndex: 10 }}>
-                      <IconButton
+                  {/* Details toggle (for pieces category only) */}
+                  {category.id === 'pieces' && renderCategoryDetails(category.id) && (
+                    <Box sx={{
+                      borderTop: '1px solid rgba(0,0,0,0.06)',
+                      px: 2.5,
+                      py: 1
+                    }}>
+                      <Button
                         size="small"
                         onClick={(e) => {
                           e.stopPropagation()
                           toggleCategory(category.id)
                         }}
+                        endIcon={isExpanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
                         sx={{
-                          color: category.color,
-                          bgcolor: `${category.color}15`,
-                          '&:hover': { bgcolor: `${category.color}25` },
-                          borderRadius: '8px'
+                          color: '#64748B',
+                          fontSize: '12px',
+                          fontWeight: 500,
+                          textTransform: 'none',
+                          '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' }
                         }}
                       >
-                        {isExpanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-                      </IconButton>
+                        {isExpanded ? 'Masquer les détails' : 'Voir les détails'}
+                      </Button>
                     </Box>
                   )}
                 </Card>
 
-                {/* Collapsible detail panel */}
-                <Collapse in={isExpanded}>
-                  <Box sx={{ mt: 2 }}>
+                {/* Collapsible details panel */}
+                <Collapse in={isExpanded && category.id === 'pieces'}>
+                  <Box sx={{ mt: 2, ml: 1 }}>
                     <Card
                       sx={{
-                        borderRadius: '16px',
-                        borderLeft: `4px solid ${category.color}`,
-                        bgcolor: `${category.color}08`
+                        borderRadius: '12px',
+                        borderLeft: `3px solid ${category.color}`,
+                        bgcolor: '#FAFBFC'
                       }}
                     >
                       <CardContent sx={{ p: 2 }}>
-                        {renderCategoryDetails(category.id) || (
-                          <Box sx={{ py: 3, textAlign: 'center' }}>
-                            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                              Aucune donnée disponible
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              Cliquez sur le bouton ci-dessous pour commencer l'inspection de cette catégorie
-                            </Typography>
-                          </Box>
-                        )}
-
-                        {/* Navigate button - shows for all categories when expanded */}
-                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-                          <Button
-                            variant="contained"
-                            endIcon={<ArrowForward />}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              router.push(`/${locale}/inspection/${property.id}/${category.id}`)
-                            }}
-                            sx={{
-                              bgcolor: category.color,
-                              '&:hover': { bgcolor: category.color, filter: 'brightness(0.9)' },
-                              borderRadius: '12px',
-                              textTransform: 'none',
-                              fontWeight: 600
-                            }}
-                          >
-                            {isCompleted ? `Modifier ${category.name}` : `Commencer ${category.name}`}
-                          </Button>
-                        </Box>
+                        {renderCategoryDetails(category.id)}
                       </CardContent>
                     </Card>
                   </Box>
