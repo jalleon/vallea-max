@@ -25,8 +25,20 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  keyframes
 } from '@mui/material'
+
+// Premium animations
+const fadeInUp = keyframes`
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+`
+
+const scaleIn = keyframes`
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+`
 import {
   Home,
   NavigateNext,
@@ -439,84 +451,111 @@ export default function BatimentPage() {
 
         {!selectedSubcategory ? (
           <>
-            {/* Subcategory Cards - Enhanced Premium Style */}
-            <Grid container spacing={3}>
-              {SUBCATEGORIES.map((subcategory) => {
-                const Icon = subcategory.icon
-                const isCompleted = isSubcategoryCompleted(subcategory.id)
+            {/* Subcategory Cards - Premium Style */}
+            <Box sx={{ animation: `${fadeInUp} 0.5s ease-out` }}>
+              <Box sx={{ mb: 3 }}>
+                <Typography sx={{ fontSize: '20px', fontWeight: 700, color: '#0F172A', letterSpacing: '-0.01em' }}>
+                  Sections d'inspection
+                </Typography>
+                <Typography sx={{ fontSize: '14px', color: '#64748B', mt: 0.5 }}>
+                  Sélectionnez une section pour commencer l'inspection
+                </Typography>
+              </Box>
+              <Grid container spacing={2}>
+                {SUBCATEGORIES.map((subcategory, index) => {
+                  const Icon = subcategory.icon
+                  const isCompleted = isSubcategoryCompleted(subcategory.id)
+                  const categoryColor = '#F59E0B'
 
-                return (
-                  <Grid item xs={12} sm={6} md={4} key={subcategory.id}>
-                    <Card
-                      elevation={0}
-                      sx={{
-                        borderRadius: '16px',
-                        position: 'relative',
-                        overflow: 'hidden',
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        border: `2px solid ${isCompleted ? '#FF9800' : 'transparent'}`,
-                        bgcolor: isCompleted ? '#FF980015' : 'white',
-                        boxShadow: isCompleted ? '0 4px 12px #FF980025' : 1,
-                        '&:hover': {
-                          transform: 'translateY(-4px)',
-                          boxShadow: '0 12px 32px #FF980030'
-                        }
-                      }}
-                    >
-                      {/* Top Color Bar */}
-                      <Box
+                  return (
+                    <Grid item xs={12} sm={6} md={4} key={subcategory.id}>
+                      <Card
+                        elevation={0}
                         sx={{
-                          height: '6px',
-                          background: 'linear-gradient(90deg, #FF9800 0%, #F57C00 100%)',
-                          borderTopLeftRadius: '16px',
-                          borderTopRightRadius: '16px'
+                          borderRadius: '16px',
+                          position: 'relative',
+                          overflow: 'visible',
+                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                          border: '2px solid',
+                          borderColor: isCompleted ? categoryColor : 'rgba(0,0,0,0.06)',
+                          bgcolor: isCompleted ? `${categoryColor}10` : 'white',
+                          boxShadow: isCompleted ? `0 4px 20px ${categoryColor}25` : '0 2px 8px rgba(0,0,0,0.04)',
+                          animation: `${scaleIn} 0.3s ease-out ${index * 0.08}s both`,
+                          '&:hover': {
+                            transform: 'translateY(-6px)',
+                            boxShadow: `0 12px 32px ${categoryColor}20`,
+                            borderColor: categoryColor
+                          }
                         }}
-                      />
+                      >
+                        {/* Completion badge */}
+                        {isCompleted && (
+                          <Box
+                            sx={{
+                              position: 'absolute',
+                              top: -8,
+                              right: -8,
+                              width: 28,
+                              height: 28,
+                              borderRadius: '50%',
+                              background: `linear-gradient(135deg, ${categoryColor} 0%, #D97706 100%)`,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              boxShadow: `0 4px 12px ${categoryColor}50`,
+                              zIndex: 10
+                            }}
+                          >
+                            <CheckCircle sx={{ fontSize: 16, color: 'white' }} />
+                          </Box>
+                        )}
 
-                      <CardActionArea onClick={() => setSelectedSubcategory(subcategory.id)} sx={{ height: '100%' }}>
-                        <CardContent sx={{ p: 3 }}>
-                          {/* Icon box + Completion badge */}
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                        <CardActionArea onClick={() => setSelectedSubcategory(subcategory.id)} sx={{ p: 2.5 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                            {/* Icon container */}
                             <Box
                               sx={{
-                                width: 56,
-                                height: 56,
-                                borderRadius: '12px',
+                                width: 52,
+                                height: 52,
+                                borderRadius: '14px',
+                                background: isCompleted
+                                  ? `linear-gradient(135deg, ${categoryColor} 0%, #D97706 100%)`
+                                  : `${categoryColor}15`,
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                bgcolor: '#FF980015'
+                                flexShrink: 0
                               }}
                             >
-                              <Icon sx={{ fontSize: 32, color: '#FF9800' }} />
+                              <Icon sx={{ fontSize: 26, color: isCompleted ? 'white' : categoryColor }} />
                             </Box>
-                            {isCompleted && (
-                              <Box
-                                sx={{
-                                  width: 32,
-                                  height: 32,
-                                  borderRadius: '50%',
-                                  bgcolor: 'success.main',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center'
-                                }}
-                              >
-                                <CheckCircle sx={{ fontSize: 20, color: 'white' }} />
-                              </Box>
-                            )}
-                          </Box>
 
-                          <Typography variant="h6" fontWeight={700}>
-                            {subcategory.name}
-                          </Typography>
-                        </CardContent>
-                      </CardActionArea>
-                    </Card>
-                  </Grid>
-                )
-              })}
-            </Grid>
+                            {/* Text content */}
+                            <Box sx={{ flex: 1, minWidth: 0 }}>
+                              <Typography sx={{
+                                fontSize: '16px',
+                                fontWeight: 700,
+                                color: '#0F172A',
+                                letterSpacing: '-0.01em',
+                                mb: 0.25
+                              }}>
+                                {subcategory.name}
+                              </Typography>
+                              <Typography sx={{
+                                fontSize: '12px',
+                                color: isCompleted ? '#059669' : '#94A3B8'
+                              }}>
+                                {isCompleted ? 'Complété' : 'Non inspecté'}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </CardActionArea>
+                      </Card>
+                    </Grid>
+                  )
+                })}
+              </Grid>
+            </Box>
           </>
         ) : (
           <>

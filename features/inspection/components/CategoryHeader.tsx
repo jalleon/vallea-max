@@ -1,8 +1,41 @@
 'use client'
 
 import React from 'react'
-import { Box, Paper, Typography, CircularProgress } from '@mui/material'
+import { Box, Paper, Typography, keyframes } from '@mui/material'
 import { SvgIconComponent } from '@mui/icons-material'
+import { Bed, Bathtub, Shower, MeetingRoom } from '@mui/icons-material'
+
+// Premium animations
+const fadeInUp = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`
+
+const scaleIn = keyframes`
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+`
+
+const pulse = keyframes`
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+`
 
 interface CategoryHeaderProps {
   categoryName: string
@@ -31,207 +64,264 @@ export function CategoryHeader({
   roomCounts
 }: CategoryHeaderProps) {
   return (
-    <Paper elevation={0} sx={{ borderRadius: '16px', overflow: 'hidden', mb: 3, border: '1px solid', borderColor: 'divider' }}>
-      {/* Layered & Depth Header - Waves + Topology + Floating Orbs */}
+    <Paper
+      elevation={0}
+      sx={{
+        borderRadius: '20px',
+        overflow: 'hidden',
+        mb: 3,
+        border: '1px solid rgba(0,0,0,0.06)',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
+        animation: `${fadeInUp} 0.6s ease-out`
+      }}
+    >
+      {/* Premium Dark Header */}
       <Box
         sx={{
           position: 'relative',
-          p: 3,
+          p: { xs: 3, md: 4 },
           color: 'white',
           overflow: 'hidden',
-          background: `linear-gradient(135deg, ${categoryColor} 0%, ${categoryColor}dd 50%, ${categoryColor}bb 100%)`
+          background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #334155 100%)',
+          minHeight: 160
         }}
       >
-        {/* Layer 1: Layered waves - Stacked semi-transparent curves */}
+        {/* Animated gradient mesh background */}
         <Box
           sx={{
             position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
+            inset: 0,
             background: `
-              radial-gradient(ellipse 150% 80% at 50% 120%, ${categoryColor}80 0%, transparent 50%),
-              radial-gradient(ellipse 140% 70% at 50% 110%, ${categoryColor}66 0%, transparent 50%),
-              radial-gradient(ellipse 130% 60% at 50% 100%, ${categoryColor}59 0%, transparent 50%)
+              radial-gradient(ellipse 80% 50% at 20% 40%, ${categoryColor}40 0%, transparent 50%),
+              radial-gradient(ellipse 60% 40% at 80% 60%, ${categoryColor}30 0%, transparent 50%),
+              radial-gradient(ellipse 50% 30% at 50% 80%, ${categoryColor}20 0%, transparent 50%)
             `,
-            pointerEvents: 'none',
+            animation: `${pulse} 8s ease-in-out infinite`,
             zIndex: 1
           }}
         />
 
-        {/* Layer 2: 3D Topology map - Contour lines */}
+        {/* Grid pattern overlay */}
         <Box
           sx={{
             position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
+            inset: 0,
             backgroundImage: `
-              repeating-radial-gradient(circle at 30% 40%, transparent 0px, transparent 30px, rgba(255,255,255,0.12) 30px, rgba(255,255,255,0.12) 31px),
-              repeating-radial-gradient(circle at 70% 60%, transparent 0px, transparent 40px, rgba(255,255,255,0.15) 40px, rgba(255,255,255,0.15) 41px)
+              linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)
             `,
-            pointerEvents: 'none',
+            backgroundSize: '32px 32px',
             zIndex: 2
           }}
         />
 
-        {/* Layer 3: Floating particles/orbs */}
+        {/* Content */}
         <Box
           sx={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: `
-              radial-gradient(circle 60px at 15% 25%, rgba(255, 255, 255, 0.15), transparent),
-              radial-gradient(circle 80px at 85% 70%, rgba(255, 255, 255, 0.12), transparent),
-              radial-gradient(circle 50px at 50% 15%, rgba(255, 255, 255, 0.1), transparent),
-              radial-gradient(circle 70px at 75% 85%, rgba(255, 255, 255, 0.08), transparent),
-              radial-gradient(circle 40px at 25% 75%, rgba(255, 255, 255, 0.1), transparent)
-            `,
-            pointerEvents: 'none',
-            zIndex: 3
+            position: 'relative',
+            zIndex: 10,
+            display: 'flex',
+            alignItems: 'center',
+            gap: { xs: 3, md: 4 },
+            flexWrap: { xs: 'wrap', md: 'nowrap' }
           }}
-        />
-
-        <Box sx={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', gap: 3, flexWrap: { xs: 'wrap', md: 'nowrap' } }}>
-          {/* Large Category Icon */}
+        >
+          {/* Icon Container with Glow */}
           <Box
             sx={{
-              width: 100,
-              height: 100,
-              borderRadius: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              bgcolor: 'rgba(255, 255, 255, 0.2)',
-              backdropFilter: 'blur(10px)'
+              position: 'relative',
+              animation: `${scaleIn} 0.5s ease-out 0.2s both`
             }}
           >
-            <Icon sx={{ fontSize: 56, color: 'white' }} />
+            {/* Glow effect */}
+            <Box
+              sx={{
+                position: 'absolute',
+                inset: -8,
+                borderRadius: '24px',
+                background: `radial-gradient(circle, ${categoryColor}50 0%, transparent 70%)`,
+                filter: 'blur(16px)',
+                animation: `${pulse} 3s ease-in-out infinite`
+              }}
+            />
+            <Box
+              sx={{
+                position: 'relative',
+                width: 80,
+                height: 80,
+                borderRadius: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: `linear-gradient(135deg, ${categoryColor} 0%, ${categoryColor}cc 100%)`,
+                boxShadow: `0 8px 32px ${categoryColor}40`
+              }}
+            >
+              <Icon sx={{ fontSize: 44, color: 'white' }} />
+            </Box>
           </Box>
 
-          {/* Title and Timeline Indicators */}
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="h4" fontWeight={800} sx={{ color: '#FCD34D', mb: 1 }}>
+          {/* Title and Stats */}
+          <Box
+            sx={{
+              flex: 1,
+              animation: `${fadeInUp} 0.6s ease-out 0.3s both`
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: { xs: '24px', md: '28px' },
+                fontWeight: 800,
+                color: 'white',
+                letterSpacing: '-0.02em',
+                mb: 0.5,
+                lineHeight: 1.2
+              }}
+            >
               {categoryName}
             </Typography>
+
             {subtitle && (
-              <Typography variant="body1" sx={{ color: 'white', mb: 2, opacity: 0.95 }}>
+              <Typography
+                sx={{
+                  fontSize: '14px',
+                  color: 'rgba(255,255,255,0.6)',
+                  mb: 2
+                }}
+              >
                 {subtitle}
               </Typography>
             )}
+
+            {/* Room counts or completion stats */}
             {roomCounts ? (
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
-                {roomCounts.bedrooms > 0 && (
+              <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+                {[
+                  { icon: Bed, count: roomCounts.bedrooms, label: 'chambres', color: '#3B82F6' },
+                  { icon: Bathtub, count: roomCounts.bathrooms, label: 'sdb', color: '#8B5CF6' },
+                  { icon: Shower, count: roomCounts.powderRooms, label: 'sde', color: '#10B981' },
+                  { icon: MeetingRoom, count: roomCounts.totalRooms, label: 'pièces', color: '#F59E0B' }
+                ].filter(item => item.count > 0).map((item, idx) => (
                   <Box
+                    key={idx}
                     sx={{
-                      bgcolor: 'rgba(255, 255, 255, 0.2)',
-                      backdropFilter: 'blur(10px)',
-                      borderRadius: '8px',
-                      px: 2,
-                      py: 0.75,
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 0.5
-                    }}
-                  >
-                    <Typography variant="body2" fontWeight={700} sx={{ color: 'white' }}>
-                      {roomCounts.bedrooms}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'white', opacity: 0.9 }}>
-                      chambres
-                    </Typography>
-                  </Box>
-                )}
-                {roomCounts.bathrooms > 0 && (
-                  <Box
-                    sx={{
-                      bgcolor: 'rgba(255, 255, 255, 0.2)',
-                      backdropFilter: 'blur(10px)',
-                      borderRadius: '8px',
-                      px: 2,
+                      gap: 0.75,
+                      px: 1.5,
                       py: 0.75,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 0.5
+                      bgcolor: 'rgba(255,255,255,0.08)',
+                      borderRadius: '10px',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      backdropFilter: 'blur(10px)'
                     }}
                   >
-                    <Typography variant="body2" fontWeight={700} sx={{ color: 'white' }}>
-                      {roomCounts.bathrooms}
+                    <item.icon sx={{ fontSize: 16, color: item.color }} />
+                    <Typography sx={{ fontSize: '13px', fontWeight: 600, color: 'white' }}>
+                      {item.count}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'white', opacity: 0.9 }}>
-                      sdb
-                    </Typography>
-                  </Box>
-                )}
-                {roomCounts.powderRooms > 0 && (
-                  <Box
-                    sx={{
-                      bgcolor: 'rgba(255, 255, 255, 0.2)',
-                      backdropFilter: 'blur(10px)',
-                      borderRadius: '8px',
-                      px: 2,
-                      py: 0.75,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 0.5
-                    }}
-                  >
-                    <Typography variant="body2" fontWeight={700} sx={{ color: 'white' }}>
-                      {roomCounts.powderRooms}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'white', opacity: 0.9 }}>
-                      sde
+                    <Typography sx={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>
+                      {item.label}
                     </Typography>
                   </Box>
-                )}
-                {roomCounts.totalRooms > 0 && (
-                  <Box
-                    sx={{
-                      bgcolor: 'rgba(255, 255, 255, 0.2)',
-                      backdropFilter: 'blur(10px)',
-                      borderRadius: '8px',
-                      px: 2,
-                      py: 0.75,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 0.5
-                    }}
-                  >
-                    <Typography variant="body2" fontWeight={700} sx={{ color: 'white' }}>
-                      {roomCounts.totalRooms}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'white', opacity: 0.9 }}>
-                      pièces
-                    </Typography>
-                  </Box>
-                )}
+                ))}
               </Box>
             ) : completedItems !== undefined && totalItems !== undefined ? (
               <Box
                 sx={{
-                  bgcolor: 'rgba(255, 255, 255, 0.2)',
-                  backdropFilter: 'blur(10px)',
-                  borderRadius: '8px',
-                  px: 2,
-                  py: 0.75,
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: 0.5
+                  gap: 1,
+                  px: 2,
+                  py: 1,
+                  bgcolor: 'rgba(255,255,255,0.08)',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  backdropFilter: 'blur(10px)'
                 }}
               >
-                <Typography variant="body2" fontWeight={700} sx={{ color: 'white' }}>
+                <Box
+                  sx={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    bgcolor: completedItems === totalItems ? '#10B981' : categoryColor
+                  }}
+                />
+                <Typography sx={{ fontSize: '14px', fontWeight: 600, color: 'white' }}>
                   {completedItems}
                 </Typography>
-                <Typography variant="body2" sx={{ color: 'white', opacity: 0.9 }}>
+                <Typography sx={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)' }}>
                   / {totalItems} complété{completedItems !== 1 ? 's' : ''}
                 </Typography>
               </Box>
             ) : null}
+          </Box>
+
+          {/* Progress Ring */}
+          <Box
+            sx={{
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              animation: `${scaleIn} 0.5s ease-out 0.4s both`
+            }}
+          >
+            {/* Circular progress background */}
+            <Box
+              sx={{
+                position: 'relative',
+                width: 72,
+                height: 72
+              }}
+            >
+              <svg width="72" height="72" style={{ transform: 'rotate(-90deg)' }}>
+                {/* Background circle */}
+                <circle
+                  cx="36"
+                  cy="36"
+                  r="30"
+                  fill="none"
+                  stroke="rgba(255,255,255,0.1)"
+                  strokeWidth="6"
+                />
+                {/* Progress circle */}
+                <circle
+                  cx="36"
+                  cy="36"
+                  r="30"
+                  fill="none"
+                  stroke={categoryColor}
+                  strokeWidth="6"
+                  strokeLinecap="round"
+                  strokeDasharray={`${(progress / 100) * 188.5} 188.5`}
+                  style={{
+                    filter: `drop-shadow(0 0 8px ${categoryColor}80)`,
+                    transition: 'stroke-dasharray 0.5s ease-out'
+                  }}
+                />
+              </svg>
+              <Box
+                sx={{
+                  position: 'absolute',
+                  inset: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontSize: '18px',
+                    fontWeight: 700,
+                    color: 'white'
+                  }}
+                >
+                  {progress}%
+                </Typography>
+              </Box>
+            </Box>
           </Box>
         </Box>
       </Box>

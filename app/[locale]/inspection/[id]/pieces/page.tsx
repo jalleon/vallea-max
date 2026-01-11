@@ -24,7 +24,8 @@ import {
   CircularProgress,
   Alert,
   Breadcrumbs,
-  Link
+  Link,
+  keyframes
 } from '@mui/material'
 import {
   Add,
@@ -56,6 +57,17 @@ import { InspectionFloatingNav } from '@/features/inspection/components/Inspecti
 import { CategoryHeader } from '@/features/inspection/components/CategoryHeader'
 import { FLOOR_OPTIONS, ROOM_CONFIG } from '@/features/inspection/constants/room.constants'
 import { Layers } from '@mui/icons-material'
+
+// Premium animations
+const fadeInUp = keyframes`
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+`
+
+const scaleIn = keyframes`
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+`
 
 const BASE_ROOM_TYPES = ['cuisine', 'salle_a_manger', 'salon', 'chambre', 'bureau', 'salle_sejour', 'salle_bain', 'salle_eau']
 const BASEMENT_ROOM_TYPES = ['salle_familiale', 'salle_sejour', 'chambre', 'bureau', 'buanderie', 'rangement', 'salle_mecanique', 'salle_bain', 'salle_eau']
@@ -560,32 +572,83 @@ export default function PiecesPage() {
           </IconButton>
         </Box>
 
-        {/* Floor Selector */}
-        <Paper elevation={0} sx={{ p: 3, mb: 3, border: '1px solid', borderColor: 'divider' }}>
-          <Typography variant="h6" fontWeight={600} gutterBottom>
-            {t('inspection.floors.addFloor')}
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mt: 2 }}>
-            {FLOOR_OPTIONS.map((floor) => {
+        {/* Floor Selector - Premium Style */}
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            mb: 3,
+            borderRadius: '16px',
+            border: '1px solid rgba(0,0,0,0.06)',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+            animation: `${fadeInUp} 0.5s ease-out`
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: '10px',
+                background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <Layers sx={{ fontSize: 22, color: 'white' }} />
+            </Box>
+            <Typography sx={{ fontSize: '18px', fontWeight: 700, color: '#0F172A' }}>
+              {t('inspection.floors.addFloor')}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+            {FLOOR_OPTIONS.map((floor, index) => {
               const floorExists = floors.some(f => f.id === floor.value)
               const isSelected = selectedFloor === floor.value
 
               return (
                 <Button
                   key={floor.value}
-                  variant={isSelected ? 'contained' : 'outlined'}
                   onClick={() => handleAddPredefinedFloor(floor.value, floor.displayName)}
                   sx={{
-                    minWidth: 120,
-                    bgcolor: isSelected ? '#4CAF50' : 'transparent',
-                    borderColor: floorExists ? '#4CAF50' : 'grey.300',
-                    color: isSelected ? 'white' : floorExists ? '#4CAF50' : 'text.primary',
-                    '&:hover': {
-                      bgcolor: isSelected ? '#45a049' : '#f0fdf4',
-                      borderColor: '#4CAF50'
-                    }
+                    minWidth: 100,
+                    px: 2.5,
+                    py: 1.5,
+                    borderRadius: '12px',
+                    fontWeight: 600,
+                    fontSize: '14px',
+                    textTransform: 'none',
+                    border: '2px solid',
+                    animation: `${scaleIn} 0.3s ease-out ${index * 0.05}s both`,
+                    ...(isSelected ? {
+                      bgcolor: '#3B82F6',
+                      borderColor: '#3B82F6',
+                      color: 'white',
+                      boxShadow: '0 4px 16px rgba(59, 130, 246, 0.35)',
+                      '&:hover': {
+                        bgcolor: '#2563EB',
+                        borderColor: '#2563EB'
+                      }
+                    } : floorExists ? {
+                      bgcolor: '#EFF6FF',
+                      borderColor: '#3B82F6',
+                      color: '#3B82F6',
+                      '&:hover': {
+                        bgcolor: '#DBEAFE',
+                        borderColor: '#2563EB'
+                      }
+                    } : {
+                      bgcolor: 'white',
+                      borderColor: '#E2E8F0',
+                      color: '#64748B',
+                      '&:hover': {
+                        bgcolor: '#F8FAFC',
+                        borderColor: '#CBD5E1'
+                      }
+                    })
                   }}
-                  startIcon={floorExists ? <CheckCircle /> : undefined}
+                  startIcon={floorExists ? <CheckCircle sx={{ fontSize: 18 }} /> : undefined}
                 >
                   {floor.displayName}
                 </Button>
@@ -594,7 +657,6 @@ export default function PiecesPage() {
             {/* Additional floors (4e, 5e, etc.) */}
             {floors
               .filter(f => {
-                // Only show floors that are not in FLOOR_OPTIONS
                 const isPredefinedFloor = FLOOR_OPTIONS.some(opt => opt.value === f.id)
                 return !isPredefinedFloor && f.id.startsWith('floor_')
               })
@@ -609,51 +671,84 @@ export default function PiecesPage() {
                 return (
                   <Button
                     key={floor.id}
-                    variant={isSelected ? 'contained' : 'outlined'}
                     onClick={() => setSelectedFloor(floor.id)}
                     sx={{
-                      minWidth: 120,
-                      bgcolor: isSelected ? '#4CAF50' : 'transparent',
-                      borderColor: '#4CAF50',
-                      color: isSelected ? 'white' : '#4CAF50',
-                      '&:hover': {
-                        bgcolor: isSelected ? '#45a049' : '#f0fdf4',
-                        borderColor: '#4CAF50'
-                      }
+                      minWidth: 100,
+                      px: 2.5,
+                      py: 1.5,
+                      borderRadius: '12px',
+                      fontWeight: 600,
+                      fontSize: '14px',
+                      textTransform: 'none',
+                      border: '2px solid',
+                      ...(isSelected ? {
+                        bgcolor: '#3B82F6',
+                        borderColor: '#3B82F6',
+                        color: 'white',
+                        boxShadow: '0 4px 16px rgba(59, 130, 246, 0.35)',
+                        '&:hover': { bgcolor: '#2563EB', borderColor: '#2563EB' }
+                      } : {
+                        bgcolor: '#EFF6FF',
+                        borderColor: '#3B82F6',
+                        color: '#3B82F6',
+                        '&:hover': { bgcolor: '#DBEAFE', borderColor: '#2563EB' }
+                      })
                     }}
-                    startIcon={<CheckCircle />}
+                    startIcon={<CheckCircle sx={{ fontSize: 18 }} />}
                   >
                     {floor.name}
                   </Button>
                 )
               })}
             <Button
-              variant="outlined"
               onClick={handleAddNextFloor}
-              sx={{ minWidth: 60 }}
+              sx={{
+                minWidth: 48,
+                width: 48,
+                height: 48,
+                borderRadius: '12px',
+                border: '2px dashed #CBD5E1',
+                color: '#94A3B8',
+                '&:hover': {
+                  bgcolor: '#F8FAFC',
+                  borderColor: '#3B82F6',
+                  color: '#3B82F6'
+                }
+              }}
             >
               <Add />
             </Button>
           </Box>
         </Paper>
 
-        {/* Rooms Grid */}
+        {/* Rooms Grid - Premium Style */}
         {selectedFloor && (
-          <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6" fontWeight={600}>
-                Pièces - {floors.find(f => f.id === selectedFloor)?.name}
-              </Typography>
+          <Box sx={{ animation: `${fadeInUp} 0.5s ease-out 0.1s both` }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+              <Box>
+                <Typography sx={{ fontSize: '20px', fontWeight: 700, color: '#0F172A', letterSpacing: '-0.01em' }}>
+                  Pièces - {floors.find(f => f.id === selectedFloor)?.name}
+                </Typography>
+                <Typography sx={{ fontSize: '14px', color: '#64748B', mt: 0.5 }}>
+                  Sélectionnez une pièce pour l'inspecter
+                </Typography>
+              </Box>
               <Button
-                variant="outlined"
                 startIcon={<Add />}
                 onClick={() => setAddRoomDialogOpen(true)}
                 sx={{
-                  borderColor: '#4CAF50',
-                  color: '#4CAF50',
+                  px: 2.5,
+                  py: 1,
+                  borderRadius: '10px',
+                  fontWeight: 600,
+                  fontSize: '14px',
+                  textTransform: 'none',
+                  bgcolor: '#10B981',
+                  color: 'white',
+                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
                   '&:hover': {
-                    bgcolor: '#f0fdf4',
-                    borderColor: '#4CAF50'
+                    bgcolor: '#059669',
+                    boxShadow: '0 6px 16px rgba(16, 185, 129, 0.4)'
                   }
                 }}
               >
@@ -664,16 +759,13 @@ export default function PiecesPage() {
             <Grid container spacing={2}>
               {(() => {
                 const groupedRooms = getGroupedRooms(selectedFloor)
-                // Determine room types order based on floor
                 let roomTypesOrder = BASE_ROOM_TYPES
                 if (selectedFloor === 'sous_sol') {
                   roomTypesOrder = BASEMENT_ROOM_TYPES
                 } else if (selectedFloor === 'deuxieme' || selectedFloor === 'troisieme' || selectedFloor?.startsWith('floor_')) {
-                  // For 2e, 3e, 4e+ floors use upper floor room types
                   roomTypesOrder = UPPER_FLOOR_ROOM_TYPES
                 }
 
-                // Sort room types by their order
                 const sortedRoomTypes = Object.keys(groupedRooms).sort((a, b) => {
                   const orderA = roomTypesOrder.indexOf(a)
                   const orderB = roomTypesOrder.indexOf(b)
@@ -683,40 +775,116 @@ export default function PiecesPage() {
                   return orderA - orderB
                 })
 
-                return sortedRoomTypes.map((roomType) => {
+                return sortedRoomTypes.map((roomType, index) => {
                   const instances = groupedRooms[roomType]
                   const roomConfig = ROOM_CONFIG[roomType]
                   const RoomIcon = ROOM_ICONS[roomType]
                   const allCompleted = instances.every(instance => isRoomCompleted(selectedFloor, instance.id))
                   const someCompleted = instances.some(instance => isRoomCompleted(selectedFloor, instance.id))
 
+                  const statusColor = allCompleted ? '#10B981' : someCompleted ? '#F59E0B' : '#94A3B8'
+                  const statusBg = allCompleted ? '#10B98115' : someCompleted ? '#F59E0B15' : '#F8FAFC'
+
                   return (
                     <Grid item xs={12} sm={6} md={4} key={roomType}>
                       <Card
                         elevation={0}
                         sx={{
+                          borderRadius: '16px',
                           border: '2px solid',
-                          borderColor: allCompleted ? '#4CAF50' : someCompleted ? '#FFA726' : 'grey.300',
-                          bgcolor: allCompleted ? '#4CAF5015' : someCompleted ? '#FFA72615' : 'white',
-                          transition: 'all 0.2s ease',
+                          borderColor: allCompleted ? '#10B981' : someCompleted ? '#F59E0B' : 'rgba(0,0,0,0.06)',
+                          bgcolor: statusBg,
+                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                          animation: `${scaleIn} 0.3s ease-out ${index * 0.05}s both`,
+                          position: 'relative',
+                          overflow: 'visible',
                           '&:hover': {
-                            transform: 'translateY(-4px)',
-                            boxShadow: 2
+                            transform: 'translateY(-6px)',
+                            boxShadow: `0 12px 32px ${statusColor}25`,
+                            borderColor: statusColor
                           }
                         }}
                       >
-                        <CardActionArea onClick={() => handleRoomGroupClick(roomType, instances)} sx={{ p: 2 }}>
+                        {/* Completion badge */}
+                        {allCompleted && (
+                          <Box
+                            sx={{
+                              position: 'absolute',
+                              top: -8,
+                              right: -8,
+                              width: 28,
+                              height: 28,
+                              borderRadius: '50%',
+                              bgcolor: '#10B981',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              boxShadow: '0 4px 12px rgba(16, 185, 129, 0.4)',
+                              zIndex: 10
+                            }}
+                          >
+                            <CheckCircle sx={{ fontSize: 18, color: 'white' }} />
+                          </Box>
+                        )}
+
+                        <CardActionArea onClick={() => handleRoomGroupClick(roomType, instances)} sx={{ p: 2.5 }}>
                           <CardContent sx={{ p: 0 }}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                              {RoomIcon && <RoomIcon sx={{ fontSize: 32, color: allCompleted ? '#4CAF50' : someCompleted ? '#FFA726' : 'text.secondary' }} />}
-                              {allCompleted && (
-                                <CheckCircle sx={{ color: '#4CAF50', fontSize: 24 }} />
-                              )}
+                            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                              {/* Icon container */}
+                              <Box
+                                sx={{
+                                  width: 52,
+                                  height: 52,
+                                  borderRadius: '14px',
+                                  background: allCompleted
+                                    ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)'
+                                    : someCompleted
+                                      ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)'
+                                      : '#E2E8F0',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  flexShrink: 0
+                                }}
+                              >
+                                {RoomIcon && <RoomIcon sx={{ fontSize: 28, color: allCompleted || someCompleted ? 'white' : '#64748B' }} />}
+                              </Box>
+
+                              {/* Text content */}
+                              <Box sx={{ flex: 1 }}>
+                                <Typography sx={{
+                                  fontSize: '16px',
+                                  fontWeight: 700,
+                                  color: '#0F172A',
+                                  letterSpacing: '-0.01em',
+                                  mb: 0.5
+                                }}>
+                                  {roomConfig ? t(roomConfig.translationKey) : roomType}
+                                </Typography>
+                                {instances.length > 1 && (
+                                  <Chip
+                                    label={`${instances.length} pièces`}
+                                    size="small"
+                                    sx={{
+                                      height: 22,
+                                      bgcolor: 'rgba(0,0,0,0.06)',
+                                      color: '#64748B',
+                                      fontWeight: 500,
+                                      fontSize: '11px'
+                                    }}
+                                  />
+                                )}
+                                {!allCompleted && (
+                                  <Typography sx={{
+                                    fontSize: '12px',
+                                    color: someCompleted ? '#D97706' : '#94A3B8',
+                                    mt: 0.5
+                                  }}>
+                                    {someCompleted ? 'En cours' : 'Non inspecté'}
+                                  </Typography>
+                                )}
+                              </Box>
                             </Box>
-                            <Typography variant="h6" fontWeight={600} color={allCompleted ? '#4CAF50' : 'text.primary'}>
-                              {roomConfig ? t(roomConfig.translationKey) : roomType}
-                              {instances.length > 1 && ` (x${instances.length})`}
-                            </Typography>
                           </CardContent>
                         </CardActionArea>
                       </Card>
