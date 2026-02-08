@@ -852,8 +852,7 @@ export default function LibraryPage() {
           <Card sx={{ height: 'calc(100vh - 350px)', overflow: 'hidden' }}>
             <PropertyMapInner
               properties={properties.filter(p => {
-                const tp = tableProperties.find((t: any) => t.id === p.id)
-                return !!tp
+                return filteredProperties.some((fp: any) => fp.id === p.id)
               })}
               onViewProperty={(p) => {
                 setViewPropertyIndex(properties.indexOf(p))
