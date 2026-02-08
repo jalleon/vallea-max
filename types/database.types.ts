@@ -158,54 +158,6 @@ export type Database = {
           },
         ]
       }
-      comparables: {
-        Row: {
-          adjusted_value: number | null
-          adjustments: Json | null
-          appraisal_id: string | null
-          created_at: string | null
-          id: string
-          notes: string | null
-          property_id: string | null
-          weight: number | null
-        }
-        Insert: {
-          adjusted_value?: number | null
-          adjustments?: Json | null
-          appraisal_id?: string | null
-          created_at?: string | null
-          id?: string
-          notes?: string | null
-          property_id?: string | null
-          weight?: number | null
-        }
-        Update: {
-          adjusted_value?: number | null
-          adjustments?: Json | null
-          appraisal_id?: string | null
-          created_at?: string | null
-          id?: string
-          notes?: string | null
-          property_id?: string | null
-          weight?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "comparables_appraisal_id_fkey"
-            columns: ["appraisal_id"]
-            isOneToOne: false
-            referencedRelation: "appraisals"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "comparables_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       field_history: {
         Row: {
           created_at: string | null
@@ -342,7 +294,9 @@ export type Database = {
           is_shared: boolean | null
           is_template: boolean | null
           jours_sur_marche: number | null
+          latitude: number | null
           localisation: string | null
+          longitude: number | null
           lot_number: string | null
           loyer_en_place: number | null
           matricule: string | null
@@ -430,7 +384,9 @@ export type Database = {
           is_shared?: boolean | null
           is_template?: boolean | null
           jours_sur_marche?: number | null
+          latitude?: number | null
           localisation?: string | null
+          longitude?: number | null
           lot_number?: string | null
           loyer_en_place?: number | null
           matricule?: string | null
@@ -518,7 +474,9 @@ export type Database = {
           is_shared?: boolean | null
           is_template?: boolean | null
           jours_sur_marche?: number | null
+          latitude?: number | null
           localisation?: string | null
+          longitude?: number | null
           lot_number?: string | null
           loyer_en_place?: number | null
           matricule?: string | null
@@ -569,6 +527,57 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "properties_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comparable_lists: {
+        Row: {
+          id: string
+          organization_id: string
+          created_by: string
+          appraisal_id: string
+          list_type: string
+          name: string | null
+          items: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          created_by: string
+          appraisal_id: string
+          list_type: string
+          name?: string | null
+          items?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          created_by?: string
+          appraisal_id?: string
+          list_type?: string
+          name?: string | null
+          items?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comparable_lists_appraisal_id_fkey"
+            columns: ["appraisal_id"]
+            isOneToOne: false
+            referencedRelation: "appraisals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comparable_lists_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"

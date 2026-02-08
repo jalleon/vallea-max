@@ -23,11 +23,14 @@ import {
   InputLabel,
   alpha
 } from '@mui/material';
-import { Add, Delete, Search, SquareFoot, Straighten, Refresh } from '@mui/icons-material';
+import { Add, Delete, Search, SquareFoot, Straighten, Refresh, PlaylistPlay } from '@mui/icons-material';
+import { Badge } from '@mui/material';
 import { useTranslations } from 'next-intl';
 import { AgGridReact } from 'ag-grid-react';
 import { ColDef, ColGroupDef, CellValueChangedEvent, ICellRendererParams, ValueFormatterParams, ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
 import 'ag-grid-community/styles/ag-grid.css';
+import LoadFromListDialog from './LoadFromListDialog';
+import { comparableListsService } from '@/features/library/_api/comparable-lists.service';
 import 'ag-grid-community/styles/ag-theme-material.css';
 import { createClient } from '@/lib/supabase/client';
 
@@ -103,6 +106,7 @@ interface DirectComparisonFormProps {
   subjectPropertyType?: string;
   subjectPropertyId?: string | null;
   reloadTrigger?: number;
+  appraisalId?: string;
 }
 
 interface RowData {
@@ -118,7 +122,8 @@ export default function DirectComparisonForm({
   onChange,
   subjectPropertyType = 'single_family',
   subjectPropertyId,
-  reloadTrigger = 0
+  reloadTrigger = 0,
+  appraisalId
 }: DirectComparisonFormProps) {
   const t = useTranslations('evaluations.sections.directComparison');
   const tCommon = useTranslations('common');
@@ -156,8 +161,84 @@ export default function DirectComparisonForm({
   const [libraryProperties, setLibraryProperties] = useState<any[]>([]);
   const [propertySearchQuery, setPropertySearchQuery] = useState('');
   const [selectedProperties, setSelectedProperties] = useState<Set<string>>(new Set());
+  const [loadFromListOpen, setLoadFromListOpen] = useState(false);
+  const [compListCount, setCompListCount] = useState(0);
   const [multiSelectMode, setMultiSelectMode] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>('all');
+
+  // Fetch comp list count for badge
+  useEffect(() => {
+    if (appraisalId) {
+      comparableListsService.getByType(appraisalId, 'direct_comparison')
+        .then(list => setCompListCount(list?.items?.length || 0))
+        .catch(() => {});
+    }
+  }, [appraisalId]);
+
+  // Handle loading properties from comparable list
+  const handleLoadFromList = (loadedProperties: any[]) => {
+    const newComparables = [...comparables];
+    loadedProperties.forEach(property => {
+      // Find first empty slot or add new
+      let targetIndex = newComparables.findIndex(c => !c.propertyId && !c.address);
+      if (targetIndex === -1 && newComparables.length < 8) {
+        targetIndex = newComparables.length;
+        newComparables.push(createEmptyComparable(targetIndex + 1));
+      }
+      if (targetIndex === -1) return; // All 8 slots filled
+
+      // Reuse the same mapping logic as handlePropertySelect
+      const addressParts = [property.adresse, property.ville, property.province, property.code_postal].filter(Boolean);
+      let lotSizeText = '';
+      if (property.superficie_terrain_m2) {
+        const m2 = property.superficie_terrain_m2;
+        const ft2 = Math.round(m2 * 10.764);
+        lotSizeText = `${m2} m² / ${ft2.toLocaleString()} ft²`;
+      } else if (property.superficie_terrain_pi2) {
+        const ft2 = property.superficie_terrain_pi2;
+        const m2 = Math.round(ft2 / 10.764);
+        lotSizeText = `${m2} m² / ${ft2.toLocaleString()} ft²`;
+      }
+      let livingAreaText = '';
+      if (property.aire_habitable_m2) {
+        const m2 = property.aire_habitable_m2;
+        const pi2 = Math.round(m2 * 10.764);
+        livingAreaText = `${m2} m² / ${pi2.toLocaleString()} pi²`;
+      } else if (property.aire_habitable_pi2) {
+        const pi2 = property.aire_habitable_pi2;
+        const m2 = Math.round(pi2 / 10.764);
+        livingAreaText = `${m2} m² / ${pi2.toLocaleString()} pi²`;
+      } else if (property.superficie_habitable_m2) {
+        const m2 = property.superficie_habitable_m2;
+        const pi2 = Math.round(m2 * 10.764);
+        livingAreaText = `${m2} m² / ${pi2.toLocaleString()} pi²`;
+      } else if (property.superficie_habitable_pi2) {
+        const pi2 = property.superficie_habitable_pi2;
+        const m2 = Math.round(pi2 / 10.764);
+        livingAreaText = `${m2} m² / ${pi2.toLocaleString()} pi²`;
+      }
+
+      newComparables[targetIndex] = {
+        ...newComparables[targetIndex],
+        propertyId: property.id,
+        address: addressParts.join(', '),
+        saleDate: property.date_vente || '',
+        salePrice: property.prix_vente || 0,
+        daysOnMarket: property.jours_sur_marche || 0,
+        lotSize: lotSizeText,
+        buildingType: property.type_propriete || '',
+        age: property.chrono_age?.toString() || '',
+        condition: property.eff_age?.toString() || '',
+        livingArea: livingAreaText,
+        roomsTotal: property.nombre_pieces || 0,
+        roomsBedrooms: property.nombre_chambres || 0,
+        roomsBathrooms: `${property.salle_bain || 0}:${property.salle_eau || 0}`,
+        basement: property.type_sous_sol || '',
+        parking: property.stationnement || ''
+      };
+    });
+    setComparables(newComparables);
+  };
 
   // Status priority for sorting (Vendu first, then Sujet, then others)
   const STATUS_PRIORITY: Record<string, number> = {
@@ -1376,6 +1457,19 @@ export default function DirectComparisonForm({
           >
             {t('addComparable')}
           </Button>
+          {appraisalId && (
+            <Badge badgeContent={compListCount} color="primary" max={99}>
+              <Button
+                startIcon={<PlaylistPlay />}
+                onClick={() => setLoadFromListOpen(true)}
+                size="small"
+                variant="outlined"
+                sx={{ textTransform: 'none', borderRadius: '8px' }}
+              >
+                Load from List
+              </Button>
+            </Badge>
+          )}
         </Box>
       </Box>
 
@@ -1741,6 +1835,18 @@ export default function DirectComparisonForm({
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Load from Comparable List Dialog */}
+      {appraisalId && (
+        <LoadFromListDialog
+          open={loadFromListOpen}
+          onClose={() => setLoadFromListOpen(false)}
+          appraisalId={appraisalId}
+          listType="direct_comparison"
+          existingPropertyIds={comparables.filter(c => c.propertyId).map(c => c.propertyId!)}
+          onLoadProperties={handleLoadFromList}
+        />
+      )}
     </Box>
   );
 }

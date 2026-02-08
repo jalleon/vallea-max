@@ -160,7 +160,7 @@ export default function AppraisalSectionForm({
         case 'conciliation':
           return renderNarrativeSection('description', 'Provide reconciliation of value indications from different approaches...');
         case 'technique_parite':
-          return <DirectComparisonForm data={formData} onChange={onChange} subjectPropertyId={subjectPropertyId} subjectPropertyType={subjectPropertyType || undefined} reloadTrigger={reloadTrigger} />;
+          return <DirectComparisonForm data={formData} onChange={onChange} subjectPropertyId={subjectPropertyId} subjectPropertyType={subjectPropertyType || undefined} reloadTrigger={reloadTrigger} appraisalId={appraisalData?.id} />;
         default:
           return renderGenericSection();
       }
@@ -176,7 +176,7 @@ export default function AppraisalSectionForm({
         case 'identification_bien':
           return renderPropertySection();
         case 'methode_parite':
-          return <DirectComparisonForm data={formData} onChange={onChange} subjectPropertyId={subjectPropertyId} subjectPropertyType={subjectPropertyType || undefined} reloadTrigger={reloadTrigger} />;
+          return <DirectComparisonForm data={formData} onChange={onChange} subjectPropertyId={subjectPropertyId} subjectPropertyType={subjectPropertyType || undefined} reloadTrigger={reloadTrigger} appraisalId={appraisalData?.id} />;
         case 'voisinage':
           return renderNarrativeSection('description', 'Describe the neighborhood characteristics...');
         case 'emplacement':
@@ -253,7 +253,7 @@ export default function AppraisalSectionForm({
         case 'highest_best_use':
           return renderNarrativeSection('content', 'Highest and best use analysis...');
         case 'direct_comparison_approach':
-          return <DirectComparisonForm data={formData} onChange={onChange} subjectPropertyId={subjectPropertyId} subjectPropertyType={subjectPropertyType || undefined} reloadTrigger={reloadTrigger} />;
+          return <DirectComparisonForm data={formData} onChange={onChange} subjectPropertyId={subjectPropertyId} subjectPropertyType={subjectPropertyType || undefined} reloadTrigger={reloadTrigger} appraisalId={appraisalData?.id} />;
         case 'cost_approach':
           return renderNarrativeSection('content', 'Cost approach analysis...');
         case 'income_approach':

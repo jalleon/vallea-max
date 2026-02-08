@@ -162,6 +162,10 @@ export interface Property {
   // Used to protect official municipal data from being overwritten by MLS imports
   field_sources?: Record<string, string>
 
+  // Geocoding
+  latitude?: number
+  longitude?: number
+
   created_at: Date
   updated_at: Date
 }

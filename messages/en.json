@@ -210,7 +210,11 @@
       "mergeOption": "Merge with existing",
       "mergeDescription": "New data will be merged with the existing property",
       "createDuplicateOption": "Create duplicate",
-      "createDuplicateDescription": "A new property will be created with the same information"
+      "createDuplicateDescription": "A new property will be created with the same information",
+      "mergeButton": "Merge",
+      "createDuplicateButton": "Create Duplicate",
+      "propertyType": "Type",
+      "propertyPrice": "Price"
     },
 
     "form": {
@@ -526,6 +530,33 @@
     "empty": {
       "noProperties": "No properties found",
       "addFirstProperty": "Add your first property to get started."
+    },
+
+    "map": {
+      "viewTable": "Table view",
+      "viewMap": "Map view",
+      "noCoordinates": "No geocoded properties to display on the map.",
+      "propertiesOnMap": "{count} properties on map",
+      "geocodeAll": "Geocode All",
+      "geocodeComplete": "Geocoded {geocoded} of {total} properties",
+      "geocodeFailed": "Geocoding failed"
+    },
+
+    "comps": {
+      "addToComps": "Add to Comps",
+      "addToCompsList": "Add to Comparable List",
+      "selectAppraisal": "Select an appraisal",
+      "selectListType": "List type",
+      "adding": "Adding {count} properties",
+      "alreadyInList": "{count} already in this list",
+      "addToList": "Add to List",
+      "addedSuccess": "{count} properties added to {listType} for {appraisal}",
+      "cancel": "Cancel",
+      "direct_comparison": "Direct Comparison",
+      "direct_capitalization": "Direct Capitalization",
+      "land": "Land Comparables",
+      "commercial_lease": "Commercial Leases",
+      "residential_lease": "Residential Leases"
     }
   },
 
@@ -1328,6 +1359,16 @@
   },
 
   "evaluations": {
+    "comps": {
+      "loadFromList": "Load from List",
+      "comparableList": "Comparable List",
+      "noListYet": "No comparables have been shortlisted yet.",
+      "goToLibrary": "Go to Library",
+      "loadSelected": "Load Selected",
+      "alreadyLoaded": "Already loaded",
+      "cancel": "Cancel",
+      "selected": "{count} selected"
+    },
     "title": "Appraisals",
     "subtitle": "Create and manage your RPS, NAS and custom appraisals",
     "createNew": "New Appraisal",

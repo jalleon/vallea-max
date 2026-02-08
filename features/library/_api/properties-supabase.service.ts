@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase/client'
 import { Property, PropertyCreateInput } from '../types/property.types'
 import { Database } from '@/types/database.types'
+import { geocodeAndUpdateProperty } from './geocoding.service'
 
 type PropertyRow = Database['public']['Tables']['properties']['Row']
 type FloorAreaRow = Database['public']['Tables']['floor_areas']['Row']
@@ -113,6 +114,10 @@ class PropertiesSupabaseService {
 
       // Field source tracking
       field_sources: data.field_sources as any,
+
+      // Geocoding
+      latitude: data.latitude || undefined,
+      longitude: data.longitude || undefined,
 
       created_at: new Date(data.created_at!),
       updated_at: new Date(data.updated_at!),
@@ -298,6 +303,15 @@ class PropertiesSupabaseService {
       }
     }
 
+    // Fire-and-forget geocoding
+    geocodeAndUpdateProperty(
+      property.id,
+      cleanedData.adresse || '',
+      cleanedData.ville || undefined,
+      cleanedData.code_postal || undefined,
+      cleanedData.province || undefined
+    ).catch(() => {})
+
     // Fetch the complete property with floor_areas
     return this.getProperty(property.id)
   }
@@ -362,6 +376,17 @@ class PropertiesSupabaseService {
           console.error('Error updating floor areas:', floorAreasError)
         }
       }
+    }
+
+    // Re-geocode if address fields changed
+    if (input.adresse || input.ville || input.code_postal || input.province) {
+      geocodeAndUpdateProperty(
+        id,
+        (property as any).adresse || '',
+        (property as any).ville || undefined,
+        (property as any).code_postal || undefined,
+        (property as any).province || undefined
+      ).catch(() => {})
     }
 
     // Fetch the complete property with floor_areas

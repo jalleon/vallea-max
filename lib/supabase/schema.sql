@@ -96,8 +96,26 @@ CREATE TABLE properties (
     )
   ) STORED,
 
+  -- Geocoding
+  latitude DOUBLE PRECISION,
+  longitude DOUBLE PRECISION,
+
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Comparable lists (shortlists of properties tied to appraisals)
+CREATE TABLE comparable_lists (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  organization_id UUID NOT NULL REFERENCES organizations(id),
+  created_by UUID NOT NULL REFERENCES auth.users(id),
+  appraisal_id UUID NOT NULL REFERENCES appraisals(id) ON DELETE CASCADE,
+  list_type TEXT NOT NULL,
+  name TEXT,
+  items JSONB NOT NULL DEFAULT '[]',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (appraisal_id, list_type)
 );
 
 -- Appraisals
@@ -129,25 +147,6 @@ CREATE TABLE appraisals (
   completed_at TIMESTAMPTZ
 );
 
--- Comparables linked to appraisals
-CREATE TABLE comparables (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  appraisal_id UUID REFERENCES appraisals(id) ON DELETE CASCADE,
-  property_id UUID REFERENCES properties(id),
-
-  -- Adjustments data
-  adjustments JSONB DEFAULT '{}',
-
-  -- Calculated values
-  adjusted_value DECIMAL(12,2),
-  weight DECIMAL(3,2), -- Weight in final calculation
-
-  -- Notes
-  notes TEXT,
-
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
 -- Activity log for dashboard
 CREATE TABLE activity_log (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -170,7 +169,6 @@ CREATE INDEX idx_appraisals_org ON appraisals(organization_id);
 CREATE INDEX idx_appraisals_appraiser ON appraisals(appraiser_id);
 CREATE INDEX idx_appraisals_status ON appraisals(status);
 CREATE INDEX idx_appraisals_type ON appraisals(type);
-CREATE INDEX idx_comparables_appraisal ON comparables(appraisal_id);
 CREATE INDEX idx_activity_org ON activity_log(organization_id);
 CREATE INDEX idx_activity_user ON activity_log(user_id);
 
@@ -180,7 +178,6 @@ ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE field_history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE properties ENABLE ROW LEVEL SECURITY;
 ALTER TABLE appraisals ENABLE ROW LEVEL SECURITY;
-ALTER TABLE comparables ENABLE ROW LEVEL SECURITY;
 ALTER TABLE activity_log ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for Organizations
@@ -259,23 +256,6 @@ CREATE POLICY "Admins delete org appraisals" ON appraisals
   FOR DELETE USING (
     organization_id = (SELECT organization_id FROM users WHERE id = auth.uid()) AND
     (SELECT role FROM users WHERE id = auth.uid()) = 'admin'
-  );
-
--- RLS Policies for Comparables
-CREATE POLICY "Users see appraisal comparables" ON comparables
-  FOR SELECT USING (
-    appraisal_id IN (
-      SELECT id FROM appraisals
-      WHERE organization_id = (SELECT organization_id FROM users WHERE id = auth.uid())
-    )
-  );
-
-CREATE POLICY "Users manage appraisal comparables" ON comparables
-  FOR ALL USING (
-    appraisal_id IN (
-      SELECT id FROM appraisals
-      WHERE organization_id = (SELECT organization_id FROM users WHERE id = auth.uid())
-    )
   );
 
 -- RLS Policies for Activity Log

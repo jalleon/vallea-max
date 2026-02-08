@@ -22,7 +22,10 @@ import {
   InputLabel,
   alpha
 } from '@mui/material';
-import { Add, Delete, Search } from '@mui/icons-material';
+import { Add, Delete, Search, PlaylistPlay } from '@mui/icons-material';
+import { Badge } from '@mui/material';
+import LoadFromListDialog from './LoadFromListDialog';
+import { comparableListsService } from '@/features/library/_api/comparable-lists.service';
 import { AgGridReact } from 'ag-grid-react';
 import { ColDef, CellValueChangedEvent, ModuleRegistry, AllCommunityModule, ColumnResizedEvent, ICellRendererParams } from 'ag-grid-community';
 import 'ag-grid-community/styles/ag-grid.css';
@@ -70,6 +73,17 @@ export default function DirectComparisonSectionContent({
   const [libraryProperties, setLibraryProperties] = useState<any[]>([]);
   const [propertySearchQuery, setPropertySearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [loadFromListOpen, setLoadFromListOpen] = useState(false);
+  const [compListCount, setCompListCount] = useState(0);
+
+  // Fetch comp list count for badge
+  useEffect(() => {
+    if (appraisalData?.id) {
+      comparableListsService.getByType(appraisalData.id, 'direct_comparison')
+        .then(list => setCompListCount(list?.items?.length || 0))
+        .catch(() => {});
+    }
+  }, [appraisalData?.id]);
 
   // Status priority for sorting (Vendu first, then Sujet, then others)
   const STATUS_PRIORITY: Record<string, number> = {
@@ -503,6 +517,43 @@ export default function DirectComparisonSectionContent({
     return '';
   };
 
+  // Handle loading properties from comparable list
+  const handleLoadFromList = useCallback((properties: any[]) => {
+    let updatedData = [...comparisonGridData];
+    let currentNum = numComparables;
+
+    properties.forEach((property) => {
+      // Add a new column if needed
+      currentNum += 1;
+      const venteKey = `vente${currentNum}`;
+      updatedData = updatedData.map(row => ({
+        ...row,
+        [venteKey]: getDefaultValue(row.id)
+      }));
+
+      // Map property data to the new column
+      updatedData = updatedData.map(row => {
+        const newRow = { ...row };
+        switch (row.id) {
+          case '1': newRow[venteKey] = property.ville || ''; break;
+          case '2': newRow[venteKey] = property.adresse || ''; break;
+          case '4': newRow[venteKey] = property.type_propriete || ''; break;
+          case '5': newRow[venteKey] = property.numero_mls || ''; break;
+          case '6': newRow[venteKey] = property.date_vente || ''; break;
+          case '7': newRow[venteKey] = property.prix_vente ? `${Number(property.prix_vente).toLocaleString()} $` : ''; break;
+          case '10': newRow[venteKey] = property.superficie_terrain_m2 || property.superficie_terrain_pi2 || ''; break;
+          case '11': newRow[venteKey] = property.superficie_habitable_pi2 || property.aire_habitable_pi2 || ''; break;
+          case '13': newRow[venteKey] = property.annee_construction || ''; break;
+        }
+        return newRow;
+      });
+    });
+
+    setComparisonGridData(updatedData);
+    setNumComparables(currentNum);
+    setLoadFromListOpen(false);
+  }, [comparisonGridData, numComparables]);
+
   // Handle column resize and save to localStorage
   const handleColumnResized = useCallback((event: ColumnResizedEvent) => {
     if (event.finished && event.column) {
@@ -576,6 +627,19 @@ export default function DirectComparisonSectionContent({
             >
               Add Comparable
             </Button>
+            {appraisalData?.id && (
+              <Badge badgeContent={compListCount} color="primary" max={99}>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={<PlaylistPlay />}
+                  onClick={() => setLoadFromListOpen(true)}
+                  sx={{ borderRadius: 2, textTransform: 'none' }}
+                >
+                  Load from List
+                </Button>
+              </Badge>
+            )}
           </Box>
         </Box>
 
@@ -947,6 +1011,18 @@ export default function DirectComparisonSectionContent({
             </Button>
           </DialogActions>
         </Dialog>
+
+        {/* Load from Comparable List Dialog */}
+        {appraisalData?.id && (
+          <LoadFromListDialog
+            open={loadFromListOpen}
+            onClose={() => setLoadFromListOpen(false)}
+            appraisalId={appraisalData.id}
+            listType="direct_comparison"
+            onLoadProperties={handleLoadFromList}
+            existingPropertyIds={[]}
+          />
+        )}
       </Box>
     </Box>
   );

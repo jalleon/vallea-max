@@ -210,7 +210,11 @@
       "mergeOption": "Fusionner avec l'existante",
       "mergeDescription": "Les nouvelles données seront fusionnées avec la propriété existante",
       "createDuplicateOption": "Créer un doublon",
-      "createDuplicateDescription": "Une nouvelle propriété sera créée avec les mêmes informations"
+      "createDuplicateDescription": "Une nouvelle propriété sera créée avec les mêmes informations",
+      "mergeButton": "Fusionner",
+      "createDuplicateButton": "Créer un doublon",
+      "propertyType": "Type",
+      "propertyPrice": "Prix"
     },
 
     "form": {
@@ -526,6 +530,33 @@
     "empty": {
       "noProperties": "Aucune propriété trouvée",
       "addFirstProperty": "Ajoutez votre première propriété pour commencer."
+    },
+
+    "map": {
+      "viewTable": "Vue tableau",
+      "viewMap": "Vue carte",
+      "noCoordinates": "Aucune propriété géocodée à afficher sur la carte.",
+      "propertiesOnMap": "{count} propriétés sur la carte",
+      "geocodeAll": "Géocoder tout",
+      "geocodeComplete": "{geocoded} de {total} propriétés géocodées",
+      "geocodeFailed": "Échec du géocodage"
+    },
+
+    "comps": {
+      "addToComps": "Ajouter aux comparables",
+      "addToCompsList": "Ajouter à la liste de comparables",
+      "selectAppraisal": "Sélectionner une évaluation",
+      "selectListType": "Type de liste",
+      "adding": "Ajout de {count} propriétés",
+      "alreadyInList": "{count} déjà dans cette liste",
+      "addToList": "Ajouter à la liste",
+      "addedSuccess": "{count} propriétés ajoutées à {listType} pour {appraisal}",
+      "cancel": "Annuler",
+      "direct_comparison": "Comparaison directe",
+      "direct_capitalization": "Capitalisation directe",
+      "land": "Terrains comparables",
+      "commercial_lease": "Baux commerciaux",
+      "residential_lease": "Baux résidentiels"
     }
   },
 
@@ -1450,6 +1481,16 @@
   },
 
   "evaluations": {
+    "comps": {
+      "loadFromList": "Charger depuis la liste",
+      "comparableList": "Liste de comparables",
+      "noListYet": "Aucun comparable n'a encore été présélectionné.",
+      "goToLibrary": "Aller à la bibliothèque",
+      "loadSelected": "Charger la sélection",
+      "alreadyLoaded": "Déjà chargé",
+      "cancel": "Annuler",
+      "selected": "{count} sélectionné(s)"
+    },
     "title": "Évaluations",
     "subtitle": "Créez et gérez vos évaluations RPS, NAS et personnalisées",
     "createNew": "Nouvelle Évaluation",

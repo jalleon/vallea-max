@@ -43,17 +43,17 @@ export class DashboardService {
         console.warn('Appraisals table error (table may not exist):', appraisalsResult.error.message)
       }
 
-      // Get comparables created by this user (gracefully handle if table doesn't exist)
+      // Get comparable lists created by this user
       let myComparablesCount = 0
       const comparablesResult = await supabase
-        .from('comparables')
+        .from('comparable_lists')
         .select('*', { count: 'exact', head: true })
         .eq('created_by', userId)
 
       if (!comparablesResult.error) {
         myComparablesCount = comparablesResult.count || 0
       } else {
-        console.warn('Comparables table error (table may not exist):', comparablesResult.error.message)
+        console.warn('Comparable lists table error:', comparablesResult.error.message)
       }
 
       // Get recent activity from activity_log (gracefully handle if table doesn't exist)

@@ -62,14 +62,25 @@ import {
   Share,
   DeleteForever,
   Clear,
-  ExpandMore
+  ExpandMore,
+  Map as MapIcon,
+  TableChart,
+  PlaylistAdd
 } from '@mui/icons-material'
+import { ToggleButtonGroup, ToggleButton } from '@mui/material'
 import { MaterialDashboardLayout } from '../../../components/layout/MaterialDashboardLayout'
 import { PropertyView } from '../../../features/library/components/PropertyView'
 import { PropertyEdit } from '../../../features/library/components/PropertyEdit'
 import { Property, PropertyCreateInput } from '../../../features/library/types/property.types'
 import { propertiesSupabaseService as propertiesService } from '../../../features/library/_api/properties-supabase.service'
 import { ProtectedRoute } from '../../../components/auth/ProtectedRoute'
+import dynamic from 'next/dynamic'
+import AddToCompsDialog from '../../../features/library/components/AddToCompsDialog'
+
+const PropertyMapInner = dynamic(
+  () => import('../../../features/library/components/PropertyMapInner'),
+  { ssr: false, loading: () => <Box sx={{ height: 'calc(100vh - 350px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><CircularProgress /></Box> }
+)
 
 // Mock organization ID - in a real app this would come from auth context
 const MOCK_ORG_ID = 'mock-org-id'
@@ -187,6 +198,8 @@ export default function LibraryPage() {
   const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false)
   const [duplicateProperty, setDuplicateProperty] = useState<Property | null>(null)
   const [pendingPropertyData, setPendingPropertyData] = useState<PropertyCreateInput | null>(null)
+  const [viewMode, setViewMode] = useState<'table' | 'map'>('table')
+  const [addToCompsOpen, setAddToCompsOpen] = useState(false)
 
   // Load properties from database
   useEffect(() => {
@@ -563,18 +576,38 @@ export default function LibraryPage() {
                 {t('subtitle')}
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', flexWrap: 'wrap' }}>
               {selectedRows.length > 0 && (
-                <Button
-                  variant="outlined"
-                  color="error"
-                  startIcon={<DeleteForever />}
-                  onClick={handleDeleteSelected}
-                  sx={{ borderRadius: 3, whiteSpace: 'nowrap' }}
-                >
-                  {t('deleteSelected', { count: selectedRows.length })}
-                </Button>
+                <>
+                  <Button
+                    variant="outlined"
+                    startIcon={<PlaylistAdd />}
+                    onClick={() => setAddToCompsOpen(true)}
+                    sx={{ borderRadius: 3, whiteSpace: 'nowrap' }}
+                  >
+                    {t('comps.addToComps')} ({selectedRows.length})
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    startIcon={<DeleteForever />}
+                    onClick={handleDeleteSelected}
+                    sx={{ borderRadius: 3, whiteSpace: 'nowrap' }}
+                  >
+                    {t('deleteSelected', { count: selectedRows.length })}
+                  </Button>
+                </>
               )}
+              <ToggleButtonGroup
+                value={viewMode}
+                exclusive
+                onChange={(_, v) => v && setViewMode(v)}
+                size="small"
+                sx={{ borderRadius: 3 }}
+              >
+                <ToggleButton value="table" sx={{ px: 1.5 }}><TableChart fontSize="small" /></ToggleButton>
+                <ToggleButton value="map" sx={{ px: 1.5 }}><MapIcon fontSize="small" /></ToggleButton>
+              </ToggleButtonGroup>
               <Button
                 variant="outlined"
                 startIcon={<Download />}
@@ -814,8 +847,24 @@ export default function LibraryPage() {
           </Card>
         )}
 
-        {/* Properties Table */}
-        {!loading && !error && (
+        {/* Properties Table / Map */}
+        {!loading && !error && viewMode === 'map' && (
+          <Card sx={{ height: 'calc(100vh - 350px)', overflow: 'hidden' }}>
+            <PropertyMapInner
+              properties={properties.filter(p => {
+                const tp = tableProperties.find((t: any) => t.id === p.id)
+                return !!tp
+              })}
+              onViewProperty={(p) => {
+                setViewPropertyIndex(properties.indexOf(p))
+                setViewProperty(p)
+              }}
+              onEditProperty={(p) => handleEdit({ id: p.id })}
+            />
+          </Card>
+        )}
+
+        {!loading && !error && viewMode === 'table' && (
           <Card>
             <TableContainer sx={{ maxHeight: 'calc(100vh - 350px)' }}>
               <Table stickyHeader>
@@ -1270,6 +1319,18 @@ export default function LibraryPage() {
         >
           <Add />
         </Fab>
+
+        {/* Add to Comps Dialog */}
+        <AddToCompsDialog
+          open={addToCompsOpen}
+          onClose={() => setAddToCompsOpen(false)}
+          selectedProperties={properties.filter(p => selectedRows.includes(p.id))}
+          onSuccess={(msg) => {
+            showSnackbar(msg)
+            setSelectedRows([])
+            setAddToCompsOpen(false)
+          }}
+        />
 
         {/* Snackbar for notifications */}
         <Snackbar
