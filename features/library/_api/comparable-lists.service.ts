@@ -86,6 +86,20 @@ export const comparableListsService = {
       .eq('id', existing.id)
   },
 
+  updateItems: async (
+    appraisalId: string,
+    listType: ComparableListType,
+    items: ComparableListItem[]
+  ): Promise<void> => {
+    const existing = await comparableListsService.getByType(appraisalId, listType)
+    if (!existing) return
+
+    await supabase
+      .from('comparable_lists')
+      .update({ items: items as any, updated_at: new Date().toISOString() })
+      .eq('id', existing.id)
+  },
+
   delete: async (id: string): Promise<void> => {
     const { error } = await supabase.from('comparable_lists').delete().eq('id', id)
     if (error) throw error

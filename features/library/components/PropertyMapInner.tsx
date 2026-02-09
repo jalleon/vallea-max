@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useCallback, useState } from 'react'
+import { useEffect, useRef, useCallback, useState, useMemo } from 'react'
 import { Box, Typography, ToggleButtonGroup, ToggleButton } from '@mui/material'
 import { Map as MapIconMui, Satellite, Terrain, Layers } from '@mui/icons-material'
 import { useTranslations } from 'next-intl'
@@ -41,17 +41,26 @@ interface PropertyMapInnerProps {
   properties: Property[]
   onViewProperty?: (property: Property) => void
   onEditProperty?: (property: Property) => void
+  onAddToComps?: (property: Property) => void
+  selectable?: boolean
+  selectedPropertyIds?: string[]
+  onSelectionChange?: (ids: string[]) => void
+  highlightedPropertyIds?: string[]
 }
 
-export default function PropertyMapInner({ properties, onViewProperty, onEditProperty }: PropertyMapInnerProps) {
+export default function PropertyMapInner({ properties, onViewProperty, onEditProperty, onAddToComps, selectable, selectedPropertyIds = [], onSelectionChange, highlightedPropertyIds }: PropertyMapInnerProps) {
   const t = useTranslations('library')
   const mapContainer = useRef<HTMLDivElement>(null)
   const map = useRef<mapboxgl.Map | null>(null)
   const popupRef = useRef<mapboxgl.Popup | null>(null)
   const [mapStyle, setMapStyle] = useState<keyof typeof MAP_STYLES>('streets')
 
-  // Properties with valid coordinates
-  const geoProperties = properties.filter(p => p.latitude && p.longitude)
+  // Properties with valid coordinates - stable reference unless IDs change
+  const geoProperties = useMemo(() =>
+    properties.filter(p => p.latitude && p.longitude),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [properties.map(p => p.id).join(',')]
+  )
 
   const buildGeoJSON = useCallback((): GeoJSON.FeatureCollection => ({
     type: 'FeatureCollection',
@@ -69,10 +78,12 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
         type: p.type_propriete || '',
         price: p.prix_vente || 0,
         status: p.status || '',
-        color: getTypeColor(p.type_propriete)
+        color: getTypeColor(p.type_propriete),
+        selected: selectedPropertyIds.includes(p.id) ? 'true' : 'false',
+        highlighted: !highlightedPropertyIds ? 'none' : highlightedPropertyIds.includes(p.id) ? 'yes' : 'no'
       }
     }))
-  }), [geoProperties])
+  }), [geoProperties, selectedPropertyIds, highlightedPropertyIds])
 
   const addLayers = useCallback((m: mapboxgl.Map) => {
     m.addSource('properties', {
@@ -114,10 +125,32 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
       source: 'properties',
       filter: ['!', ['has', 'point_count']],
       paint: {
-        'circle-color': ['get', 'color'],
-        'circle-radius': 8,
-        'circle-stroke-width': 2,
-        'circle-stroke-color': '#ffffff'
+        'circle-color': ['case',
+          ['==', ['get', 'selected'], 'true'], '#2196F3',
+          ['==', ['get', 'highlighted'], 'no'], '#BDBDBD',
+          ['get', 'color']
+        ],
+        'circle-radius': ['case',
+          ['==', ['get', 'selected'], 'true'], 11,
+          ['==', ['get', 'highlighted'], 'yes'], 10,
+          ['==', ['get', 'highlighted'], 'no'], 5,
+          8
+        ],
+        'circle-stroke-width': ['case',
+          ['==', ['get', 'selected'], 'true'], 3,
+          ['==', ['get', 'highlighted'], 'yes'], 3,
+          ['==', ['get', 'highlighted'], 'no'], 1,
+          2
+        ],
+        'circle-stroke-color': ['case',
+          ['==', ['get', 'selected'], 'true'], '#1565C0',
+          ['==', ['get', 'highlighted'], 'yes'], '#FFB300',
+          '#ffffff'
+        ],
+        'circle-opacity': ['case',
+          ['==', ['get', 'highlighted'], 'no'], 0.35,
+          1
+        ]
       }
     })
 
@@ -132,10 +165,22 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
       })
     })
 
-    // Click marker → popup
+    // Click marker → toggle selection + show popup
     m.on('click', 'unclustered-point', (e) => {
       if (!e.features?.length) return
       const props = e.features[0].properties!
+
+      // Toggle selection if selectable
+      if (selectable && onSelectionChange) {
+        const id = props.id as string
+        const isSelected = selectedPropertyIds.includes(id)
+        onSelectionChange(isSelected
+          ? selectedPropertyIds.filter(pid => pid !== id)
+          : [...selectedPropertyIds, id]
+        )
+      }
+
+      // Show popup
       const coords = (e.features[0].geometry as GeoJSON.Point).coordinates.slice() as [number, number]
       const price = props.price ? `$${Number(props.price).toLocaleString('fr-CA')}` : ''
 
@@ -150,6 +195,7 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
             <div style="margin-top: 8px; display: flex; gap: 6px;">
               <button onclick="window.__mapViewProperty('${props.id}')" style="padding: 4px 12px; font-size: 12px; border: 1px solid #ddd; border-radius: 6px; background: white; cursor: pointer;">View</button>
               <button onclick="window.__mapEditProperty('${props.id}')" style="padding: 4px 12px; font-size: 12px; border: none; border-radius: 6px; background: #667eea; color: white; cursor: pointer;">Edit</button>
+              <button onclick="window.__mapAddToComps('${props.id}')" style="padding: 4px 12px; font-size: 12px; border: none; border-radius: 6px; background: #4CAF50; color: white; cursor: pointer;">+ Comps</button>
             </div>
           </div>
         `)
@@ -166,7 +212,7 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
       geoProperties.forEach(p => bounds.extend([p.longitude!, p.latitude!]))
       m.fitBounds(bounds, { padding: 60, maxZoom: 15 })
     }
-  }, [buildGeoJSON, geoProperties])
+  }, [buildGeoJSON, geoProperties, selectable, selectedPropertyIds, onSelectionChange])
 
   // Initialize map
   useEffect(() => {
@@ -223,25 +269,36 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
       const p = properties.find(prop => prop.id === id)
       if (p && onEditProperty) onEditProperty(p)
     }
+    ;(window as any).__mapAddToComps = (id: string) => {
+      const p = properties.find(prop => prop.id === id)
+      if (p && onAddToComps) onAddToComps(p)
+    }
     return () => {
       delete (window as any).__mapViewProperty
       delete (window as any).__mapEditProperty
+      delete (window as any).__mapAddToComps
     }
-  }, [properties, onViewProperty, onEditProperty])
+  }, [properties, onViewProperty, onEditProperty, onAddToComps])
 
-  // Update map data when properties change
+  // Update map data when properties, selection, or highlight change
   useEffect(() => {
     if (!map.current?.isStyleLoaded()) return
     const source = map.current.getSource('properties') as mapboxgl.GeoJSONSource | undefined
     if (source) {
       source.setData(buildGeoJSON())
-      if (geoProperties.length > 0) {
-        const bounds = new mapboxgl.LngLatBounds()
-        geoProperties.forEach(p => bounds.extend([p.longitude!, p.latitude!]))
-        map.current!.fitBounds(bounds, { padding: 60, maxZoom: 15 })
-      }
     }
-  }, [geoProperties, buildGeoJSON])
+  }, [selectedPropertyIds, highlightedPropertyIds, buildGeoJSON])
+
+  // Fit bounds when properties change (not on selection change)
+  useEffect(() => {
+    if (!map.current?.isStyleLoaded()) return
+    const source = map.current.getSource('properties') as mapboxgl.GeoJSONSource | undefined
+    if (source && geoProperties.length > 0) {
+      const bounds = new mapboxgl.LngLatBounds()
+      geoProperties.forEach(p => bounds.extend([p.longitude!, p.latitude!]))
+      map.current!.fitBounds(bounds, { padding: 60, maxZoom: 15 })
+    }
+  }, [geoProperties])
 
   if (!mapboxgl.accessToken) {
     return (
@@ -292,6 +349,20 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
           {t('map.propertiesOnMap', { count: geoProperties.length })}
         </Typography>
       </Box>
+
+      {selectable && (
+        <Box sx={{
+          position: 'absolute', bottom: 8, right: 8,
+          bgcolor: 'rgba(255,255,255,0.95)', borderRadius: 1, px: 1.5, py: 0.5
+        }}>
+          <Typography variant="caption" color={selectedPropertyIds.length > 0 ? 'primary' : 'text.secondary'} fontWeight={selectedPropertyIds.length > 0 ? 600 : 400}>
+            {selectedPropertyIds.length > 0
+              ? t('map.selectedOnMap', { count: selectedPropertyIds.length })
+              : t('map.clickToSelect')
+            }
+          </Typography>
+        </Box>
+      )}
     </Box>
   )
 }

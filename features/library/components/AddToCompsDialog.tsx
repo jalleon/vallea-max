@@ -5,11 +5,11 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions, Button,
   TextField, MenuItem, Typography, Box, Chip, Alert, CircularProgress
 } from '@mui/material'
-import { PlaylistAdd } from '@mui/icons-material'
+import { PlaylistAdd, Settings } from '@mui/icons-material'
 import { useTranslations } from 'next-intl'
 import { appraisalsService } from '@/features/evaluations/_api/appraisals.service'
 import { comparableListsService } from '../_api/comparable-lists.service'
-import { ComparableListType } from '../types/comparable-list.types'
+import { ComparableListType, ComparableList } from '../types/comparable-list.types'
 import { Property } from '../types/property.types'
 
 const LIST_TYPES: ComparableListType[] = [
@@ -25,9 +25,10 @@ interface AddToCompsDialogProps {
   onClose: () => void
   selectedProperties: Property[]
   onSuccess: (message: string) => void
+  onManageList?: (appraisalId: string, listType: ComparableListType) => void
 }
 
-export default function AddToCompsDialog({ open, onClose, selectedProperties, onSuccess }: AddToCompsDialogProps) {
+export default function AddToCompsDialog({ open, onClose, selectedProperties, onSuccess, onManageList }: AddToCompsDialogProps) {
   const t = useTranslations('library.comps')
   const [appraisals, setAppraisals] = useState<any[]>([])
   const [selectedAppraisal, setSelectedAppraisal] = useState('')
@@ -35,17 +36,26 @@ export default function AddToCompsDialog({ open, onClose, selectedProperties, on
   const [loading, setLoading] = useState(false)
   const [loadingAppraisals, setLoadingAppraisals] = useState(false)
   const [error, setError] = useState('')
+  const [existingLists, setExistingLists] = useState<ComparableList[]>([])
 
   useEffect(() => {
     if (!open) return
     setLoadingAppraisals(true)
     setError('')
     setSelectedAppraisal('')
+    setExistingLists([])
     appraisalsService.getAll()
       .then(data => setAppraisals(data))
       .catch(() => setError('Failed to load appraisals'))
       .finally(() => setLoadingAppraisals(false))
   }, [open])
+
+  useEffect(() => {
+    if (!selectedAppraisal) { setExistingLists([]); return }
+    comparableListsService.getByAppraisal(selectedAppraisal)
+      .then(lists => setExistingLists(lists))
+      .catch(() => setExistingLists([]))
+  }, [selectedAppraisal])
 
   const handleSubmit = async () => {
     if (!selectedAppraisal) return
@@ -93,6 +103,38 @@ export default function AddToCompsDialog({ open, onClose, selectedProperties, on
             <MenuItem key={a.id} value={a.id}>{getAppraisalLabel(a)}</MenuItem>
           ))}
         </TextField>
+
+        {existingLists.length > 0 && (
+          <Box sx={{ mb: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+              <Typography variant="caption" color="text.secondary">
+                {t('existingLists')}
+              </Typography>
+              {onManageList && selectedAppraisal && (
+                <Button
+                  size="small"
+                  startIcon={<Settings sx={{ fontSize: 14 }} />}
+                  onClick={() => onManageList(selectedAppraisal, listType)}
+                  sx={{ fontSize: '0.7rem', textTransform: 'none', minHeight: 0, py: 0 }}
+                >
+                  {t('manageLists')}
+                </Button>
+              )}
+            </Box>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              {existingLists.map(list => (
+                <Chip
+                  key={list.id}
+                  label={`${t(list.list_type)} (${list.items.length})`}
+                  variant={listType === list.list_type ? 'filled' : 'outlined'}
+                  color={listType === list.list_type ? 'primary' : 'default'}
+                  onClick={() => setListType(list.list_type)}
+                  size="small"
+                />
+              ))}
+            </Box>
+          </Box>
+        )}
 
         <TextField
           select

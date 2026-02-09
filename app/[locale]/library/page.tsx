@@ -65,7 +65,8 @@ import {
   ExpandMore,
   Map as MapIcon,
   TableChart,
-  PlaylistAdd
+  PlaylistAdd,
+  Settings
 } from '@mui/icons-material'
 import { ToggleButtonGroup, ToggleButton } from '@mui/material'
 import { MaterialDashboardLayout } from '../../../components/layout/MaterialDashboardLayout'
@@ -76,6 +77,10 @@ import { propertiesSupabaseService as propertiesService } from '../../../feature
 import { ProtectedRoute } from '../../../components/auth/ProtectedRoute'
 import dynamic from 'next/dynamic'
 import AddToCompsDialog from '../../../features/library/components/AddToCompsDialog'
+import ManageCompsDialog from '../../../features/library/components/ManageCompsDialog'
+import { comparableListsService } from '../../../features/library/_api/comparable-lists.service'
+import { ComparableList } from '../../../features/library/types/comparable-list.types'
+import { appraisalsService } from '../../../features/evaluations/_api/appraisals.service'
 
 const PropertyMapInner = dynamic(
   () => import('../../../features/library/components/PropertyMapInner'),
@@ -200,6 +205,13 @@ export default function LibraryPage() {
   const [pendingPropertyData, setPendingPropertyData] = useState<PropertyCreateInput | null>(null)
   const [viewMode, setViewMode] = useState<'table' | 'map'>('table')
   const [addToCompsOpen, setAddToCompsOpen] = useState(false)
+  const [manageCompsOpen, setManageCompsOpen] = useState(false)
+  const [manageAppraisalId, setManageAppraisalId] = useState('')
+  const [manageListType, setManageListType] = useState<'direct_comparison' | 'direct_capitalization' | 'land' | 'commercial_lease' | 'residential_lease'>('direct_comparison')
+  const [singleCompsProperty, setSingleCompsProperty] = useState<Property | null>(null)
+  const [mapListFilter, setMapListFilter] = useState<ComparableList | null>(null)
+  const [allComparableLists, setAllComparableLists] = useState<(ComparableList & { appraisalLabel: string })[]>([])
+  const [listsLoaded, setListsLoaded] = useState(false)
 
   // Load properties from database
   useEffect(() => {
@@ -217,6 +229,24 @@ export default function LibraryPage() {
       }
     }
   }, [propertyIdParam, properties])
+
+  // Load comparable lists for map filter dropdown
+  useEffect(() => {
+    if (viewMode !== 'map' || listsLoaded) return
+    appraisalsService.getAll().then(appraisals =>
+      Promise.all(appraisals.map((a: any) =>
+        comparableListsService.getByAppraisal(a.id).then(lists =>
+          lists.map(l => ({
+            ...l,
+            appraisalLabel: [a.appraisal_number, a.client_name, a.address].filter(Boolean).join(' - ') || a.id.slice(0, 8)
+          }))
+        )
+      ))
+    ).then(listsPerAppraisal => {
+      setAllComparableLists(listsPerAppraisal.flat())
+      setListsLoaded(true)
+    }).catch(() => setListsLoaded(true))
+  }, [viewMode, listsLoaded])
 
   // Keyboard shortcut handler
   useEffect(() => {
@@ -601,7 +631,7 @@ export default function LibraryPage() {
               <ToggleButtonGroup
                 value={viewMode}
                 exclusive
-                onChange={(_, v) => v && setViewMode(v)}
+                onChange={(_, v) => { if (v) { setViewMode(v); setSelectedRows([]) } }}
                 size="small"
                 sx={{ borderRadius: 3 }}
               >
@@ -849,7 +879,40 @@ export default function LibraryPage() {
 
         {/* Properties Table / Map */}
         {!loading && !error && viewMode === 'map' && (
-          <Card sx={{ height: 'calc(100vh - 350px)', overflow: 'hidden' }}>
+          <Card sx={{ height: 'calc(100vh - 350px)', overflow: 'hidden', position: 'relative' }}>
+            {/* List filter dropdown */}
+            {allComparableLists.length > 0 && (
+              <Box sx={{ position: 'absolute', top: 10, left: 280, zIndex: 2 }}>
+                <TextField
+                  select
+                  size="small"
+                  value={mapListFilter?.id || ''}
+                  onChange={(e) => {
+                    if (!e.target.value) { setMapListFilter(null); return }
+                    const list = allComparableLists.find(l => l.id === e.target.value)
+                    setMapListFilter(list || null)
+                  }}
+                  sx={{
+                    minWidth: 200,
+                    bgcolor: 'rgba(255,255,255,0.95)',
+                    borderRadius: 2,
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+                    '& .MuiOutlinedInput-root': { borderRadius: 2 },
+                    '& .MuiSelect-select': { py: 0.7, fontSize: '0.8rem' }
+                  }}
+                  InputProps={{
+                    startAdornment: <FilterList sx={{ fontSize: 16, mr: 0.5, color: mapListFilter ? 'primary.main' : 'text.secondary' }} />
+                  }}
+                >
+                  <MenuItem value="">{t('map.allProperties')}</MenuItem>
+                  {allComparableLists.map(list => (
+                    <MenuItem key={list.id} value={list.id} sx={{ fontSize: '0.8rem' }}>
+                      {list.appraisalLabel} - {t(`comps.${list.list_type}`)} ({list.items.length})
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Box>
+            )}
             <PropertyMapInner
               properties={properties.filter(p => {
                 return filteredProperties.some((fp: any) => fp.id === p.id)
@@ -859,6 +922,15 @@ export default function LibraryPage() {
                 setViewProperty(p)
               }}
               onEditProperty={(p) => handleEdit({ id: p.id })}
+              onAddToComps={(p) => {
+                setSingleCompsProperty(p)
+                setSelectedRows([p.id])
+                setAddToCompsOpen(true)
+              }}
+              selectable
+              selectedPropertyIds={selectedRows}
+              onSelectionChange={setSelectedRows}
+              highlightedPropertyIds={mapListFilter ? mapListFilter.items.map(i => i.property_id) : undefined}
             />
           </Card>
         )}
@@ -1322,14 +1394,32 @@ export default function LibraryPage() {
         {/* Add to Comps Dialog */}
         <AddToCompsDialog
           open={addToCompsOpen}
-          onClose={() => setAddToCompsOpen(false)}
-          selectedProperties={properties.filter(p => selectedRows.includes(p.id))}
+          onClose={() => { setAddToCompsOpen(false); setSingleCompsProperty(null) }}
+          selectedProperties={singleCompsProperty ? [singleCompsProperty] : properties.filter(p => selectedRows.includes(p.id))}
           onSuccess={(msg) => {
             showSnackbar(msg)
             setSelectedRows([])
+            setSingleCompsProperty(null)
             setAddToCompsOpen(false)
+            setListsLoaded(false) // refresh lists for filter dropdown
+          }}
+          onManageList={(appraisalId, listType) => {
+            setAddToCompsOpen(false)
+            setManageAppraisalId(appraisalId)
+            setManageListType(listType)
+            setManageCompsOpen(true)
           }}
         />
+
+        {/* Manage Comps Dialog */}
+        {manageAppraisalId && (
+          <ManageCompsDialog
+            open={manageCompsOpen}
+            onClose={() => setManageCompsOpen(false)}
+            appraisalId={manageAppraisalId}
+            listType={manageListType}
+          />
+        )}
 
         {/* Snackbar for notifications */}
         <Snackbar

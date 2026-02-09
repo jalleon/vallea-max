@@ -539,7 +539,10 @@
       "propertiesOnMap": "{count} propriétés sur la carte",
       "geocodeAll": "Géocoder tout",
       "geocodeComplete": "{geocoded} de {total} propriétés géocodées",
-      "geocodeFailed": "Échec du géocodage"
+      "geocodeFailed": "Échec du géocodage",
+      "selectedOnMap": "{count} sélectionnées",
+      "clickToSelect": "Cliquez sur les marqueurs pour sélectionner",
+      "allProperties": "Toutes les propriétés"
     },
 
     "comps": {
@@ -552,11 +555,18 @@
       "addToList": "Ajouter à la liste",
       "addedSuccess": "{count} propriétés ajoutées à {listType} pour {appraisal}",
       "cancel": "Annuler",
+      "close": "Fermer",
       "direct_comparison": "Comparaison directe",
       "direct_capitalization": "Capitalisation directe",
       "land": "Terrains comparables",
       "commercial_lease": "Baux commerciaux",
-      "residential_lease": "Baux résidentiels"
+      "residential_lease": "Baux résidentiels",
+      "existingLists": "Listes existantes",
+      "manageLists": "Gérer",
+      "manageCompsList": "Gérer la liste de comparables",
+      "emptyList": "Cette liste est vide",
+      "goToLibrary": "Aller à la bibliothèque",
+      "itemsCount": "{count} éléments"
     }
   },
 

@@ -1,328 +1,131 @@
 # Feature: Property Library Map View
 
+## Status: Implemented
+
+Merged to `main` on 2026-02-08 via `feature/library` branch.
+
+---
+
 ## Overview
 
-Add an interactive Mapbox map view to the Property Library module, allowing users to visualize all their properties geographically and filter them using the existing filter controls.
+Interactive Mapbox map view in the Property Library module. Users can visualize properties geographically, toggle between table and map views, switch map styles, and select properties directly on the map.
 
 ---
 
-## Goals
+## What Was Built
 
-1. **Visualize properties on a map** - See all properties as markers on an interactive Mapbox map
-2. **Filter integration** - Existing filters (search, type, city, date range, price range, year range) control which markers appear on the map
-3. **Toggle between views** - Users can switch between the current table view and the new map view
-4. **Property interaction** - Click a marker to see property details; navigate to full property view
-5. **Geocode properties** - Store lat/lng coordinates on each property for fast, reliable map rendering
+### Database Changes
 
----
-
-## Current State
-
-| Aspect | Status |
-|--------|--------|
-| Property data model | No `latitude`/`longitude` fields |
-| Map library | None installed (only Google Maps Embed iframe in PropertyView) |
-| Geocoding | None - Google Maps iframe handles it implicitly |
-| Filters | Fully implemented client-side (search, type, city, date/price/year ranges) |
-| Map view | Does not exist |
-
----
-
-## Technical Design
-
-### 1. Database Changes
-
-**Add geocoding columns to `properties` table:**
+**Migration:** `supabase/migrations/20260207000100_add_geocoding_to_properties.sql`
 
 ```sql
-ALTER TABLE properties
-  ADD COLUMN latitude DOUBLE PRECISION,
-  ADD COLUMN longitude DOUBLE PRECISION;
-
--- Index for spatial queries (optional, for future radius search)
-CREATE INDEX idx_properties_coordinates
-  ON properties (latitude, longitude)
-  WHERE latitude IS NOT NULL AND longitude IS NOT NULL;
+ALTER TABLE properties ADD COLUMN latitude DOUBLE PRECISION;
+ALTER TABLE properties ADD COLUMN longitude DOUBLE PRECISION;
 ```
 
-**Update TypeScript types** in `features/library/types/property.types.ts`:
+**Types:** `latitude` and `longitude` added to `Property` interface in `features/library/types/property.types.ts`.
 
-```typescript
-// Add to Property interface
-latitude?: number;
-longitude?: number;
-```
+**Service transform:** `properties-supabase.service.ts` maps lat/lng in `transformToProperty()`.
 
-**Update service transform** in `features/library/_api/properties-supabase.service.ts`:
+---
 
-```typescript
-// In transformToProperty()
-latitude: row.latitude ?? undefined,
-longitude: row.longitude ?? undefined,
+### Geocoding
+
+**Service:** `features/library/_api/geocoding.service.ts`
+
+| Function | Purpose |
+|----------|---------|
+| `geocodeAddress(address, city, postalCode, province)` | Returns `{lat, lng}` or `null` via Mapbox Geocoding API |
+| `geocodeAndUpdateProperty(propertyId, ...)` | Geocodes and saves to DB |
+| `geocodeAllProperties(onProgress?)` | Backfills all properties missing lat/lng |
+
+**Auto-geocoding:** Fire-and-forget calls in `createProperty()` and `updateProperty()` in `properties-supabase.service.ts`.
+
+**Backfill script:** `scripts/backfill-geocoding.mjs` - One-time Node.js script using `SUPABASE_SERVICE_ROLE_KEY` to geocode all existing properties.
+
+```bash
+SUPABASE_SERVICE_ROLE_KEY=your_key node scripts/backfill-geocoding.mjs
 ```
 
 ---
 
-### 2. Geocoding Strategy
+### Map Component
 
-**Library:** Mapbox Geocoding API (bundled with Mapbox account, consistent with map rendering)
+**File:** `features/library/components/PropertyMapInner.tsx`
 
-**When to geocode:**
-- **On property create/update** - If address fields change, geocode and store lat/lng
-- **Batch migration** - One-time script to geocode all existing properties that lack coordinates
+Loaded via `next/dynamic` with `ssr: false` (Mapbox requires browser APIs).
 
-**Implementation:**
+**Features:**
+- Mapbox GL JS map centered on Montreal (-73.5673, 45.5017)
+- GeoJSON source with clustering (radius 50, max zoom 14)
+- Color-coded markers by property type (TYPE_COLORS map)
+- 4 map styles: Streets (default), Satellite, Outdoors, Light - toggle in top-left
+- Click marker: popup with address, city, price, View/Edit buttons
+- Auto-fit bounds to visible markers
+- ResizeObserver for sidebar collapse handling
 
-```
-features/library/_api/geocoding.service.ts
-```
-
-- `geocodeAddress(address, city, postalCode, province)` → `{ lat, lng } | null`
-- Called from `createProperty()` and `updateProperty()` in the service layer
-- Uses Mapbox Geocoding API: `https://api.mapbox.com/geocoding/v5/mapbox.places/{query}.json`
-- Rate-limited and cached to avoid excessive API calls
-- Falls back gracefully if geocoding fails (property still saves, just without coordinates)
-
-**Batch migration endpoint (API route):**
-
-```
-app/api/geocode-properties/route.ts
-```
-
-- Server-side route that fetches all properties without coordinates
-- Geocodes them in batches (respecting Mapbox rate limits)
-- Updates the database with lat/lng
-- Protected by auth (admin only)
+**Selectable mode** (added later):
+- Props: `selectable`, `selectedPropertyIds`, `onSelectionChange`
+- Click markers to toggle selection (blue highlight, larger radius)
+- Bottom-right overlay shows selection count or "Click markers to select" hint
+- Selected markers: blue (#2196F3) with dark blue stroke (#1565C0), radius 11
 
 ---
 
-### 3. Mapbox Integration
+### Library Page Integration
 
-**Package:** `mapbox-gl` + `@types/mapbox-gl`
+**File:** `app/[locale]/library/page.tsx`
 
-**Access token:** Stored as `NEXT_PUBLIC_MAPBOX_TOKEN` in `.env.local` (public token, safe for client-side per Mapbox docs - restricted by URL referrer).
-
-**Map component:**
-
-```
-features/library/components/PropertyMap.tsx
-```
-
-**Responsibilities:**
-- Render a full-width Mapbox GL map
-- Accept filtered properties as props
-- Display each property as a marker (with clustering for dense areas)
-- Fit map bounds to visible markers when filters change
-- Show a popup on marker click with key property info
+- `viewMode` state: `'table' | 'map'`
+- ToggleButtonGroup with Table/Map icons in header
+- Map receives `filteredProperties` (respects all active filters)
+- `selectedRows` state works for both table checkboxes and map clicks
+- Selection clears on view mode switch
 
 ---
 
-### 4. UI Design
+### Environment Setup
 
-#### 4.1 View Toggle
-
-Add a toggle button group to the library page header (next to existing action buttons):
-
-```
-[Table icon] [Map icon]
-```
-
-- **Table view** (default) - Current behavior, no changes
-- **Map view** - Replaces the table area with the map component
-- Filters card remains visible and functional in both views
-- Active filter count badge shown on both views
-
-#### 4.2 Map View Layout
-
-```
-┌─────────────────────────────────────────────────┐
-│  Header: Title + Actions + [Table | Map] Toggle │
-├─────────────────────────────────────────────────┤
-│  Filters Card (same as current)                 │
-├─────────────────────────────────────────────────┤
-│                                                 │
-│              Mapbox Map (full width)             │
-│              ~500px height (desktop)             │
-│              ~400px height (mobile)              │
-│                                                 │
-│  ● Clustered markers                            │
-│  ● Click cluster → zoom in                      │
-│  ● Click marker → popup                         │
-│                                                 │
-├─────────────────────────────────────────────────┤
-│  Property count: "Showing X of Y properties"    │
-└─────────────────────────────────────────────────┘
-```
-
-#### 4.3 Marker Popup Content
-
-When a user clicks a property marker, show a compact popup:
-
-```
-┌──────────────────────────┐
-│ 123 Rue Principale       │
-│ Montréal, QC H2X 1A1    │
-│ Unifamiliale | $450,000  │
-│ [View] [Edit]            │
-└──────────────────────────┘
-```
-
-Fields shown:
-- Address (adresse)
-- City + postal code
-- Property type + sold price
-- Action buttons: View (opens PropertyView dialog), Edit (opens PropertyEdit dialog)
-
-#### 4.4 Marker Styling
-
-- **Color by property type** - Match the existing chip colors used in the table:
-  - Unifamiliale: blue
-  - Condo: purple
-  - Plex: orange
-  - Terrain: green
-  - Commercial: red
-  - Other: grey
-- **Cluster circles** - Show count, sized proportionally, neutral color
-
-#### 4.5 Empty/Edge States
-
-| State | Behavior |
-|-------|----------|
-| No properties have coordinates | Show map centered on Quebec with a message: "No properties to display. Geocode your properties to see them on the map." |
-| Filters return 0 results | Show empty map with message: "No properties match your filters." |
-| Single property | Center map on that property, appropriate zoom level |
-| All properties in same city | Fit bounds with padding, moderate zoom |
+1. Mapbox account at [mapbox.com](https://www.mapbox.com)
+2. Public access token in `.env.local`: `NEXT_PUBLIC_MAPBOX_TOKEN=pk.eyJ1...`
+3. Same token must be added to Vercel environment variables for production
+4. Mapbox token: `pk.eyJ1IjoidmFsZWFtYXgiLCJhIjoiY21sZTFmMjF3MWh4aTNlcHdkbDRxcjNodiJ9.JzSSbo3OazYEzCmGVyz8Tg`
 
 ---
 
-### 5. Filter Integration
+### Dependencies
 
-The map view reuses the **exact same filtered properties array** that currently feeds the table. No separate filtering logic needed.
-
-**Current flow (table):**
 ```
-allProperties → applyFilters(search, type, city, dates, prices, years) → filteredProperties → Table
-```
-
-**New flow (map):**
-```
-allProperties → applyFilters(search, type, city, dates, prices, years) → filteredProperties → PropertyMap
-```
-
-The `filteredProperties` array is passed as a prop to `PropertyMap`. When filters change, the map automatically updates markers and re-fits bounds.
-
----
-
-### 6. Clustering
-
-**Why:** Users may have hundreds of properties in the same area. Without clustering, markers overlap and become unusable.
-
-**Implementation:** Use Mapbox GL JS built-in clustering via GeoJSON source:
-
-```typescript
-map.addSource('properties', {
-  type: 'geojson',
-  data: propertiesGeoJSON,
-  cluster: true,
-  clusterMaxZoom: 14,
-  clusterRadius: 50
-});
-```
-
-**Behavior:**
-- Zoom out: Properties merge into clusters showing count
-- Zoom in: Clusters split into individual markers
-- Click cluster: Zoom to expand that cluster
-
----
-
-## File Changes Summary
-
-### New Files
-
-| File | Purpose |
-|------|---------|
-| `features/library/components/PropertyMap.tsx` | Map component with markers, clustering, popups |
-| `features/library/_api/geocoding.service.ts` | Mapbox geocoding service (address → lat/lng) |
-| `supabase/migrations/XXXXXX_add_property_coordinates.sql` | Database migration for lat/lng columns |
-| `app/api/geocode-properties/route.ts` | Batch geocoding API route (one-time migration) |
-
-### Modified Files
-
-| File | Changes |
-|------|---------|
-| `features/library/types/property.types.ts` | Add `latitude`, `longitude` fields |
-| `features/library/_api/properties-supabase.service.ts` | Add lat/lng to transform; geocode on create/update |
-| `app/[locale]/library/page.tsx` | Add view toggle (table/map), render PropertyMap when map view active |
-| `messages/fr.json` | Add `library.map.*` translation keys |
-| `messages/en.json` | Add `library.map.*` translation keys |
-| `package.json` | Add `mapbox-gl` dependency |
-
-### Translation Keys to Add
-
-```json
-{
-  "library": {
-    "map": {
-      "viewToggle": "View",
-      "tableView": "Table",
-      "mapView": "Map",
-      "noCoordinates": "No properties to display on the map. Properties need to be geocoded first.",
-      "noResults": "No properties match your current filters.",
-      "showing": "Showing {count} of {total} properties",
-      "geocodeAll": "Geocode All Properties",
-      "geocoding": "Geocoding in progress...",
-      "clusterCount": "{count} properties"
-    }
-  }
-}
+mapbox-gl: ^3.x
+@types/mapbox-gl: ^3.x
 ```
 
 ---
 
-## Implementation Order
+### Translation Keys
 
-| Phase | Task | Dependencies |
-|-------|------|-------------|
-| **1** | Add `latitude`/`longitude` to DB schema + types + service transform | None |
-| **2** | Install `mapbox-gl`, create `PropertyMap.tsx` with static markers | Phase 1 |
-| **3** | Add view toggle to library page, wire filtered properties to map | Phase 2 |
-| **4** | Create `geocoding.service.ts`, integrate into create/update flows | Phase 1 |
-| **5** | Build batch geocoding API route + trigger from UI | Phase 4 |
-| **6** | Add clustering, marker colors by type, popup interactions | Phase 2 |
-| **7** | Add i18n keys, test both languages, edge states | Phase 3 |
-| **8** | Polish: bounds fitting, responsive sizing, empty states | Phase 6 |
+`library.map.*` in both `messages/en.json` and `messages/fr.json`:
 
----
-
-## Environment Setup Required
-
-1. **Mapbox account** - Create at [mapbox.com](https://www.mapbox.com)
-2. **Access token** - Generate a public token with:
-   - Scopes: `styles:read`, `fonts:read`, `datasets:read`
-   - URL restrictions: `localhost:*`, `valeamax.com`, `*.vercel.app`
-3. **Environment variable** - Add `NEXT_PUBLIC_MAPBOX_TOKEN` to `.env.local` and Vercel dashboard
+| Key | EN | FR |
+|-----|----|----|
+| `viewTable` | Table view | Vue tableau |
+| `viewMap` | Map view | Vue carte |
+| `noCoordinates` | No geocoded properties... | Aucune propriete geocodee... |
+| `propertiesOnMap` | {count} properties on map | {count} proprietes sur la carte |
+| `selectedOnMap` | {count} selected | {count} selectionnees |
+| `clickToSelect` | Click markers to select | Cliquez sur les marqueurs... |
 
 ---
 
-## Risks & Mitigations
+### Files
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| Geocoding rate limits | Properties without coordinates | Batch with delays; cache results in DB |
-| Mapbox token exposure | Unauthorized usage | URL referrer restrictions on token |
-| Properties without valid addresses | No marker on map | Gracefully skip; show count of unmapped properties |
-| Bundle size increase (~200KB for mapbox-gl) | Slower initial load | Dynamic import (`next/dynamic`) with `ssr: false` |
-| Large number of properties (1000+) | Map performance | Clustering + GeoJSON source (GPU-accelerated in Mapbox GL) |
-
----
-
-## Out of Scope (Future Enhancements)
-
-- Radius search ("properties within X km of address")
-- Draw polygon to select properties
-- Heatmap visualization (property values / density)
-- Street View integration
-- Satellite/terrain map style toggles
-- Map-based property creation (drop pin to set address)
-- Route planning between properties
+| File | Type | Purpose |
+|------|------|---------|
+| `features/library/components/PropertyMapInner.tsx` | New | Map component |
+| `features/library/_api/geocoding.service.ts` | New | Geocoding service |
+| `scripts/backfill-geocoding.mjs` | New | One-time backfill script |
+| `supabase/migrations/20260207000100_add_geocoding_to_properties.sql` | New | DB migration |
+| `features/library/types/property.types.ts` | Modified | Added lat/lng |
+| `features/library/_api/properties-supabase.service.ts` | Modified | Transform + auto-geocode |
+| `app/[locale]/library/page.tsx` | Modified | View toggle + map rendering |
+| `package.json` | Modified | Added mapbox-gl |

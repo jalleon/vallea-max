@@ -539,7 +539,10 @@
       "propertiesOnMap": "{count} properties on map",
       "geocodeAll": "Geocode All",
       "geocodeComplete": "Geocoded {geocoded} of {total} properties",
-      "geocodeFailed": "Geocoding failed"
+      "geocodeFailed": "Geocoding failed",
+      "selectedOnMap": "{count} selected",
+      "clickToSelect": "Click markers to select",
+      "allProperties": "All properties"
     },
 
     "comps": {
@@ -552,11 +555,18 @@
       "addToList": "Add to List",
       "addedSuccess": "{count} properties added to {listType} for {appraisal}",
       "cancel": "Cancel",
+      "close": "Close",
       "direct_comparison": "Direct Comparison",
       "direct_capitalization": "Direct Capitalization",
       "land": "Land Comparables",
       "commercial_lease": "Commercial Leases",
-      "residential_lease": "Residential Leases"
+      "residential_lease": "Residential Leases",
+      "existingLists": "Existing lists",
+      "manageLists": "Manage",
+      "manageCompsList": "Manage Comparable List",
+      "emptyList": "This list is empty",
+      "goToLibrary": "Go to Library",
+      "itemsCount": "{count} items"
     }
   },
 

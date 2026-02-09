@@ -23,13 +23,14 @@ import {
   InputLabel,
   alpha
 } from '@mui/material';
-import { Add, Delete, Search, SquareFoot, Straighten, Refresh, PlaylistPlay } from '@mui/icons-material';
+import { Add, Delete, Search, SquareFoot, Straighten, Refresh, PlaylistPlay, Settings } from '@mui/icons-material';
 import { Badge } from '@mui/material';
 import { useTranslations } from 'next-intl';
 import { AgGridReact } from 'ag-grid-react';
 import { ColDef, ColGroupDef, CellValueChangedEvent, ICellRendererParams, ValueFormatterParams, ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
 import 'ag-grid-community/styles/ag-grid.css';
 import LoadFromListDialog from './LoadFromListDialog';
+import ManageCompsDialog from '@/features/library/components/ManageCompsDialog';
 import { comparableListsService } from '@/features/library/_api/comparable-lists.service';
 import 'ag-grid-community/styles/ag-theme-material.css';
 import { createClient } from '@/lib/supabase/client';
@@ -162,6 +163,7 @@ export default function DirectComparisonForm({
   const [propertySearchQuery, setPropertySearchQuery] = useState('');
   const [selectedProperties, setSelectedProperties] = useState<Set<string>>(new Set());
   const [loadFromListOpen, setLoadFromListOpen] = useState(false);
+  const [manageCompsOpen, setManageCompsOpen] = useState(false);
   const [compListCount, setCompListCount] = useState(0);
   const [multiSelectMode, setMultiSelectMode] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -1458,17 +1460,30 @@ export default function DirectComparisonForm({
             {t('addComparable')}
           </Button>
           {appraisalId && (
-            <Badge badgeContent={compListCount} color="primary" max={99}>
-              <Button
-                startIcon={<PlaylistPlay />}
-                onClick={() => setLoadFromListOpen(true)}
-                size="small"
-                variant="outlined"
-                sx={{ textTransform: 'none', borderRadius: '8px' }}
-              >
-                Load from List
-              </Button>
-            </Badge>
+            <>
+              <Badge badgeContent={compListCount} color="primary" max={99}>
+                <Button
+                  startIcon={<PlaylistPlay />}
+                  onClick={() => setLoadFromListOpen(true)}
+                  size="small"
+                  variant="outlined"
+                  sx={{ textTransform: 'none', borderRadius: '8px' }}
+                >
+                  Load from List
+                </Button>
+              </Badge>
+              {compListCount > 0 && (
+                <Button
+                  startIcon={<Settings />}
+                  onClick={() => setManageCompsOpen(true)}
+                  size="small"
+                  variant="text"
+                  sx={{ textTransform: 'none', borderRadius: '8px' }}
+                >
+                  Manage
+                </Button>
+              )}
+            </>
           )}
         </Box>
       </Box>
@@ -1838,14 +1853,27 @@ export default function DirectComparisonForm({
 
       {/* Load from Comparable List Dialog */}
       {appraisalId && (
-        <LoadFromListDialog
-          open={loadFromListOpen}
-          onClose={() => setLoadFromListOpen(false)}
-          appraisalId={appraisalId}
-          listType="direct_comparison"
-          existingPropertyIds={comparables.filter(c => c.propertyId).map(c => c.propertyId!)}
-          onLoadProperties={handleLoadFromList}
-        />
+        <>
+          <LoadFromListDialog
+            open={loadFromListOpen}
+            onClose={() => setLoadFromListOpen(false)}
+            appraisalId={appraisalId}
+            listType="direct_comparison"
+            existingPropertyIds={comparables.filter(c => c.propertyId).map(c => c.propertyId!)}
+            onLoadProperties={handleLoadFromList}
+          />
+          <ManageCompsDialog
+            open={manageCompsOpen}
+            onClose={() => setManageCompsOpen(false)}
+            appraisalId={appraisalId}
+            listType="direct_comparison"
+            onListChanged={() => {
+              comparableListsService.getByType(appraisalId, 'direct_comparison')
+                .then(list => setCompListCount(list?.items?.length || 0))
+                .catch(() => {})
+            }}
+          />
+        </>
       )}
     </Box>
   );
