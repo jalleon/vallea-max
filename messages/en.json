@@ -542,7 +542,13 @@
       "geocodeFailed": "Geocoding failed",
       "selectedOnMap": "{count} selected",
       "clickToSelect": "Click markers to select",
-      "allProperties": "All properties"
+      "allProperties": "All properties",
+      "layers": {
+        "agricultural": "Agricultural Zone",
+        "floodZones": "Flood Zones",
+        "wetlands": "Wetlands",
+        "landCover": "Land Cover"
+      }
     },
 
     "comps": {

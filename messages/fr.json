@@ -542,7 +542,13 @@
       "geocodeFailed": "Échec du géocodage",
       "selectedOnMap": "{count} sélectionnées",
       "clickToSelect": "Cliquez sur les marqueurs pour sélectionner",
-      "allProperties": "Toutes les propriétés"
+      "allProperties": "Toutes les propriétés",
+      "layers": {
+        "agricultural": "Zone agricole",
+        "floodZones": "Zones inondables",
+        "wetlands": "Milieux humides",
+        "landCover": "Couverture du sol"
+      }
     },
 
     "comps": {

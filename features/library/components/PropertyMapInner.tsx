@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useCallback, useState, useMemo } from 'react'
-import { Box, Typography, ToggleButtonGroup, ToggleButton } from '@mui/material'
-import { Map as MapIconMui, Satellite, Terrain, Layers } from '@mui/icons-material'
+import { Box, Typography, ToggleButtonGroup, ToggleButton, Chip } from '@mui/material'
+import { Map as MapIconMui, Satellite, Terrain, Layers, Agriculture, Waves, Park, Landscape, Flight } from '@mui/icons-material'
 import { useTranslations } from 'next-intl'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
@@ -10,11 +10,66 @@ import { Property } from '../types/property.types'
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ''
 
-const MAP_STYLES = {
+const MAP_STYLES: Record<string, string | mapboxgl.Style> = {
   streets: 'mapbox://styles/mapbox/streets-v12',
   satellite: 'mapbox://styles/mapbox/satellite-streets-v12',
   outdoors: 'mapbox://styles/mapbox/outdoors-v12',
   light: 'mapbox://styles/mapbox/light-v11',
+  ortho: {
+    version: 8,
+    sources: {
+      'qc-ortho': {
+        type: 'raster',
+        tiles: ['https://geoegl.msp.gouv.qc.ca/carto/tms/1.0.0/orthos@EPSG_3857/{z}/{x}/{y}.png'],
+        tileSize: 256,
+        scheme: 'tms',
+        attribution: 'Gouvernement du Québec'
+      }
+    },
+    layers: [{ id: 'qc-ortho-layer', type: 'raster', source: 'qc-ortho' }],
+    glyphs: 'mapbox://fonts/mapbox/{fontstack}/{range}.pbf'
+  } as mapboxgl.Style,
+}
+
+// Government GIS overlay layers
+const GIS_LAYERS: Record<string, { tiles: string[], color: string, icon: typeof Agriculture }> = {
+  agricultural: {
+    tiles: [
+      'https://carto.cptaq.gouv.qc.ca/cgi-bin/v2/cptaq?'
+      + 'SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap'
+      + '&LAYERS=zone_agricole&CRS=EPSG:3857&BBOX={bbox-epsg-3857}'
+      + '&WIDTH=256&HEIGHT=256&FORMAT=image/png&TRANSPARENT=true'
+    ],
+    color: '#4CAF50',
+    icon: Agriculture,
+  },
+  floodZones: {
+    tiles: [
+      'https://www.servicesgeo.enviroweb.gouv.qc.ca/donnees/rest/services/Public/Themes_publics/MapServer/export'
+      + '?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256'
+      + '&format=png32&transparent=true&f=image&layers=show:22'
+    ],
+    color: '#2196F3',
+    icon: Waves,
+  },
+  wetlands: {
+    tiles: [
+      'https://geo.environnement.gouv.qc.ca/donnees/rest/services/Biodiversite/MH_potentiels/MapServer/export'
+      + '?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256'
+      + '&format=png32&transparent=true&f=image&layers=show:0'
+    ],
+    color: '#00897B',
+    icon: Park,
+  },
+  landCover: {
+    tiles: [
+      'https://datacube.services.geo.ca/ows/landcover?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap'
+      + '&LAYERS=landcover-2020&CRS=EPSG:3857&BBOX={bbox-epsg-3857}'
+      + '&WIDTH=256&HEIGHT=256&FORMAT=image/png&TRANSPARENT=true&STYLES='
+    ],
+    color: '#8D6E63',
+    icon: Landscape,
+  },
 }
 
 // Marker colors by property type
@@ -54,6 +109,7 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
   const map = useRef<mapboxgl.Map | null>(null)
   const popupRef = useRef<mapboxgl.Popup | null>(null)
   const [mapStyle, setMapStyle] = useState<keyof typeof MAP_STYLES>('streets')
+  const [activeLayers, setActiveLayers] = useState<Set<string>>(new Set())
 
   // Properties with valid coordinates - stable reference unless IDs change
   const geoProperties = useMemo(() =>
@@ -243,6 +299,32 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
     return () => observer.disconnect()
   }, [])
 
+  // Add a GIS raster overlay to the map
+  const addGISLayer = useCallback((m: mapboxgl.Map, layerId: string) => {
+    const config = GIS_LAYERS[layerId]
+    if (!config || m.getSource(`gis-${layerId}`)) return
+    m.addSource(`gis-${layerId}`, { type: 'raster', tiles: config.tiles, tileSize: 256 })
+    m.addLayer({ id: `gis-${layerId}`, type: 'raster', source: `gis-${layerId}`, paint: { 'raster-opacity': 0.6 } }, 'clusters')
+  }, [])
+
+  const removeGISLayer = useCallback((m: mapboxgl.Map, layerId: string) => {
+    if (m.getLayer(`gis-${layerId}`)) m.removeLayer(`gis-${layerId}`)
+    if (m.getSource(`gis-${layerId}`)) m.removeSource(`gis-${layerId}`)
+  }, [])
+
+  const toggleGISLayer = useCallback((layerId: string) => {
+    if (!map.current?.isStyleLoaded()) return
+    const next = new Set(activeLayers)
+    if (next.has(layerId)) {
+      removeGISLayer(map.current, layerId)
+      next.delete(layerId)
+    } else {
+      addGISLayer(map.current, layerId)
+      next.add(layerId)
+    }
+    setActiveLayers(next)
+  }, [activeLayers, addGISLayer, removeGISLayer])
+
   // Handle style change - re-add layers after style loads
   const handleStyleChange = useCallback((newStyle: keyof typeof MAP_STYLES) => {
     if (!map.current || newStyle === mapStyle) return
@@ -256,8 +338,10 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
       map.current!.setCenter(center)
       map.current!.setZoom(zoom)
       addLayers(map.current!)
+      // Restore active GIS overlays
+      activeLayers.forEach(layerId => addGISLayer(map.current!, layerId))
     })
-  }, [mapStyle, addLayers])
+  }, [mapStyle, addLayers, activeLayers, addGISLayer])
 
   // Set up window callbacks for popup buttons
   useEffect(() => {
@@ -312,8 +396,8 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
     <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
       <Box ref={mapContainer} sx={{ width: '100%', height: '100%' }} />
 
-      {/* Style toggle */}
-      <Box sx={{ position: 'absolute', top: 10, left: 10, zIndex: 1 }}>
+      {/* Style toggle + GIS layers */}
+      <Box sx={{ position: 'absolute', top: 10, left: 10, zIndex: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
         <ToggleButtonGroup
           value={mapStyle}
           exclusive
@@ -323,14 +407,39 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
             bgcolor: 'rgba(255,255,255,0.95)',
             borderRadius: 2,
             boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
-            '& .MuiToggleButton-root': { px: 1, py: 0.5, border: 'none', fontSize: '0.7rem', textTransform: 'none', gap: 0.5 }
+            overflow: 'hidden',
+            '& .MuiToggleButton-root': { flex: 1, px: 1, py: 0.5, border: 'none', fontSize: '0.7rem', textTransform: 'none', gap: 0.5 }
           }}
         >
           <ToggleButton value="streets"><MapIconMui sx={{ fontSize: 16 }} /> Streets</ToggleButton>
           <ToggleButton value="satellite"><Satellite sx={{ fontSize: 16 }} /> Satellite</ToggleButton>
           <ToggleButton value="outdoors"><Terrain sx={{ fontSize: 16 }} /> Outdoors</ToggleButton>
           <ToggleButton value="light"><Layers sx={{ fontSize: 16 }} /> Light</ToggleButton>
+          <ToggleButton value="ortho"><Flight sx={{ fontSize: 16 }} /> QC Ortho</ToggleButton>
         </ToggleButtonGroup>
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
+          {Object.entries(GIS_LAYERS).map(([id, config]) => {
+            const Icon = config.icon
+            const isActive = activeLayers.has(id)
+            return (
+              <Chip
+                key={id}
+                icon={<Icon sx={{ fontSize: 14, color: isActive ? '#fff' : config.color }} />}
+                label={t(`map.layers.${id}`)}
+                size="small"
+                onClick={() => toggleGISLayer(id)}
+                sx={{
+                  fontSize: '0.65rem', height: 26,
+                  bgcolor: isActive ? config.color : 'rgba(255,255,255,0.95)',
+                  color: isActive ? '#fff' : 'text.primary',
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+                  '&:hover': { bgcolor: isActive ? config.color : 'rgba(255,255,255,1)' },
+                  '& .MuiChip-icon': { ml: 0.5 }
+                }}
+              />
+            )
+          })}
+        </Box>
       </Box>
 
       {geoProperties.length === 0 && (
