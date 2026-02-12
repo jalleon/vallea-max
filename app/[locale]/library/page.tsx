@@ -870,6 +870,11 @@ export default function LibraryPage() {
                 setSelectedRows([p.id])
                 setAddToCompsOpen(true)
               }}
+              onDeleteProperty={async (p) => {
+                await propertiesService.delete(p.id)
+                await loadProperties()
+                showSnackbar('Property deleted')
+              }}
               selectable
               selectedPropertyIds={selectedRows}
               onSelectionChange={setSelectedRows}

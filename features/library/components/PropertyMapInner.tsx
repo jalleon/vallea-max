@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useCallback, useState, useMemo } from 'react'
-import { Box, Typography, ToggleButtonGroup, ToggleButton, Chip, Menu, MenuItem } from '@mui/material'
+import { Box, Typography, ToggleButtonGroup, ToggleButton, Chip, Menu, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material'
 import { Map as MapIconMui, Satellite, Terrain, Layers, Agriculture, Waves, Park, Landscape, Flight } from '@mui/icons-material'
 import { useTranslations } from 'next-intl'
 import mapboxgl from 'mapbox-gl'
@@ -136,13 +136,14 @@ interface PropertyMapInnerProps {
   onViewProperty?: (property: Property) => void
   onEditProperty?: (property: Property) => void
   onAddToComps?: (property: Property) => void
+  onDeleteProperty?: (property: Property) => Promise<void>
   selectable?: boolean
   selectedPropertyIds?: string[]
   onSelectionChange?: (ids: string[]) => void
   highlightedPropertyIds?: string[]
 }
 
-export default function PropertyMapInner({ properties, onViewProperty, onEditProperty, onAddToComps, selectable, selectedPropertyIds = [], onSelectionChange, highlightedPropertyIds }: PropertyMapInnerProps) {
+export default function PropertyMapInner({ properties, onViewProperty, onEditProperty, onAddToComps, onDeleteProperty, selectable, selectedPropertyIds = [], onSelectionChange, highlightedPropertyIds }: PropertyMapInnerProps) {
   const t = useTranslations('library')
   const mapContainer = useRef<HTMLDivElement>(null)
   const map = useRef<mapboxgl.Map | null>(null)
@@ -189,6 +190,8 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
   }, [availableLayers])
 
   const [layerMenuAnchor, setLayerMenuAnchor] = useState<{ el: HTMLElement, category: LayerCategory } | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<Property | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   const buildGeoJSON = useCallback((): GeoJSON.FeatureCollection => ({
     type: 'FeatureCollection',
@@ -213,7 +216,7 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
     }))
   }), [geoProperties, selectedPropertyIds, highlightedPropertyIds])
 
-  const addLayers = useCallback((m: mapboxgl.Map) => {
+  const addLayers = useCallback((m: mapboxgl.Map, skipFitBounds = false) => {
     m.addSource('properties', {
       type: 'geojson',
       data: buildGeoJSON(),
@@ -320,10 +323,11 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
             <div style="font-weight: 600; font-size: 14px; margin-bottom: 2px;">${props.address}</div>
             <div style="color: #666; font-size: 12px;">${[props.city, props.postalCode].filter(Boolean).join(', ')}</div>
             ${price ? `<div style="font-weight: 600; font-size: 13px; margin-top: 4px; color: #667eea;">${price}</div>` : ''}
-            <div style="margin-top: 8px; display: flex; gap: 6px;">
+            <div style="margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap;">
               <button onclick="window.__mapViewProperty('${props.id}')" style="padding: 4px 12px; font-size: 12px; border: 1px solid #ddd; border-radius: 6px; background: white; cursor: pointer;">View</button>
               <button onclick="window.__mapEditProperty('${props.id}')" style="padding: 4px 12px; font-size: 12px; border: none; border-radius: 6px; background: #667eea; color: white; cursor: pointer;">Edit</button>
               <button onclick="window.__mapAddToComps('${props.id}')" style="padding: 4px 12px; font-size: 12px; border: none; border-radius: 6px; background: #4CAF50; color: white; cursor: pointer;">+ Comps</button>
+              <button onclick="window.__mapDeleteProperty('${props.id}')" style="padding: 4px 12px; font-size: 12px; border: none; border-radius: 6px; background: #F44336; color: white; cursor: pointer;">Delete</button>
             </div>
           </div>
         `)
@@ -335,7 +339,7 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
     m.on('mouseenter', 'unclustered-point', () => { m.getCanvas().style.cursor = 'pointer' })
     m.on('mouseleave', 'unclustered-point', () => { m.getCanvas().style.cursor = '' })
 
-    if (geoProperties.length > 0) {
+    if (!skipFitBounds && geoProperties.length > 0) {
       const bounds = new mapboxgl.LngLatBounds()
       geoProperties.forEach(p => bounds.extend([p.longitude!, p.latitude!]))
       m.fitBounds(bounds, { padding: 60, maxZoom: 15 })
@@ -438,7 +442,7 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
     map.current.once('style.load', () => {
       map.current!.setCenter(center)
       map.current!.setZoom(zoom)
-      addLayers(map.current!)
+      addLayers(map.current!, true)
       // Restore active GIS overlays
       activeLayers.forEach(layerId => addGISLayer(map.current!, layerId))
     })
@@ -458,10 +462,15 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
       const p = properties.find(prop => prop.id === id)
       if (p && onAddToComps) onAddToComps(p)
     }
+    ;(window as any).__mapDeleteProperty = (id: string) => {
+      const p = properties.find(prop => prop.id === id)
+      if (p) setDeleteConfirm(p)
+    }
     return () => {
       delete (window as any).__mapViewProperty
       delete (window as any).__mapEditProperty
       delete (window as any).__mapAddToComps
+      delete (window as any).__mapDeleteProperty
     }
   }, [properties, onViewProperty, onEditProperty, onAddToComps])
 
@@ -592,6 +601,43 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
           </Typography>
         </Box>
       )}
+
+      <Dialog open={!!deleteConfirm} onClose={() => !deleting && setDeleteConfirm(null)} maxWidth="xs">
+        <DialogTitle>{t('map.deleteConfirmTitle')}</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            {deleteConfirm?.adresse}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            {[deleteConfirm?.ville, deleteConfirm?.code_postal].filter(Boolean).join(', ')}
+          </Typography>
+          <Typography variant="body2" color="error" sx={{ mt: 1.5 }}>
+            {t('map.deleteConfirmWarning')}
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setDeleteConfirm(null)} disabled={deleting}>{t('map.cancel')}</Button>
+          <Button
+            variant="contained"
+            color="error"
+            disabled={deleting}
+            onClick={async () => {
+              if (!deleteConfirm || !onDeleteProperty) return
+              setDeleting(true)
+              try {
+                await onDeleteProperty(deleteConfirm)
+                if (popupRef.current) popupRef.current.remove()
+                setDeleteConfirm(null)
+              } finally {
+                setDeleting(false)
+              }
+            }}
+            sx={{ borderRadius: 2 }}
+          >
+            {deleting ? t('map.deleting') : t('map.deleteConfirm')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }

@@ -543,6 +543,11 @@
       "selectedOnMap": "{count} sélectionnées",
       "clickToSelect": "Cliquez sur les marqueurs pour sélectionner",
       "allProperties": "Toutes les propriétés",
+      "deleteConfirmTitle": "Supprimer la propriété?",
+      "deleteConfirmWarning": "Cette action est irréversible.",
+      "deleteConfirm": "Supprimer",
+      "deleting": "Suppression...",
+      "cancel": "Annuler",
       "layers": {
         "qc-agricultural": "Zone agricole (QC)",
         "qc-floodZones": "Zones inondables (QC)",

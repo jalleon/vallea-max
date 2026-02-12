@@ -543,6 +543,11 @@
       "selectedOnMap": "{count} selected",
       "clickToSelect": "Click markers to select",
       "allProperties": "All properties",
+      "deleteConfirmTitle": "Delete property?",
+      "deleteConfirmWarning": "This action cannot be undone.",
+      "deleteConfirm": "Delete",
+      "deleting": "Deleting...",
+      "cancel": "Cancel",
       "layers": {
         "qc-agricultural": "Agricultural Zone (QC)",
         "qc-floodZones": "Flood Zones (QC)",
