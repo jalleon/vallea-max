@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useCallback, useState, useMemo } from 'react'
-import { Box, Typography, ToggleButtonGroup, ToggleButton, Chip } from '@mui/material'
+import { Box, Typography, ToggleButtonGroup, ToggleButton, Chip, Menu, MenuItem } from '@mui/material'
 import { Map as MapIconMui, Satellite, Terrain, Layers, Agriculture, Waves, Park, Landscape, Flight } from '@mui/icons-material'
 import { useTranslations } from 'next-intl'
 import mapboxgl from 'mapbox-gl'
@@ -31,46 +31,85 @@ const MAP_STYLES: Record<string, string | mapboxgl.Style> = {
   } as mapboxgl.Style,
 }
 
-// Government GIS overlay layers
-const GIS_LAYERS: Record<string, { tiles: string[], color: string, icon: typeof Agriculture }> = {
-  agricultural: {
-    tiles: [
-      'https://carto.cptaq.gouv.qc.ca/cgi-bin/v2/cptaq?'
-      + 'SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap'
-      + '&LAYERS=zone_agricole&CRS=EPSG:3857&BBOX={bbox-epsg-3857}'
-      + '&WIDTH=256&HEIGHT=256&FORMAT=image/png&TRANSPARENT=true'
-    ],
-    color: '#4CAF50',
-    icon: Agriculture,
-  },
-  floodZones: {
-    tiles: [
-      'https://www.servicesgeo.enviroweb.gouv.qc.ca/donnees/rest/services/Public/Themes_publics/MapServer/export'
-      + '?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256'
-      + '&format=png32&transparent=true&f=image&layers=show:22'
-    ],
-    color: '#2196F3',
-    icon: Waves,
-  },
-  wetlands: {
-    tiles: [
-      'https://geo.environnement.gouv.qc.ca/donnees/rest/services/Biodiversite/MH_potentiels/MapServer/export'
-      + '?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256'
-      + '&format=png32&transparent=true&f=image&layers=show:0'
-    ],
-    color: '#00897B',
-    icon: Park,
-  },
-  landCover: {
-    tiles: [
-      'https://datacube.services.geo.ca/ows/landcover?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap'
-      + '&LAYERS=landcover-2020&CRS=EPSG:3857&BBOX={bbox-epsg-3857}'
-      + '&WIDTH=256&HEIGHT=256&FORMAT=image/png&TRANSPARENT=true&STYLES='
-    ],
-    color: '#8D6E63',
-    icon: Landscape,
-  },
+// Government GIS overlay layers - province-aware
+type LayerCategory = 'agricultural' | 'floodZones' | 'wetlands' | 'landCover'
+interface GISLayerConfig { tiles: string[], color: string, icon: typeof Agriculture, category: LayerCategory }
+
+const ALL_GIS_LAYERS: Record<string, GISLayerConfig> = {
+  // Quebec
+  'qc-agricultural': { category: 'agricultural', color: '#4CAF50', icon: Agriculture, tiles: [
+    'https://carto.cptaq.gouv.qc.ca/cgi-bin/v2/cptaq?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=zone_agricole&CRS=EPSG:3857&BBOX={bbox-epsg-3857}&WIDTH=256&HEIGHT=256&FORMAT=image/png&TRANSPARENT=true'
+  ]},
+  'qc-floodZones': { category: 'floodZones', color: '#2196F3', icon: Waves, tiles: [
+    'https://www.servicesgeo.enviroweb.gouv.qc.ca/donnees/rest/services/Public/Themes_publics/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image&layers=show:22'
+  ]},
+  'qc-wetlands': { category: 'wetlands', color: '#00897B', icon: Park, tiles: [
+    'https://geo.environnement.gouv.qc.ca/donnees/rest/services/Biodiversite/MH_potentiels/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image&layers=show:0'
+  ]},
+  // British Columbia
+  'bc-agricultural': { category: 'agricultural', color: '#4CAF50', icon: Agriculture, tiles: [
+    'https://openmaps.gov.bc.ca/geo/pub/WHSE_LEGAL_ADMIN_BOUNDARIES.OATS_ALR_POLYS/ows?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=pub:WHSE_LEGAL_ADMIN_BOUNDARIES.OATS_ALR_POLYS&CRS=EPSG:3857&BBOX={bbox-epsg-3857}&WIDTH=256&HEIGHT=256&FORMAT=image/png&TRANSPARENT=true'
+  ]},
+  'bc-floodZones': { category: 'floodZones', color: '#2196F3', icon: Waves, tiles: [
+    'https://openmaps.gov.bc.ca/geo/pub/WHSE_BASEMAPPING.CWB_FLOODPLAINS_BC_AREA_SVW/ows?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=pub:WHSE_BASEMAPPING.CWB_FLOODPLAINS_BC_AREA_SVW&CRS=EPSG:3857&BBOX={bbox-epsg-3857}&WIDTH=256&HEIGHT=256&FORMAT=image/png&TRANSPARENT=true'
+  ]},
+  'bc-wetlands': { category: 'wetlands', color: '#00897B', icon: Park, tiles: [
+    'https://openmaps.gov.bc.ca/geo/pub/WHSE_BASEMAPPING.FWA_WETLANDS_POLY/ows?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=pub:WHSE_BASEMAPPING.FWA_WETLANDS_POLY&CRS=EPSG:3857&BBOX={bbox-epsg-3857}&WIDTH=256&HEIGHT=256&FORMAT=image/png&TRANSPARENT=true'
+  ]},
+  // Alberta
+  'ab-agricultural': { category: 'agricultural', color: '#4CAF50', icon: Agriculture, tiles: [
+    'https://geospatial.alberta.ca/titan/rest/services/agriculture/Agricultural_Land_Resource_Atlas/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image&layers=show:0'
+  ]},
+  'ab-wetlands': { category: 'wetlands', color: '#00897B', icon: Park, tiles: [
+    'https://geospatial.alberta.ca/titan/rest/services/environment/alberta_merged_wetland_inventory/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image&layers=show:3'
+  ]},
+  // Ontario
+  'on-agricultural': { category: 'agricultural', color: '#4CAF50', icon: Agriculture, tiles: [
+    'https://ws.lioservices.lrc.gov.on.ca/arcgis2/rest/services/LIO_OPEN_DATA/LIO_Open06/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image&layers=show:15'
+  ]},
+  'on-wetlands': { category: 'wetlands', color: '#00897B', icon: Park, tiles: [
+    'https://ws.lioservices.lrc.gov.on.ca/arcgis2/rest/services/LIO_OPEN_DATA/LIO_Open01/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image&layers=show:15'
+  ]},
+  // New Brunswick
+  'nb-floodZones': { category: 'floodZones', color: '#2196F3', icon: Waves, tiles: [
+    'https://geonb.snb.ca/arcgis/rest/services/GeoNB_ENV_Flood/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image&layers=show:0'
+  ]},
+  'nb-wetlands': { category: 'wetlands', color: '#00897B', icon: Park, tiles: [
+    'https://geonb.snb.ca/arcgis/rest/services/GeoNB_ELG_WAWA/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image&layers=show:0'
+  ]},
+  // Nova Scotia
+  'ns-floodZones': { category: 'floodZones', color: '#2196F3', icon: Waves, tiles: [
+    'https://fletcher.novascotia.ca/arcgis/rest/services/mrlu/flood_risk_areas/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image&layers=show:0'
+  ]},
+  // Saskatchewan
+  'sk-floodZones': { category: 'floodZones', color: '#2196F3', icon: Waves, tiles: [
+    'https://gis.wsask.ca/arcgiswa/rest/services/Temp/Water/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image&layers=show:0'
+  ]},
+  // Federal (available everywhere)
+  'fed-landCover': { category: 'landCover', color: '#8D6E63', icon: Landscape, tiles: [
+    'https://datacube.services.geo.ca/ows/landcover?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=landcover-2020&CRS=EPSG:3857&BBOX={bbox-epsg-3857}&WIDTH=256&HEIGHT=256&FORMAT=image/png&TRANSPARENT=true&STYLES='
+  ]},
+  'fed-wetlands': { category: 'wetlands', color: '#009688', icon: Park, tiles: [
+    'https://maps-cartes.ec.gc.ca/arcgis/services/CWS_SCF/INTHC/MapServer/WMSServer?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=0&CRS=EPSG:3857&BBOX={bbox-epsg-3857}&WIDTH=256&HEIGHT=256&FORMAT=image/png&TRANSPARENT=true'
+  ]},
 }
+
+// Province-specific layer IDs
+const PROVINCE_LAYERS: Record<string, string[]> = {
+  QC: ['qc-agricultural', 'qc-floodZones', 'qc-wetlands'],
+  BC: ['bc-agricultural', 'bc-floodZones', 'bc-wetlands'],
+  AB: ['ab-agricultural', 'ab-wetlands'],
+  ON: ['on-agricultural', 'on-wetlands'],
+  NB: ['nb-floodZones', 'nb-wetlands'],
+  NS: ['ns-floodZones'],
+  SK: ['sk-floodZones'],
+}
+
+// Federal layers fill in categories not covered by province
+const FEDERAL_LAYERS = ['fed-landCover', 'fed-wetlands']
+
+// Category display order for GIS layer chips
+const CATEGORY_ORDER: LayerCategory[] = ['agricultural', 'floodZones', 'wetlands', 'landCover']
 
 // Marker colors by property type
 const TYPE_COLORS: Record<string, string> = {
@@ -117,6 +156,39 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [properties.map(p => p.id).join(',')]
   )
+
+  // Detect all provinces represented in current properties
+  const detectedProvinces = useMemo(() => {
+    const provinces = new Set<string>()
+    geoProperties.forEach(p => provinces.add(p.province || 'QC'))
+    return provinces.size > 0 ? provinces : new Set(['QC'])
+  }, [geoProperties])
+
+  // Available layers = union of all province-specific layers + federal fallbacks for uncovered categories
+  const availableLayers = useMemo(() => {
+    const allProvinceLayers: string[] = []
+    const coveredCategories = new Set<LayerCategory>()
+    for (const prov of detectedProvinces) {
+      for (const id of (PROVINCE_LAYERS[prov] || [])) {
+        allProvinceLayers.push(id)
+        coveredCategories.add(ALL_GIS_LAYERS[id].category)
+      }
+    }
+    const federalFallbacks = FEDERAL_LAYERS.filter(id => !coveredCategories.has(ALL_GIS_LAYERS[id].category))
+    return [...allProvinceLayers, ...federalFallbacks]
+  }, [detectedProvinces])
+
+  // Group available layers by category for dropdown menus
+  const layersByCategory = useMemo(() => {
+    const groups: Partial<Record<LayerCategory, string[]>> = {}
+    for (const id of availableLayers) {
+      const cat = ALL_GIS_LAYERS[id].category
+      ;(groups[cat] ||= []).push(id)
+    }
+    return groups
+  }, [availableLayers])
+
+  const [layerMenuAnchor, setLayerMenuAnchor] = useState<{ el: HTMLElement, category: LayerCategory } | null>(null)
 
   const buildGeoJSON = useCallback((): GeoJSON.FeatureCollection => ({
     type: 'FeatureCollection',
@@ -301,7 +373,7 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
 
   // Add a GIS raster overlay to the map
   const addGISLayer = useCallback((m: mapboxgl.Map, layerId: string) => {
-    const config = GIS_LAYERS[layerId]
+    const config = ALL_GIS_LAYERS[layerId]
     if (!config || m.getSource(`gis-${layerId}`)) return
     m.addSource(`gis-${layerId}`, { type: 'raster', tiles: config.tiles, tileSize: 256 })
     m.addLayer({ id: `gis-${layerId}`, type: 'raster', source: `gis-${layerId}`, paint: { 'raster-opacity': 0.6 } }, 'clusters')
@@ -324,6 +396,35 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
     }
     setActiveLayers(next)
   }, [activeLayers, addGISLayer, removeGISLayer])
+
+  const handleLayerChipClick = useCallback((e: React.MouseEvent<HTMLElement>, category: LayerCategory, layerIds: string[]) => {
+    const activeId = layerIds.find(id => activeLayers.has(id))
+    if (activeId) {
+      if (map.current?.isStyleLoaded()) {
+        removeGISLayer(map.current, activeId)
+        const next = new Set(activeLayers)
+        next.delete(activeId)
+        setActiveLayers(next)
+      }
+    } else if (layerIds.length === 1) {
+      toggleGISLayer(layerIds[0])
+    } else {
+      setLayerMenuAnchor({ el: e.currentTarget, category })
+    }
+  }, [activeLayers, removeGISLayer, toggleGISLayer])
+
+  // Clean up active layers that no longer exist when province changes
+  useEffect(() => {
+    if (!map.current?.isStyleLoaded()) return
+    const availableSet = new Set(availableLayers)
+    const next = new Set(activeLayers)
+    let changed = false
+    for (const layerId of activeLayers) {
+      if (!availableSet.has(layerId)) { removeGISLayer(map.current, layerId); next.delete(layerId); changed = true }
+    }
+    if (changed) setActiveLayers(next)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [availableLayers])
 
   // Handle style change - re-add layers after style loads
   const handleStyleChange = useCallback((newStyle: keyof typeof MAP_STYLES) => {
@@ -417,17 +518,20 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
           <ToggleButton value="light"><Layers sx={{ fontSize: 16 }} /> Light</ToggleButton>
           <ToggleButton value="ortho"><Flight sx={{ fontSize: 16 }} /> QC Ortho</ToggleButton>
         </ToggleButtonGroup>
-        <Box sx={{ display: 'flex', gap: 0.5 }}>
-          {Object.entries(GIS_LAYERS).map(([id, config]) => {
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+          {CATEGORY_ORDER.filter(cat => layersByCategory[cat]).map(cat => {
+            const layerIds = layersByCategory[cat]!
+            const activeId = layerIds.find(id => activeLayers.has(id))
+            const isActive = !!activeId
+            const config = ALL_GIS_LAYERS[layerIds[0]]
             const Icon = config.icon
-            const isActive = activeLayers.has(id)
             return (
               <Chip
-                key={id}
+                key={cat}
                 icon={<Icon sx={{ fontSize: 14, color: isActive ? '#fff' : config.color }} />}
-                label={t(`map.layers.${id}`)}
+                label={activeId ? t(`map.layers.${activeId}`) : t(`map.categories.${cat}`)}
                 size="small"
-                onClick={() => toggleGISLayer(id)}
+                onClick={(e) => handleLayerChipClick(e, cat, layerIds)}
                 sx={{
                   fontSize: '0.65rem', height: 26,
                   bgcolor: isActive ? config.color : 'rgba(255,255,255,0.95)',
@@ -440,6 +544,22 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
             )
           })}
         </Box>
+        <Menu
+          anchorEl={layerMenuAnchor?.el}
+          open={!!layerMenuAnchor}
+          onClose={() => setLayerMenuAnchor(null)}
+          slotProps={{ paper: { sx: { borderRadius: 2, minWidth: 160 } } }}
+        >
+          {layerMenuAnchor && layersByCategory[layerMenuAnchor.category]?.map(layerId => (
+            <MenuItem
+              key={layerId}
+              onClick={() => { toggleGISLayer(layerId); setLayerMenuAnchor(null) }}
+              sx={{ fontSize: '0.8rem', py: 0.75 }}
+            >
+              {t(`map.layers.${layerId}`)}
+            </MenuItem>
+          ))}
+        </Menu>
       </Box>
 
       {geoProperties.length === 0 && (

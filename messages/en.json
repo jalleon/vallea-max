@@ -544,7 +544,25 @@
       "clickToSelect": "Click markers to select",
       "allProperties": "All properties",
       "layers": {
-        "agricultural": "Agricultural Zone",
+        "qc-agricultural": "Agricultural Zone (QC)",
+        "qc-floodZones": "Flood Zones (QC)",
+        "qc-wetlands": "Wetlands (QC)",
+        "bc-agricultural": "Agri. Land Reserve (BC)",
+        "bc-floodZones": "Floodplains (BC)",
+        "bc-wetlands": "Wetlands (BC)",
+        "ab-agricultural": "Agricultural Land (AB)",
+        "ab-wetlands": "Wetlands (AB)",
+        "on-agricultural": "Greenbelt (ON)",
+        "on-wetlands": "Wetlands (ON)",
+        "nb-floodZones": "Flood Zones (NB)",
+        "nb-wetlands": "Wetlands (NB)",
+        "ns-floodZones": "Flood Zones (NS)",
+        "sk-floodZones": "Flood Zones (SK)",
+        "fed-landCover": "Land Cover",
+        "fed-wetlands": "Wetlands (National)"
+      },
+      "categories": {
+        "agricultural": "Agricultural",
         "floodZones": "Flood Zones",
         "wetlands": "Wetlands",
         "landCover": "Land Cover"
