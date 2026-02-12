@@ -15,7 +15,7 @@ const MAP_STYLES: Record<string, string | mapboxgl.Style> = {
   satellite: 'mapbox://styles/mapbox/satellite-streets-v12',
   outdoors: 'mapbox://styles/mapbox/outdoors-v12',
   light: 'mapbox://styles/mapbox/light-v11',
-  ortho: {
+  'ortho-qc': {
     version: 8,
     sources: {
       'qc-ortho': {
@@ -29,6 +29,48 @@ const MAP_STYLES: Record<string, string | mapboxgl.Style> = {
     layers: [{ id: 'qc-ortho-layer', type: 'raster', source: 'qc-ortho' }],
     glyphs: 'mapbox://fonts/mapbox/{fontstack}/{range}.pbf'
   } as mapboxgl.Style,
+  'ortho-on': {
+    version: 8,
+    sources: {
+      'on-ortho': {
+        type: 'raster',
+        tiles: ['https://ws.lioservices.lrc.gov.on.ca/arcgis1071a/rest/services/LIO_Imagery/Ontario_Imagery_Web_Map_Service_Source/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png&f=image'],
+        tileSize: 256,
+        attribution: 'Ontario GeoHub'
+      }
+    },
+    layers: [{ id: 'on-ortho-layer', type: 'raster', source: 'on-ortho' }],
+    glyphs: 'mapbox://fonts/mapbox/{fontstack}/{range}.pbf'
+  } as mapboxgl.Style,
+  'ortho-bc': {
+    version: 8,
+    sources: {
+      'bc-ortho-10m': {
+        type: 'raster',
+        tiles: ['https://openmaps.gov.bc.ca/imagex/ecw_wms.dll?service=WMS&version=1.1.1&request=GetMap&layers=bc_bc_bc_xc10m_bcalb_20070115&styles=&format=image/jpeg&srs=EPSG:3857&width=256&height=256&bbox={bbox-epsg-3857}'],
+        tileSize: 256,
+        attribution: 'GeoBC'
+      },
+      'bc-ortho-2m': {
+        type: 'raster',
+        tiles: ['https://openmaps.gov.bc.ca/imagex/ecw_wms.dll?service=WMS&version=1.1.1&request=GetMap&layers=bc_bc_bc_xc2m_bcalb_20070115&styles=&format=image/jpeg&srs=EPSG:3857&width=256&height=256&bbox={bbox-epsg-3857}'],
+        tileSize: 256,
+        attribution: 'GeoBC'
+      }
+    },
+    layers: [
+      { id: 'bc-ortho-10m-layer', type: 'raster', source: 'bc-ortho-10m', maxzoom: 13 },
+      { id: 'bc-ortho-2m-layer', type: 'raster', source: 'bc-ortho-2m', minzoom: 13 },
+    ],
+    glyphs: 'mapbox://fonts/mapbox/{fontstack}/{range}.pbf'
+  } as mapboxgl.Style,
+}
+
+// Province ortho style mapping
+const PROVINCE_ORTHO: Record<string, string> = {
+  QC: 'ortho-qc',
+  ON: 'ortho-on',
+  BC: 'ortho-bc',
 }
 
 // Government GIS overlay layers - province-aware
@@ -179,6 +221,9 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
     return [...allProvinceLayers, ...federalFallbacks]
   }, [detectedProvinces])
 
+  // All ortho styles always available (base map, not filtered by province)
+  const availableOrthos = Object.values(PROVINCE_ORTHO)
+
   // Group available layers by category for dropdown menus
   const layersByCategory = useMemo(() => {
     const groups: Partial<Record<LayerCategory, string[]>> = {}
@@ -190,6 +235,7 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
   }, [availableLayers])
 
   const [layerMenuAnchor, setLayerMenuAnchor] = useState<{ el: HTMLElement, category: LayerCategory } | null>(null)
+  const [orthoMenuAnchor, setOrthoMenuAnchor] = useState<HTMLElement | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<Property | null>(null)
   const [deleting, setDeleting] = useState(false)
 
@@ -511,7 +557,11 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
         <ToggleButtonGroup
           value={mapStyle}
           exclusive
-          onChange={(_, v) => v && handleStyleChange(v)}
+          onChange={(_, v) => {
+            if (!v) return
+            if (v === '__ortho__') return // handled by onClick below
+            handleStyleChange(v)
+          }}
           size="small"
           sx={{
             bgcolor: 'rgba(255,255,255,0.95)',
@@ -525,8 +575,38 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
           <ToggleButton value="satellite"><Satellite sx={{ fontSize: 16 }} /> Satellite</ToggleButton>
           <ToggleButton value="outdoors"><Terrain sx={{ fontSize: 16 }} /> Outdoors</ToggleButton>
           <ToggleButton value="light"><Layers sx={{ fontSize: 16 }} /> Light</ToggleButton>
-          <ToggleButton value="ortho"><Flight sx={{ fontSize: 16 }} /> QC Ortho</ToggleButton>
+          <ToggleButton
+            value={mapStyle.startsWith('ortho-') ? mapStyle : '__ortho__'}
+            selected={mapStyle.startsWith('ortho-')}
+            onClick={(e) => {
+              if (mapStyle.startsWith('ortho-')) {
+                handleStyleChange('streets')
+              } else if (availableOrthos.length === 1) {
+                handleStyleChange(availableOrthos[0] as keyof typeof MAP_STYLES)
+              } else {
+                setOrthoMenuAnchor(e.currentTarget)
+              }
+            }}
+          >
+            <Flight sx={{ fontSize: 16 }} /> {mapStyle.startsWith('ortho-') ? t(`map.styles.${mapStyle}`) : 'Ortho'}
+          </ToggleButton>
         </ToggleButtonGroup>
+        <Menu
+          anchorEl={orthoMenuAnchor}
+          open={!!orthoMenuAnchor}
+          onClose={() => setOrthoMenuAnchor(null)}
+          slotProps={{ paper: { sx: { borderRadius: 2, minWidth: 140 } } }}
+        >
+          {availableOrthos.map(key => (
+            <MenuItem
+              key={key}
+              onClick={() => { handleStyleChange(key as keyof typeof MAP_STYLES); setOrthoMenuAnchor(null) }}
+              sx={{ fontSize: '0.8rem', py: 0.75 }}
+            >
+              {t(`map.styles.${key}`)}
+            </MenuItem>
+          ))}
+        </Menu>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
           {CATEGORY_ORDER.filter(cat => layersByCategory[cat]).map(cat => {
             const layerIds = layersByCategory[cat]!

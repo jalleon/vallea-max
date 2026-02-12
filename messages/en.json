@@ -571,6 +571,11 @@
         "floodZones": "Flood Zones",
         "wetlands": "Wetlands",
         "landCover": "Land Cover"
+      },
+      "styles": {
+        "ortho-qc": "QC Ortho",
+        "ortho-on": "ON Ortho",
+        "ortho-bc": "BC Ortho"
       }
     },
 

@@ -571,6 +571,11 @@
         "floodZones": "Zones inondables",
         "wetlands": "Milieux humides",
         "landCover": "Couverture du sol"
+      },
+      "styles": {
+        "ortho-qc": "Ortho QC",
+        "ortho-on": "Ortho ON",
+        "ortho-bc": "Ortho BC"
       }
     },
 
