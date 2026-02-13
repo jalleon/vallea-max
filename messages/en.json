@@ -572,11 +572,31 @@
         "wetlands": "Wetlands",
         "landCover": "Land Cover"
       },
+      "overlays": "Overlays",
       "styles": {
+        "streets": "Streets",
+        "satellite": "Satellite",
+        "outdoors": "Outdoors",
+        "light": "Light",
         "ortho-qc": "QC Ortho",
         "ortho-on": "ON Ortho",
         "ortho-bc": "BC Ortho"
-      }
+      },
+      "cadastre": "Cadastre",
+      "cadastreLot": "Lot",
+      "cadastreNoLot": "No lot found",
+      "buildings3d": "3D Buildings",
+      "terrain3d": "Terrain",
+      "searchPlaceholder": "Search for an address...",
+      "measureArea": "Area",
+      "measureDistance": "Distance",
+      "measureClear": "Clear",
+      "isochrone": "Accessibility",
+      "isochroneDriving": "Driving",
+      "isochroneWalking": "Walking",
+      "isochroneCycling": "Cycling",
+      "isochroneClear": "Clear",
+      "streetView": "Street View"
     },
 
     "comps": {

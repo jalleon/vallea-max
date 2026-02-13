@@ -1,11 +1,18 @@
 'use client'
 
 import { useEffect, useRef, useCallback, useState, useMemo } from 'react'
-import { Box, Typography, ToggleButtonGroup, ToggleButton, Chip, Menu, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material'
-import { Map as MapIconMui, Satellite, Terrain, Layers, Agriculture, Waves, Park, Landscape, Flight } from '@mui/icons-material'
-import { useTranslations } from 'next-intl'
+import { Box, Typography, Chip, Menu, MenuItem, Divider, Dialog, DialogTitle, DialogContent, DialogActions, Button, IconButton } from '@mui/material'
+import { Map as MapIconMui, Satellite, Terrain, Layers, Agriculture, Waves, Park, Landscape, Flight, Straighten, SquareFoot, ViewInAr, Close } from '@mui/icons-material'
+import { useTranslations, useLocale } from 'next-intl'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
+// @ts-ignore
+import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder'
+import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
+// @ts-ignore
+import MapboxDraw from '@mapbox/mapbox-gl-draw'
+import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
+import * as turf from '@turf/turf'
 import { Property } from '../types/property.types'
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ''
@@ -153,6 +160,49 @@ const FEDERAL_LAYERS = ['fed-landCover', 'fed-wetlands']
 // Category display order for GIS layer chips
 const CATEGORY_ORDER: LayerCategory[] = ['agricultural', 'floodZones', 'wetlands', 'landCover']
 
+// Cadastre endpoints per province (raster tile overlays)
+const CADASTRE_LAYERS: Record<string, { tiles: string[], tileSize: number, minzoom: number, attribution: string }> = {
+  QC: {
+    tiles: ['https://geo.environnement.gouv.qc.ca/donnees/rest/services/Reference/Cadastre_allege/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&layers=show:0&f=image'],
+    tileSize: 512, minzoom: 13, attribution: 'Gouvernement du Québec - Cadastre'
+  },
+  NS: {
+    tiles: ['https://nsgiwa2.novascotia.ca/arcgis/rest/services/PLAN/PLAN_NSPRD_WM84/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png&transparent=true&f=image'],
+    tileSize: 512, minzoom: 14, attribution: 'Province of Nova Scotia - NSPRD'
+  },
+  NB: {
+    tiles: ['https://geonb.snb.ca/arcgis/rest/services/GeoNB_SNB_Parcels/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png&transparent=true&f=image'],
+    tileSize: 512, minzoom: 14, attribution: 'Service New Brunswick - GeoNB'
+  },
+  ON: {
+    tiles: ['https://ws.lioservices.lrc.gov.on.ca/arcgis2/rest/services/LIO_OPEN_DATA/LIO_Open05/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&layers=show:15&f=image'],
+    tileSize: 512, minzoom: 13, attribution: 'Ontario GeoHub - Cadastral Location'
+  },
+}
+
+// Rough bounding boxes for provinces with GIS layers [west, south, east, north]
+const PROVINCE_BOUNDS: Record<string, [number, number, number, number]> = {
+  QC: [-79.8, 44.9, -57.1, 62.6],
+  ON: [-95.2, 41.7, -74.3, 56.9],
+  BC: [-139.1, 48.3, -114.0, 60.0],
+  AB: [-120.0, 49.0, -110.0, 60.0],
+  SK: [-110.0, 49.0, -101.4, 60.0],
+  NB: [-69.1, 44.6, -63.8, 48.1],
+  NS: [-66.4, 43.4, -59.7, 47.1],
+}
+
+// Check if two bounding boxes overlap
+function boundsOverlap(a: [number, number, number, number], b: [number, number, number, number]) {
+  return a[0] < b[2] && a[2] > b[0] && a[1] < b[3] && a[3] > b[1]
+}
+
+// Check if map style is structurally ready (doesn't wait for tile loading)
+// Unlike isStyleLoaded(), this returns true even while slow raster tiles are still fetching
+function isStyleReady(m: mapboxgl.Map | null): m is mapboxgl.Map {
+  if (!m) return false
+  try { return !!m.getStyle()?.layers } catch { return false }
+}
+
 // Marker colors by property type
 const TYPE_COLORS: Record<string, string> = {
   condo_residentiel: '#9C27B0',
@@ -187,11 +237,23 @@ interface PropertyMapInnerProps {
 
 export default function PropertyMapInner({ properties, onViewProperty, onEditProperty, onAddToComps, onDeleteProperty, selectable, selectedPropertyIds = [], onSelectionChange, highlightedPropertyIds }: PropertyMapInnerProps) {
   const t = useTranslations('library')
+  const locale = useLocale()
   const mapContainer = useRef<HTMLDivElement>(null)
   const map = useRef<mapboxgl.Map | null>(null)
   const popupRef = useRef<mapboxgl.Popup | null>(null)
+  const drawRef = useRef<any>(null)
+  const cadastreProvinceRef = useRef<string | null>(null)
+  const isochroneDataRef = useRef<any>(null)
   const [mapStyle, setMapStyle] = useState<keyof typeof MAP_STYLES>('streets')
   const [activeLayers, setActiveLayers] = useState<Set<string>>(new Set())
+  const [cadastreProvince, setCadastreProvince] = useState<string | null>(null)
+  const [cadastreMenuAnchor, setCadastreMenuAnchor] = useState<HTMLElement | null>(null)
+  const [buildings3D, setBuildings3D] = useState(false)
+  const [terrain3D, setTerrain3D] = useState(false)
+  const [measureMode, setMeasureMode] = useState<'line' | 'polygon' | null>(null)
+  const [measureResult, setMeasureResult] = useState<{ type: 'area' | 'distance', value: number } | null>(null)
+  const [isochroneCenter, setIsochroneCenter] = useState<[number, number] | null>(null)
+  const [isochroneProfile, setIsochroneProfile] = useState<'driving' | 'walking' | 'cycling'>('driving')
 
   // Properties with valid coordinates - stable reference unless IDs change
   const geoProperties = useMemo(() =>
@@ -200,18 +262,14 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
     [properties.map(p => p.id).join(',')]
   )
 
-  // Detect all provinces represented in current properties
-  const detectedProvinces = useMemo(() => {
-    const provinces = new Set<string>()
-    geoProperties.forEach(p => provinces.add(p.province || 'QC'))
-    return provinces.size > 0 ? provinces : new Set(['QC'])
-  }, [geoProperties])
+  // Provinces visible in the current map viewport (updated on moveend)
+  const [viewportProvinces, setViewportProvinces] = useState<Set<string>>(new Set(['QC']))
 
   // Available layers = union of all province-specific layers + federal fallbacks for uncovered categories
   const availableLayers = useMemo(() => {
     const allProvinceLayers: string[] = []
     const coveredCategories = new Set<LayerCategory>()
-    for (const prov of detectedProvinces) {
+    for (const prov of viewportProvinces) {
       for (const id of (PROVINCE_LAYERS[prov] || [])) {
         allProvinceLayers.push(id)
         coveredCategories.add(ALL_GIS_LAYERS[id].category)
@@ -219,7 +277,7 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
     }
     const federalFallbacks = FEDERAL_LAYERS.filter(id => !coveredCategories.has(ALL_GIS_LAYERS[id].category))
     return [...allProvinceLayers, ...federalFallbacks]
-  }, [detectedProvinces])
+  }, [viewportProvinces])
 
   // All ortho styles always available (base map, not filtered by province)
   const availableOrthos = Object.values(PROVINCE_ORTHO)
@@ -234,8 +292,15 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
     return groups
   }, [availableLayers])
 
+  // Available cadastre provinces from detected properties
+  const availableCadastres = useMemo(() =>
+    [...viewportProvinces].filter(p => CADASTRE_LAYERS[p]),
+    [viewportProvinces]
+  )
+
   const [layerMenuAnchor, setLayerMenuAnchor] = useState<{ el: HTMLElement, category: LayerCategory } | null>(null)
-  const [orthoMenuAnchor, setOrthoMenuAnchor] = useState<HTMLElement | null>(null)
+  const [styleMenuAnchor, setStyleMenuAnchor] = useState<HTMLElement | null>(null)
+  const [showOverlays, setShowOverlays] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState<Property | null>(null)
   const [deleting, setDeleting] = useState(false)
 
@@ -374,6 +439,8 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
               <button onclick="window.__mapEditProperty('${props.id}')" style="padding: 4px 12px; font-size: 12px; border: none; border-radius: 6px; background: #667eea; color: white; cursor: pointer;">Edit</button>
               <button onclick="window.__mapAddToComps('${props.id}')" style="padding: 4px 12px; font-size: 12px; border: none; border-radius: 6px; background: #4CAF50; color: white; cursor: pointer;">+ Comps</button>
               <button onclick="window.__mapDeleteProperty('${props.id}')" style="padding: 4px 12px; font-size: 12px; border: none; border-radius: 6px; background: #F44336; color: white; cursor: pointer;">Delete</button>
+              <button onclick="window.__mapShowIsochrone('${props.id}')" style="padding: 4px 12px; font-size: 12px; border: 1px solid #3bb2d0; border-radius: 6px; background: white; color: #3bb2d0; cursor: pointer;">Isochrone</button>
+              <button onclick="window.open('https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${(e.features![0].geometry as GeoJSON.Point).coordinates[1]},${(e.features![0].geometry as GeoJSON.Point).coordinates[0]}','_blank')" style="padding: 4px 12px; font-size: 12px; border: 1px solid #666; border-radius: 6px; background: white; color: #666; cursor: pointer;">Street View</button>
             </div>
           </div>
         `)
@@ -403,11 +470,84 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
       zoom: 10
     })
 
+    // Geocoder search control (top-right, above zoom buttons)
+    const geocoder = new MapboxGeocoder({
+      accessToken: mapboxgl.accessToken,
+      mapboxgl: mapboxgl as any,
+      countries: 'ca',
+      language: locale,
+      marker: true,
+      collapsed: true
+    })
+    map.current.addControl(geocoder, 'top-right')
     map.current.addControl(new mapboxgl.NavigationControl(), 'top-right')
-    map.current.on('load', () => addLayers(map.current!))
+
+    // Draw control for measurement (no visible controls - we use our own buttons)
+    const draw = new MapboxDraw({ displayControlsDefault: false, controls: {} })
+    drawRef.current = draw
+    map.current.addControl(draw as any)
+
+    // Draw measurement events
+    const updateMeasurement = () => {
+      if (!drawRef.current) return
+      const data = drawRef.current.getAll()
+      if (!data.features.length) { setMeasureResult(null); return }
+      const feature = data.features[data.features.length - 1]
+      if (feature.geometry.type === 'Polygon') {
+        setMeasureResult({ type: 'area', value: turf.area(feature) })
+      } else if (feature.geometry.type === 'LineString') {
+        setMeasureResult({ type: 'distance', value: turf.length(feature, { units: 'kilometers' }) * 1000 })
+      }
+    }
+    map.current.on('draw.create', updateMeasurement)
+    map.current.on('draw.update', updateMeasurement)
+    map.current.on('draw.delete', () => setMeasureResult(null))
+
+    // Cadastre QC click-to-identify lot number
+    map.current.on('click', async (e: mapboxgl.MapMouseEvent) => {
+      if (cadastreProvinceRef.current !== 'QC') return
+      const m = map.current
+      if (!m || m.getZoom() < 13) return
+      const hits = m.queryRenderedFeatures(e.point, { layers: ['clusters', 'unclustered-point'].filter(l => m.getLayer(l)) })
+      if (hits.length > 0) return
+      const { lng, lat } = e.lngLat
+      const x = lng * 20037508.34 / 180
+      const sinLat = Math.sin(lat * Math.PI / 180)
+      const y = (20037508.34 / Math.PI) * Math.log((1 + sinLat) / (1 - sinLat)) / 2
+      try {
+        const resp = await fetch(`https://geo.environnement.gouv.qc.ca/donnees/rest/services/Reference/Cadastre_allege/MapServer/identify?geometry=${x},${y}&geometryType=esriGeometryPoint&sr=3857&layers=all:0&tolerance=2&mapExtent=${x - 100},${y - 100},${x + 100},${y + 100}&imageDisplay=256,256,96&returnGeometry=false&f=json`)
+        const data = await resp.json()
+        if (data.results?.length > 0) {
+          new mapboxgl.Popup({ offset: 0 }).setLngLat(e.lngLat)
+            .setHTML(`<div style="font-family:-apple-system,sans-serif;padding:4px 0;"><strong>Lot:</strong> ${data.results[0].attributes.NO_LOT}</div>`)
+            .addTo(m)
+        }
+      } catch (err) { console.warn('Cadastre identify failed:', err) }
+    })
+
+    // Detect provinces visible in the current viewport
+    const updateViewportProvinces = () => {
+      if (!map.current) return
+      const b = map.current.getBounds()
+      if (!b) return
+      const vp: [number, number, number, number] = [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()]
+      const visible = new Set<string>()
+      for (const [prov, bbox] of Object.entries(PROVINCE_BOUNDS)) {
+        if (boundsOverlap(vp, bbox)) visible.add(prov)
+      }
+      if (visible.size === 0) visible.add('QC')
+      setViewportProvinces(prev => {
+        const same = prev.size === visible.size && [...prev].every(p => visible.has(p))
+        return same ? prev : visible
+      })
+    }
+    map.current.on('moveend', updateViewportProvinces)
+
+    map.current.on('load', () => { addLayers(map.current!); updateViewportProvinces() })
 
     return () => {
       if (popupRef.current) popupRef.current.remove()
+      drawRef.current = null
       map.current?.remove()
       map.current = null
     }
@@ -425,56 +565,188 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
   const addGISLayer = useCallback((m: mapboxgl.Map, layerId: string) => {
     const config = ALL_GIS_LAYERS[layerId]
     if (!config || m.getSource(`gis-${layerId}`)) return
-    m.addSource(`gis-${layerId}`, { type: 'raster', tiles: config.tiles, tileSize: 256 })
-    m.addLayer({ id: `gis-${layerId}`, type: 'raster', source: `gis-${layerId}`, paint: { 'raster-opacity': 0.6 } }, 'clusters')
+    try {
+      m.addSource(`gis-${layerId}`, { type: 'raster', tiles: config.tiles, tileSize: 256 })
+      const beforeId = m.getLayer('clusters') ? 'clusters' : undefined
+      m.addLayer({ id: `gis-${layerId}`, type: 'raster', source: `gis-${layerId}`, paint: { 'raster-opacity': 0.6 } }, beforeId)
+    } catch (err) { console.warn(`Failed to add GIS layer ${layerId}:`, err) }
   }, [])
 
   const removeGISLayer = useCallback((m: mapboxgl.Map, layerId: string) => {
-    if (m.getLayer(`gis-${layerId}`)) m.removeLayer(`gis-${layerId}`)
-    if (m.getSource(`gis-${layerId}`)) m.removeSource(`gis-${layerId}`)
+    try {
+      if (m.getLayer(`gis-${layerId}`)) m.removeLayer(`gis-${layerId}`)
+      if (m.getSource(`gis-${layerId}`)) m.removeSource(`gis-${layerId}`)
+    } catch (err) { console.warn(`Failed to remove GIS layer ${layerId}:`, err) }
   }, [])
 
   const toggleGISLayer = useCallback((layerId: string) => {
-    if (!map.current?.isStyleLoaded()) return
-    const next = new Set(activeLayers)
-    if (next.has(layerId)) {
-      removeGISLayer(map.current, layerId)
-      next.delete(layerId)
+    const m = map.current
+    if (!isStyleReady(m)) return
+    // Check actual Mapbox state (not React state) to decide add/remove
+    const isOnMap = !!m.getLayer(`gis-${layerId}`)
+    if (isOnMap) {
+      removeGISLayer(m, layerId)
     } else {
-      addGISLayer(map.current, layerId)
-      next.add(layerId)
+      addGISLayer(m, layerId)
     }
-    setActiveLayers(next)
-  }, [activeLayers, addGISLayer, removeGISLayer])
+    setActiveLayers(prev => {
+      const next = new Set(prev)
+      if (isOnMap) next.delete(layerId)
+      else next.add(layerId)
+      return next
+    })
+  }, [addGISLayer, removeGISLayer])
 
   const handleLayerChipClick = useCallback((e: React.MouseEvent<HTMLElement>, category: LayerCategory, layerIds: string[]) => {
-    const activeId = layerIds.find(id => activeLayers.has(id))
+    // Check actual Mapbox state for active layer in this category
+    const activeId = map.current
+      ? layerIds.find(id => map.current!.getLayer(`gis-${id}`))
+      : layerIds.find(id => activeLayers.has(id))
     if (activeId) {
-      if (map.current?.isStyleLoaded()) {
-        removeGISLayer(map.current, activeId)
-        const next = new Set(activeLayers)
-        next.delete(activeId)
-        setActiveLayers(next)
-      }
+      toggleGISLayer(activeId)
     } else if (layerIds.length === 1) {
       toggleGISLayer(layerIds[0])
     } else {
       setLayerMenuAnchor({ el: e.currentTarget, category })
     }
-  }, [activeLayers, removeGISLayer, toggleGISLayer])
+  }, [activeLayers, toggleGISLayer])
 
   // Clean up active layers that no longer exist when province changes
   useEffect(() => {
-    if (!map.current?.isStyleLoaded()) return
+    if (!isStyleReady(map.current)) return
     const availableSet = new Set(availableLayers)
-    const next = new Set(activeLayers)
-    let changed = false
-    for (const layerId of activeLayers) {
-      if (!availableSet.has(layerId)) { removeGISLayer(map.current, layerId); next.delete(layerId); changed = true }
-    }
-    if (changed) setActiveLayers(next)
+    setActiveLayers(prev => {
+      let changed = false
+      const next = new Set(prev)
+      for (const layerId of prev) {
+        if (!availableSet.has(layerId)) { removeGISLayer(map.current!, layerId); next.delete(layerId); changed = true }
+      }
+      return changed ? next : prev
+    })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [availableLayers])
+
+  // Keep cadastre ref in sync with state
+  useEffect(() => { cadastreProvinceRef.current = cadastreProvince }, [cadastreProvince])
+
+  // --- Cadastre layer ---
+  const addCadastreToMap = useCallback((m: mapboxgl.Map, province: string) => {
+    const config = CADASTRE_LAYERS[province]
+    if (!config || m.getSource('cadastre-source')) return
+    try {
+      m.addSource('cadastre-source', { type: 'raster', tiles: config.tiles, tileSize: config.tileSize, attribution: config.attribution })
+      const beforeId = m.getLayer('clusters') ? 'clusters' : undefined
+      m.addLayer({ id: 'cadastre-layer', type: 'raster', source: 'cadastre-source', paint: { 'raster-opacity': 0.7 }, minzoom: config.minzoom, maxzoom: 20 }, beforeId)
+    } catch (err) { console.warn(`Failed to add cadastre layer for ${province}:`, err) }
+  }, [])
+
+  const removeCadastreFromMap = useCallback((m: mapboxgl.Map) => {
+    if (m.getLayer('cadastre-layer')) m.removeLayer('cadastre-layer')
+    if (m.getSource('cadastre-source')) m.removeSource('cadastre-source')
+  }, [])
+
+  const toggleCadastre = useCallback((province: string) => {
+    if (!isStyleReady(map.current)) return
+    if (cadastreProvince === province) {
+      removeCadastreFromMap(map.current)
+      setCadastreProvince(null)
+    } else {
+      removeCadastreFromMap(map.current)
+      addCadastreToMap(map.current, province)
+      setCadastreProvince(province)
+    }
+  }, [cadastreProvince, addCadastreToMap, removeCadastreFromMap])
+
+  // --- 3D Buildings ---
+  const add3DBuildings = useCallback((m: mapboxgl.Map) => {
+    if (!m.getSource('composite') || m.getLayer('3d-buildings')) return
+    const labelLayerId = m.getStyle().layers.find((l: any) => l.type === 'symbol' && l.layout?.['text-field'])?.id
+    m.addLayer({
+      id: '3d-buildings', source: 'composite', 'source-layer': 'building',
+      filter: ['==', 'extrude', 'true'], type: 'fill-extrusion', minzoom: 14,
+      paint: {
+        'fill-extrusion-color': '#aaa',
+        'fill-extrusion-height': ['interpolate', ['linear'], ['zoom'], 14, 0, 14.05, ['get', 'height']],
+        'fill-extrusion-base': ['interpolate', ['linear'], ['zoom'], 14, 0, 14.05, ['get', 'min_height']],
+        'fill-extrusion-opacity': 0.6
+      }
+    }, labelLayerId)
+  }, [])
+
+  const toggle3DBuildings = useCallback(() => {
+    if (!isStyleReady(map.current)) return
+    if (buildings3D) {
+      if (map.current.getLayer('3d-buildings')) map.current.removeLayer('3d-buildings')
+      setBuildings3D(false)
+    } else {
+      add3DBuildings(map.current)
+      setBuildings3D(true)
+    }
+  }, [buildings3D, add3DBuildings])
+
+  // --- 3D Terrain ---
+  const toggle3DTerrain = useCallback(() => {
+    if (!isStyleReady(map.current)) return
+    if (terrain3D) {
+      map.current.setTerrain(null)
+      setTerrain3D(false)
+    } else {
+      if (!map.current.getSource('mapbox-dem')) {
+        map.current.addSource('mapbox-dem', { type: 'raster-dem', url: 'mapbox://mapbox.mapbox-terrain-dem-v1', tileSize: 512, maxzoom: 14 })
+      }
+      map.current.setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 })
+      setTerrain3D(true)
+    }
+  }, [terrain3D])
+
+  // --- Measurement tools ---
+  const toggleMeasureMode = useCallback((mode: 'line' | 'polygon') => {
+    if (!drawRef.current) return
+    if (measureMode === mode) {
+      drawRef.current.deleteAll()
+      drawRef.current.changeMode('simple_select')
+      setMeasureMode(null)
+      setMeasureResult(null)
+    } else {
+      drawRef.current.deleteAll()
+      setMeasureResult(null)
+      drawRef.current.changeMode(mode === 'line' ? 'draw_line_string' : 'draw_polygon')
+      setMeasureMode(mode)
+    }
+  }, [measureMode])
+
+  // --- Isochrone ---
+  const fetchIsochrone = useCallback(async (center: [number, number], profile: string) => {
+    const url = `https://api.mapbox.com/isochrone/v1/mapbox/${profile}/${center[0]},${center[1]}?contours_minutes=5,10,15&contours_colors=4CAF50,FF9800,F44336&polygons=true&access_token=${mapboxgl.accessToken}`
+    try {
+      const resp = await fetch(url)
+      const data = await resp.json()
+      isochroneDataRef.current = data
+      if (!isStyleReady(map.current)) return
+      if (map.current.getSource('isochrone')) {
+        (map.current.getSource('isochrone') as mapboxgl.GeoJSONSource).setData(data)
+      } else {
+        const beforeId = map.current.getLayer('clusters') ? 'clusters' : undefined
+        map.current.addSource('isochrone', { type: 'geojson', data })
+        map.current.addLayer({ id: 'isochrone-fill', type: 'fill', source: 'isochrone', paint: { 'fill-color': ['get', 'fill'], 'fill-opacity': 0.2 } }, beforeId)
+        map.current.addLayer({ id: 'isochrone-outline', type: 'line', source: 'isochrone', paint: { 'line-color': ['get', 'fill'], 'line-width': 2 } }, beforeId)
+      }
+    } catch (err) { console.warn('Isochrone fetch failed:', err) }
+  }, [])
+
+  const clearIsochrone = useCallback(() => {
+    setIsochroneCenter(null)
+    isochroneDataRef.current = null
+    if (!isStyleReady(map.current)) return
+    if (map.current.getLayer('isochrone-outline')) map.current.removeLayer('isochrone-outline')
+    if (map.current.getLayer('isochrone-fill')) map.current.removeLayer('isochrone-fill')
+    if (map.current.getSource('isochrone')) map.current.removeSource('isochrone')
+  }, [])
+
+  // Fetch isochrone when center or profile changes
+  useEffect(() => {
+    if (isochroneCenter) fetchIsochrone(isochroneCenter, isochroneProfile)
+  }, [isochroneCenter, isochroneProfile, fetchIsochrone])
 
   // Handle style change - re-add layers after style loads
   const handleStyleChange = useCallback((newStyle: keyof typeof MAP_STYLES) => {
@@ -491,8 +763,26 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
       addLayers(map.current!, true)
       // Restore active GIS overlays
       activeLayers.forEach(layerId => addGISLayer(map.current!, layerId))
+      // Restore cadastre
+      if (cadastreProvince) addCadastreToMap(map.current!, cadastreProvince)
+      // Restore 3D buildings (only on standard Mapbox styles with composite source)
+      if (buildings3D) add3DBuildings(map.current!)
+      // Restore terrain
+      if (terrain3D) {
+        if (!map.current!.getSource('mapbox-dem')) {
+          map.current!.addSource('mapbox-dem', { type: 'raster-dem', url: 'mapbox://mapbox.mapbox-terrain-dem-v1', tileSize: 512, maxzoom: 14 })
+        }
+        map.current!.setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 })
+      }
+      // Restore isochrone
+      if (isochroneDataRef.current) {
+        const isoBeforeId = map.current!.getLayer('clusters') ? 'clusters' : undefined
+        map.current!.addSource('isochrone', { type: 'geojson', data: isochroneDataRef.current })
+        map.current!.addLayer({ id: 'isochrone-fill', type: 'fill', source: 'isochrone', paint: { 'fill-color': ['get', 'fill'], 'fill-opacity': 0.2 } }, isoBeforeId)
+        map.current!.addLayer({ id: 'isochrone-outline', type: 'line', source: 'isochrone', paint: { 'line-color': ['get', 'fill'], 'line-width': 2 } }, isoBeforeId)
+      }
     })
-  }, [mapStyle, addLayers, activeLayers, addGISLayer])
+  }, [mapStyle, addLayers, activeLayers, addGISLayer, cadastreProvince, addCadastreToMap, buildings3D, add3DBuildings, terrain3D])
 
   // Set up window callbacks for popup buttons
   useEffect(() => {
@@ -512,17 +802,26 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
       const p = properties.find(prop => prop.id === id)
       if (p) setDeleteConfirm(p)
     }
+    ;(window as any).__mapShowIsochrone = (id: string) => {
+      const p = properties.find(prop => prop.id === id)
+      if (p && p.longitude && p.latitude) {
+        setIsochroneCenter([p.longitude, p.latitude])
+        setIsochroneProfile('driving')
+        if (popupRef.current) popupRef.current.remove()
+      }
+    }
     return () => {
       delete (window as any).__mapViewProperty
       delete (window as any).__mapEditProperty
       delete (window as any).__mapAddToComps
       delete (window as any).__mapDeleteProperty
+      delete (window as any).__mapShowIsochrone
     }
   }, [properties, onViewProperty, onEditProperty, onAddToComps])
 
   // Update map data when properties, selection, or highlight change
   useEffect(() => {
-    if (!map.current?.isStyleLoaded()) return
+    if (!isStyleReady(map.current)) return
     const source = map.current.getSource('properties') as mapboxgl.GeoJSONSource | undefined
     if (source) {
       source.setData(buildGeoJSON())
@@ -531,7 +830,7 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
 
   // Fit bounds when properties change (not on selection change)
   useEffect(() => {
-    if (!map.current?.isStyleLoaded()) return
+    if (!isStyleReady(map.current)) return
     const source = map.current.getSource('properties') as mapboxgl.GeoJSONSource | undefined
     if (source && geoProperties.length > 0) {
       const bounds = new mapboxgl.LngLatBounds()
@@ -552,103 +851,185 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
     <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
       <Box ref={mapContainer} sx={{ width: '100%', height: '100%' }} />
 
-      {/* Style toggle + GIS layers */}
-      <Box sx={{ position: 'absolute', top: 10, left: 10, zIndex: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-        <ToggleButtonGroup
-          value={mapStyle}
-          exclusive
-          onChange={(_, v) => {
-            if (!v) return
-            if (v === '__ortho__') return // handled by onClick below
-            handleStyleChange(v)
-          }}
-          size="small"
-          sx={{
-            bgcolor: 'rgba(255,255,255,0.95)',
-            borderRadius: 2,
-            boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
-            overflow: 'hidden',
-            '& .MuiToggleButton-root': { flex: 1, px: 1, py: 0.5, border: 'none', fontSize: '0.7rem', textTransform: 'none', gap: 0.5 }
-          }}
-        >
-          <ToggleButton value="streets"><MapIconMui sx={{ fontSize: 16 }} /> Streets</ToggleButton>
-          <ToggleButton value="satellite"><Satellite sx={{ fontSize: 16 }} /> Satellite</ToggleButton>
-          <ToggleButton value="outdoors"><Terrain sx={{ fontSize: 16 }} /> Outdoors</ToggleButton>
-          <ToggleButton value="light"><Layers sx={{ fontSize: 16 }} /> Light</ToggleButton>
-          <ToggleButton
-            value={mapStyle.startsWith('ortho-') ? mapStyle : '__ortho__'}
-            selected={mapStyle.startsWith('ortho-')}
-            onClick={(e) => {
-              if (mapStyle.startsWith('ortho-')) {
-                handleStyleChange('streets')
-              } else if (availableOrthos.length === 1) {
-                handleStyleChange(availableOrthos[0] as keyof typeof MAP_STYLES)
-              } else {
-                setOrthoMenuAnchor(e.currentTarget)
-              }
+      {/* Map style + Layers controls */}
+      <Box sx={{ position: 'absolute', top: 10, left: 10, zIndex: 1, display: 'flex', flexDirection: 'column', gap: 0.5, maxWidth: 260 }}>
+        {/* Top row: base map dropdown + layers toggle */}
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
+          <IconButton
+            size="small"
+            onClick={(e) => setStyleMenuAnchor(e.currentTarget)}
+            title={t('map.styles.' + (mapStyle.startsWith('ortho-') ? mapStyle : mapStyle))}
+            sx={{
+              bgcolor: 'rgba(255,255,255,0.95)', boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+              border: '2px solid #667eea', borderRadius: 2, width: 36, height: 36,
+              color: '#667eea',
+              '&:hover': { bgcolor: 'rgba(255,255,255,1)' }
             }}
           >
-            <Flight sx={{ fontSize: 16 }} /> {mapStyle.startsWith('ortho-') ? t(`map.styles.${mapStyle}`) : 'Ortho'}
-          </ToggleButton>
-        </ToggleButtonGroup>
+            <MapIconMui sx={{ fontSize: 18 }} />
+          </IconButton>
+          <IconButton
+            size="small"
+            onClick={() => setShowOverlays(v => !v)}
+            title={t('map.overlays')}
+            sx={{
+              bgcolor: (activeLayers.size > 0 || cadastreProvince || buildings3D || terrain3D) ? '#667eea' : 'rgba(255,255,255,0.95)',
+              color: (activeLayers.size > 0 || cadastreProvince || buildings3D || terrain3D) ? '#fff' : '#667eea',
+              border: '2px solid #667eea',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+              borderRadius: 2, width: 36, height: 36,
+              '&:hover': { bgcolor: (activeLayers.size > 0 || cadastreProvince || buildings3D || terrain3D) ? '#5a6fd6' : 'rgba(255,255,255,1)' }
+            }}
+          >
+            <Layers sx={{ fontSize: 18 }} />
+          </IconButton>
+        </Box>
+
+        {/* Base map style menu */}
         <Menu
-          anchorEl={orthoMenuAnchor}
-          open={!!orthoMenuAnchor}
-          onClose={() => setOrthoMenuAnchor(null)}
-          slotProps={{ paper: { sx: { borderRadius: 2, minWidth: 140 } } }}
+          anchorEl={styleMenuAnchor}
+          open={!!styleMenuAnchor}
+          onClose={() => setStyleMenuAnchor(null)}
+          slotProps={{ paper: { sx: { borderRadius: 2, minWidth: 160, border: '2px solid #667eea' } } }}
         >
+          {([
+            { key: 'streets', icon: <MapIconMui sx={{ fontSize: 16, color: '#667eea' }} /> },
+            { key: 'satellite', icon: <Satellite sx={{ fontSize: 16, color: '#5c6bc0' }} /> },
+            { key: 'outdoors', icon: <Terrain sx={{ fontSize: 16, color: '#43a047' }} /> },
+            { key: 'light', icon: <Layers sx={{ fontSize: 16, color: '#9e9e9e' }} /> },
+          ] as const).map(({ key, icon }) => (
+            <MenuItem
+              key={key}
+              selected={mapStyle === key}
+              onClick={() => { handleStyleChange(key); setStyleMenuAnchor(null) }}
+              sx={{ fontSize: '0.8rem', py: 0.75, gap: 1 }}
+            >
+              {icon} {t(`map.styles.${key}`)}
+            </MenuItem>
+          ))}
+          <Divider />
           {availableOrthos.map(key => (
             <MenuItem
               key={key}
-              onClick={() => { handleStyleChange(key as keyof typeof MAP_STYLES); setOrthoMenuAnchor(null) }}
-              sx={{ fontSize: '0.8rem', py: 0.75 }}
+              selected={mapStyle === key}
+              onClick={() => { handleStyleChange(key as keyof typeof MAP_STYLES); setStyleMenuAnchor(null) }}
+              sx={{ fontSize: '0.8rem', py: 0.75, gap: 1 }}
             >
-              {t(`map.styles.${key}`)}
+              <Flight sx={{ fontSize: 16, color: '#ff7043' }} /> {t(`map.styles.${key}`)}
             </MenuItem>
           ))}
         </Menu>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-          {CATEGORY_ORDER.filter(cat => layersByCategory[cat]).map(cat => {
-            const layerIds = layersByCategory[cat]!
-            const activeId = layerIds.find(id => activeLayers.has(id))
-            const isActive = !!activeId
-            const config = ALL_GIS_LAYERS[layerIds[0]]
-            const Icon = config.icon
-            return (
+
+        {/* Overlay layers panel (toggleable) */}
+        {showOverlays && (
+          <>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              {CATEGORY_ORDER.filter(cat => layersByCategory[cat]).map(cat => {
+                const layerIds = layersByCategory[cat]!
+                const activeId = layerIds.find(id => activeLayers.has(id))
+                const isActive = !!activeId
+                const config = ALL_GIS_LAYERS[layerIds[0]]
+                const Icon = config.icon
+                return (
+                  <Chip
+                    key={cat}
+                    icon={<Icon sx={{ fontSize: 14, color: isActive ? '#fff' : config.color }} />}
+                    label={activeId ? t(`map.layers.${activeId}`) : t(`map.categories.${cat}`)}
+                    size="small"
+                    onClick={(e) => handleLayerChipClick(e, cat, layerIds)}
+                    sx={{
+                      fontSize: '0.65rem', height: 26,
+                      bgcolor: isActive ? config.color : 'rgba(255,255,255,0.95)',
+                      color: isActive ? '#fff' : 'text.primary',
+                      boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+                      '&:hover': { bgcolor: isActive ? config.color : 'rgba(255,255,255,1)' },
+                      '& .MuiChip-icon': { ml: 0.5 }
+                    }}
+                  />
+                )
+              })}
+            </Box>
+            <Menu
+              anchorEl={layerMenuAnchor?.el}
+              open={!!layerMenuAnchor}
+              onClose={() => setLayerMenuAnchor(null)}
+              slotProps={{ paper: { sx: { borderRadius: 2, minWidth: 160, border: '2px solid #667eea' } } }}
+            >
+              {layerMenuAnchor && layersByCategory[layerMenuAnchor.category]?.map(layerId => (
+                <MenuItem
+                  key={layerId}
+                  onClick={() => { toggleGISLayer(layerId); setLayerMenuAnchor(null) }}
+                  sx={{ fontSize: '0.8rem', py: 0.75 }}
+                >
+                  {t(`map.layers.${layerId}`)}
+                </MenuItem>
+              ))}
+            </Menu>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              {availableCadastres.length > 0 && (
+                <Chip
+                  icon={<Layers sx={{ fontSize: 14, color: cadastreProvince ? '#fff' : '#795548' }} />}
+                  label={cadastreProvince ? `${t('map.cadastre')} (${cadastreProvince})` : t('map.cadastre')}
+                  size="small"
+                  onClick={(e) => {
+                    if (cadastreProvince) { toggleCadastre(cadastreProvince) }
+                    else if (availableCadastres.length === 1) { toggleCadastre(availableCadastres[0]) }
+                    else { setCadastreMenuAnchor(e.currentTarget) }
+                  }}
+                  sx={{
+                    fontSize: '0.65rem', height: 26,
+                    bgcolor: cadastreProvince ? '#795548' : 'rgba(255,255,255,0.95)',
+                    color: cadastreProvince ? '#fff' : 'text.primary',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+                    '&:hover': { bgcolor: cadastreProvince ? '#795548' : 'rgba(255,255,255,1)' },
+                    '& .MuiChip-icon': { ml: 0.5 }
+                  }}
+                />
+              )}
               <Chip
-                key={cat}
-                icon={<Icon sx={{ fontSize: 14, color: isActive ? '#fff' : config.color }} />}
-                label={activeId ? t(`map.layers.${activeId}`) : t(`map.categories.${cat}`)}
+                icon={<ViewInAr sx={{ fontSize: 14, color: buildings3D ? '#fff' : '#667eea' }} />}
+                label={t('map.buildings3d')}
                 size="small"
-                onClick={(e) => handleLayerChipClick(e, cat, layerIds)}
+                onClick={toggle3DBuildings}
+                disabled={mapStyle.startsWith('ortho-')}
                 sx={{
                   fontSize: '0.65rem', height: 26,
-                  bgcolor: isActive ? config.color : 'rgba(255,255,255,0.95)',
-                  color: isActive ? '#fff' : 'text.primary',
+                  bgcolor: buildings3D ? '#667eea' : 'rgba(255,255,255,0.95)',
+                  color: buildings3D ? '#fff' : 'text.primary',
                   boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
-                  '&:hover': { bgcolor: isActive ? config.color : 'rgba(255,255,255,1)' },
+                  '&:hover': { bgcolor: buildings3D ? '#667eea' : 'rgba(255,255,255,1)' },
                   '& .MuiChip-icon': { ml: 0.5 }
                 }}
               />
-            )
-          })}
-        </Box>
-        <Menu
-          anchorEl={layerMenuAnchor?.el}
-          open={!!layerMenuAnchor}
-          onClose={() => setLayerMenuAnchor(null)}
-          slotProps={{ paper: { sx: { borderRadius: 2, minWidth: 160 } } }}
-        >
-          {layerMenuAnchor && layersByCategory[layerMenuAnchor.category]?.map(layerId => (
-            <MenuItem
-              key={layerId}
-              onClick={() => { toggleGISLayer(layerId); setLayerMenuAnchor(null) }}
-              sx={{ fontSize: '0.8rem', py: 0.75 }}
+              <Chip
+                icon={<Terrain sx={{ fontSize: 14, color: terrain3D ? '#fff' : '#8D6E63' }} />}
+                label={t('map.terrain3d')}
+                size="small"
+                onClick={toggle3DTerrain}
+                sx={{
+                  fontSize: '0.65rem', height: 26,
+                  bgcolor: terrain3D ? '#8D6E63' : 'rgba(255,255,255,0.95)',
+                  color: terrain3D ? '#fff' : 'text.primary',
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+                  '&:hover': { bgcolor: terrain3D ? '#8D6E63' : 'rgba(255,255,255,1)' },
+                  '& .MuiChip-icon': { ml: 0.5 }
+                }}
+              />
+            </Box>
+            <Menu
+              anchorEl={cadastreMenuAnchor}
+              open={!!cadastreMenuAnchor}
+              onClose={() => setCadastreMenuAnchor(null)}
+              slotProps={{ paper: { sx: { borderRadius: 2, minWidth: 140, border: '2px solid #667eea' } } }}
             >
-              {t(`map.layers.${layerId}`)}
-            </MenuItem>
-          ))}
-        </Menu>
+              {availableCadastres.map(prov => (
+                <MenuItem key={prov} onClick={() => { toggleCadastre(prov); setCadastreMenuAnchor(null) }} sx={{ fontSize: '0.8rem', py: 0.75 }}>
+                  {t('map.cadastre')} ({prov})
+                </MenuItem>
+              ))}
+            </Menu>
+          </>
+        )}
       </Box>
 
       {geoProperties.length === 0 && (
@@ -679,6 +1060,77 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
               : t('map.clickToSelect')
             }
           </Typography>
+        </Box>
+      )}
+
+      {/* Measurement tools - bottom left */}
+      <Box sx={{ position: 'absolute', bottom: 36, left: 8, display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'flex-start' }}>
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
+          <IconButton
+            size="small"
+            onClick={() => toggleMeasureMode('line')}
+            sx={{
+              bgcolor: measureMode === 'line' ? '#667eea' : 'rgba(255,255,255,0.95)',
+              color: measureMode === 'line' ? '#fff' : 'text.primary',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+              width: 32, height: 32,
+              '&:hover': { bgcolor: measureMode === 'line' ? '#667eea' : 'rgba(255,255,255,1)' }
+            }}
+            title={t('map.measureDistance')}
+          >
+            <Straighten sx={{ fontSize: 16 }} />
+          </IconButton>
+          <IconButton
+            size="small"
+            onClick={() => toggleMeasureMode('polygon')}
+            sx={{
+              bgcolor: measureMode === 'polygon' ? '#667eea' : 'rgba(255,255,255,0.95)',
+              color: measureMode === 'polygon' ? '#fff' : 'text.primary',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+              width: 32, height: 32,
+              '&:hover': { bgcolor: measureMode === 'polygon' ? '#667eea' : 'rgba(255,255,255,1)' }
+            }}
+            title={t('map.measureArea')}
+          >
+            <SquareFoot sx={{ fontSize: 16 }} />
+          </IconButton>
+        </Box>
+        {measureResult && (
+          <Box sx={{ bgcolor: 'rgba(255,255,255,0.95)', borderRadius: 1, px: 1.5, py: 0.5, boxShadow: '0 1px 4px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="caption" sx={{ fontWeight: 600 }}>
+              {measureResult.type === 'area'
+                ? `${t('map.measureArea')}: ${measureResult.value.toFixed(1)} m² (${(measureResult.value * 10.7639).toFixed(0)} pi²)`
+                : `${t('map.measureDistance')}: ${measureResult.value.toFixed(1)} m (${(measureResult.value * 3.28084).toFixed(0)} pi)`
+              }
+            </Typography>
+            <IconButton size="small" onClick={() => { drawRef.current?.deleteAll(); setMeasureMode(null); setMeasureResult(null) }} sx={{ p: 0.25 }}>
+              <Close sx={{ fontSize: 14 }} />
+            </IconButton>
+          </Box>
+        )}
+      </Box>
+
+      {/* Isochrone controls - bottom right */}
+      {isochroneCenter && (
+        <Box sx={{ position: 'absolute', bottom: 36, right: 8, bgcolor: 'rgba(255,255,255,0.95)', borderRadius: 1, px: 1.5, py: 0.75, boxShadow: '0 1px 4px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', gap: 0.75 }}>
+          <Typography variant="caption" sx={{ fontWeight: 600, mr: 0.5 }}>{t('map.isochrone')}:</Typography>
+          {(['driving', 'walking', 'cycling'] as const).map(p => (
+            <Chip
+              key={p}
+              label={t(`map.isochrone${p.charAt(0).toUpperCase() + p.slice(1)}`)}
+              size="small"
+              onClick={() => setIsochroneProfile(p)}
+              sx={{
+                fontSize: '0.65rem', height: 22,
+                bgcolor: isochroneProfile === p ? '#3bb2d0' : 'transparent',
+                color: isochroneProfile === p ? '#fff' : 'text.primary',
+                border: isochroneProfile === p ? 'none' : '1px solid #ccc',
+              }}
+            />
+          ))}
+          <IconButton size="small" onClick={clearIsochrone} sx={{ p: 0.25 }}>
+            <Close sx={{ fontSize: 14 }} />
+          </IconButton>
         </Box>
       )}
 

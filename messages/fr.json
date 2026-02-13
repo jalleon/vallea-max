@@ -572,11 +572,31 @@
         "wetlands": "Milieux humides",
         "landCover": "Couverture du sol"
       },
+      "overlays": "Couches",
       "styles": {
+        "streets": "Rues",
+        "satellite": "Satellite",
+        "outdoors": "Plein air",
+        "light": "Clair",
         "ortho-qc": "Ortho QC",
         "ortho-on": "Ortho ON",
         "ortho-bc": "Ortho BC"
-      }
+      },
+      "cadastre": "Cadastre",
+      "cadastreLot": "Lot",
+      "cadastreNoLot": "Aucun lot trouvé",
+      "buildings3d": "Bâtiments 3D",
+      "terrain3d": "Relief",
+      "searchPlaceholder": "Rechercher une adresse...",
+      "measureArea": "Superficie",
+      "measureDistance": "Distance",
+      "measureClear": "Effacer",
+      "isochrone": "Accessibilité",
+      "isochroneDriving": "En voiture",
+      "isochroneWalking": "À pied",
+      "isochroneCycling": "À vélo",
+      "isochroneClear": "Effacer",
+      "streetView": "Street View"
     },
 
     "comps": {
