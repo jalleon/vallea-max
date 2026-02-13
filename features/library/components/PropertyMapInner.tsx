@@ -1110,9 +1110,9 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
         )}
       </Box>
 
-      {/* Isochrone controls - bottom right */}
+      {/* Isochrone controls - bottom center-right */}
       {isochroneCenter && (
-        <Box sx={{ position: 'absolute', bottom: 36, right: 8, bgcolor: 'rgba(255,255,255,0.95)', borderRadius: 1, px: 1.5, py: 0.75, boxShadow: '0 1px 4px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', gap: 0.75 }}>
+        <Box sx={{ position: 'absolute', bottom: 36, right: 60, bgcolor: 'rgba(255,255,255,0.95)', borderRadius: 1, px: 1.5, py: 0.75, boxShadow: '0 1px 4px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', gap: 0.75 }}>
           <Typography variant="caption" sx={{ fontWeight: 600, mr: 0.5 }}>{t('map.isochrone')}:</Typography>
           {(['driving', 'walking', 'cycling'] as const).map(p => (
             <Chip
@@ -1128,9 +1128,13 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
               }}
             />
           ))}
-          <IconButton size="small" onClick={clearIsochrone} sx={{ p: 0.25 }}>
-            <Close sx={{ fontSize: 14 }} />
-          </IconButton>
+          <Chip
+            label={t('map.isochroneClear')}
+            size="small"
+            onClick={clearIsochrone}
+            onDelete={clearIsochrone}
+            sx={{ fontSize: '0.65rem', height: 22, bgcolor: '#F44336', color: '#fff', '& .MuiChip-deleteIcon': { color: '#fff', fontSize: 14 } }}
+          />
         </Box>
       )}
 
