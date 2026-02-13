@@ -196,6 +196,13 @@ function boundsOverlap(a: [number, number, number, number], b: [number, number, 
   return a[0] < b[2] && a[2] > b[0] && a[1] < b[3] && a[3] > b[1]
 }
 
+// Convert EPSG:3857 [x,y] to WGS84 [lng,lat]
+function epsg3857ToLngLat(x: number, y: number): [number, number] {
+  const lng = (x * 180) / 20037508.34
+  const lat = (Math.atan(Math.exp((y * Math.PI) / 20037508.34)) * 360) / Math.PI - 90
+  return [lng, lat]
+}
+
 // Check if map style is structurally ready (doesn't wait for tile loading)
 // Unlike isStyleLoaded(), this returns true even while slow raster tiles are still fetching
 function isStyleReady(m: mapboxgl.Map | null): m is mapboxgl.Map {
@@ -244,6 +251,8 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
   const drawRef = useRef<any>(null)
   const cadastreProvinceRef = useRef<string | null>(null)
   const isochroneDataRef = useRef<any>(null)
+  const cadastreHighlightRef = useRef<GeoJSON.FeatureCollection | null>(null)
+  const ctrlHeldRef = useRef(false)
   const [mapStyle, setMapStyle] = useState<keyof typeof MAP_STYLES>('streets')
   const [activeLayers, setActiveLayers] = useState<Set<string>>(new Set())
   const [cadastreProvince, setCadastreProvince] = useState<string | null>(null)
@@ -396,6 +405,11 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
       }
     })
 
+    // Cadastre highlight overlay (empty until a lot is clicked)
+    m.addSource('cadastre-highlight', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+    m.addLayer({ id: 'cadastre-highlight-fill', type: 'fill', source: 'cadastre-highlight', paint: { 'fill-color': '#FFD600', 'fill-opacity': 0.3 } }, 'clusters')
+    m.addLayer({ id: 'cadastre-highlight-outline', type: 'line', source: 'cadastre-highlight', paint: { 'line-color': '#F57F17', 'line-width': 3 } }, 'clusters')
+
     // Click cluster → zoom in
     m.on('click', 'clusters', (e) => {
       const features = m.queryRenderedFeatures(e.point, { layers: ['clusters'] })
@@ -503,24 +517,52 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
     map.current.on('draw.update', updateMeasurement)
     map.current.on('draw.delete', () => setMeasureResult(null))
 
-    // Cadastre QC click-to-identify lot number
+    // Cadastre click-to-identify: highlight lot polygon + show lot number popup
+    // Ctrl/Cmd+click accumulates lots, normal click replaces selection
     map.current.on('click', async (e: mapboxgl.MapMouseEvent) => {
-      if (cadastreProvinceRef.current !== 'QC') return
+      const prov = cadastreProvinceRef.current
+      if (!prov) return
       const m = map.current
-      if (!m || m.getZoom() < 13) return
+      const config = CADASTRE_LAYERS[prov]
+      if (!m || !config || m.getZoom() < config.minzoom) return
       const hits = m.queryRenderedFeatures(e.point, { layers: ['clusters', 'unclustered-point'].filter(l => m.getLayer(l)) })
       if (hits.length > 0) return
+      const multiSelect = ctrlHeldRef.current
+      // Convert click to EPSG:3857
       const { lng, lat } = e.lngLat
       const x = lng * 20037508.34 / 180
       const sinLat = Math.sin(lat * Math.PI / 180)
       const y = (20037508.34 / Math.PI) * Math.log((1 + sinLat) / (1 - sinLat)) / 2
+      // Derive identify URL from tile export URL
+      const baseUrl = config.tiles[0].split('/export?')[0]
+      const layerParam = config.tiles[0].match(/layers=show:(\d+)/)?.[1]
       try {
-        const resp = await fetch(`https://geo.environnement.gouv.qc.ca/donnees/rest/services/Reference/Cadastre_allege/MapServer/identify?geometry=${x},${y}&geometryType=esriGeometryPoint&sr=3857&layers=all:0&tolerance=2&mapExtent=${x - 100},${y - 100},${x + 100},${y + 100}&imageDisplay=256,256,96&returnGeometry=false&f=json`)
+        const resp = await fetch(`${baseUrl}/identify?geometry=${x},${y}&geometryType=esriGeometryPoint&sr=3857&layers=all${layerParam ? `:${layerParam}` : ''}&tolerance=2&mapExtent=${x - 100},${y - 100},${x + 100},${y + 100}&imageDisplay=256,256,96&returnGeometry=true&f=json`)
         const data = await resp.json()
         if (data.results?.length > 0) {
+          const result = data.results[0]
+          // Show popup with lot/parcel info
+          const lotNum = result.attributes.NO_LOT || result.attributes.PID || result.attributes.PIN || result.attributes.PARCELID || result.attributes.OBJECTID || ''
           new mapboxgl.Popup({ offset: 0 }).setLngLat(e.lngLat)
-            .setHTML(`<div style="font-family:-apple-system,sans-serif;padding:4px 0;"><strong>Lot:</strong> ${data.results[0].attributes.NO_LOT}</div>`)
+            .setHTML(`<div style="font-family:-apple-system,sans-serif;padding:4px 0;"><strong>${t('map.cadastreLot')}:</strong> ${lotNum}</div>`)
             .addTo(m)
+          // Highlight the lot polygon
+          if (result.geometry?.rings) {
+            const coordinates = result.geometry.rings.map((ring: number[][]) =>
+              ring.map(([rx, ry]: number[]) => epsg3857ToLngLat(rx, ry))
+            )
+            const newFeature: GeoJSON.Feature = { type: 'Feature', geometry: { type: 'Polygon', coordinates }, properties: { lot: lotNum } }
+            const prev = multiSelect && cadastreHighlightRef.current ? cadastreHighlightRef.current.features : []
+            const fc: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [...prev, newFeature] }
+            cadastreHighlightRef.current = fc
+            const src = m.getSource('cadastre-highlight') as mapboxgl.GeoJSONSource | undefined
+            if (src) src.setData(fc)
+          }
+        } else if (!multiSelect) {
+          // Clear highlight if clicked on empty area (only without Ctrl)
+          cadastreHighlightRef.current = null
+          const src = m.getSource('cadastre-highlight') as mapboxgl.GeoJSONSource | undefined
+          if (src) src.setData({ type: 'FeatureCollection', features: [] })
         }
       } catch (err) { console.warn('Cadastre identify failed:', err) }
     })
@@ -559,6 +601,18 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
     const observer = new ResizeObserver(() => map.current?.resize())
     observer.observe(mapContainer.current)
     return () => observer.disconnect()
+  }, [])
+
+  // Track Ctrl/Cmd key state for cadastre multi-select
+  // (Mapbox's DragRotateHandler can swallow Ctrl+click events, so we track independently)
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Control' || e.key === 'Meta') ctrlHeldRef.current = true }
+    const onKeyUp = (e: KeyboardEvent) => { if (e.key === 'Control' || e.key === 'Meta') ctrlHeldRef.current = false }
+    const onBlur = () => { ctrlHeldRef.current = false }
+    document.addEventListener('keydown', onKeyDown)
+    document.addEventListener('keyup', onKeyUp)
+    window.addEventListener('blur', onBlur)
+    return () => { document.removeEventListener('keydown', onKeyDown); document.removeEventListener('keyup', onKeyUp); window.removeEventListener('blur', onBlur) }
   }, [])
 
   // Add a GIS raster overlay to the map
@@ -645,17 +699,25 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
     if (m.getSource('cadastre-source')) m.removeSource('cadastre-source')
   }, [])
 
+  const clearCadastreHighlight = useCallback((m: mapboxgl.Map) => {
+    cadastreHighlightRef.current = null
+    const src = m.getSource('cadastre-highlight') as mapboxgl.GeoJSONSource | undefined
+    if (src) src.setData({ type: 'FeatureCollection', features: [] })
+  }, [])
+
   const toggleCadastre = useCallback((province: string) => {
     if (!isStyleReady(map.current)) return
     if (cadastreProvince === province) {
       removeCadastreFromMap(map.current)
+      clearCadastreHighlight(map.current)
       setCadastreProvince(null)
     } else {
       removeCadastreFromMap(map.current)
+      clearCadastreHighlight(map.current)
       addCadastreToMap(map.current, province)
       setCadastreProvince(province)
     }
-  }, [cadastreProvince, addCadastreToMap, removeCadastreFromMap])
+  }, [cadastreProvince, addCadastreToMap, removeCadastreFromMap, clearCadastreHighlight])
 
   // --- 3D Buildings ---
   const add3DBuildings = useCallback((m: mapboxgl.Map) => {
@@ -773,6 +835,11 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
           map.current!.addSource('mapbox-dem', { type: 'raster-dem', url: 'mapbox://mapbox.mapbox-terrain-dem-v1', tileSize: 512, maxzoom: 14 })
         }
         map.current!.setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 })
+      }
+      // Restore cadastre highlight
+      if (cadastreHighlightRef.current) {
+        const src = map.current!.getSource('cadastre-highlight') as mapboxgl.GeoJSONSource | undefined
+        if (src) src.setData(cadastreHighlightRef.current)
       }
       // Restore isochrone
       if (isochroneDataRef.current) {
