@@ -407,8 +407,8 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
 
     // Cadastre highlight overlay (empty until a lot is clicked)
     m.addSource('cadastre-highlight', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
-    m.addLayer({ id: 'cadastre-highlight-fill', type: 'fill', source: 'cadastre-highlight', paint: { 'fill-color': '#FFD600', 'fill-opacity': 0.3 } }, 'clusters')
-    m.addLayer({ id: 'cadastre-highlight-outline', type: 'line', source: 'cadastre-highlight', paint: { 'line-color': '#F57F17', 'line-width': 3 } }, 'clusters')
+    m.addLayer({ id: 'cadastre-highlight-fill', type: 'fill', source: 'cadastre-highlight', paint: { 'fill-color': '#F44336', 'fill-opacity': 0.25 } }, 'clusters')
+    m.addLayer({ id: 'cadastre-highlight-outline', type: 'line', source: 'cadastre-highlight', paint: { 'line-color': '#D32F2F', 'line-width': 3 } }, 'clusters')
 
     // Click cluster → zoom in
     m.on('click', 'clusters', (e) => {
@@ -541,11 +541,14 @@ export default function PropertyMapInner({ properties, onViewProperty, onEditPro
         const data = await resp.json()
         if (data.results?.length > 0) {
           const result = data.results[0]
-          // Show popup with lot/parcel info
-          const lotNum = result.attributes.NO_LOT || result.attributes.PID || result.attributes.PIN || result.attributes.PARCELID || result.attributes.OBJECTID || ''
-          new mapboxgl.Popup({ offset: 0 }).setLngLat(e.lngLat)
-            .setHTML(`<div style="font-family:-apple-system,sans-serif;padding:4px 0;"><strong>${t('map.cadastreLot')}:</strong> ${lotNum}</div>`)
-            .addTo(m)
+          // Show popup with lot/parcel info (only if a lot number is found)
+          const attrs = result.attributes || {}
+          const lotNum = attrs.NO_LOT || attrs.PID || attrs.PIN || attrs.PARCELID || ''
+          if (lotNum) {
+            new mapboxgl.Popup({ offset: 0 }).setLngLat(e.lngLat)
+              .setHTML(`<div style="font-family:-apple-system,sans-serif;padding:4px 0;"><strong>${t('map.cadastreLot')}:</strong> ${lotNum}</div>`)
+              .addTo(m)
+          }
           // Highlight the lot polygon
           if (result.geometry?.rings) {
             const coordinates = result.geometry.rings.map((ring: number[][]) =>
